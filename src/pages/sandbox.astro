@@ -141,10 +141,10 @@ import { MODULES } from '../lib/modules';
           <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-blue)] opacity-70">Spectrum</span>
         </div>
 
-        <!-- 파형 속도 슬라이더 -->
+        <!-- 파형 줌 슬라이더 -->
         <div class="flex items-center gap-3">
-          <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)] whitespace-nowrap">파형 속도</span>
-          <input type="range" id="scopeSpeed" class="sl-range flex-1" min="64" max="2048" step="64" value="512" aria-label="파형 속도" />
+          <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)] whitespace-nowrap">파형 줌</span>
+          <input type="range" id="scopeSpeed" class="sl-range flex-1" min="64" max="2048" step="64" value="512" aria-label="파형 줌" />
           <span id="scopeSpeedVal" class="text-[11px] font-mono text-[var(--color-ink-500)] w-10 text-right">보통</span>
         </div>
       </div>
@@ -319,19 +319,16 @@ playBtn.addEventListener('click', async () => {
   }
 });
 
-// 파형 속도 슬라이더
-const SCOPE_DRAW = 512;
-let scopeSpeed = 4;
-let scopeOffset = 0;
+// 파형 줌 슬라이더
+let SCOPE_DRAW = 512;
 const speedInput = document.getElementById('scopeSpeed') as HTMLInputElement;
 const speedValEl = document.getElementById('scopeSpeedVal')!;
-const speedLabels = (v: number) => v <= 1 ? '매우 느림' : v <= 3 ? '느림' : v <= 6 ? '보통' : v <= 14 ? '빠름' : '매우 빠름';
-speedInput.min = '1'; speedInput.max = '32'; speedInput.step = '1'; speedInput.value = '4';
-speedInput.style.setProperty('--sl-pct', `${(4-1)/(32-1)*100}%`);
+speedInput.min = '128'; speedInput.max = '1024'; speedInput.step = '64'; speedInput.value = '512';
+speedInput.style.setProperty('--sl-pct', `${(512-128)/(1024-128)*100}%`);
 speedInput.addEventListener('input', () => {
-  scopeSpeed = parseInt(speedInput.value);
-  speedInput.style.setProperty('--sl-pct', `${(scopeSpeed-1)/(32-1)*100}%`);
-  speedValEl.textContent = speedLabels(scopeSpeed);
+  SCOPE_DRAW = parseInt(speedInput.value);
+  speedInput.style.setProperty('--sl-pct', `${(SCOPE_DRAW-128)/(1024-128)*100}%`);
+  speedValEl.textContent = SCOPE_DRAW <= 256 ? '확대' : SCOPE_DRAW >= 768 ? '축소' : '보통';
 });
 
 // 비주얼라이저
@@ -383,15 +380,18 @@ function drawScope() {
   ctx.stroke();
   if (!engine?.playing) return;
   const data = engine.getScope();
-  const N = SCOPE_DRAW;
   const bufLen = data.length;
-  scopeOffset = (scopeOffset + scopeSpeed) % bufLen;
+  const N = SCOPE_DRAW;
+  // 제로 크로싱 트리거
+  let start = 0;
+  for (let i = 1; i < bufLen - N; i++) {
+    if (data[i - 1] < 128 && data[i] >= 128) { start = i; break; }
+  }
   ctx.lineWidth = 1.5; ctx.strokeStyle = '#7c3aed';
   ctx.shadowColor = 'rgba(124,58,237,0.5)'; ctx.shadowBlur = 6;
   ctx.beginPath();
   for (let i = 0; i < N; i++) {
-    const idx = (Math.floor(scopeOffset) + i) % bufLen;
-    const x = i / (N-1) * w, y = (1 - data[idx]/255) * h;
+    const x = i / (N-1) * w, y = (1 - data[start + i]/255) * h;
     i ? ctx.lineTo(x,y) : ctx.moveTo(x,y);
   }
   ctx.stroke(); ctx.shadowBlur = 0;

@@ -29,12 +29,12 @@ const base = import.meta.env.BASE_URL;
       </p>
 
       <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
-        <a href={`${base}sandbox`}
+        <a href={`${base}sandbox/`}
           class="gradient-brand text-white font-semibold px-7 py-3 rounded-xl text-[15px] transition hover:opacity-90 hover:-translate-y-0.5 shadow-lg"
           style="font-family:'Space Grotesk'; box-shadow: 0 8px 30px -8px rgba(124,58,237,0.5)">
           샌드박스 열기 →
         </a>
-        <a href={`${base}learn/filter`}
+        <a href={`${base}learn/filter/`}
           class="border border-[var(--color-border)] text-[var(--color-ink-700)] font-semibold px-7 py-3 rounded-xl text-[15px] transition hover:border-[var(--color-violet)] hover:text-[var(--color-violet)] bg-white"
           style="font-family:'Space Grotesk'">
           레슨 시작하기
@@ -52,7 +52,7 @@ const base = import.meta.env.BASE_URL;
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {MODULES.map((m) => (
-        <a href={`${base}learn/${m.id}`}
+        <a href={`${base}learn/${m.id}/`}
           class="group block p-5 rounded-2xl border border-[var(--color-border)] bg-white hover:border-transparent transition-all duration-200"
           style={`--hover-color: ${m.color === 'violet' ? 'rgba(124,58,237,0.4)' : 'rgba(37,99,235,0.4)'}`}
           onmouseover="this.style.boxShadow=`0 0 0 1.5px var(--hover-color), 0 8px 30px -10px var(--hover-color)`"

@@ -55,7 +55,7 @@ const next = MODULES[currentIdx + 1];
         <!-- 이전/다음 네비게이션 -->
         <div class="flex items-center justify-between mt-12 pt-8 border-t border-[var(--color-border)]">
           {prev ? (
-            <a href={`${base}learn/${prev.id}`}
+            <a href={`${base}learn/${prev.id}/`}
               class="flex items-center gap-2 text-sm font-medium text-[var(--color-ink-500)] hover:text-[var(--color-violet)] transition group">
               <svg class="w-4 h-4 transition group-hover:-translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
               <div>
@@ -66,7 +66,7 @@ const next = MODULES[currentIdx + 1];
           ) : <div />}
 
           {next ? (
-            <a href={`${base}learn/${next.id}`}
+            <a href={`${base}learn/${next.id}/`}
               class="flex items-center gap-2 text-sm font-medium text-[var(--color-ink-500)] hover:text-[var(--color-violet)] transition group text-right">
               <div>
                 <div class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)]">다음 레슨</div>
@@ -75,7 +75,7 @@ const next = MODULES[currentIdx + 1];
               <svg class="w-4 h-4 transition group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
             </a>
           ) : (
-            <a href={`${base}sandbox`}
+            <a href={`${base}sandbox/`}
               class="flex items-center gap-2 text-sm font-semibold text-[var(--color-violet)] hover:opacity-80 transition group text-right">
               <div>
                 <div class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)]">다음 단계</div>

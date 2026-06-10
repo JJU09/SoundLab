@@ -1,0 +1,44 @@
+---
+import LearnLayout from '../../layouts/LearnLayout.astro';
+import { MODULE_MAP } from '../../lib/modules';
+const m = MODULE_MAP['tremolo'];
+---
+<LearnLayout module={m}>
+  <div class="space-y-6 text-sm leading-relaxed text-[var(--color-ink-700)]">
+
+    <section>
+      <h2 class="text-base font-bold mb-2" style="font-family:'Space Grotesk'">트레몰로란?</h2>
+      <p>저주파 발진기(LFO, Low-Frequency Oscillator)를 이용해 음량(amplitude)을 주기적으로 흔드는 효과입니다. 클래식 기타의 오른손 빠른 피킹이나 비브라폰의 떨림 소리가 바로 트레몰로입니다.</p>
+    </section>
+
+    <section>
+      <h2 class="text-base font-bold mb-2" style="font-family:'Space Grotesk'">LFO란?</h2>
+      <p>가청 주파수(20Hz) 이하의 아주 느린 진동입니다. 이 진동 자체를 소리로 듣는 것이 아니라, <b>다른 파라미터를 조절하는 신호</b>로 사용합니다. 트레몰로는 LFO → 음량, 비브라토는 LFO → 피치, 와우는 LFO → 필터 컷오프에 연결한 것입니다.</p>
+    </section>
+
+    <section>
+      <h2 class="text-base font-bold mb-3" style="font-family:'Space Grotesk'">파라미터 이해</h2>
+      <div class="space-y-2">
+        {[
+          ['Rate (속도)', '음량이 몇 번/초 떨리는지. 1Hz = 1초에 한 번. 빠를수록 윙윙거리는 느낌.'],
+          ['Depth (깊이)', '음량이 얼마나 크게 변하는지. 0%이면 변화 없음, 100%이면 완전 무음까지 내려갔다 올라옴.'],
+        ].map(([title, desc]) => (
+          <div class="p-3 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)]">
+            <div class="font-semibold text-xs font-mono text-[var(--color-violet)] mb-1">{title}</div>
+            <div class="text-xs text-[var(--color-ink-500)]">{desc}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <div class="p-4 rounded-xl border-l-2 border-[var(--color-violet)] bg-[var(--color-violet-glow)]">
+      <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-violet)] mb-2">🔊 실습 가이드</div>
+      <ul class="space-y-1 text-xs text-[var(--color-ink-700)]">
+        <li>→ <b>삼각파(Tri)</b> 지속음으로 시작하세요</li>
+        <li>→ Rate 2Hz, Depth 80%로 맞추고 규칙적인 맥동을 들어보세요</li>
+        <li>→ Rate를 10Hz 이상으로 올리면 떨림이 아닌 독특한 링 모듈레이션처럼 들립니다</li>
+        <li>→ 오실로스코프에서 파형 진폭(높이)이 주기적으로 변하는 것을 확인하세요</li>
+      </ul>
+    </div>
+  </div>
+</LearnLayout>

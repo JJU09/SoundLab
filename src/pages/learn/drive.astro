@@ -1,0 +1,44 @@
+---
+import LearnLayout from '../../layouts/LearnLayout.astro';
+import { MODULE_MAP } from '../../lib/modules';
+const m = MODULE_MAP['drive'];
+---
+<LearnLayout module={m}>
+  <div class="space-y-6 text-sm leading-relaxed text-[var(--color-ink-700)]">
+
+    <section>
+      <h2 class="text-base font-bold mb-2" style="font-family:'Space Grotesk'">드라이브(디스토션)란?</h2>
+      <p>신호의 레벨을 증폭시켜 파형의 꼭대기를 잘라내는(클리핑) 효과입니다. 이 과정에서 원래 없던 배음(harmonics)이 생겨나 소리가 거칠고 풍성해집니다. 기타 앰프의 오버드라이브, 퍼즈 페달이 모두 이 원리입니다.</p>
+    </section>
+
+    <section>
+      <h2 class="text-base font-bold mb-3" style="font-family:'Space Grotesk'">하드 클리핑 vs 소프트 클리핑</h2>
+      <div class="space-y-2">
+        {[
+          ['하드 클리핑', '파형을 직각으로 잘라냅니다. 날카롭고 공격적인 사운드. 사각파(Square)에 가까워집니다.'],
+          ['소프트 클리핑 (SoundLab 방식)', '파형을 부드럽게 눌러줍니다. 따뜻하고 자연스러운 배음. 진공관 앰프 특성을 모사합니다.'],
+        ].map(([title, desc]) => (
+          <div class="p-3 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)]">
+            <div class="font-semibold text-xs font-mono text-[var(--color-blue)] mb-1">{title}</div>
+            <div class="text-xs text-[var(--color-ink-500)]">{desc}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <section>
+      <h2 class="text-base font-bold mb-2" style="font-family:'Space Grotesk'">왜 배음이 생길까?</h2>
+      <p>순수한 사인파(기음만 존재)를 클리핑하면 파형이 사각파에 가까워집니다. 사각파는 수학적으로 기음의 홀수 배음(3배, 5배, 7배…)의 합으로 이루어져 있기 때문에, 클리핑 = 배음 추가입니다. 스펙트럼에서 이 배음 막대들이 생겨나는 것을 직접 확인할 수 있습니다.</p>
+    </section>
+
+    <div class="p-4 rounded-xl border-l-2 border-[var(--color-blue)] bg-[var(--color-blue-glow)]">
+      <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-blue)] mb-2">🔊 실습 가이드</div>
+      <ul class="space-y-1 text-xs text-[var(--color-ink-700)]">
+        <li>→ <b>사인파(Sine)</b> 지속음으로 시작하세요 — 파형이 매끄럽고 스펙트럼에 막대 하나만 있습니다</li>
+        <li>→ Drive를 올리며 파형 꼭대기가 눌리는 클리핑을 관찰하세요</li>
+        <li>→ 스펙트럼에 배음 막대들이 줄지어 나타나는 것을 확인하세요</li>
+        <li>→ 사각파(Square)로 바꿔 이미 배음이 많은 소리와 비교해보세요</li>
+      </ul>
+    </div>
+  </div>
+</LearnLayout>

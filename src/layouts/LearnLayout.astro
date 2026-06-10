@@ -1,0 +1,96 @@
+---
+import Base from './Base.astro';
+import EffectPlayer from '../components/EffectPlayer.astro';
+import { MODULES, type ModuleDef } from '../lib/modules';
+
+interface Props {
+  module: ModuleDef;
+}
+const { module: m } = Astro.props;
+const base = import.meta.env.BASE_URL;
+
+const currentIdx = MODULES.findIndex(x => x.id === m.id);
+const prev = MODULES[currentIdx - 1];
+const next = MODULES[currentIdx + 1];
+---
+<Base title={`${m.name} (${m.kr})`} description={m.desc}>
+
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 py-10">
+
+    <!-- 브레드크럼 -->
+    <nav class="flex items-center gap-2 text-xs font-mono text-[var(--color-ink-300)] mb-8">
+      <a href={base} class="hover:text-[var(--color-violet)] transition">홈</a>
+      <span>/</span>
+      <span>레슨</span>
+      <span>/</span>
+      <span class="text-[var(--color-ink-700)]">{m.name}</span>
+    </nav>
+
+    <div class="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-10">
+
+      <!-- 왼쪽: 개념 설명 -->
+      <div>
+        <div class="flex items-center gap-3 mb-4">
+          <span class={`text-xs font-mono px-2.5 py-1 rounded-full border ${
+            m.color === 'violet'
+              ? 'border-[var(--color-violet-light)] text-[var(--color-violet)] bg-[var(--color-violet-glow)]'
+              : 'border-[var(--color-blue-light)] text-[var(--color-blue)] bg-[var(--color-blue-glow)]'
+          }`}>LESSON {m.num}</span>
+        </div>
+
+        <h1 class="text-3xl sm:text-4xl font-bold mb-2 leading-tight" style="font-family:'Space Grotesk'">
+          {m.name}
+          <span class="text-[var(--color-ink-300)] font-medium text-2xl ml-2">{m.kr}</span>
+        </h1>
+        <p class={`text-lg font-medium mb-6 ${m.color === 'violet' ? 'gradient-brand-text' : ''}`}
+          style={m.color === 'blue' ? 'color:var(--color-blue)' : ''}>
+          {m.tagline}
+        </p>
+
+        <p class="text-[var(--color-ink-700)] leading-relaxed mb-8">{m.desc}</p>
+
+        <!-- 슬롯: 각 레슨별 상세 내용 -->
+        <slot />
+
+        <!-- 이전/다음 네비게이션 -->
+        <div class="flex items-center justify-between mt-12 pt-8 border-t border-[var(--color-border)]">
+          {prev ? (
+            <a href={`${base}learn/${prev.id}`}
+              class="flex items-center gap-2 text-sm font-medium text-[var(--color-ink-500)] hover:text-[var(--color-violet)] transition group">
+              <svg class="w-4 h-4 transition group-hover:-translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+              <div>
+                <div class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)]">이전 레슨</div>
+                <div>{prev.name} ({prev.kr})</div>
+              </div>
+            </a>
+          ) : <div />}
+
+          {next ? (
+            <a href={`${base}learn/${next.id}`}
+              class="flex items-center gap-2 text-sm font-medium text-[var(--color-ink-500)] hover:text-[var(--color-violet)] transition group text-right">
+              <div>
+                <div class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)]">다음 레슨</div>
+                <div>{next.name} ({next.kr})</div>
+              </div>
+              <svg class="w-4 h-4 transition group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </a>
+          ) : (
+            <a href={`${base}sandbox`}
+              class="flex items-center gap-2 text-sm font-semibold text-[var(--color-violet)] hover:opacity-80 transition group text-right">
+              <div>
+                <div class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)]">다음 단계</div>
+                <div>샌드박스로 자유롭게 →</div>
+              </div>
+            </a>
+          )}
+        </div>
+      </div>
+
+      <!-- 오른쪽: 인터랙티브 플레이어 -->
+      <div class="lg:sticky lg:top-20 self-start">
+        <EffectPlayer module={m} />
+      </div>
+
+    </div>
+  </div>
+</Base>

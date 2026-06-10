@@ -1,0 +1,310 @@
+---
+import type { ModuleDef } from '../lib/modules';
+
+interface Props {
+  module: ModuleDef;
+}
+const { module: m } = Astro.props;
+---
+
+<div class="effect-player rounded-2xl border border-[var(--color-border)] bg-white overflow-hidden"
+  data-module-id={m.id}>
+
+  <!-- 헤더 -->
+  <div class="flex items-center justify-between px-5 py-4 border-b border-[var(--color-border)] bg-[var(--color-surface)]">
+    <div class="flex items-center gap-3">
+      <div class={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-mono font-bold text-white gradient-brand`}>
+        {m.num}
+      </div>
+      <div>
+        <span class="font-bold text-base" style="font-family:'Space Grotesk'">{m.name}</span>
+        <span class="text-sm text-[var(--color-ink-300)] ml-2">{m.kr}</span>
+      </div>
+    </div>
+    <!-- 전원 토글 -->
+    <button
+      class="pwr-btn flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-mono font-medium transition-all"
+      aria-pressed="false"
+      aria-label={`${m.name} 켜기/끄기`}>
+      <span class="pwr-dot w-2 h-2 rounded-full bg-[var(--color-border)] transition-all"></span>
+      <span class="pwr-label">OFF</span>
+    </button>
+  </div>
+
+  <!-- 타입 선택 (Filter만) -->
+  {m.type && (
+    <div class="px-5 pt-4">
+      <div class="flex gap-1.5 p-1 bg-[var(--color-surface-2)] rounded-xl w-fit" role="group" aria-label="필터 타입">
+        {m.type.options.map(([val, txt]) => (
+          <button
+            class="type-btn px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition-all text-[var(--color-ink-500)]"
+            data-val={val}
+            aria-pressed={val === m.type!.value ? 'true' : 'false'}>
+            {txt}
+          </button>
+        ))}
+      </div>
+    </div>
+  )}
+
+  <!-- 슬라이더들 -->
+  <div class="px-5 py-5 flex flex-col gap-5">
+    {m.knobs.map(k => (
+      <div class="slider-wrap" data-param={k.param}
+        data-min={k.min} data-max={k.max} data-value={k.value} data-curve={k.curve ?? 'lin'}>
+        <div class="flex items-center justify-between mb-2">
+          <label class="text-xs font-mono uppercase tracking-widest text-[var(--color-ink-500)]">{k.label}</label>
+          <span class="val-display text-sm font-mono font-medium text-[var(--color-ink-700)]">—</span>
+        </div>
+        <input type="range" class="sl-range w-full" min="0" max="1000" step="1"
+          aria-label={k.label} />
+      </div>
+    ))}
+  </div>
+
+  <!-- 비주얼라이저 -->
+  <div class="px-5 pb-5 grid grid-cols-2 gap-3">
+    <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]">
+      <canvas class="scope-canvas block w-full" style="height:100px"></canvas>
+      <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)] opacity-70">Waveform</span>
+    </div>
+    <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]">
+      <canvas class="spectrum-canvas block w-full" style="height:100px"></canvas>
+      <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-blue)] opacity-70">Spectrum</span>
+    </div>
+  </div>
+
+  <!-- 음원 + 재생 -->
+  <div class="px-5 pb-5 flex items-center gap-3 flex-wrap">
+    <div class="flex gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" role="group">
+      {[['tone','지속음'],['pluck','플럭'],['noise','노이즈']].map(([v,t]) => (
+        <button class="src-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-[var(--color-ink-500)]"
+          data-src={v} aria-pressed={v === 'tone' ? 'true' : 'false'}
+          style="font-family:'Space Grotesk'">
+          {t}
+        </button>
+      ))}
+    </div>
+    <button class="play-btn ml-auto gradient-brand text-white font-semibold px-5 py-2 rounded-xl text-sm flex items-center gap-2 transition hover:opacity-90"
+      style="font-family:'Space Grotesk'">
+      <span class="play-dot w-2 h-2 rounded-full bg-white"></span>
+      <span class="play-label">소리 켜기</span>
+    </button>
+  </div>
+</div>
+
+<script>
+import { Engine } from '../lib/engine';
+
+document.querySelectorAll<HTMLElement>('.effect-player').forEach(el => {
+  const moduleId = el.dataset.moduleId!;
+  let engine: Engine | null = null;
+
+  // 슬라이더 초기화
+  const sliders = el.querySelectorAll<HTMLElement>('.slider-wrap');
+
+  function logMap(p: number, min: number, max: number, curve: string): number {
+    if (curve === 'log') return min * Math.pow(max / min, p);
+    return min + (max - min) * p;
+  }
+
+  function toP(v: number, min: number, max: number, curve: string): number {
+    if (curve === 'log') return Math.log(v / min) / Math.log(max / min);
+    return (v - min) / (max - min);
+  }
+
+  sliders.forEach(wrap => {
+    const input = wrap.querySelector<HTMLInputElement>('input')!;
+    const valEl = wrap.querySelector<HTMLElement>('.val-display')!;
+    const param = wrap.dataset.param!;
+    const min = parseFloat(wrap.dataset.min!);
+    const max = parseFloat(wrap.dataset.max!);
+    const def = parseFloat(wrap.dataset.value!);
+    const curve = wrap.dataset.curve!;
+
+    // 초기값 세팅
+    const initP = toP(def, min, max, curve);
+    input.value = String(Math.round(initP * 1000));
+    input.style.setProperty('--sl-pct', `${initP * 100}%`);
+
+    // fmt 함수는 data-unit 없이 값으로 추정
+    const fmt = (v: number) => {
+      if (param === 'freq') return v >= 1000 ? (v/1000).toFixed(1)+'kHz' : Math.round(v)+'Hz';
+      if (param === 'time') return v < 1 ? Math.round(v*1000)+'ms' : v.toFixed(2)+'s';
+      if (param === 'rate') return v.toFixed(1)+'Hz';
+      if (param === 'size') return v.toFixed(1)+'s';
+      if (param === 'q') return v.toFixed(1);
+      return Math.round(v)+'%';
+    };
+    valEl.textContent = fmt(def);
+
+    input.addEventListener('input', () => {
+      const p = parseInt(input.value) / 1000;
+      const v = logMap(p, min, max, curve);
+      input.style.setProperty('--sl-pct', `${p * 100}%`);
+      valEl.textContent = fmt(v);
+      engine?.set(moduleId, param, v);
+    });
+  });
+
+  // 전원 버튼
+  const pwrBtn = el.querySelector<HTMLButtonElement>('.pwr-btn')!;
+  const pwrDot = el.querySelector<HTMLElement>('.pwr-dot')!;
+  const pwrLabel = el.querySelector<HTMLElement>('.pwr-label')!;
+
+  pwrBtn.addEventListener('click', () => {
+    const on = pwrBtn.getAttribute('aria-pressed') !== 'true';
+    pwrBtn.setAttribute('aria-pressed', String(on));
+    if (on) {
+      pwrBtn.style.cssText = 'border-color:var(--color-violet);color:var(--color-violet);background:var(--color-violet-glow)';
+      pwrDot.style.cssText = 'background:var(--color-violet);box-shadow:0 0 8px var(--color-violet)';
+      pwrLabel.textContent = 'ON';
+    } else {
+      pwrBtn.style.cssText = '';
+      pwrDot.style.cssText = 'background:var(--color-border)';
+      pwrLabel.textContent = 'OFF';
+    }
+    engine?.setEnabled(moduleId, on);
+  });
+
+  // 타입 버튼
+  el.querySelectorAll<HTMLButtonElement>('.type-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      el.querySelectorAll('.type-btn').forEach(b => {
+        (b as HTMLElement).setAttribute('aria-pressed','false');
+        (b as HTMLElement).style.cssText = '';
+      });
+      btn.setAttribute('aria-pressed','true');
+      btn.style.cssText = 'background:white;color:var(--color-violet);box-shadow:0 1px 4px rgba(0,0,0,0.08)';
+      engine?.set(moduleId, 'type', btn.dataset.val!);
+    });
+    // 기본 선택 스타일
+    if (btn.getAttribute('aria-pressed') === 'true') {
+      btn.style.cssText = 'background:white;color:var(--color-violet);box-shadow:0 1px 4px rgba(0,0,0,0.08)';
+    }
+  });
+
+  // 음원 버튼
+  el.querySelectorAll<HTMLButtonElement>('.src-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      el.querySelectorAll('.src-btn').forEach(b => {
+        (b as HTMLElement).setAttribute('aria-pressed','false');
+        (b as HTMLElement).style.cssText = '';
+      });
+      btn.setAttribute('aria-pressed','true');
+      btn.style.cssText = 'background:white;color:var(--color-violet);box-shadow:0 1px 4px rgba(0,0,0,0.08)';
+      engine?.setSource(btn.dataset.src as any);
+    });
+    if (btn.getAttribute('aria-pressed') === 'true') {
+      btn.style.cssText = 'background:white;color:var(--color-violet);box-shadow:0 1px 4px rgba(0,0,0,0.08)';
+    }
+  });
+
+  // 재생 버튼
+  const playBtn = el.querySelector<HTMLButtonElement>('.play-btn')!;
+  const playDot = el.querySelector<HTMLElement>('.play-dot')!;
+  const playLabel = el.querySelector<HTMLElement>('.play-label')!;
+
+  playBtn.addEventListener('click', async () => {
+    if (!engine) {
+      engine = new Engine();
+      // 현재 슬라이더 값 엔진에 적용
+      sliders.forEach(wrap => {
+        const input = wrap.querySelector<HTMLInputElement>('input')!;
+        const p = parseInt(input.value) / 1000;
+        const min = parseFloat(wrap.dataset.min!);
+        const max = parseFloat(wrap.dataset.max!);
+        const curve = wrap.dataset.curve!;
+        const v = logMap(p, min, max, curve);
+        engine!.set(moduleId, wrap.dataset.param!, v);
+      });
+      // 전원 상태 적용
+      const isOn = pwrBtn.getAttribute('aria-pressed') === 'true';
+      engine.setEnabled(moduleId, isOn);
+    }
+
+    if (engine.playing) {
+      engine.stop();
+      playBtn.classList.remove('playing');
+      playBtn.style.cssText = '';
+      playDot.style.cssText = 'background:white';
+      playLabel.textContent = '소리 켜기';
+      stopViz();
+    } else {
+      await engine.start();
+      playBtn.style.cssText = 'background:var(--color-surface-2);color:var(--color-ink-700);border:1px solid var(--color-border)';
+      playDot.style.cssText = 'background:#ef4444;box-shadow:0 0 8px #ef4444';
+      playLabel.textContent = '소리 끄기';
+      startViz();
+    }
+  });
+
+  // 비주얼라이저
+  const scopeCv = el.querySelector<HTMLCanvasElement>('.scope-canvas')!;
+  const specCv = el.querySelector<HTMLCanvasElement>('.spectrum-canvas')!;
+  let scopeCtx: CanvasRenderingContext2D, specCtx: CanvasRenderingContext2D;
+  let rafId = 0;
+
+  function setupCv(cv: HTMLCanvasElement) {
+    const dpr = window.devicePixelRatio || 1;
+    const ctx = cv.getContext('2d')!;
+    const fit = () => {
+      const r = cv.getBoundingClientRect();
+      cv.width = r.width * dpr; cv.height = r.height * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+    fit(); window.addEventListener('resize', fit);
+    return ctx;
+  }
+
+  function startViz() {
+    scopeCtx = setupCv(scopeCv);
+    specCtx = setupCv(specCv);
+    const loop = () => {
+      rafId = requestAnimationFrame(loop);
+      drawScope(); drawSpec();
+    };
+    loop();
+  }
+
+  function stopViz() { cancelAnimationFrame(rafId); }
+
+  function cssW(cv: HTMLCanvasElement) { return cv.width / (window.devicePixelRatio || 1); }
+  function cssH(cv: HTMLCanvasElement) { return cv.height / (window.devicePixelRatio || 1); }
+
+  function drawScope() {
+    const w = cssW(scopeCv), h = cssH(scopeCv), ctx = scopeCtx;
+    ctx.fillStyle = 'rgba(240,240,248,0.4)'; ctx.fillRect(0, 0, w, h);
+    if (!engine?.playing) return;
+    const data = engine.getScope(), N = data.length;
+    ctx.lineWidth = 1.5; ctx.strokeStyle = '#7c3aed';
+    ctx.shadowColor = 'rgba(124,58,237,0.6)'; ctx.shadowBlur = 6;
+    ctx.beginPath();
+    for (let i = 0; i < N; i++) {
+      const x = i / (N - 1) * w, y = (1 - data[i] / 255) * h;
+      i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+    }
+    ctx.stroke(); ctx.shadowBlur = 0;
+  }
+
+  function drawSpec() {
+    const w = cssW(specCv), h = cssH(specCv), ctx = specCtx;
+    ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = '#f0f0f8'; ctx.fillRect(0, 0, w, h);
+    if (!engine?.playing) return;
+    const data = engine.getSpectrum(), N = data.length, bars = 48;
+    const grad = ctx.createLinearGradient(0, h, 0, 0);
+    grad.addColorStop(0, '#2563eb'); grad.addColorStop(1, '#60a5fa');
+    ctx.fillStyle = grad;
+    ctx.shadowColor = 'rgba(37,99,235,0.4)'; ctx.shadowBlur = 4;
+    for (let i = 0; i < bars; i++) {
+      const f0 = Math.pow(i / bars, 2), f1 = Math.pow((i + 1) / bars, 2);
+      const lo = Math.floor(f0 * N), hi = Math.max(lo + 1, Math.floor(f1 * N));
+      let mx = 0; for (let j = lo; j < hi && j < N; j++) mx = Math.max(mx, data[j]);
+      const bh = (mx / 255) * (h - 4);
+      ctx.fillRect(i * w / bars + 0.5, h - bh, w / bars - 1, bh);
+    }
+    ctx.shadowBlur = 0;
+  }
+});
+</script>

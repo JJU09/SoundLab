@@ -1,0 +1,403 @@
+---
+import Base from '../layouts/Base.astro';
+import { MODULES } from '../lib/modules';
+---
+<Base title="샌드박스" description="6개 이펙트를 자유롭게 조합하고 실시간으로 사운드를 디자인하는 샌드박스 플레이그라운드.">
+
+<div class="max-w-6xl mx-auto px-4 sm:px-6 py-10">
+
+  <!-- 헤더 -->
+  <div class="mb-8">
+    <div class="flex items-center gap-2 mb-3">
+      <span class="text-xs font-mono px-2.5 py-1 rounded-full border border-[var(--color-violet-light)] text-[var(--color-violet)] bg-[var(--color-violet-glow)]">SANDBOX</span>
+    </div>
+    <h1 class="text-3xl font-bold mb-2" style="font-family:'Space Grotesk'">자유 실습 공간</h1>
+    <p class="text-[var(--color-ink-500)]">6개 이펙트를 자유롭게 켜고 끄며 소리를 만들어보세요. 신호는 위에서 아래 순서로 흐릅니다.</p>
+  </div>
+
+  <!-- 신호 체인 흐름 표시 -->
+  <div class="flex items-center gap-2 flex-wrap mb-8 p-3 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)]">
+    <span class="text-xs font-mono text-[var(--color-ink-500)]">SOURCE</span>
+    {MODULES.map((m, i) => (
+      <>
+        <svg class="w-4 h-4 text-[var(--color-border)] flex-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        <span class={`text-xs font-mono font-medium chain-label-${m.id} transition-colors text-[var(--color-ink-300)]`}>{m.name.toUpperCase()}</span>
+      </>
+    ))}
+    <svg class="w-4 h-4 text-[var(--color-border)] flex-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+    <span class="text-xs font-mono text-[var(--color-ink-500)]">OUT</span>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
+
+    <!-- 이펙트 랙 -->
+    <div>
+      <!-- 음원 + 마스터 볼륨 -->
+      <div class="p-5 rounded-2xl border border-[var(--color-border)] bg-white mb-4">
+        <div class="flex items-center justify-between flex-wrap gap-4">
+          <div>
+            <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-2">Source · 음원</div>
+            <div class="flex gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" role="group" id="srcSeg">
+              {[['tone','지속음'],['pluck','플럭'],['noise','노이즈']].map(([v,t]) => (
+                <button class="src-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-[var(--color-ink-500)]"
+                  data-src={v} aria-pressed={v === 'tone' ? 'true' : 'false'}
+                  style="font-family:'Space Grotesk'">{t}</button>
+              ))}
+            </div>
+          </div>
+          <div class="flex items-center gap-4">
+            <div>
+              <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">Volume</div>
+              <div class="flex items-center gap-2">
+                <input type="range" class="sl-range w-28" id="masterVol" min="0" max="1000" step="1" value="700" aria-label="마스터 볼륨" />
+                <span class="text-sm font-mono text-[var(--color-ink-700)] w-8" id="masterVolVal">70%</span>
+              </div>
+            </div>
+            <button id="playBtn"
+              class="gradient-brand text-white font-semibold px-5 py-2.5 rounded-xl text-sm flex items-center gap-2 transition hover:opacity-90"
+              style="font-family:'Space Grotesk'">
+              <span id="playDot" class="w-2 h-2 rounded-full bg-white"></span>
+              <span id="playLabel">소리 켜기</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 이펙트 모듈들 -->
+      <div class="space-y-3" id="effectRack">
+        {MODULES.map(m => (
+          <div class="module-card rounded-2xl border border-[var(--color-border)] bg-white overflow-hidden transition-all duration-200"
+            id={`mod-${m.id}`} data-module-id={m.id}>
+
+            <div class="flex items-center justify-between px-4 py-3 border-b border-[var(--color-border)] bg-[var(--color-surface)]">
+              <div class="flex items-center gap-3">
+                <div class="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-mono font-bold text-white gradient-brand">{m.num}</div>
+                <span class="font-bold text-sm" style="font-family:'Space Grotesk'">{m.name}</span>
+                <span class="text-xs text-[var(--color-ink-300)]">{m.kr}</span>
+                <span class="hidden sm:block text-xs text-[var(--color-ink-300)] border-l border-[var(--color-border)] pl-3">{m.tagline}</span>
+              </div>
+              <button class="pwr-btn flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-mono transition-all"
+                aria-pressed="false" aria-label={`${m.name} 켜기/끄기`}>
+                <span class="pwr-dot w-1.5 h-1.5 rounded-full bg-[var(--color-border)]"></span>
+                <span class="pwr-label">OFF</span>
+              </button>
+            </div>
+
+            <div class="px-4 py-4">
+              {m.type && (
+                <div class="flex gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl w-fit mb-3" role="group">
+                  {m.type.options.map(([val, txt]) => (
+                    <button class="type-btn px-2.5 py-1 rounded-lg text-xs font-mono font-medium transition-all text-[var(--color-ink-500)]"
+                      data-val={val} aria-pressed={val === m.type!.value ? 'true' : 'false'}>
+                      {txt}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              <div class={`grid gap-x-6 gap-y-3 ${m.knobs.length === 1 ? 'grid-cols-1 max-w-xs' : m.knobs.length === 2 ? 'grid-cols-2' : 'grid-cols-3'}`}>
+                {m.knobs.map(k => (
+                  <div class="slider-wrap" data-param={k.param}
+                    data-min={k.min} data-max={k.max} data-value={k.value} data-curve={k.curve ?? 'lin'}>
+                    <div class="flex items-center justify-between mb-1.5">
+                      <label class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-500)]">{k.label}</label>
+                      <span class="val-display text-xs font-mono font-medium text-[var(--color-ink-700)]">—</span>
+                    </div>
+                    <input type="range" class="sl-range w-full" min="0" max="1000" step="1" aria-label={k.label} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <!-- 오른쪽: 비주얼라이저 + 출력 미터 -->
+    <div class="lg:sticky lg:top-20 self-start space-y-4">
+
+      <div class="p-4 rounded-2xl border border-[var(--color-border)] bg-white">
+        <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-3">Visualizer · 출력 신호</div>
+
+        <!-- 출력 미터 -->
+        <div class="flex items-center gap-2 mb-4">
+          <span class="text-[10px] font-mono text-[var(--color-ink-300)]">OUT</span>
+          <div class="flex-1 h-2 rounded-full bg-[var(--color-surface-2)] border border-[var(--color-border)] overflow-hidden">
+            <div id="meterFill" class="h-full w-0 rounded-full transition-[width] duration-50"
+              style="background:linear-gradient(90deg,#7c3aed 0%,#7c3aed 60%,#f59e0b 80%,#ef4444 100%)"></div>
+          </div>
+          <span class="text-[10px] font-mono text-[var(--color-ink-300)] w-8 text-right" id="meterVal">—</span>
+        </div>
+
+        <!-- 오실로스코프 -->
+        <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)] mb-3">
+          <canvas id="scopeCv" class="block w-full" style="height:120px"></canvas>
+          <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)] opacity-70">Waveform</span>
+        </div>
+
+        <!-- 스펙트럼 -->
+        <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]">
+          <canvas id="specCv" class="block w-full" style="height:120px"></canvas>
+          <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-blue)] opacity-70">Spectrum</span>
+        </div>
+      </div>
+
+      <!-- 레슨 바로가기 -->
+      <div class="p-4 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)]">
+        <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-3">레슨으로 돌아가기</div>
+        <div class="space-y-1">
+          {MODULES.map(m => (
+            <a href={`${import.meta.env.BASE_URL}learn/${m.id}`}
+              class="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium text-[var(--color-ink-500)] hover:bg-white hover:text-[var(--color-violet)] transition">
+              <span class="font-mono text-[10px] text-[var(--color-ink-300)]">{m.num}</span>
+              {m.name} · {m.kr}
+            </a>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+import { Engine } from '../lib/engine';
+
+let engine: Engine | null = null;
+
+function logMap(p: number, min: number, max: number, curve: string): number {
+  if (curve === 'log') return min * Math.pow(max / min, p);
+  return min + (max - min) * p;
+}
+function toP(v: number, min: number, max: number, curve: string): number {
+  if (curve === 'log') return Math.log(v / min) / Math.log(max / min);
+  return (v - min) / (max - min);
+}
+function fmtParam(param: string, v: number): string {
+  if (param === 'freq') return v >= 1000 ? (v/1000).toFixed(1)+'kHz' : Math.round(v)+'Hz';
+  if (param === 'time') return v < 1 ? Math.round(v*1000)+'ms' : v.toFixed(2)+'s';
+  if (param === 'rate') return v.toFixed(1)+'Hz';
+  if (param === 'size') return v.toFixed(1)+'s';
+  if (param === 'q') return v.toFixed(1);
+  return Math.round(v)+'%';
+}
+
+// 슬라이더 초기화
+document.querySelectorAll<HTMLElement>('.slider-wrap').forEach(wrap => {
+  const input = wrap.querySelector<HTMLInputElement>('input')!;
+  const valEl = wrap.querySelector<HTMLElement>('.val-display')!;
+  const { param, min: minS, max: maxS, value: valS, curve = 'lin' } = wrap.dataset as any;
+  const min = parseFloat(minS), max = parseFloat(maxS), def = parseFloat(valS);
+
+  const initP = toP(def, min, max, curve);
+  input.value = String(Math.round(initP * 1000));
+  input.style.setProperty('--sl-pct', `${initP * 100}%`);
+  valEl.textContent = fmtParam(param, def);
+
+  input.addEventListener('input', () => {
+    const p = parseInt(input.value) / 1000;
+    const v = logMap(p, min, max, curve);
+    input.style.setProperty('--sl-pct', `${p * 100}%`);
+    valEl.textContent = fmtParam(param, v);
+    const moduleId = wrap.closest<HTMLElement>('.module-card')!.dataset.moduleId!;
+    engine?.set(moduleId, param, v);
+  });
+});
+
+// 마스터 볼륨
+const masterVol = document.getElementById('masterVol') as HTMLInputElement;
+const masterVolVal = document.getElementById('masterVolVal')!;
+masterVol.addEventListener('input', () => {
+  const p = parseInt(masterVol.value) / 1000;
+  masterVol.style.setProperty('--sl-pct', `${p * 100}%`);
+  masterVolVal.textContent = Math.round(p * 100) + '%';
+  engine?.setMaster(p * 100);
+});
+masterVol.style.setProperty('--sl-pct', '70%');
+
+// 전원 버튼
+document.querySelectorAll<HTMLElement>('.module-card').forEach(card => {
+  const moduleId = card.dataset.moduleId!;
+  const pwrBtn = card.querySelector<HTMLButtonElement>('.pwr-btn')!;
+  const pwrDot = card.querySelector<HTMLElement>('.pwr-dot')!;
+  const pwrLabel = card.querySelector<HTMLElement>('.pwr-label')!;
+  const chainLabel = document.querySelector(`.chain-label-${moduleId}`);
+
+  pwrBtn.addEventListener('click', () => {
+    const on = pwrBtn.getAttribute('aria-pressed') !== 'true';
+    pwrBtn.setAttribute('aria-pressed', String(on));
+    if (on) {
+      card.style.borderColor = 'rgba(124,58,237,0.4)';
+      card.style.boxShadow = '0 0 0 1px rgba(124,58,237,0.15), 0 4px 20px -6px rgba(124,58,237,0.25)';
+      pwrBtn.style.cssText = 'border-color:var(--color-violet);color:var(--color-violet);background:var(--color-violet-glow)';
+      pwrDot.style.cssText = 'background:var(--color-violet);box-shadow:0 0 8px rgba(124,58,237,0.8)';
+      pwrLabel.textContent = 'ON';
+      if (chainLabel) (chainLabel as HTMLElement).style.color = 'var(--color-violet)';
+    } else {
+      card.style.borderColor = '';
+      card.style.boxShadow = '';
+      pwrBtn.style.cssText = '';
+      pwrDot.style.cssText = 'background:var(--color-border)';
+      pwrLabel.textContent = 'OFF';
+      if (chainLabel) (chainLabel as HTMLElement).style.color = '';
+    }
+    engine?.setEnabled(moduleId, on);
+  });
+
+  // 타입 버튼
+  card.querySelectorAll<HTMLButtonElement>('.type-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      card.querySelectorAll('.type-btn').forEach(b => {
+        (b as HTMLElement).setAttribute('aria-pressed','false');
+        (b as HTMLElement).style.cssText = '';
+      });
+      btn.setAttribute('aria-pressed','true');
+      btn.style.cssText = 'background:white;color:var(--color-violet);box-shadow:0 1px 4px rgba(0,0,0,0.08)';
+      engine?.set(moduleId, 'type', btn.dataset.val!);
+    });
+    if (btn.getAttribute('aria-pressed') === 'true') {
+      btn.style.cssText = 'background:white;color:var(--color-violet);box-shadow:0 1px 4px rgba(0,0,0,0.08)';
+    }
+  });
+});
+
+// 음원 버튼
+document.querySelectorAll<HTMLButtonElement>('.src-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.src-btn').forEach(b => {
+      (b as HTMLElement).setAttribute('aria-pressed','false');
+      (b as HTMLElement).style.cssText = '';
+    });
+    btn.setAttribute('aria-pressed','true');
+    btn.style.cssText = 'background:white;color:var(--color-violet);box-shadow:0 1px 4px rgba(0,0,0,0.08)';
+    engine?.setSource(btn.dataset.src as any);
+  });
+  if (btn.getAttribute('aria-pressed') === 'true') {
+    btn.style.cssText = 'background:white;color:var(--color-violet);box-shadow:0 1px 4px rgba(0,0,0,0.08)';
+  }
+});
+
+// 재생 버튼
+const playBtn = document.getElementById('playBtn')!;
+const playDot = document.getElementById('playDot')!;
+const playLabel = document.getElementById('playLabel')!;
+
+playBtn.addEventListener('click', async () => {
+  if (!engine) {
+    engine = new Engine();
+    // 슬라이더 초기값 적용
+    document.querySelectorAll<HTMLElement>('.slider-wrap').forEach(wrap => {
+      const input = wrap.querySelector<HTMLInputElement>('input')!;
+      const p = parseInt(input.value) / 1000;
+      const { param, min: minS, max: maxS, curve = 'lin' } = wrap.dataset as any;
+      const v = logMap(p, parseFloat(minS), parseFloat(maxS), curve);
+      const moduleId = wrap.closest<HTMLElement>('.module-card')!.dataset.moduleId!;
+      engine!.set(moduleId, param, v);
+    });
+    engine.setMaster(parseInt(masterVol.value) / 10);
+  }
+
+  if (engine.playing) {
+    engine.stop();
+    playBtn.className = 'gradient-brand text-white font-semibold px-5 py-2.5 rounded-xl text-sm flex items-center gap-2 transition hover:opacity-90';
+    playBtn.style.cssText = '';
+    playDot.style.cssText = 'background:white';
+    playLabel.textContent = '소리 켜기';
+    stopViz();
+  } else {
+    await engine.start();
+    playBtn.style.cssText = 'background:var(--color-surface-2);color:var(--color-ink-700);border:1px solid var(--color-border)';
+    playDot.style.cssText = 'background:#ef4444;box-shadow:0 0 8px #ef4444;animation:pulse 1.4s infinite';
+    playLabel.textContent = '소리 끄기';
+    startViz();
+  }
+});
+
+// 비주얼라이저
+let rafId = 0;
+const scopeCv = document.getElementById('scopeCv') as HTMLCanvasElement;
+const specCv = document.getElementById('specCv') as HTMLCanvasElement;
+let scopeCtx: CanvasRenderingContext2D, specCtx: CanvasRenderingContext2D;
+
+function setupCv(cv: HTMLCanvasElement) {
+  const dpr = window.devicePixelRatio || 1;
+  const ctx = cv.getContext('2d')!;
+  const fit = () => {
+    const r = cv.getBoundingClientRect();
+    cv.width = r.width * dpr; cv.height = r.height * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  };
+  fit(); window.addEventListener('resize', fit);
+  return ctx;
+}
+
+function startViz() {
+  scopeCtx = setupCv(scopeCv);
+  specCtx = setupCv(specCv);
+  const loop = () => {
+    rafId = requestAnimationFrame(loop);
+    drawScope(); drawSpec(); updateMeter();
+  };
+  loop();
+}
+
+function stopViz() {
+  cancelAnimationFrame(rafId);
+  document.getElementById('meterFill')!.style.width = '0%';
+  document.getElementById('meterVal')!.textContent = '—';
+}
+
+function cw(cv: HTMLCanvasElement) { return cv.width / (window.devicePixelRatio || 1); }
+function ch(cv: HTMLCanvasElement) { return cv.height / (window.devicePixelRatio || 1); }
+
+function drawScope() {
+  const w = cw(scopeCv), h = ch(scopeCv), ctx = scopeCtx;
+  ctx.fillStyle = 'rgba(240,240,248,0.4)'; ctx.fillRect(0, 0, w, h);
+  // 그리드
+  ctx.strokeStyle = 'rgba(124,58,237,0.06)'; ctx.lineWidth = 1;
+  ctx.beginPath();
+  for (let i = 1; i < 8; i++) { const x = w*i/8; ctx.moveTo(x,0); ctx.lineTo(x,h); }
+  ctx.moveTo(0,h/2); ctx.lineTo(w,h/2);
+  ctx.stroke();
+  if (!engine?.playing) return;
+  const data = engine.getScope(), N = data.length;
+  ctx.lineWidth = 1.5; ctx.strokeStyle = '#7c3aed';
+  ctx.shadowColor = 'rgba(124,58,237,0.5)'; ctx.shadowBlur = 6;
+  ctx.beginPath();
+  for (let i = 0; i < N; i++) {
+    const x = i / (N-1) * w, y = (1 - data[i]/255) * h;
+    i ? ctx.lineTo(x,y) : ctx.moveTo(x,y);
+  }
+  ctx.stroke(); ctx.shadowBlur = 0;
+}
+
+function drawSpec() {
+  const w = cw(specCv), h = ch(specCv), ctx = specCtx;
+  ctx.clearRect(0,0,w,h);
+  ctx.fillStyle = '#f0f0f8'; ctx.fillRect(0,0,w,h);
+  if (!engine?.playing) return;
+  const data = engine.getSpectrum(), N = data.length, bars = 60;
+  const grad = ctx.createLinearGradient(0,h,0,0);
+  grad.addColorStop(0,'#2563eb'); grad.addColorStop(0.6,'#60a5fa'); grad.addColorStop(1,'#a5f3fc');
+  ctx.fillStyle = grad;
+  ctx.shadowColor = 'rgba(37,99,235,0.4)'; ctx.shadowBlur = 4;
+  for (let i = 0; i < bars; i++) {
+    const f0 = Math.pow(i/bars,2), f1 = Math.pow((i+1)/bars,2);
+    const lo = Math.floor(f0*N), hi = Math.max(lo+1,Math.floor(f1*N));
+    let mx = 0; for (let j = lo; j < hi && j < N; j++) mx = Math.max(mx, data[j]);
+    const bh = (mx/255)*(h-4);
+    ctx.fillRect(i*w/bars+0.5, h-bh, w/bars-1, bh);
+  }
+  ctx.shadowBlur = 0;
+}
+
+function updateMeter() {
+  if (!engine?.playing) return;
+  const d = engine.getScope(); let peak = 0;
+  for (let i = 0; i < d.length; i++) { const v = Math.abs(d[i]-128)/128; if (v > peak) peak = v; }
+  const pct = Math.min(100, peak*130);
+  document.getElementById('meterFill')!.style.width = pct + '%';
+  document.getElementById('meterVal')!.textContent = peak > 0.98 ? 'CLIP' : Math.round(pct)+'%';
+}
+</script>
+
+</Base>

@@ -1,0 +1,87 @@
+---
+interface Props {
+  title: string;
+  description?: string;
+}
+const { title, description = 'Web Audio API로 배우는 사운드 이펙트 실습 플레이그라운드' } = Astro.props;
+const base = import.meta.env.BASE_URL;
+---
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{title} · SoundLab</title>
+  <meta name="description" content={description} />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link rel="stylesheet" href={`${base}styles/global.css`} />
+</head>
+<body class="min-h-screen">
+  <!-- 배경 그리드 패턴 -->
+  <div class="fixed inset-0 -z-10 pointer-events-none"
+    style="background-image: linear-gradient(var(--color-border) 1px, transparent 1px), linear-gradient(90deg, var(--color-border) 1px, transparent 1px); background-size: 40px 40px; opacity: 0.5;">
+  </div>
+
+  <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-[var(--color-border)]">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
+      <a href={base} class="flex items-center gap-2.5 group">
+        <div class="w-7 h-7 rounded-lg gradient-brand flex items-center justify-center flex-none">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+            <path d="M2 12h3l2-7 3 14 3-10 2 6h7"/>
+          </svg>
+        </div>
+        <span class="font-bold text-[15px] tracking-tight gradient-brand-text" style="font-family:'Space Grotesk'">SoundLab</span>
+      </a>
+
+      <nav class="hidden sm:flex items-center gap-1">
+        <a href={`${base}learn/filter`} class="nav-link">레슨</a>
+        <a href={`${base}sandbox`} class="nav-link">샌드박스</a>
+      </nav>
+
+      <a href={`${base}sandbox`}
+        class="gradient-brand text-white text-sm font-semibold px-4 py-1.5 rounded-full transition hover:opacity-90"
+        style="font-family:'Space Grotesk'">
+        시작하기
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <slot />
+  </main>
+
+  <footer class="mt-24 border-t border-[var(--color-border)] bg-[var(--color-surface)]">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-10 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <div class="w-6 h-6 rounded-md gradient-brand flex items-center justify-center">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5">
+            <path d="M2 12h3l2-7 3 14 3-10 2 6h7"/>
+          </svg>
+        </div>
+        <span class="text-sm font-semibold gradient-brand-text" style="font-family:'Space Grotesk'">SoundLab</span>
+      </div>
+      <p class="text-xs text-[var(--color-ink-300)] font-mono">Web Audio API · 헤드폰 착용 권장</p>
+      <a href={`${base}privacy`} class="text-xs text-[var(--color-ink-300)] hover:text-[var(--color-violet)] transition">개인정보처리방침</a>
+    </div>
+  </footer>
+</body>
+</html>
+
+<style>
+  .nav-link {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-ink-500);
+    padding: 6px 12px;
+    border-radius: 8px;
+    transition: color 0.15s, background 0.15s;
+  }
+  .nav-link:hover {
+    color: var(--color-violet);
+    background: var(--color-violet-glow);
+  }
+</style>

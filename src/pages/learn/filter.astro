@@ -1,0 +1,44 @@
+---
+import LearnLayout from '../../layouts/LearnLayout.astro';
+import { MODULE_MAP } from '../../lib/modules';
+const m = MODULE_MAP['filter'];
+---
+<LearnLayout module={m}>
+  <div class="space-y-6 text-sm leading-relaxed text-[var(--color-ink-700)]">
+
+    <section>
+      <h2 class="text-base font-bold mb-2" style="font-family:'Space Grotesk'">필터란?</h2>
+      <p>필터는 오디오 신호에서 원하는 주파수 대역만 통과시키고 나머지를 줄이는 장치입니다. EQ(이퀄라이저)의 기초이며, 신디사이저의 가장 핵심적인 음색 조절 도구입니다.</p>
+    </section>
+
+    <section>
+      <h2 class="text-base font-bold mb-3" style="font-family:'Space Grotesk'">세 가지 필터 타입</h2>
+      <div class="space-y-2">
+        {[
+          ['Low Pass (로우패스)', 'Cutoff 이하만 통과. 고음을 깎아 따뜻하고 둔탁하게 만듭니다. 신스 사운드 디자인에서 가장 많이 쓰입니다.'],
+          ['High Pass (하이패스)', 'Cutoff 이상만 통과. 저음을 제거해 얇고 밝게 만듭니다. 킥·베이스의 공간 확보에 활용됩니다.'],
+          ['Band Pass (밴드패스)', 'Cutoff 주변 좁은 대역만 통과. 라디오·전화 음색처럼 특정 주파수만 강조됩니다.'],
+        ].map(([title, desc]) => (
+          <div class="p-3 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)]">
+            <div class="font-semibold text-xs font-mono text-[var(--color-violet)] mb-1">{title}</div>
+            <div class="text-xs text-[var(--color-ink-500)]">{desc}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <section>
+      <h2 class="text-base font-bold mb-2" style="font-family:'Space Grotesk'">Resonance(Q)란?</h2>
+      <p>Cutoff 주파수 근처를 얼마나 강조할지 정합니다. Q를 높이면 컷오프 지점에서 뾰족하게 울리는 공진(resonance) 현상이 나타납니다. 극단적으로 높이면 자기 발진(self-oscillation)이 발생해 순수한 음정을 만들기도 합니다.</p>
+    </section>
+
+    <div class="p-4 rounded-xl border-l-2 border-[var(--color-violet)] bg-[var(--color-violet-glow)]">
+      <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-violet)] mb-2">🔊 실습 가이드</div>
+      <ul class="space-y-1 text-xs text-[var(--color-ink-700)]">
+        <li>→ <b>노이즈</b> 음원 + Low Pass: Cutoff를 낮추며 고음이 잘려나가는 소리를 들어보세요</li>
+        <li>→ Resonance를 올리며 Cutoff 부근의 공진 소리를 확인하세요</li>
+        <li>→ 스펙트럼에서 오른쪽 고역 막대가 사라지는 것을 눈으로 확인하세요</li>
+      </ul>
+    </div>
+  </div>
+</LearnLayout>

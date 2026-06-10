@@ -90,4 +90,3 @@ Copyright (c) 2026 jju09. All rights reserved.
 
 본 프로젝트의 소스코드는 교육 및 학업 참조 목적으로 퍼블릭 공개되어 있으나, 저작권물의 보호를 위해 **Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)** 라이선스를 엄격히 적용합니다.
 저작권자의 서면 동의 없는 **무단 복제 배포, 상업적 웹사이트 미러링 및 구글 애드센스 등을 포함한 모든 영리 목적의 호스팅 및 배포 행위를 절대 금지**합니다. 
-```

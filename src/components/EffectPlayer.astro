@@ -276,7 +276,8 @@ document.querySelectorAll<HTMLElement>('.effect-player').forEach(el => {
     const w = cssW(scopeCv), h = cssH(scopeCv), ctx = scopeCtx;
     ctx.fillStyle = 'rgba(240,240,248,0.4)'; ctx.fillRect(0, 0, w, h);
     if (!engine?.playing) return;
-    const data = engine.getScope(), N = data.length;
+    const data = engine.getScope();
+    const N = 512; // 전체 2048 중 512만 사용 → 속도 1/4
     ctx.lineWidth = 1.5; ctx.strokeStyle = '#7c3aed';
     ctx.shadowColor = 'rgba(124,58,237,0.6)'; ctx.shadowBlur = 6;
     ctx.beginPath();

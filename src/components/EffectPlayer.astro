@@ -8,7 +8,9 @@ const { module: m } = Astro.props;
 ---
 
 <div class="effect-player rounded-2xl border border-[var(--color-border)] bg-white overflow-hidden"
-  data-module-id={m.id}>
+  data-module-id={m.id}
+  data-default-src={m.defaultSrc}
+  data-default-wave={m.defaultWave ?? ''}>
 
   <!-- 헤더 -->
   <div class="flex items-center justify-between px-5 py-4 border-b border-[var(--color-border)] bg-[var(--color-surface)]">
@@ -24,10 +26,12 @@ const { module: m } = Astro.props;
     <!-- 전원 토글 -->
     <button
       class="pwr-btn flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-mono font-medium transition-all"
-      aria-pressed="false"
-      aria-label={`${m.name} 켜기/끄기`}>
-      <span class="pwr-dot w-2 h-2 rounded-full bg-[var(--color-border)] transition-all"></span>
-      <span class="pwr-label">OFF</span>
+      aria-pressed="true"
+      aria-label={`${m.name} 켜기/끄기`}
+      style="border-color:var(--color-violet);color:var(--color-violet);background:var(--color-violet-glow)">
+      <span class="pwr-dot w-2 h-2 rounded-full transition-all"
+        style="background:var(--color-violet);box-shadow:0 0 8px var(--color-violet)"></span>
+      <span class="pwr-label">ON</span>
     </button>
   </div>
 
@@ -85,7 +89,7 @@ const { module: m } = Astro.props;
     <div class="flex gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" role="group">
       {[['tone','지속음'],['pluck','플럭'],['noise','노이즈']].map(([v,t]) => (
         <button class="src-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-[var(--color-ink-500)]"
-          data-src={v} aria-pressed={v === 'tone' ? 'true' : 'false'}
+          data-src={v} aria-pressed={v === m.defaultSrc ? 'true' : 'false'}
           style="font-family:'Space Grotesk'">
           {t}
         </button>
@@ -104,7 +108,24 @@ import { Engine } from '../lib/engine';
 
 document.querySelectorAll<HTMLElement>('.effect-player').forEach(el => {
   const moduleId = el.dataset.moduleId!;
+  const defaultSrc = (el.dataset.defaultSrc ?? 'tone') as 'tone' | 'pluck' | 'noise';
+  const defaultWave = (el.dataset.defaultWave || 'sine') as OscillatorType;
   let engine: Engine | null = null;
+
+  // 추천 소스 버튼 초기 스타일 적용
+  el.querySelectorAll<HTMLButtonElement>('.src-btn').forEach(btn => {
+    if (btn.getAttribute('aria-pressed') === 'true') {
+      btn.style.cssText = 'background:white;color:var(--color-violet);box-shadow:0 1px 4px rgba(0,0,0,0.08)';
+    }
+  });
+  // 추천 파형 버튼 초기 선택
+  if (defaultSrc === 'tone' && defaultWave) {
+    el.querySelectorAll<HTMLButtonElement>('.wave-btn').forEach(btn => {
+      const isDefault = btn.dataset.wave === defaultWave;
+      btn.setAttribute('aria-pressed', String(isDefault));
+      if (isDefault) btn.style.cssText = 'background:white;color:var(--color-violet);box-shadow:0 1px 4px rgba(0,0,0,0.08)';
+    });
+  }
 
   // 슬라이더 초기화
   const sliders = el.querySelectorAll<HTMLElement>('.slider-wrap');
@@ -214,6 +235,9 @@ document.querySelectorAll<HTMLElement>('.effect-player').forEach(el => {
   playBtn.addEventListener('click', async () => {
     if (!engine) {
       engine = new Engine();
+      // 추천 소스/파형 적용
+      engine.srcMode = defaultSrc;
+      if (defaultSrc === 'tone') engine.wave = defaultWave;
       // 현재 슬라이더 값 엔진에 적용
       sliders.forEach(wrap => {
         const input = wrap.querySelector<HTMLInputElement>('input')!;
@@ -224,7 +248,7 @@ document.querySelectorAll<HTMLElement>('.effect-player').forEach(el => {
         const v = logMap(p, min, max, curve);
         engine!.set(moduleId, wrap.dataset.param!, v);
       });
-      // 전원 상태 적용
+      // 전원 상태 적용 (기본 ON)
       const isOn = pwrBtn.getAttribute('aria-pressed') === 'true';
       engine.setEnabled(moduleId, isOn);
     }

@@ -21,6 +21,8 @@ export interface ModuleDef {
   desc: string;
   type?: { options: [string, string][]; value: string };
   knobs: KnobDef[];
+  defaultSrc: 'tone' | 'pluck' | 'noise';
+  defaultWave?: OscillatorType;
 }
 
 const fHz = (v: number) => v >= 1000 ? (v / 1000).toFixed(v >= 10000 ? 0 : 1) + 'kHz' : Math.round(v) + 'Hz';
@@ -37,6 +39,7 @@ export const MODULES: ModuleDef[] = [
       { param: 'freq', label: 'Cutoff', min: 30, max: 18000, value: 1200, curve: 'log', fmt: fHz },
       { param: 'q', label: 'Resonance', min: 0.1, max: 20, value: 1, curve: 'log', fmt: v => v.toFixed(1) },
     ],
+    defaultSrc: 'noise',
   },
   {
     id: 'drive', name: 'Drive', kr: '디스토션', num: '02', color: 'blue',
@@ -45,6 +48,8 @@ export const MODULES: ModuleDef[] = [
     knobs: [
       { param: 'amount', label: 'Drive', min: 0, max: 100, value: 40, fmt: fPct },
     ],
+    defaultSrc: 'tone',
+    defaultWave: 'sine',
   },
   {
     id: 'tremolo', name: 'Tremolo', kr: '트레몰로', num: '03', color: 'violet',
@@ -54,6 +59,8 @@ export const MODULES: ModuleDef[] = [
       { param: 'rate', label: 'Rate', min: 0.1, max: 20, value: 5, curve: 'log', fmt: v => v.toFixed(1) + 'Hz' },
       { param: 'depth', label: 'Depth', min: 0, max: 100, value: 60, fmt: fPct },
     ],
+    defaultSrc: 'tone',
+    defaultWave: 'triangle',
   },
   {
     id: 'chorus', name: 'Chorus', kr: '코러스', num: '04', color: 'blue',
@@ -64,6 +71,7 @@ export const MODULES: ModuleDef[] = [
       { param: 'depth', label: 'Depth', min: 0, max: 100, value: 50, fmt: fPct },
       { param: 'mix', label: 'Mix', min: 0, max: 100, value: 50, fmt: fPct },
     ],
+    defaultSrc: 'pluck',
   },
   {
     id: 'delay', name: 'Delay', kr: '딜레이', num: '05', color: 'violet',
@@ -74,6 +82,7 @@ export const MODULES: ModuleDef[] = [
       { param: 'feedback', label: 'Feedback', min: 0, max: 90, value: 40, fmt: fPct },
       { param: 'mix', label: 'Mix', min: 0, max: 100, value: 35, fmt: fPct },
     ],
+    defaultSrc: 'pluck',
   },
   {
     id: 'reverb', name: 'Reverb', kr: '리버브', num: '06', color: 'blue',
@@ -83,6 +92,7 @@ export const MODULES: ModuleDef[] = [
       { param: 'size', label: 'Size', min: 0.3, max: 4, value: 1.8, fmt: v => v.toFixed(1) + 's' },
       { param: 'mix', label: 'Mix', min: 0, max: 100, value: 30, fmt: fPct },
     ],
+    defaultSrc: 'pluck',
   },
 ];
 

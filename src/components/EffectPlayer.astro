@@ -245,17 +245,20 @@ document.querySelectorAll<HTMLElement>('.effect-player').forEach(el => {
     }
   });
 
-  // 파형 속도 슬라이더
-  let scopeSamples = 512;
+  // 파형 속도 슬라이더 — 매 프레임 오프셋 전진량으로 속도 제어
+  const SCOPE_DRAW = 512; // 화면에 보여줄 샘플 수 (줌 고정)
+  let scopeSpeed = 4;     // 프레임당 오프셋 전진량 (1=매우 느림, 32=매우 빠름)
+  let scopeOffset = 0;
   const speedInput = el.querySelector<HTMLInputElement>('.scope-speed')!;
   const speedVal = el.querySelector<HTMLElement>('.scope-speed-val')!;
-  const speedLabels: Record<number, string> = { 64:'매우 느림', 128:'느림', 256:'느림', 512:'보통', 768:'보통', 1024:'빠름', 1280:'빠름', 1536:'빠름', 1792:'빠름', 2048:'매우 빠름' };
-  speedInput.style.setProperty('--sl-pct', `${(512-64)/(2048-64)*100}%`);
+  const speedLabels = (v: number) => v <= 1 ? '매우 느림' : v <= 3 ? '느림' : v <= 6 ? '보통' : v <= 14 ? '빠름' : '매우 빠름';
+  // 슬라이더: min=1, max=32, 기본값=4
+  speedInput.min = '1'; speedInput.max = '32'; speedInput.step = '1'; speedInput.value = '4';
+  speedInput.style.setProperty('--sl-pct', `${(4-1)/(32-1)*100}%`);
   speedInput.addEventListener('input', () => {
-    scopeSamples = parseInt(speedInput.value);
-    const pct = (scopeSamples - 64) / (2048 - 64) * 100;
-    speedInput.style.setProperty('--sl-pct', `${pct}%`);
-    speedVal.textContent = speedLabels[scopeSamples] ?? '보통';
+    scopeSpeed = parseInt(speedInput.value);
+    speedInput.style.setProperty('--sl-pct', `${(scopeSpeed-1)/(32-1)*100}%`);
+    speedVal.textContent = speedLabels(scopeSpeed);
   });
 
   // 비주얼라이저
@@ -293,15 +296,19 @@ document.querySelectorAll<HTMLElement>('.effect-player').forEach(el => {
 
   function drawScope() {
     const w = cssW(scopeCv), h = cssH(scopeCv), ctx = scopeCtx;
-    ctx.fillStyle = 'rgba(240,240,248,0.4)'; ctx.fillRect(0, 0, w, h);
+    ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = '#f0f0f8'; ctx.fillRect(0, 0, w, h);
     if (!engine?.playing) return;
     const data = engine.getScope();
-    const N = scopeSamples;
+    const N = SCOPE_DRAW;
+    const bufLen = data.length;
+    scopeOffset = (scopeOffset + scopeSpeed) % bufLen;
     ctx.lineWidth = 1.5; ctx.strokeStyle = '#7c3aed';
     ctx.shadowColor = 'rgba(124,58,237,0.6)'; ctx.shadowBlur = 6;
     ctx.beginPath();
     for (let i = 0; i < N; i++) {
-      const x = i / (N - 1) * w, y = (1 - data[i] / 255) * h;
+      const idx = (Math.floor(scopeOffset) + i) % bufLen;
+      const x = i / (N - 1) * w, y = (1 - data[idx] / 255) * h;
       i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
     }
     ctx.stroke(); ctx.shadowBlur = 0;

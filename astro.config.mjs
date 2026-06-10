@@ -6,6 +6,7 @@ import sitemap from '@astrojs/sitemap';
 export default defineConfig({
   site: 'https://JJU09.github.io',
   base: '/SoundLab',
+  trailingSlash: 'always',
   vite: {
     plugins: [tailwindcss()]
   },

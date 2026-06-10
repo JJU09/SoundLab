@@ -67,26 +67,62 @@ const { module: m } = Astro.props;
   </div>
 
   <!-- 비주얼라이저 -->
-  <div class="px-5 pb-2 grid grid-cols-2 gap-3">
-    <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]">
-      <canvas class="scope-canvas block w-full" style="height:100px"></canvas>
-      <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)] opacity-70">Waveform</span>
+  {m.id === 'filter' ? (
+    <!-- Filter: 스펙트럼 메인 + 웨이브폼 작게 -->
+    <div class="px-5 pb-2 flex flex-col gap-2">
+      <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]">
+        <canvas class="spectrum-canvas block w-full" style="height:130px"></canvas>
+        <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-blue)] opacity-70 pointer-events-none">Spectrum · 드래그로 Cutoff/Q 조절</span>
+      </div>
+      <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]">
+        <canvas class="scope-canvas block w-full" style="height:60px"></canvas>
+        <span class="absolute top-1.5 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)] opacity-70">Waveform</span>
+      </div>
     </div>
-    <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]">
-      <canvas class="spectrum-canvas block w-full" style="height:100px"></canvas>
-      <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-blue)] opacity-70">Spectrum</span>
+  ) : (m.id === 'delay' || m.id === 'reverb') ? (
+    <!-- Delay/Reverb: 웨이브폼 + 스크롤 엔벨로프 -->
+    <div class="px-5 pb-2 flex flex-col gap-2">
+      <div class="grid grid-cols-2 gap-2">
+        <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]">
+          <canvas class="scope-canvas block w-full" style="height:80px"></canvas>
+          <span class="absolute top-1.5 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)] opacity-70">Waveform</span>
+        </div>
+        <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]">
+          <canvas class="spectrum-canvas block w-full" style="height:80px"></canvas>
+          <span class="absolute top-1.5 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-blue)] opacity-70">Spectrum</span>
+        </div>
+      </div>
+      <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]">
+        <canvas class="envelope-canvas block w-full" style="height:56px"></canvas>
+        <span class="absolute top-1.5 left-2.5 text-[10px] font-mono uppercase tracking-wider opacity-70"
+          style={`color:${m.id === 'delay' ? 'var(--color-violet)' : 'var(--color-blue)'}`}>
+          Envelope · 시간 흐름
+        </span>
+      </div>
     </div>
-  </div>
+  ) : (
+    <!-- 기본: 좌우 동일 크기 -->
+    <div class="px-5 pb-2 grid grid-cols-2 gap-3">
+      <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]">
+        <canvas class="scope-canvas block w-full" style="height:100px"></canvas>
+        <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)] opacity-70">Waveform</span>
+      </div>
+      <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]">
+        <canvas class="spectrum-canvas block w-full" style="height:100px"></canvas>
+        <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-blue)] opacity-70">Spectrum</span>
+      </div>
+    </div>
+  )}
   <!-- 파형 줌 슬라이더 -->
   <div class="px-5 pb-4 flex items-center gap-3">
     <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)] whitespace-nowrap">파형 줌</span>
     <input type="range" class="scope-speed sl-range flex-1" min="64" max="2048" step="64" value="512" aria-label="파형 줌" />
-    <span class="scope-speed-val text-[11px] font-mono text-[var(--color-ink-500)] w-10 text-right">느림</span>
+    <span class="scope-speed-val text-[11px] font-mono text-[var(--color-ink-500)] w-10 text-right">보통</span>
   </div>
 
-  <!-- 음원 + 재생 -->
-  <div class="px-5 pb-5 flex items-center gap-3 flex-wrap">
-    <div class="flex gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" role="group">
+  <!-- 음원 선택 -->
+  <div class="px-5 pb-3 flex flex-col gap-2">
+    <div class="flex gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl w-fit" role="group" aria-label="음원">
       {[['tone','지속음'],['pluck','플럭'],['noise','노이즈']].map(([v,t]) => (
         <button class="src-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-[var(--color-ink-500)]"
           data-src={v} aria-pressed={v === m.defaultSrc ? 'true' : 'false'}
@@ -95,7 +131,23 @@ const { module: m } = Astro.props;
         </button>
       ))}
     </div>
-    <button class="play-btn ml-auto gradient-brand text-white font-semibold px-5 py-2 rounded-xl text-sm flex items-center gap-2 transition hover:opacity-90"
+    <!-- 파형 선택 (tone일 때만 표시) -->
+    <div class="wave-row flex gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl w-fit"
+      role="group" aria-label="파형"
+      style={m.defaultSrc !== 'tone' ? 'display:none' : ''}>
+      {[['sine','Sine'],['square','Square'],['sawtooth','Saw'],['triangle','Tri']].map(([v,t]) => (
+        <button class="wave-btn px-2.5 py-1.5 rounded-lg text-[11px] font-mono transition-all text-[var(--color-ink-500)]"
+          data-wave={v}
+          aria-pressed={v === (m.defaultWave ?? 'sine') ? 'true' : 'false'}>
+          {t}
+        </button>
+      ))}
+    </div>
+  </div>
+
+  <!-- 재생 버튼 -->
+  <div class="px-5 pb-5">
+    <button class="play-btn w-full gradient-brand text-white font-semibold px-5 py-2.5 rounded-xl text-sm flex items-center justify-center gap-2 transition hover:opacity-90"
       style="font-family:'Space Grotesk'">
       <span class="play-dot w-2 h-2 rounded-full bg-white"></span>
       <span class="play-label">소리 켜기</span>
@@ -140,6 +192,9 @@ document.querySelectorAll<HTMLElement>('.effect-player').forEach(el => {
     return (v - min) / (max - min);
   }
 
+  // param → 슬라이더 메타 (Canvas 드래그 등 외부 제어용)
+  const sliderMap: Record<string, { input: HTMLInputElement; valEl: HTMLElement; min: number; max: number; curve: string; fmt: (v: number) => string }> = {};
+
   sliders.forEach(wrap => {
     const input = wrap.querySelector<HTMLInputElement>('input')!;
     const valEl = wrap.querySelector<HTMLElement>('.val-display')!;
@@ -164,6 +219,7 @@ document.querySelectorAll<HTMLElement>('.effect-player').forEach(el => {
       return Math.round(v)+'%';
     };
     valEl.textContent = fmt(def);
+    sliderMap[param] = { input, valEl, min, max, curve, fmt };
 
     input.addEventListener('input', () => {
       const p = parseInt(input.value) / 1000;
@@ -173,6 +229,17 @@ document.querySelectorAll<HTMLElement>('.effect-player').forEach(el => {
       engine?.set(moduleId, param, v);
     });
   });
+
+  // 슬라이더를 값으로 직접 설정 (Canvas 드래그 등 외부 제어)
+  function setSliderByParam(param: string, v: number) {
+    const s = sliderMap[param];
+    if (!s) return;
+    const p = Math.max(0, Math.min(1, toP(v, s.min, s.max, s.curve)));
+    s.input.value = String(Math.round(p * 1000));
+    s.input.style.setProperty('--sl-pct', `${p * 100}%`);
+    s.valEl.textContent = s.fmt(v);
+    engine?.set(moduleId, param, v);
+  }
 
   // 전원 버튼
   const pwrBtn = el.querySelector<HTMLButtonElement>('.pwr-btn')!;
@@ -212,6 +279,7 @@ document.querySelectorAll<HTMLElement>('.effect-player').forEach(el => {
   });
 
   // 음원 버튼
+  const waveRow = el.querySelector<HTMLElement>('.wave-row')!;
   el.querySelectorAll<HTMLButtonElement>('.src-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       el.querySelectorAll('.src-btn').forEach(b => {
@@ -220,7 +288,24 @@ document.querySelectorAll<HTMLElement>('.effect-player').forEach(el => {
       });
       btn.setAttribute('aria-pressed','true');
       btn.style.cssText = 'background:white;color:var(--color-violet);box-shadow:0 1px 4px rgba(0,0,0,0.08)';
+      waveRow.style.display = btn.dataset.src === 'tone' ? '' : 'none';
       engine?.setSource(btn.dataset.src as any);
+    });
+    if (btn.getAttribute('aria-pressed') === 'true') {
+      btn.style.cssText = 'background:white;color:var(--color-violet);box-shadow:0 1px 4px rgba(0,0,0,0.08)';
+    }
+  });
+
+  // 파형 버튼
+  el.querySelectorAll<HTMLButtonElement>('.wave-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      el.querySelectorAll('.wave-btn').forEach(b => {
+        (b as HTMLElement).setAttribute('aria-pressed','false');
+        (b as HTMLElement).style.cssText = '';
+      });
+      btn.setAttribute('aria-pressed','true');
+      btn.style.cssText = 'background:white;color:var(--color-violet);box-shadow:0 1px 4px rgba(0,0,0,0.08)';
+      engine?.setWave(btn.dataset.wave as OscillatorType);
     });
     if (btn.getAttribute('aria-pressed') === 'true') {
       btn.style.cssText = 'background:white;color:var(--color-violet);box-shadow:0 1px 4px rgba(0,0,0,0.08)';
@@ -235,6 +320,9 @@ document.querySelectorAll<HTMLElement>('.effect-player').forEach(el => {
   playBtn.addEventListener('click', async () => {
     if (!engine) {
       engine = new Engine();
+      // 레슨은 단일 이펙트: 인스턴스 1개 생성 (instanceId == type == moduleId)
+      engine.addInstance(moduleId, moduleId);
+      engine.updateChain([moduleId]);
       // 추천 소스/파형 적용
       engine.srcMode = defaultSrc;
       if (defaultSrc === 'tone') engine.wave = defaultWave;
@@ -269,12 +357,18 @@ document.querySelectorAll<HTMLElement>('.effect-player').forEach(el => {
     }
   });
 
-  // 파형 줌 슬라이더 — 보여주는 샘플 수로 확대/축소
-  let SCOPE_DRAW = 512;
+  // 이펙터별 기본 줌 레벨
+  const DEFAULT_ZOOM: Record<string, number> = {
+    drive: 192, tremolo: 1024, filter: 512, chorus: 512, delay: 512, reverb: 512,
+  };
+  let SCOPE_DRAW = DEFAULT_ZOOM[moduleId] ?? 512;
   const speedInput = el.querySelector<HTMLInputElement>('.scope-speed')!;
   const speedVal = el.querySelector<HTMLElement>('.scope-speed-val')!;
-  speedInput.min = '128'; speedInput.max = '1024'; speedInput.step = '64'; speedInput.value = '512';
-  speedInput.style.setProperty('--sl-pct', `${(512-128)/(1024-128)*100}%`);
+  speedInput.min = '128'; speedInput.max = '1024'; speedInput.step = '64';
+  speedInput.value = String(SCOPE_DRAW);
+  const initPct = (SCOPE_DRAW - 128) / (1024 - 128) * 100;
+  speedInput.style.setProperty('--sl-pct', `${initPct}%`);
+  speedVal.textContent = SCOPE_DRAW <= 256 ? '확대' : SCOPE_DRAW >= 768 ? '축소' : '보통';
   speedInput.addEventListener('input', () => {
     SCOPE_DRAW = parseInt(speedInput.value);
     speedInput.style.setProperty('--sl-pct', `${(SCOPE_DRAW-128)/(1024-128)*100}%`);
@@ -284,8 +378,39 @@ document.querySelectorAll<HTMLElement>('.effect-player').forEach(el => {
   // 비주얼라이저
   const scopeCv = el.querySelector<HTMLCanvasElement>('.scope-canvas')!;
   const specCv = el.querySelector<HTMLCanvasElement>('.spectrum-canvas')!;
-  let scopeCtx: CanvasRenderingContext2D, specCtx: CanvasRenderingContext2D;
+  const envCv = el.querySelector<HTMLCanvasElement>('.envelope-canvas') ?? null;
+  let scopeCtx: CanvasRenderingContext2D;
+  let specCtx: CanvasRenderingContext2D;
+  let envCtx: CanvasRenderingContext2D | null = null;
   let rafId = 0;
+
+  // 엔벨로프 링버퍼 (Delay/Reverb용)
+  const ENV_LEN = 300;
+  const envBuf = new Float32Array(ENV_LEN);
+  let envHead = 0;
+
+  // Phase 3: Filter 스펙트럼 캔버스 드래그 → Cutoff(가로)/Resonance(세로)
+  if (moduleId === 'filter') {
+    specCv.style.cursor = 'crosshair';
+    let dragging = false;
+    const applyXY = (clientX: number, clientY: number) => {
+      const r = specCv.getBoundingClientRect();
+      const x = Math.max(0, Math.min(1, (clientX - r.left) / r.width));
+      const y = Math.max(0, Math.min(1, (clientY - r.top) / r.height));
+      const fs = sliderMap.freq, qs = sliderMap.q;
+      const nyq = ((engine as any)?.ctx?.sampleRate || 44100) / 2;
+      // 스펙트럼 막대의 quadratic 매핑과 일치: freq = x² · nyquist
+      const freq = Math.max(fs.min, Math.min(fs.max, x * x * nyq));
+      const q = qs.min * Math.pow(qs.max / qs.min, 1 - y); // 위로 갈수록 Q ↑
+      setSliderByParam('freq', freq);
+      setSliderByParam('q', q);
+    };
+    specCv.addEventListener('pointerdown', e => { dragging = true; specCv.setPointerCapture(e.pointerId); applyXY(e.clientX, e.clientY); });
+    specCv.addEventListener('pointermove', e => { if (dragging) applyXY(e.clientX, e.clientY); });
+    const end = () => { dragging = false; };
+    specCv.addEventListener('pointerup', end);
+    specCv.addEventListener('pointercancel', end);
+  }
 
   function setupCv(cv: HTMLCanvasElement) {
     const dpr = window.devicePixelRatio || 1;
@@ -302,33 +427,46 @@ document.querySelectorAll<HTMLElement>('.effect-player').forEach(el => {
   function startViz() {
     scopeCtx = setupCv(scopeCv);
     specCtx = setupCv(specCv);
+    if (envCv) envCtx = setupCv(envCv);
     const loop = () => {
       rafId = requestAnimationFrame(loop);
       drawScope(); drawSpec();
+      if (envCtx) drawEnvelope();
     };
     loop();
   }
 
   function stopViz() { cancelAnimationFrame(rafId); }
-
   function cssW(cv: HTMLCanvasElement) { return cv.width / (window.devicePixelRatio || 1); }
   function cssH(cv: HTMLCanvasElement) { return cv.height / (window.devicePixelRatio || 1); }
 
   function drawScope() {
     const w = cssW(scopeCv), h = cssH(scopeCv), ctx = scopeCtx;
-    ctx.clearRect(0, 0, w, h);
-    ctx.fillStyle = '#f0f0f8'; ctx.fillRect(0, 0, w, h);
+
+    // Chorus: 잔상 효과 (반투명 덮기)
+    if (moduleId === 'chorus') {
+      ctx.fillStyle = 'rgba(240,240,248,0.18)';
+      ctx.fillRect(0, 0, w, h);
+    } else {
+      ctx.clearRect(0, 0, w, h);
+      ctx.fillStyle = '#f0f0f8';
+      ctx.fillRect(0, 0, w, h);
+    }
+
     if (!engine?.playing) return;
     const data = engine.getScope();
     const bufLen = data.length;
-    const N = SCOPE_DRAW;
-    // 제로 크로싱 트리거: 상승 방향으로 0을 지나는 지점 탐색
+    const N = Math.min(SCOPE_DRAW, bufLen - 1);
+
+    // 제로 크로싱 트리거
     let start = 0;
     for (let i = 1; i < bufLen - N; i++) {
       if (data[i - 1] < 128 && data[i] >= 128) { start = i; break; }
     }
-    ctx.lineWidth = 1.5; ctx.strokeStyle = '#7c3aed';
-    ctx.shadowColor = 'rgba(124,58,237,0.6)'; ctx.shadowBlur = 6;
+
+    ctx.lineWidth = moduleId === 'chorus' ? 1.2 : 1.5;
+    ctx.strokeStyle = '#7c3aed';
+    ctx.shadowColor = 'rgba(124,58,237,0.6)'; ctx.shadowBlur = 5;
     ctx.beginPath();
     for (let i = 0; i < N; i++) {
       const x = i / (N - 1) * w, y = (1 - data[start + i] / 255) * h;
@@ -338,6 +476,7 @@ document.querySelectorAll<HTMLElement>('.effect-player').forEach(el => {
   }
 
   function drawSpec() {
+    if (!specCv) return;
     const w = cssW(specCv), h = cssH(specCv), ctx = specCtx;
     ctx.clearRect(0, 0, w, h);
     ctx.fillStyle = '#f0f0f8'; ctx.fillRect(0, 0, w, h);
@@ -355,6 +494,76 @@ document.querySelectorAll<HTMLElement>('.effect-player').forEach(el => {
       ctx.fillRect(i * w / bars + 0.5, h - bh, w / bars - 1, bh);
     }
     ctx.shadowBlur = 0;
+
+    // Filter: Cutoff 가이드라인 오버레이
+    if (moduleId === 'filter') {
+      const freqWrap = el.querySelector<HTMLElement>('.slider-wrap[data-param="freq"]');
+      if (freqWrap) {
+        const inp = freqWrap.querySelector<HTMLInputElement>('input')!;
+        const p = parseInt(inp.value) / 1000;
+        const minF = parseFloat(freqWrap.dataset.min!), maxF = parseFloat(freqWrap.dataset.max!);
+        const freq = minF * Math.pow(maxF / minF, p); // log mapping
+        const nyquist = (engine as any).ctx.sampleRate / 2;
+        const normF = freq / nyquist;
+        // 스펙트럼 bars quadratic 역매핑: x = sqrt(normF) * bars
+        const barIdx = Math.sqrt(normF) * bars;
+        const xPos = barIdx / bars * w;
+        // 가이드라인
+        ctx.save();
+        ctx.strokeStyle = 'rgba(124,58,237,0.9)';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([4, 3]);
+        ctx.beginPath(); ctx.moveTo(xPos, 0); ctx.lineTo(xPos, h); ctx.stroke();
+        ctx.setLineDash([]);
+        // 레이블
+        const label = freq >= 1000 ? (freq/1000).toFixed(1)+'kHz' : Math.round(freq)+'Hz';
+        ctx.fillStyle = 'rgba(124,58,237,0.9)';
+        ctx.font = '9px JetBrains Mono, monospace';
+        ctx.fillText(label, Math.min(xPos + 3, w - 36), 12);
+        ctx.restore();
+      }
+    }
+  }
+
+  // 엔벨로프 스크롤 뷰 (Delay/Reverb)
+  function drawEnvelope() {
+    if (!envCtx || !envCv) return;
+    const w = cssW(envCv), h = cssH(envCv), ctx = envCtx;
+
+    // 현재 피크 계산 후 링버퍼에 추가
+    if (engine?.playing) {
+      const d = engine.getScope();
+      let peak = 0;
+      for (let i = 0; i < d.length; i++) peak = Math.max(peak, Math.abs(d[i] - 128) / 128);
+      envBuf[envHead % ENV_LEN] = peak;
+      envHead++;
+    }
+
+    ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = '#f0f0f8'; ctx.fillRect(0, 0, w, h);
+
+    // 그리드 가로선
+    ctx.strokeStyle = moduleId === 'delay' ? 'rgba(124,58,237,0.08)' : 'rgba(37,99,235,0.08)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(0, h * 0.5); ctx.lineTo(w, h * 0.5);
+    ctx.stroke();
+
+    if (!engine?.playing) return;
+
+    const color = moduleId === 'delay' ? '#7c3aed' : '#2563eb';
+    ctx.strokeStyle = color;
+    ctx.shadowColor = moduleId === 'delay' ? 'rgba(124,58,237,0.5)' : 'rgba(37,99,235,0.5)';
+    ctx.shadowBlur = 4;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    for (let i = 0; i < ENV_LEN; i++) {
+      const idx = (envHead - ENV_LEN + i + ENV_LEN * 2) % ENV_LEN;
+      const x = i / (ENV_LEN - 1) * w;
+      const y = h - envBuf[idx] * (h - 4) - 2;
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    }
+    ctx.stroke(); ctx.shadowBlur = 0;
   }
 });
 </script>

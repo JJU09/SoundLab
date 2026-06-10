@@ -1,43 +1,86 @@
 ---
 import Base from '../layouts/Base.astro';
 import { MODULES } from '../lib/modules';
+import { PRESETS } from '../lib/presets';
 ---
-<Base title="샌드박스" description="6개 이펙트를 자유롭게 조합하고 실시간으로 사운드를 디자인하는 샌드박스 플레이그라운드.">
+<Base title="샌드박스" description="이펙터를 자유롭게 꺼내 조립하는 모듈러 페달보드. 같은 이펙터를 여러 개 배치하고 순서를 바꾸며 사운드를 디자인하세요.">
 
-<div class="max-w-6xl mx-auto px-4 sm:px-6 py-10">
+<div class="max-w-[1400px] mx-auto px-4 sm:px-6 py-10">
 
   <!-- 헤더 -->
-  <div class="mb-8">
+  <div class="mb-6">
     <div class="flex items-center gap-2 mb-3">
       <span class="text-xs font-mono px-2.5 py-1 rounded-full border border-[var(--color-violet-light)] text-[var(--color-violet)] bg-[var(--color-violet-glow)]">SANDBOX</span>
     </div>
-    <h1 class="text-3xl font-bold mb-2" style="font-family:'Space Grotesk'">자유 실습 공간</h1>
-    <p class="text-[var(--color-ink-500)]">6개 이펙트를 자유롭게 켜고 끄며 소리를 만들어보세요. 신호는 위에서 아래 순서로 흐릅니다.</p>
+    <h1 class="text-3xl font-bold mb-2" style="font-family:'Space Grotesk'">모듈러 페달보드</h1>
+    <p class="text-[var(--color-ink-500)]">왼쪽 <b class="text-[var(--color-ink-700)]">창고</b>에서 이펙터를 클릭하거나 드래그해 랙에 추가하세요. 같은 이펙터를 여러 개 놓을 수 있고, <b class="text-[var(--color-ink-700)]">⠿ 손잡이로 순서를 바꾸면</b> 소리가 흐르는 경로가 실시간으로 재구성됩니다.</p>
   </div>
 
   <!-- 신호 체인 흐름 표시 -->
-  <div class="flex items-center gap-2 flex-wrap mb-8 p-3 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)]">
+  <div id="chainFlow" class="flex items-center gap-2 flex-wrap mb-6 p-3 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)]">
     <span class="text-xs font-mono text-[var(--color-ink-500)]">SOURCE</span>
-    {MODULES.map((m, i) => (
-      <>
-        <svg class="w-4 h-4 text-[var(--color-border)] flex-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-        <span class={`text-xs font-mono font-medium chain-label-${m.id} transition-colors text-[var(--color-ink-300)]`}>{m.name.toUpperCase()}</span>
-      </>
-    ))}
     <svg class="w-4 h-4 text-[var(--color-border)] flex-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
     <span class="text-xs font-mono text-[var(--color-ink-500)]">OUT</span>
   </div>
 
-  <div class="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
+  <!-- 프리셋 레시피 북 -->
+  <div class="mb-6 p-4 rounded-2xl border border-[var(--color-border)] bg-white">
+    <div class="flex items-center justify-between gap-2 mb-3">
+      <div class="flex items-center gap-2">
+        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Presets · 레시피 북</span>
+        <span class="hidden sm:inline text-[10px] text-[var(--color-ink-300)]">버튼 하나로 페달보드 전체가 구성됩니다</span>
+      </div>
+      <button id="shareBtn"
+        class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[var(--color-border)] text-xs font-medium text-[var(--color-ink-500)] hover:border-[var(--color-violet)] hover:text-[var(--color-violet)] transition whitespace-nowrap"
+        title="현재 페달보드를 링크로 복사">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+        <span id="shareLabel">링크 공유</span>
+      </button>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      {PRESETS.map(p => (
+        <button class="preset-btn group flex items-center gap-2.5 px-3 py-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-violet)] hover:bg-[var(--color-violet-glow)] transition-all text-left"
+          data-preset={p.id}>
+          <span class="text-xl leading-none">{p.emoji}</span>
+          <span class="block">
+            <span class="block text-sm font-semibold text-[var(--color-ink-700)] group-hover:text-[var(--color-violet)] transition" style="font-family:'Space Grotesk'">{p.name}</span>
+            <span class="block text-[10px] text-[var(--color-ink-300)] max-w-[190px] leading-tight">{p.desc}</span>
+          </span>
+        </button>
+      ))}
+    </div>
+  </div>
 
-    <!-- 이펙트 랙 -->
+  <div class="grid grid-cols-1 lg:grid-cols-[190px_1fr_300px] gap-6">
+
+    <!-- 좌: 이펙터 팔레트(창고) -->
+    <div class="lg:sticky lg:top-20 self-start">
+      <div class="p-3 rounded-2xl border border-[var(--color-border)] bg-white">
+        <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-3 px-1">Palette · 창고</div>
+        <div class="flex lg:flex-col gap-2 flex-wrap">
+          {MODULES.map(m => (
+            <button class="palette-chip group flex items-center gap-2 px-3 py-2.5 rounded-xl border border-[var(--color-border)] bg-white hover:border-[var(--color-violet)] hover:bg-[var(--color-violet-glow)] transition cursor-grab active:cursor-grabbing text-left"
+              draggable="true" data-type={m.id} title={`${m.name} 추가 (클릭 또는 드래그)`}>
+              <span class="w-6 h-6 flex-none rounded-lg flex items-center justify-center text-[10px] font-mono font-bold text-white gradient-brand">{m.num}</span>
+              <span class="min-w-0">
+                <span class="block text-xs font-bold text-[var(--color-ink-700)] group-hover:text-[var(--color-violet)] truncate" style="font-family:'Space Grotesk'">{m.name}</span>
+                <span class="block text-[10px] text-[var(--color-ink-300)] truncate">{m.kr}</span>
+              </span>
+              <span class="ml-auto text-[var(--color-ink-300)] group-hover:text-[var(--color-violet)] text-lg leading-none">+</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+
+    <!-- 중앙: 컨트롤 바 + 이펙트 랙(드롭존) -->
     <div>
-      <!-- 음원 + 마스터 볼륨 -->
-      <div class="p-5 rounded-2xl border border-[var(--color-border)] bg-white mb-4">
+      <!-- 음원 + 마스터 + 재생 -->
+      <div class="p-4 rounded-2xl border border-[var(--color-border)] bg-white mb-4">
         <div class="flex items-center justify-between flex-wrap gap-4">
           <div>
             <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-2">Source · 음원</div>
-            <div class="flex gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" role="group" id="srcSeg">
+            <div class="flex gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" role="group">
               {[['tone','지속음'],['pluck','플럭'],['noise','노이즈']].map(([v,t]) => (
                 <button class="src-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-[var(--color-ink-500)]"
                   data-src={v} aria-pressed={v === 'tone' ? 'true' : 'false'}
@@ -45,14 +88,20 @@ import { MODULES } from '../lib/modules';
               ))}
             </div>
           </div>
-          <div class="flex items-center gap-4">
+          <div class="flex items-center gap-3 flex-wrap">
             <div>
               <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">Volume</div>
               <div class="flex items-center gap-2">
-                <input type="range" class="sl-range w-28" id="masterVol" min="0" max="1000" step="1" value="700" aria-label="마스터 볼륨" />
+                <input type="range" class="sl-range w-24" id="masterVol" min="0" max="1000" step="1" value="700" aria-label="마스터 볼륨" />
                 <span class="text-sm font-mono text-[var(--color-ink-700)] w-8" id="masterVolVal">70%</span>
               </div>
             </div>
+            <button id="bypassBtn"
+              class="border border-[var(--color-border)] text-[var(--color-ink-500)] font-semibold px-4 py-2.5 rounded-xl text-sm flex items-center gap-2 transition hover:border-[var(--color-ink-700)] hover:text-[var(--color-ink-700)]"
+              style="font-family:'Space Grotesk'" aria-pressed="false" title="모든 이펙터를 통과시켜 원음과 비교">
+              <span id="bypassDot" class="w-2 h-2 rounded-full bg-[var(--color-border)]"></span>
+              <span id="bypassLabel">원음 비교</span>
+            </button>
             <button id="playBtn"
               class="gradient-brand text-white font-semibold px-5 py-2.5 rounded-xl text-sm flex items-center gap-2 transition hover:opacity-90"
               style="font-family:'Space Grotesk'">
@@ -63,63 +112,20 @@ import { MODULES } from '../lib/modules';
         </div>
       </div>
 
-      <!-- 이펙트 모듈들 -->
-      <div class="space-y-3" id="effectRack">
-        {MODULES.map(m => (
-          <div class="module-card rounded-2xl border border-[var(--color-border)] bg-white overflow-hidden transition-all duration-200"
-            id={`mod-${m.id}`} data-module-id={m.id}>
-
-            <div class="flex items-center justify-between px-4 py-3 border-b border-[var(--color-border)] bg-[var(--color-surface)]">
-              <div class="flex items-center gap-3">
-                <div class="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-mono font-bold text-white gradient-brand">{m.num}</div>
-                <span class="font-bold text-sm" style="font-family:'Space Grotesk'">{m.name}</span>
-                <span class="text-xs text-[var(--color-ink-300)]">{m.kr}</span>
-                <span class="hidden sm:block text-xs text-[var(--color-ink-300)] border-l border-[var(--color-border)] pl-3">{m.tagline}</span>
-              </div>
-              <button class="pwr-btn flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-mono transition-all"
-                aria-pressed="false" aria-label={`${m.name} 켜기/끄기`}>
-                <span class="pwr-dot w-1.5 h-1.5 rounded-full bg-[var(--color-border)]"></span>
-                <span class="pwr-label">OFF</span>
-              </button>
-            </div>
-
-            <div class="px-4 py-4">
-              {m.type && (
-                <div class="flex gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl w-fit mb-3" role="group">
-                  {m.type.options.map(([val, txt]) => (
-                    <button class="type-btn px-2.5 py-1 rounded-lg text-xs font-mono font-medium transition-all text-[var(--color-ink-500)]"
-                      data-val={val} aria-pressed={val === m.type!.value ? 'true' : 'false'}>
-                      {txt}
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              <div class={`grid gap-x-6 gap-y-3 ${m.knobs.length === 1 ? 'grid-cols-1 max-w-xs' : m.knobs.length === 2 ? 'grid-cols-2' : 'grid-cols-3'}`}>
-                {m.knobs.map(k => (
-                  <div class="slider-wrap" data-param={k.param}
-                    data-min={k.min} data-max={k.max} data-value={k.value} data-curve={k.curve ?? 'lin'}>
-                    <div class="flex items-center justify-between mb-1.5">
-                      <label class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-500)]">{k.label}</label>
-                      <span class="val-display text-xs font-mono font-medium text-[var(--color-ink-700)]">—</span>
-                    </div>
-                    <input type="range" class="sl-range w-full" min="0" max="1000" step="1" aria-label={k.label} />
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        ))}
+      <!-- 이펙트 랙 (드롭존) -->
+      <div id="effectRack" class="space-y-3 min-h-[160px] rounded-2xl transition-colors">
+        <div id="rackEmpty" class="flex flex-col items-center justify-center text-center py-16 px-6 rounded-2xl border-2 border-dashed border-[var(--color-border)] text-[var(--color-ink-300)]">
+          <svg class="w-10 h-10 mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v16m8-8H4"/></svg>
+          <p class="text-sm font-medium">창고에서 이펙터를 끌어다 놓으세요</p>
+          <p class="text-xs mt-1">또는 팔레트의 이펙터를 클릭하면 추가됩니다</p>
+        </div>
       </div>
     </div>
 
-    <!-- 오른쪽: 비주얼라이저 + 출력 미터 -->
+    <!-- 우: 비주얼라이저 -->
     <div class="lg:sticky lg:top-20 self-start space-y-4">
-
       <div class="p-4 rounded-2xl border border-[var(--color-border)] bg-white">
         <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-3">Visualizer · 출력 신호</div>
-
-        <!-- 출력 미터 -->
         <div class="flex items-center gap-2 mb-4">
           <span class="text-[10px] font-mono text-[var(--color-ink-300)]">OUT</span>
           <div class="flex-1 h-2 rounded-full bg-[var(--color-surface-2)] border border-[var(--color-border)] overflow-hidden">
@@ -128,48 +134,94 @@ import { MODULES } from '../lib/modules';
           </div>
           <span class="text-[10px] font-mono text-[var(--color-ink-300)] w-8 text-right" id="meterVal">—</span>
         </div>
-
-        <!-- 오실로스코프 -->
         <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)] mb-3">
           <canvas id="scopeCv" class="block w-full" style="height:120px"></canvas>
           <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)] opacity-70">Waveform</span>
         </div>
-
-        <!-- 스펙트럼 -->
         <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)] mb-3">
           <canvas id="specCv" class="block w-full" style="height:120px"></canvas>
           <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-blue)] opacity-70">Spectrum</span>
         </div>
-
-        <!-- 파형 줌 슬라이더 -->
         <div class="flex items-center gap-3">
           <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)] whitespace-nowrap">파형 줌</span>
           <input type="range" id="scopeSpeed" class="sl-range flex-1" min="64" max="2048" step="64" value="512" aria-label="파형 줌" />
           <span id="scopeSpeedVal" class="text-[11px] font-mono text-[var(--color-ink-500)] w-10 text-right">보통</span>
         </div>
       </div>
-
-      <!-- 레슨 바로가기 -->
-      <div class="p-4 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)]">
-        <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-3">레슨으로 돌아가기</div>
-        <div class="space-y-1">
-          {MODULES.map(m => (
-            <a href={`${import.meta.env.BASE_URL}learn/${m.id}`}
-              class="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium text-[var(--color-ink-500)] hover:bg-white hover:text-[var(--color-violet)] transition">
-              <span class="font-mono text-[10px] text-[var(--color-ink-300)]">{m.num}</span>
-              {m.name} · {m.kr}
-            </a>
-          ))}
-        </div>
-      </div>
     </div>
   </div>
 </div>
 
+<!-- 이펙터 카드 템플릿 (타입별, 서버 렌더 → 드롭 시 복제) -->
+{MODULES.map(m => (
+  <template data-card-type={m.id}>
+    <div class="module-card rounded-2xl border border-[var(--color-border)] bg-white overflow-hidden transition-all duration-200" data-type={m.id}>
+      <div class="flex items-center justify-between px-4 py-3 border-b border-[var(--color-border)] bg-[var(--color-surface)]">
+        <div class="flex items-center gap-2.5">
+          <span class="drag-handle cursor-grab active:cursor-grabbing text-[var(--color-ink-300)] hover:text-[var(--color-violet)] touch-none select-none" title="드래그해서 순서 변경">
+            <svg class="w-4 h-4 pointer-events-none" fill="currentColor" viewBox="0 0 20 20"><path d="M7 4a1 1 0 11-2 0 1 1 0 012 0zM7 10a1 1 0 11-2 0 1 1 0 012 0zM6 17a1 1 0 100-2 1 1 0 000 2zM15 4a1 1 0 11-2 0 1 1 0 012 0zM14 10a1 1 0 11-2 0 1 1 0 012 0zM14 17a1 1 0 100-2 1 1 0 000 2z"/></svg>
+          </span>
+          <div class="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-mono font-bold text-white gradient-brand">{m.num}</div>
+          <span class="font-bold text-sm" style="font-family:'Space Grotesk'">{m.name}</span>
+          <span class="text-xs text-[var(--color-ink-300)]">{m.kr}</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <button class="pwr-btn flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-mono transition-all" aria-pressed="false" aria-label="켜기/끄기">
+            <span class="pwr-dot w-1.5 h-1.5 rounded-full bg-[var(--color-border)]"></span>
+            <span class="pwr-label">OFF</span>
+          </button>
+          <button class="del-btn w-6 h-6 flex items-center justify-center rounded-lg text-[var(--color-ink-300)] hover:text-red-500 hover:bg-red-50 transition" title="삭제" aria-label="삭제">
+            <svg class="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="px-4 py-4">
+        {m.type && (
+          <div class="flex gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl w-fit mb-3" role="group">
+            {m.type.options.map(([val, txt]) => (
+              <button class="type-btn px-2.5 py-1 rounded-lg text-xs font-mono font-medium transition-all text-[var(--color-ink-500)]"
+                data-val={val} aria-pressed={val === m.type!.value ? 'true' : 'false'}>{txt}</button>
+            ))}
+          </div>
+        )}
+        <div class={`grid gap-x-6 gap-y-3 ${m.knobs.length === 1 ? 'grid-cols-1 max-w-xs' : m.knobs.length === 2 ? 'grid-cols-2' : 'grid-cols-3'}`}>
+          {m.knobs.map(k => (
+            <div class="slider-wrap" data-param={k.param}
+              data-min={k.min} data-max={k.max} data-value={k.value} data-curve={k.curve ?? 'lin'}>
+              <div class="flex items-center justify-between mb-1.5">
+                <label class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-500)]">{k.label}</label>
+                <span class="val-display text-xs font-mono font-medium text-[var(--color-ink-700)]">—</span>
+              </div>
+              <input type="range" class="sl-range w-full" min="0" max="1000" step="1" aria-label={k.label} />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </template>
+))}
+
 <script>
-import { Engine } from '../lib/engine';
+import { Engine, DEFAULT_CHAIN, type EngineState } from '../lib/engine';
+import { MODULE_MAP } from '../lib/modules';
+import { PRESETS } from '../lib/presets';
 
 let engine: Engine | null = null;
+
+// 음원 파라미터는 UI에 노출되지 않으므로 변수로 추적 (프리셋이 갱신)
+let currentWave: OscillatorType = 'sine';
+let currentFreq = 220;
+let currentTempo = 110;
+
+// 인스턴스 ID 카운터 + 드래그 상태
+let instanceSeq = 0;
+let dragMode: 'move' | 'new' | null = null;
+let dragType: string | null = null;
+let dragCard: HTMLElement | null = null;
+
+const rack = document.getElementById('effectRack')!;
+const masterVol = document.getElementById('masterVol') as HTMLInputElement;
+const masterVolVal = document.getElementById('masterVolVal')!;
 
 function logMap(p: number, min: number, max: number, curve: string): number {
   if (curve === 'log') return min * Math.pow(max / min, p);
@@ -187,32 +239,266 @@ function fmtParam(param: string, v: number): string {
   if (param === 'q') return v.toFixed(1);
   return Math.round(v)+'%';
 }
+// modules.ts 단일 소스에서 기본 파라미터 파생
+function defaultParamsClient(type: string): Record<string, number|string> {
+  const def = (MODULE_MAP as any)[type];
+  const p: Record<string, number|string> = {};
+  if (!def) return p;
+  for (const k of def.knobs) p[k.param] = k.value;
+  if (def.type) p.type = def.type.value;
+  return p;
+}
 
-// 슬라이더 초기화
-document.querySelectorAll<HTMLElement>('.slider-wrap').forEach(wrap => {
+// ── 공통 UI 헬퍼 ──
+function selectBtn(btn: HTMLElement, group: HTMLElement[]) {
+  group.forEach(b => { b.setAttribute('aria-pressed','false'); b.style.cssText = ''; });
+  btn.setAttribute('aria-pressed','true');
+  btn.style.cssText = 'background:white;color:var(--color-violet);box-shadow:0 1px 4px rgba(0,0,0,0.08)';
+}
+function setPwrVisual(card: HTMLElement, on: boolean) {
+  const pwrBtn = card.querySelector<HTMLButtonElement>('.pwr-btn')!;
+  const pwrDot = card.querySelector<HTMLElement>('.pwr-dot')!;
+  const pwrLabel = card.querySelector<HTMLElement>('.pwr-label')!;
+  pwrBtn.setAttribute('aria-pressed', String(on));
+  if (on) {
+    card.style.borderColor = 'rgba(124,58,237,0.4)';
+    card.style.boxShadow = '0 0 0 1px rgba(124,58,237,0.15), 0 4px 20px -6px rgba(124,58,237,0.25)';
+    pwrBtn.style.cssText = 'border-color:var(--color-violet);color:var(--color-violet);background:var(--color-violet-glow)';
+    pwrDot.style.cssText = 'background:var(--color-violet);box-shadow:0 0 8px rgba(124,58,237,0.8)';
+    pwrLabel.textContent = 'ON';
+  } else {
+    card.style.borderColor = ''; card.style.boxShadow = '';
+    pwrBtn.style.cssText = '';
+    pwrDot.style.cssText = 'background:var(--color-border)';
+    pwrLabel.textContent = 'OFF';
+  }
+}
+function setSliderDOM(wrap: HTMLElement, v: number) {
   const input = wrap.querySelector<HTMLInputElement>('input')!;
   const valEl = wrap.querySelector<HTMLElement>('.val-display')!;
-  const { param, min: minS, max: maxS, value: valS, curve = 'lin' } = wrap.dataset as any;
-  const min = parseFloat(minS), max = parseFloat(maxS), def = parseFloat(valS);
+  const { param, min, max, curve = 'lin' } = wrap.dataset as any;
+  const p = Math.max(0, Math.min(1, toP(v, parseFloat(min), parseFloat(max), curve)));
+  input.value = String(Math.round(p * 1000));
+  input.style.setProperty('--sl-pct', `${p * 100}%`);
+  valEl.textContent = fmtParam(param, v);
+}
 
-  const initP = toP(def, min, max, curve);
-  input.value = String(Math.round(initP * 1000));
-  input.style.setProperty('--sl-pct', `${initP * 100}%`);
-  valEl.textContent = fmtParam(param, def);
+function currentOrder(): string[] {
+  return [...rack.querySelectorAll<HTMLElement>('.module-card')].map(c => c.dataset.instanceId!);
+}
+function updatePlaceholder() {
+  const empty = document.getElementById('rackEmpty')!;
+  empty.style.display = rack.querySelector('.module-card') ? 'none' : '';
+}
 
-  input.addEventListener('input', () => {
-    const p = parseInt(input.value) / 1000;
-    const v = logMap(p, min, max, curve);
-    input.style.setProperty('--sl-pct', `${p * 100}%`);
-    valEl.textContent = fmtParam(param, v);
-    const moduleId = wrap.closest<HTMLElement>('.module-card')!.dataset.moduleId!;
-    engine?.set(moduleId, param, v);
+// 체인 흐름줄 렌더 (인스턴스 순서·전원 반영)
+const CHAIN_ARROW = '<svg class="w-4 h-4 text-[var(--color-border)] flex-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>';
+function renderChainFlow(order: string[]) {
+  const flow = document.getElementById('chainFlow')!;
+  let html = '<span class="text-xs font-mono text-[var(--color-ink-500)]">SOURCE</span>';
+  order.forEach(id => {
+    const card = rack.querySelector<HTMLElement>(`[data-instance-id="${id}"]`);
+    const name = (card?.dataset.type ?? id).toUpperCase();
+    const on = card?.querySelector('.pwr-btn')?.getAttribute('aria-pressed') === 'true';
+    const color = on ? 'var(--color-violet)' : 'var(--color-ink-300)';
+    html += CHAIN_ARROW + `<span class="text-xs font-mono font-medium transition-colors" style="color:${color}">${name}</span>`;
   });
-});
+  html += CHAIN_ARROW + '<span class="text-xs font-mono text-[var(--color-ink-500)]">OUT</span>';
+  flow.innerHTML = html;
+}
 
-// 마스터 볼륨
-const masterVol = document.getElementById('masterVol') as HTMLInputElement;
-const masterVolVal = document.getElementById('masterVolVal')!;
+// DOM 카드 순서를 엔진 체인 + 흐름줄에 동기화
+function syncChain() {
+  const order = currentOrder();
+  engine?.updateChain(order);
+  renderChainFlow(order);
+}
+
+// ── 카드 이벤트 바인딩 (동적 생성 카드용) ──
+function bindCard(card: HTMLElement, id: string, type: string) {
+  card.dataset.instanceId = id;
+  card.dataset.type = type;
+
+  // 슬라이더: 초기 위치 + 입력 핸들러
+  card.querySelectorAll<HTMLElement>('.slider-wrap').forEach(wrap => {
+    const input = wrap.querySelector<HTMLInputElement>('input')!;
+    const { param, min: minS, max: maxS, value: valS, curve = 'lin' } = wrap.dataset as any;
+    const min = parseFloat(minS), max = parseFloat(maxS), def = parseFloat(valS);
+    setSliderDOM(wrap, def);
+    input.addEventListener('input', () => {
+      const p = parseInt(input.value) / 1000;
+      const v = logMap(p, min, max, curve);
+      input.style.setProperty('--sl-pct', `${p * 100}%`);
+      wrap.querySelector<HTMLElement>('.val-display')!.textContent = fmtParam(param, v);
+      engine?.set(id, param, v);
+    });
+  });
+
+  // 전원
+  const pwrBtn = card.querySelector<HTMLButtonElement>('.pwr-btn')!;
+  pwrBtn.addEventListener('click', () => {
+    const on = pwrBtn.getAttribute('aria-pressed') !== 'true';
+    setPwrVisual(card, on);
+    engine?.setEnabled(id, on);
+    renderChainFlow(currentOrder());
+  });
+
+  // 타입 버튼 (filter)
+  const typeBtns = [...card.querySelectorAll<HTMLElement>('.type-btn')];
+  typeBtns.forEach(btn => {
+    btn.addEventListener('click', () => { selectBtn(btn, typeBtns); engine?.set(id, 'type', btn.dataset.val!); });
+    if (btn.getAttribute('aria-pressed') === 'true') btn.style.cssText = 'background:white;color:var(--color-violet);box-shadow:0 1px 4px rgba(0,0,0,0.08)';
+  });
+
+  // 삭제
+  card.querySelector<HTMLButtonElement>('.del-btn')!.addEventListener('click', () => {
+    engine?.removeInstance(id);
+    card.remove();
+    syncChain();
+    updatePlaceholder();
+  });
+
+  // 드래그 손잡이 (순서 변경)
+  const handle = card.querySelector<HTMLElement>('.drag-handle')!;
+  handle.addEventListener('pointerdown', () => card.setAttribute('draggable', 'true'));
+  handle.addEventListener('pointerup', () => card.removeAttribute('draggable'));
+  card.addEventListener('dragstart', e => {
+    dragMode = 'move'; dragCard = card; card.style.opacity = '0.4';
+    const dt = (e as DragEvent).dataTransfer!; dt.effectAllowed = 'move'; dt.setData('text/plain', id);
+  });
+  card.addEventListener('dragend', () => {
+    card.style.opacity = ''; card.removeAttribute('draggable');
+    dragCard = null; dragMode = null;
+    syncChain();
+  });
+}
+
+// 타입으로 새 카드 생성 (beforeEl 위치에 삽입, 없으면 맨 끝)
+function spawnCard(type: string, beforeEl: HTMLElement | null = null): string {
+  const tpl = document.querySelector<HTMLTemplateElement>(`template[data-card-type="${type}"]`);
+  if (!tpl) return '';
+  const card = tpl.content.firstElementChild!.cloneNode(true) as HTMLElement;
+  const id = `${type}-${++instanceSeq}`;
+  if (beforeEl) rack.insertBefore(card, beforeEl); else rack.appendChild(card);
+  bindCard(card, id, type);
+  engine?.addInstance(id, type);
+  syncChain();
+  updatePlaceholder();
+  return id;
+}
+
+// ── DOM ↔ 상태 직렬화 ──
+function readStateFromDOM(): EngineState {
+  const instances = [...rack.querySelectorAll<HTMLElement>('.module-card')].map(card => {
+    const id = card.dataset.instanceId!;
+    const type = card.dataset.type!;
+    const enabled = card.querySelector('.pwr-btn')!.getAttribute('aria-pressed') === 'true';
+    const params: Record<string, number | string> = {};
+    const typeBtn = card.querySelector<HTMLElement>('.type-btn[aria-pressed="true"]');
+    if (typeBtn) params.type = typeBtn.dataset.val!;
+    card.querySelectorAll<HTMLElement>('.slider-wrap').forEach(wrap => {
+      const input = wrap.querySelector<HTMLInputElement>('input')!;
+      const p = parseInt(input.value) / 1000;
+      const { param, min, max, curve = 'lin' } = wrap.dataset as any;
+      params[param] = logMap(p, parseFloat(min), parseFloat(max), curve);
+    });
+    return { id, type, enabled, params };
+  });
+  const srcBtn = document.querySelector<HTMLElement>('.src-btn[aria-pressed="true"]');
+  return {
+    src: { mode: (srcBtn?.dataset.src as any) || 'tone', wave: currentWave, freq: currentFreq, tempo: currentTempo },
+    master: parseInt(masterVol.value) / 10,
+    instances,
+  };
+}
+
+function writeStateToDOM(state: EngineState) {
+  // 음원
+  const srcBtns = [...document.querySelectorAll<HTMLElement>('.src-btn')];
+  const srcTarget = srcBtns.find(b => b.dataset.src === state.src.mode);
+  if (srcTarget) selectBtn(srcTarget, srcBtns);
+  // 마스터
+  masterVol.value = String(Math.round(state.master * 10));
+  masterVol.style.setProperty('--sl-pct', `${state.master}%`);
+  masterVolVal.textContent = Math.round(state.master) + '%';
+  // 랙 비우고 인스턴스 순서대로 카드 생성
+  rack.querySelectorAll('.module-card').forEach(c => c.remove());
+  for (const inst of state.instances) {
+    instanceSeq = Math.max(instanceSeq, parseInt(inst.id.split('-').pop() || '0') || 0);
+    const tpl = document.querySelector<HTMLTemplateElement>(`template[data-card-type="${inst.type}"]`);
+    if (!tpl) continue;
+    const card = tpl.content.firstElementChild!.cloneNode(true) as HTMLElement;
+    rack.appendChild(card);
+    bindCard(card, inst.id, inst.type);
+    // 파라미터 반영
+    if (inst.params.type) {
+      const typeBtns = [...card.querySelectorAll<HTMLElement>('.type-btn')];
+      const t = typeBtns.find(b => b.dataset.val === inst.params.type);
+      if (t) selectBtn(t, typeBtns);
+    }
+    card.querySelectorAll<HTMLElement>('.slider-wrap').forEach(wrap => {
+      const v = inst.params[wrap.dataset.param!];
+      if (typeof v === 'number') setSliderDOM(wrap, v);
+    });
+    setPwrVisual(card, !!inst.enabled);
+  }
+  renderChainFlow(state.instances.map(i => i.id));
+  updatePlaceholder();
+}
+
+const CLEAN_BASE: EngineState = {
+  src: { mode: 'tone', wave: 'sine', freq: 220, tempo: 110 },
+  master: 70,
+  instances: [],
+};
+
+// 프리셋(부분 상태, instances는 id 없는 {type,enabled,params})을 완전한 상태로
+function mergePreset(partial: Partial<EngineState>): EngineState {
+  const base: EngineState = structuredClone(CLEAN_BASE);
+  if (partial.src) Object.assign(base.src, partial.src);
+  if (partial.master != null) base.master = partial.master;
+  base.instances = (partial.instances ?? []).map((inst: any, i) => ({
+    id: inst.id || `${inst.type}-${i + 1}`,
+    type: inst.type,
+    enabled: inst.enabled ?? false,
+    params: { ...defaultParamsClient(inst.type), ...(inst.params || {}) },
+  }));
+  return base;
+}
+
+function applyFullState(state: EngineState) {
+  currentWave = state.src.wave;
+  currentFreq = state.src.freq;
+  currentTempo = state.src.tempo;
+  writeStateToDOM(state);
+  engine?.applyState(state);
+}
+
+// ── URL 직렬화 + 구버전 마이그레이션 ──
+function encodeState(state: EngineState): string {
+  return btoa(unescape(encodeURIComponent(JSON.stringify(state))));
+}
+// 구버전(modules 맵 + chain) → 신버전(instances 배열) 변환
+function migrate(obj: any): any {
+  if (obj && obj.modules && !obj.instances) {
+    const chain: string[] = obj.chain || DEFAULT_CHAIN;
+    obj.instances = chain.filter(t => obj.modules[t]).map(t => ({
+      id: t, type: t, enabled: !!obj.modules[t].enabled, params: obj.modules[t].params || {},
+    }));
+    delete obj.modules; delete obj.chain;
+  }
+  return obj;
+}
+function decodeState(s: string): EngineState | null {
+  try {
+    let obj = JSON.parse(decodeURIComponent(escape(atob(s))));
+    obj = migrate(obj);
+    if (obj && obj.src && Array.isArray(obj.instances)) return obj as EngineState;
+  } catch (e) {}
+  return null;
+}
+
+// ── 음원 / 마스터 / 재생 / 바이패스 ──
 masterVol.addEventListener('input', () => {
   const p = parseInt(masterVol.value) / 1000;
   masterVol.style.setProperty('--sl-pct', `${p * 100}%`);
@@ -221,91 +507,25 @@ masterVol.addEventListener('input', () => {
 });
 masterVol.style.setProperty('--sl-pct', '70%');
 
-// 전원 버튼
-document.querySelectorAll<HTMLElement>('.module-card').forEach(card => {
-  const moduleId = card.dataset.moduleId!;
-  const pwrBtn = card.querySelector<HTMLButtonElement>('.pwr-btn')!;
-  const pwrDot = card.querySelector<HTMLElement>('.pwr-dot')!;
-  const pwrLabel = card.querySelector<HTMLElement>('.pwr-label')!;
-  const chainLabel = document.querySelector(`.chain-label-${moduleId}`);
-
-  pwrBtn.addEventListener('click', () => {
-    const on = pwrBtn.getAttribute('aria-pressed') !== 'true';
-    pwrBtn.setAttribute('aria-pressed', String(on));
-    if (on) {
-      card.style.borderColor = 'rgba(124,58,237,0.4)';
-      card.style.boxShadow = '0 0 0 1px rgba(124,58,237,0.15), 0 4px 20px -6px rgba(124,58,237,0.25)';
-      pwrBtn.style.cssText = 'border-color:var(--color-violet);color:var(--color-violet);background:var(--color-violet-glow)';
-      pwrDot.style.cssText = 'background:var(--color-violet);box-shadow:0 0 8px rgba(124,58,237,0.8)';
-      pwrLabel.textContent = 'ON';
-      if (chainLabel) (chainLabel as HTMLElement).style.color = 'var(--color-violet)';
-    } else {
-      card.style.borderColor = '';
-      card.style.boxShadow = '';
-      pwrBtn.style.cssText = '';
-      pwrDot.style.cssText = 'background:var(--color-border)';
-      pwrLabel.textContent = 'OFF';
-      if (chainLabel) (chainLabel as HTMLElement).style.color = '';
-    }
-    engine?.setEnabled(moduleId, on);
-  });
-
-  // 타입 버튼
-  card.querySelectorAll<HTMLButtonElement>('.type-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      card.querySelectorAll('.type-btn').forEach(b => {
-        (b as HTMLElement).setAttribute('aria-pressed','false');
-        (b as HTMLElement).style.cssText = '';
-      });
-      btn.setAttribute('aria-pressed','true');
-      btn.style.cssText = 'background:white;color:var(--color-violet);box-shadow:0 1px 4px rgba(0,0,0,0.08)';
-      engine?.set(moduleId, 'type', btn.dataset.val!);
-    });
-    if (btn.getAttribute('aria-pressed') === 'true') {
-      btn.style.cssText = 'background:white;color:var(--color-violet);box-shadow:0 1px 4px rgba(0,0,0,0.08)';
-    }
-  });
-});
-
-// 음원 버튼
 document.querySelectorAll<HTMLButtonElement>('.src-btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    document.querySelectorAll('.src-btn').forEach(b => {
-      (b as HTMLElement).setAttribute('aria-pressed','false');
-      (b as HTMLElement).style.cssText = '';
-    });
-    btn.setAttribute('aria-pressed','true');
-    btn.style.cssText = 'background:white;color:var(--color-violet);box-shadow:0 1px 4px rgba(0,0,0,0.08)';
+    selectBtn(btn, [...document.querySelectorAll<HTMLElement>('.src-btn')]);
     engine?.setSource(btn.dataset.src as any);
   });
-  if (btn.getAttribute('aria-pressed') === 'true') {
-    btn.style.cssText = 'background:white;color:var(--color-violet);box-shadow:0 1px 4px rgba(0,0,0,0.08)';
-  }
+  if (btn.getAttribute('aria-pressed') === 'true') btn.style.cssText = 'background:white;color:var(--color-violet);box-shadow:0 1px 4px rgba(0,0,0,0.08)';
 });
 
-// 재생 버튼
 const playBtn = document.getElementById('playBtn')!;
 const playDot = document.getElementById('playDot')!;
 const playLabel = document.getElementById('playLabel')!;
-
 playBtn.addEventListener('click', async () => {
   if (!engine) {
     engine = new Engine();
-    // 슬라이더 초기값 적용
-    document.querySelectorAll<HTMLElement>('.slider-wrap').forEach(wrap => {
-      const input = wrap.querySelector<HTMLInputElement>('input')!;
-      const p = parseInt(input.value) / 1000;
-      const { param, min: minS, max: maxS, curve = 'lin' } = wrap.dataset as any;
-      const v = logMap(p, parseFloat(minS), parseFloat(maxS), curve);
-      const moduleId = wrap.closest<HTMLElement>('.module-card')!.dataset.moduleId!;
-      engine!.set(moduleId, param, v);
-    });
-    engine.setMaster(parseInt(masterVol.value) / 10);
+    engine.applyState(readStateFromDOM());
+    if (bypassBtn.getAttribute('aria-pressed') === 'true') engine.setBypassAll(true);
   }
-
   if (engine.playing) {
     engine.stop();
-    playBtn.className = 'gradient-brand text-white font-semibold px-5 py-2.5 rounded-xl text-sm flex items-center gap-2 transition hover:opacity-90';
     playBtn.style.cssText = '';
     playDot.style.cssText = 'background:white';
     playLabel.textContent = '소리 켜기';
@@ -319,7 +539,88 @@ playBtn.addEventListener('click', async () => {
   }
 });
 
-// 파형 줌 슬라이더
+const bypassBtn = document.getElementById('bypassBtn')!;
+const bypassDot = document.getElementById('bypassDot')!;
+const bypassLabel = document.getElementById('bypassLabel')!;
+bypassBtn.addEventListener('click', () => {
+  const on = bypassBtn.getAttribute('aria-pressed') !== 'true';
+  bypassBtn.setAttribute('aria-pressed', String(on));
+  if (on) {
+    bypassBtn.style.cssText = 'background:var(--color-ink-700);color:white;border-color:var(--color-ink-700)';
+    bypassDot.style.cssText = 'background:#f59e0b;box-shadow:0 0 8px #f59e0b';
+    bypassLabel.textContent = '원음 (이펙터 OFF)';
+  } else {
+    bypassBtn.style.cssText = '';
+    bypassDot.style.cssText = 'background:var(--color-border)';
+    bypassLabel.textContent = '원음 비교';
+  }
+  engine?.setBypassAll(on);
+});
+
+// ── 프리셋 / 공유 ──
+document.querySelectorAll<HTMLElement>('.preset-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const preset = PRESETS.find(p => p.id === btn.dataset.preset);
+    if (!preset) return;
+    if (bypassBtn.getAttribute('aria-pressed') === 'true') bypassBtn.click();
+    applyFullState(mergePreset(preset.state as any));
+    btn.animate([{ transform: 'scale(1)' }, { transform: 'scale(0.97)' }, { transform: 'scale(1)' }], { duration: 180, easing: 'ease-out' });
+  });
+});
+
+const shareBtn = document.getElementById('shareBtn')!;
+const shareLabel = document.getElementById('shareLabel')!;
+shareBtn.addEventListener('click', async () => {
+  const url = `${location.origin}${location.pathname}?p=${encodeState(readStateFromDOM())}`;
+  try { await navigator.clipboard.writeText(url); shareLabel.textContent = '복사됨!'; }
+  catch (e) { shareLabel.textContent = '복사 실패'; }
+  setTimeout(() => { shareLabel.textContent = '링크 공유'; }, 1600);
+});
+
+// ── 팔레트 + 랙 Drag & Drop ──
+document.querySelectorAll<HTMLElement>('.palette-chip').forEach(chip => {
+  chip.addEventListener('click', () => spawnCard(chip.dataset.type!));
+  chip.addEventListener('dragstart', e => {
+    dragMode = 'new'; dragType = chip.dataset.type!;
+    const dt = (e as DragEvent).dataTransfer!; dt.effectAllowed = 'copy'; dt.setData('text/plain', `new:${dragType}`);
+  });
+  chip.addEventListener('dragend', () => { if (dragMode === 'new') { dragMode = null; dragType = null; } });
+});
+
+function getDragAfter(y: number): HTMLElement | null {
+  const cards = [...rack.querySelectorAll<HTMLElement>('.module-card')].filter(c => c !== dragCard);
+  let closest: { offset: number; el: HTMLElement | null } = { offset: -Infinity, el: null };
+  for (const c of cards) {
+    const box = c.getBoundingClientRect();
+    const offset = y - box.top - box.height / 2;
+    if (offset < 0 && offset > closest.offset) closest = { offset, el: c };
+  }
+  return closest.el;
+}
+rack.addEventListener('dragover', e => {
+  e.preventDefault();
+  if (dragMode === 'move' && dragCard) {
+    const after = getDragAfter((e as DragEvent).clientY);
+    if (after == null) rack.appendChild(dragCard); else rack.insertBefore(dragCard, after);
+  }
+});
+rack.addEventListener('drop', e => {
+  e.preventDefault();
+  if (dragMode === 'new' && dragType) {
+    const after = getDragAfter((e as DragEvent).clientY);
+    spawnCard(dragType, after);
+    dragMode = null; dragType = null;
+  }
+});
+
+// 페이지 로드 시 ?p= 복원
+const sharedParam = new URLSearchParams(location.search).get('p');
+if (sharedParam) {
+  const restored = decodeState(sharedParam);
+  if (restored) applyFullState(restored);
+}
+
+// ── 파형 줌 + 비주얼라이저 ──
 let SCOPE_DRAW = 512;
 const speedInput = document.getElementById('scopeSpeed') as HTMLInputElement;
 const speedValEl = document.getElementById('scopeSpeedVal')!;
@@ -331,7 +632,6 @@ speedInput.addEventListener('input', () => {
   speedValEl.textContent = SCOPE_DRAW <= 256 ? '확대' : SCOPE_DRAW >= 768 ? '축소' : '보통';
 });
 
-// 비주얼라이저
 let rafId = 0;
 const scopeCv = document.getElementById('scopeCv') as HTMLCanvasElement;
 const specCv = document.getElementById('specCv') as HTMLCanvasElement;
@@ -348,23 +648,17 @@ function setupCv(cv: HTMLCanvasElement) {
   fit(); window.addEventListener('resize', fit);
   return ctx;
 }
-
 function startViz() {
   scopeCtx = setupCv(scopeCv);
   specCtx = setupCv(specCv);
-  const loop = () => {
-    rafId = requestAnimationFrame(loop);
-    drawScope(); drawSpec(); updateMeter();
-  };
+  const loop = () => { rafId = requestAnimationFrame(loop); drawScope(); drawSpec(); updateMeter(); };
   loop();
 }
-
 function stopViz() {
   cancelAnimationFrame(rafId);
   document.getElementById('meterFill')!.style.width = '0%';
   document.getElementById('meterVal')!.textContent = '—';
 }
-
 function cw(cv: HTMLCanvasElement) { return cv.width / (window.devicePixelRatio || 1); }
 function ch(cv: HTMLCanvasElement) { return cv.height / (window.devicePixelRatio || 1); }
 
@@ -372,7 +666,6 @@ function drawScope() {
   const w = cw(scopeCv), h = ch(scopeCv), ctx = scopeCtx;
   ctx.clearRect(0, 0, w, h);
   ctx.fillStyle = '#f0f0f8'; ctx.fillRect(0, 0, w, h);
-  // 그리드
   ctx.strokeStyle = 'rgba(124,58,237,0.06)'; ctx.lineWidth = 1;
   ctx.beginPath();
   for (let i = 1; i < 8; i++) { const x = w*i/8; ctx.moveTo(x,0); ctx.lineTo(x,h); }
@@ -382,21 +675,14 @@ function drawScope() {
   const data = engine.getScope();
   const bufLen = data.length;
   const N = SCOPE_DRAW;
-  // 제로 크로싱 트리거
   let start = 0;
-  for (let i = 1; i < bufLen - N; i++) {
-    if (data[i - 1] < 128 && data[i] >= 128) { start = i; break; }
-  }
+  for (let i = 1; i < bufLen - N; i++) { if (data[i - 1] < 128 && data[i] >= 128) { start = i; break; } }
   ctx.lineWidth = 1.5; ctx.strokeStyle = '#7c3aed';
   ctx.shadowColor = 'rgba(124,58,237,0.5)'; ctx.shadowBlur = 6;
   ctx.beginPath();
-  for (let i = 0; i < N; i++) {
-    const x = i / (N-1) * w, y = (1 - data[start + i]/255) * h;
-    i ? ctx.lineTo(x,y) : ctx.moveTo(x,y);
-  }
+  for (let i = 0; i < N; i++) { const x = i / (N-1) * w, y = (1 - data[start + i]/255) * h; i ? ctx.lineTo(x,y) : ctx.moveTo(x,y); }
   ctx.stroke(); ctx.shadowBlur = 0;
 }
-
 function drawSpec() {
   const w = cw(specCv), h = ch(specCv), ctx = specCtx;
   ctx.clearRect(0,0,w,h);
@@ -416,7 +702,6 @@ function drawSpec() {
   }
   ctx.shadowBlur = 0;
 }
-
 function updateMeter() {
   if (!engine?.playing) return;
   const d = engine.getScope(); let peak = 0;
@@ -425,6 +710,8 @@ function updateMeter() {
   document.getElementById('meterFill')!.style.width = pct + '%';
   document.getElementById('meterVal')!.textContent = peak > 0.98 ? 'CLIP' : Math.round(pct)+'%';
 }
+
+updatePlaceholder();
 </script>
 
 </Base>

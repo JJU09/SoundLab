@@ -1,4 +1,31 @@
+import { MODULE_MAP, type ModuleId } from './modules';
+
 export type SrcMode = 'tone' | 'pluck' | 'noise';
+
+export interface InstanceState {
+  id: string;
+  type: string;
+  enabled: boolean;
+  params: Record<string, number | string>;
+}
+
+export interface EngineState {
+  src: { mode: SrcMode; wave: OscillatorType; freq: number; tempo: number };
+  master: number;
+  instances: InstanceState[]; // 순서 = 신호 체인 순서
+}
+
+export const DEFAULT_CHAIN = ['filter', 'drive', 'tremolo', 'chorus', 'delay', 'reverb'];
+
+// 인스턴스 초기 파라미터를 modules.ts(단일 소스)에서 파생
+function defaultParams(type: string): Record<string, number | string> {
+  const def = MODULE_MAP[type as ModuleId];
+  const p: Record<string, number | string> = {};
+  if (!def) return p;
+  for (const k of def.knobs) p[k.param] = k.value;
+  if (def.type) p.type = def.type.value; // filter의 'lowpass' 등 노브 아닌 타입 셀렉터
+  return p;
+}
 
 export class Engine {
   ctx: AudioContext;
@@ -8,12 +35,17 @@ export class Engine {
   wave: OscillatorType = 'sine';
   freq = 220;
   tempo = 110;
+  masterVol = 70;
+  chainOrder: string[] = []; // 동적 인스턴스 ID 순서
 
   private chainIn!: GainNode;
   private master!: GainNode;
   analyser!: AnalyserNode;
   tdData!: Uint8Array;
   fdData!: Uint8Array;
+
+  private _defaultImpulse!: AudioBuffer; // 리버브 기본 임펄스 캐싱 (드롭아웃 방어)
+  private _chainTimer: ReturnType<typeof setTimeout> | null = null;
 
   private _osc: OscillatorNode | null = null;
   private _noise: AudioBufferSourceNode | null = null;
@@ -31,24 +63,18 @@ export class Engine {
     return g;
   }
 
+  // 빈 그래프로 시작: chainIn → master → analyser → destination (이펙터는 동적 추가)
   private _buildGraph() {
     this.chainIn = this._gain(1);
-    this.master = this._gain(0.7);
+    this.master = this._gain(this.masterVol / 100);
     this.analyser = this.ctx.createAnalyser();
     this.analyser.fftSize = 2048;
     this.analyser.smoothingTimeConstant = 0.8;
     this.tdData = new Uint8Array(this.analyser.fftSize);
     this.fdData = new Uint8Array(this.analyser.frequencyBinCount);
+    this._defaultImpulse = this._impulse(1.8, 3);
 
-    const order = ['filter', 'drive', 'tremolo', 'chorus', 'delay', 'reverb'] as const;
-    let prev: AudioNode = this.chainIn;
-    for (const id of order) {
-      const m = (this as any)[`_mk_${id}`]();
-      prev.connect(m.input);
-      prev = m.output;
-      this.modules[id] = m;
-    }
-    prev.connect(this.master);
+    this.chainIn.connect(this.master);
     this.master.connect(this.analyser);
     this.analyser.connect(this.ctx.destination);
   }
@@ -64,10 +90,89 @@ export class Engine {
     param.setTargetAtTime(val, this.ctx.currentTime, t);
   }
 
+  // ── 동적 인스턴스 관리 ──
+  // 인스턴스 생성 (연결은 updateChain이 담당). instanceId는 고유, type은 이펙트 종류.
+  addInstance(id: string, type: string) {
+    const factory = (this as any)[`_mk_${type}`];
+    if (!factory) return;
+    const m = factory.call(this);
+    m.type = type;
+    m.params = defaultParams(type);
+    m.enabled = false;
+    this.modules[id] = m;
+  }
+
+  // 인스턴스 제거 (호출 후 updateChain으로 체인 재연결 필요).
+  removeInstance(id: string) {
+    const m = this.modules[id];
+    if (!m) return;
+    try { m.input.disconnect(); } catch (e) {}
+    try { m.output.disconnect(); } catch (e) {}
+    if (m.lfo) { try { m.lfo.stop(); } catch (e) {} } // tremolo/chorus LFO 정지 (누수 방지)
+    delete this.modules[id];
+    this.chainOrder = this.chainOrder.filter(x => x !== id);
+  }
+
+  bypassed = false;
+
   setEnabled(id: string, on: boolean) {
-    const m = this.modules[id]; m.enabled = on;
-    if (m.kind === 'series') { this._smooth(m.dry.gain, on ? 0 : 1); this._smooth(m.wet.gain, on ? 1 : 0); }
-    else { this._smooth(m.wet.gain, on ? m.mix : 0); }
+    const m = this.modules[id];
+    if (!m) return;
+    m.enabled = on;
+    if (this.bypassed) return; // 글로벌 바이패스 중엔 상태만 기억, 소리엔 미반영
+    this._applyMix(m);
+  }
+
+  private _applyMix(m: any) {
+    const active = this.bypassed ? false : m.enabled;
+    if (m.kind === 'series') { this._smooth(m.dry.gain, active ? 0 : 1); this._smooth(m.wet.gain, active ? 1 : 0); }
+    else { this._smooth(m.wet.gain, active ? m.mix : 0); }
+  }
+
+  // 모든 이펙터를 한 번에 통과(Bypass)시켜 원음과 A/B 비교. enabled 상태는 보존.
+  setBypassAll(on: boolean) {
+    this.bypassed = on;
+    for (const id of Object.keys(this.modules)) this._applyMix(this.modules[id]);
+  }
+
+  // 모듈 간 연결만 끊고 주어진 순서로 재연결 (내부 dry/wet 노드는 보존). 동기 실행.
+  private _rewire(order: string[]) {
+    this.chainIn.disconnect();
+    for (const id of Object.keys(this.modules)) {
+      try { this.modules[id].output.disconnect(); } catch (e) {}
+    }
+    const valid = order.filter(id => this.modules[id]);
+    let prev: AudioNode = this.chainIn;
+    for (const id of valid) {
+      const m = this.modules[id];
+      prev.connect(m.input);
+      prev = m.output;
+    }
+    prev.connect(this.master); // 빈 체인이면 chainIn → master 직결
+  }
+
+  // 신호 체인 순서 갱신 + 무클릭 페이드. 재생 중에만 페이드(아니면 즉시 재연결).
+  updateChain(order: string[]) {
+    const valid = order.filter(id => this.modules[id]);
+    this.chainOrder = [...valid];
+
+    if (this.ctx.state !== 'running') { this._rewire(valid); return; }
+
+    const mv = this.masterVol / 100; // 의도된 볼륨 캡처 (연속 드래그 중 라이브 gain 오염 방지)
+    const t = this.ctx.currentTime;
+    this.master.gain.cancelScheduledValues(t);
+    this.master.gain.setValueAtTime(this.master.gain.value, t);
+    this.master.gain.linearRampToValueAtTime(0.0001, t + 0.01); // 10ms 페이드아웃
+
+    if (this._chainTimer) clearTimeout(this._chainTimer);
+    this._chainTimer = setTimeout(() => {
+      this._rewire(valid); // 페이드아웃 완료 후 재연결
+      const t2 = this.ctx.currentTime;
+      this.master.gain.cancelScheduledValues(t2);
+      this.master.gain.setValueAtTime(0.0001, t2);
+      this.master.gain.linearRampToValueAtTime(mv, t2 + 0.01); // 10ms 페이드인
+      this._chainTimer = null;
+    }, 14);
   }
 
   private _mk_filter() {
@@ -135,7 +240,7 @@ export class Engine {
   private _mk_reverb() {
     const m = this._shell('parallel'); m.mix = 0.3;
     const conv = this.ctx.createConvolver();
-    conv.buffer = this._impulse(1.8, 3);
+    conv.buffer = this._defaultImpulse; // 캐싱된 기본 임펄스 참조 (재계산 X)
     m.input.connect(conv); conv.connect(m.wet);
     return { ...m, conv };
   }
@@ -150,9 +255,12 @@ export class Engine {
     return buf;
   }
 
+  // 인스턴스 ID로 파라미터 조작 — 타입은 m.type으로 추적
   set(id: string, param: string, v: number | string) {
     const m = this.modules[id];
-    switch (`${id}.${param}`) {
+    if (!m) return;
+    m.params[param] = v;
+    switch (`${m.type}.${param}`) {
       case 'filter.type': m.bq.type = v; break;
       case 'filter.freq': this._smooth(m.bq.frequency, v as number); break;
       case 'filter.q': this._smooth(m.bq.Q, v as number); break;
@@ -161,16 +269,50 @@ export class Engine {
       case 'tremolo.depth': this._setTremDepth(m, v as number); break;
       case 'chorus.rate': this._smooth(m.lfo.frequency, v as number); break;
       case 'chorus.depth': this._smooth(m.depthG.gain, (v as number / 100) * 0.006); break;
-      case 'chorus.mix': m.mix = (v as number) / 100; if (m.enabled) this._smooth(m.wet.gain, m.mix); break;
+      case 'chorus.mix': m.mix = (v as number) / 100; this._applyMix(m); break;
       case 'delay.time': this._smooth(m.delay.delayTime, v as number, 0.05); break;
       case 'delay.feedback': this._smooth(m.fb.gain, (v as number) / 100); break;
-      case 'delay.mix': m.mix = (v as number) / 100; if (m.enabled) this._smooth(m.wet.gain, m.mix); break;
+      case 'delay.mix': m.mix = (v as number) / 100; this._applyMix(m); break;
       case 'reverb.size': m.conv.buffer = this._impulse(v as number, 3); break;
-      case 'reverb.mix': m.mix = (v as number) / 100; if (m.enabled) this._smooth(m.wet.gain, m.mix); break;
+      case 'reverb.mix': m.mix = (v as number) / 100; this._applyMix(m); break;
     }
   }
 
-  setMaster(pct: number) { this._smooth(this.master.gain, pct / 100); }
+  setMaster(pct: number) { this.masterVol = pct; this._smooth(this.master.gain, pct / 100); }
+
+  // ── 상태 직렬화 (프리셋 · URL 공유 공통 토대) ──
+  getState(): EngineState {
+    const instances: InstanceState[] = this.chainOrder
+      .filter(id => this.modules[id])
+      .map(id => {
+        const m = this.modules[id];
+        return { id, type: m.type, enabled: !!m.enabled, params: { ...m.params } };
+      });
+    return {
+      src: { mode: this.srcMode, wave: this.wave, freq: this.freq, tempo: this.tempo },
+      master: this.masterVol,
+      instances,
+    };
+  }
+
+  applyState(s: Partial<EngineState>) {
+    if (s.src) {
+      if (s.src.wave) this.wave = s.src.wave;
+      if (s.src.freq != null) this.freq = s.src.freq;
+      if (s.src.tempo != null) this.tempo = s.src.tempo;
+      if (s.src.mode) this.setSource(s.src.mode); // wave/freq 갱신 후 호출 → 재생 중이면 새 소스로 반영
+    }
+    if (s.master != null) this.setMaster(s.master);
+    if (s.instances) {
+      for (const id of Object.keys(this.modules)) this.removeInstance(id); // 기존 전부 제거
+      for (const inst of s.instances) {
+        this.addInstance(inst.id, inst.type);
+        if (inst.params) for (const p of Object.keys(inst.params)) this.set(inst.id, p, inst.params[p]);
+      }
+      this.updateChain(s.instances.map(i => i.id));
+      for (const inst of s.instances) if (inst.enabled != null) this.setEnabled(inst.id, inst.enabled);
+    }
+  }
 
   async start() {
     await this.ctx.resume();

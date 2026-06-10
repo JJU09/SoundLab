@@ -1,0 +1,99 @@
+---
+import type { QuizQuestion } from '../lib/quizzes';
+
+interface Props {
+  questions: QuizQuestion[];
+  color?: 'violet' | 'blue';
+}
+const { questions, color = 'violet' } = Astro.props;
+const accent = color === 'violet' ? 'var(--color-violet)' : 'var(--color-blue)';
+---
+
+<section class="quiz-block mt-12 pt-8 border-t border-[var(--color-border)]">
+  <div class="flex items-center justify-between mb-5">
+    <h2 class="text-base font-bold flex items-center gap-2" style="font-family:'Space Grotesk'">
+      <span>✅</span> 이해도 확인 퀴즈
+    </h2>
+    <span class="quiz-score text-xs font-mono px-2.5 py-1 rounded-full border"
+      style={`border-color:${accent};color:${accent}`}>0 / {questions.length}</span>
+  </div>
+
+  <div class="space-y-5">
+    {questions.map((item, qi) => (
+      <div class="quiz-q p-4 rounded-2xl border border-[var(--color-border)] bg-white" data-answer={item.answer}>
+        <p class="font-semibold text-sm mb-3 text-[var(--color-ink-700)]">
+          <span class="font-mono text-[var(--color-ink-300)] mr-1">{qi + 1}.</span>{item.q}
+        </p>
+        <div class="grid gap-2">
+          {item.options.map((opt, oi) => (
+            <button class="quiz-opt flex items-center gap-2.5 text-left text-sm px-3 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] transition-all hover:border-[var(--color-ink-300)]"
+              data-idx={oi}>
+              <span class="opt-marker w-5 h-5 flex-none flex items-center justify-center rounded-md text-[11px] font-mono font-bold bg-white border border-[var(--color-border)] text-[var(--color-ink-500)]">
+                {String.fromCharCode(65 + oi)}
+              </span>
+              <span class="opt-text text-[var(--color-ink-700)]">{opt}</span>
+            </button>
+          ))}
+        </div>
+        <div class="quiz-explain hidden mt-3 p-3 rounded-xl text-xs leading-relaxed text-[var(--color-ink-700)] border-l-2"
+          style={`border-color:${accent};background:${color === 'violet' ? 'var(--color-violet-glow)' : 'var(--color-blue-glow)'}`}>
+          {item.explain}
+        </div>
+      </div>
+    ))}
+  </div>
+</section>
+
+<style>
+  .quiz-opt.answered { cursor: default; }
+  .quiz-opt.opt-correct {
+    border-color: #16a34a;
+    background: rgba(22, 163, 74, 0.08);
+  }
+  .quiz-opt.opt-correct .opt-marker {
+    background: #16a34a; border-color: #16a34a; color: #fff;
+  }
+  .quiz-opt.opt-correct .opt-text { color: #15803d; font-weight: 600; }
+  .quiz-opt.opt-wrong {
+    border-color: #dc2626;
+    background: rgba(220, 38, 38, 0.06);
+  }
+  .quiz-opt.opt-wrong .opt-marker {
+    background: #dc2626; border-color: #dc2626; color: #fff;
+  }
+  .quiz-opt.opt-wrong .opt-text { color: #b91c1c; }
+  .quiz-opt.dimmed { opacity: 0.45; }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('.quiz-block').forEach(block => {
+    const scoreEl = block.querySelector<HTMLElement>('.quiz-score')!;
+    const questions = block.querySelectorAll<HTMLElement>('.quiz-q');
+    const total = questions.length;
+    let score = 0;
+
+    questions.forEach(q => {
+      const answer = parseInt(q.dataset.answer!);
+      const opts = [...q.querySelectorAll<HTMLButtonElement>('.quiz-opt')];
+      const explain = q.querySelector<HTMLElement>('.quiz-explain')!;
+      let answered = false;
+
+      opts.forEach(opt => {
+        opt.addEventListener('click', () => {
+          if (answered) return;
+          answered = true;
+          const idx = parseInt(opt.dataset.idx!);
+          const correct = idx === answer;
+          if (correct) { score++; scoreEl.textContent = `${score} / ${total}`; }
+          opts.forEach((o, oi) => {
+            o.classList.add('answered');
+            if (oi === answer) o.classList.add('opt-correct');
+            else if (oi === idx) o.classList.add('opt-wrong');
+            else o.classList.add('dimmed');
+          });
+          explain.classList.remove('hidden');
+        });
+      });
+    });
+  });
+</script>

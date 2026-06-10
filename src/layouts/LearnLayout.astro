@@ -1,7 +1,9 @@
 ---
 import Base from './Base.astro';
 import EffectPlayer from '../components/EffectPlayer.astro';
+import Quiz from '../components/Quiz.astro';
 import { MODULES, type ModuleDef } from '../lib/modules';
+import { QUIZZES } from '../lib/quizzes';
 
 interface Props {
   module: ModuleDef;
@@ -51,6 +53,9 @@ const next = MODULES[currentIdx + 1];
 
         <!-- 슬롯: 각 레슨별 상세 내용 -->
         <slot />
+
+        <!-- 레슨별 객관식 퀴즈 -->
+        {QUIZZES[m.id] && <Quiz questions={QUIZZES[m.id]} color={m.color} />}
 
         <!-- 이전/다음 네비게이션 -->
         <div class="flex items-center justify-between mt-12 pt-8 border-t border-[var(--color-border)]">

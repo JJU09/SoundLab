@@ -136,9 +136,16 @@ import { MODULES } from '../lib/modules';
         </div>
 
         <!-- 스펙트럼 -->
-        <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]">
+        <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)] mb-3">
           <canvas id="specCv" class="block w-full" style="height:120px"></canvas>
           <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-blue)] opacity-70">Spectrum</span>
+        </div>
+
+        <!-- 파형 속도 슬라이더 -->
+        <div class="flex items-center gap-3">
+          <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)] whitespace-nowrap">파형 속도</span>
+          <input type="range" id="scopeSpeed" class="sl-range flex-1" min="64" max="2048" step="64" value="512" aria-label="파형 속도" />
+          <span id="scopeSpeedVal" class="text-[11px] font-mono text-[var(--color-ink-500)] w-10 text-right">보통</span>
         </div>
       </div>
 
@@ -312,6 +319,19 @@ playBtn.addEventListener('click', async () => {
   }
 });
 
+// 파형 속도 슬라이더
+let scopeSamples = 512;
+const speedInput = document.getElementById('scopeSpeed') as HTMLInputElement;
+const speedValEl = document.getElementById('scopeSpeedVal')!;
+const speedLabels: Record<number, string> = { 64:'매우 느림', 128:'느림', 256:'느림', 512:'보통', 768:'보통', 1024:'빠름', 1536:'빠름', 2048:'매우 빠름' };
+speedInput.style.setProperty('--sl-pct', `${(512-64)/(2048-64)*100}%`);
+speedInput.addEventListener('input', () => {
+  scopeSamples = parseInt(speedInput.value);
+  const pct = (scopeSamples - 64) / (2048 - 64) * 100;
+  speedInput.style.setProperty('--sl-pct', `${pct}%`);
+  speedValEl.textContent = speedLabels[scopeSamples] ?? '보통';
+});
+
 // 비주얼라이저
 let rafId = 0;
 const scopeCv = document.getElementById('scopeCv') as HTMLCanvasElement;
@@ -360,7 +380,7 @@ function drawScope() {
   ctx.stroke();
   if (!engine?.playing) return;
   const data = engine.getScope();
-  const N = 512; // 전체 2048 중 512만 사용 → 속도 1/4
+  const N = scopeSamples;
   ctx.lineWidth = 1.5; ctx.strokeStyle = '#7c3aed';
   ctx.shadowColor = 'rgba(124,58,237,0.5)'; ctx.shadowBlur = 6;
   ctx.beginPath();

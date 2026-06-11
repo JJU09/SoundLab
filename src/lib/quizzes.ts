@@ -473,7 +473,7 @@ export const QUIZZES: Record<string, QuizQuestion[] | LevelQuizzes> = {
       },
       {
         q: '원본 주파수를 계속 올렸더니 음이 오히려 낮아졌습니다. 왜일까요?',
-        options: ['너무 높아 샘플점 사이로 빠져나가 낮은 음으로 둔갑', '음량이 줄어서', '잔향 때문', '디더 때문'],
+        options: ['너무 높아 샘플점 사이로 빠져나가 낮은 음으로 둔갑', '음량이 줄어서', '잔향 때문', '디더(Dither) 때문'],
         answer: 0,
         explain: '샘플레이트가 따라가지 못하는 높은 음은 낮은 alias로 접혀 들립니다.',
       },
@@ -501,7 +501,7 @@ export const QUIZZES: Record<string, QuizQuestion[] | LevelQuizzes> = {
       },
       {
         q: '실제 ADC가 에일리어싱을 막는 방법은?',
-        options: ['표본화 전에 나이퀴스트 이상을 자르는 저역통과 필터', '비트를 늘림', '디더링', '잔향 추가'],
+        options: ['표본화 전에 나이퀴스트 이상을 자르는 저역통과 필터', '비트를 늘림', '디더링(Dithering)', '잔향 추가'],
         answer: 0,
         explain: '표본화 직전 안티에일리어싱(저역통과) 필터로 나이퀴스트 이상 성분을 제거해 접힘을 방지합니다.',
       },

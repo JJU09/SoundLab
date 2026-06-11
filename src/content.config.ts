@@ -7,7 +7,7 @@ export type Hub = (typeof HUBS)[number];
 
 // 허브 메타 (내비·라벨·순서). 코드 단일 소스.
 export const HUB_META: Record<Hub, { kr: string; label: string; order: number; desc: string }> = {
-  acoustics: { kr: '음향물리', label: 'Acoustics', order: 1, desc: '소리의 본질을 눈으로 보다' },
+  acoustics: { kr: '소리와 파동', label: 'Acoustics', order: 1, desc: '소리의 본질을 눈으로 보다' },
   digital:   { kr: '디지털오디오', label: 'Digital Audio', order: 2, desc: '컴퓨터가 소리를 다루는 법' },
   synthesis: { kr: '신디시스', label: 'Synthesis', order: 3, desc: '무에서 소리를 창조하다' },
   effects:   { kr: '이펙트', label: 'Effects', order: 4, desc: '소리를 빚고 가공하다' },

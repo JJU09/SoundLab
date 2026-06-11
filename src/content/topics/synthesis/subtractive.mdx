@@ -1,0 +1,83 @@
+---
+hub: synthesis
+title: Subtractive Synthesis
+kr: 감산합성
+order: 2
+color: violet
+tagline: 깎아내어 소리를 빚다
+desc: 배음이 풍부한 파형에서 출발해 필터로 필요 없는 부분을 깎아내는 신디사이저의 정석. 오실레이터 → 필터 → 앰프로 이어지는 신호 흐름의 첫 두 단계를 다룹니다.
+widget: subtractive
+widgetConfig:
+  wave: sawtooth
+  cutoff: 2000
+  q: 4
+  type: lowpass
+quiz: subtractive
+scaffold: true
+---
+import Level from '../../../components/doc/Level.astro';
+import DefList from '../../../components/doc/DefList.astro';
+import DefCard from '../../../components/doc/DefCard.astro';
+import Callout from '../../../components/doc/Callout.astro';
+
+{/* ───────── 초급 ───────── */}
+<Level show="easy">
+## 조각가처럼 깎아내기
+
+조각가는 큰 돌덩이에서 **필요 없는 부분을 깎아** 형상을 만들죠. 감산합성도 똑같아요. 먼저 배음이 잔뜩 든 **풍부하고 거친 소리**(톱니파)에서 출발해, 필터로 원치 않는 부분을 깎아 원하는 음색을 만듭니다.
+
+신디사이저로 만드는 대부분의 소리가 이 방식이에요.
+
+## 직접 해보기
+
+**소리 켜기** 후 **Cutoff** 슬라이더를 내려보세요. 거칠던 톱니파가 점점 부드럽고 둥근 소리로 깎입니다. 파형 위쪽 스펙트럼에서 높은 배음들이 사라지는 게 보여요.
+</Level>
+
+{/* ───────── 중급 ───────── */}
+<Level show="normal">
+## OSC → FILTER → AMP
+
+감산합성의 신호 흐름은 세 단계입니다.
+
+<DefList>
+  <DefCard term="① 오실레이터 (OSC)">배음이 풍부한 원음(톱니·사각파). 깎을 '재료'.</DefCard>
+  <DefCard term="② 필터 (FILTER)">불필요한 배음을 깎아 음색을 조형. 이 토픽의 핵심.</DefCard>
+  <DefCard term="③ 앰프 (AMP)">엔벨로프로 음량의 시간 변화를 입힘 (→ 엔벨로프 토픽).</DefCard>
+</DefList>
+
+## 왜 톱니파에서 시작하나
+
+사인파는 배음이 없어 깎을 게 없습니다. 톱니파는 모든 정수 배음을 가져 **가장 깎을 거리가 많은** 재료입니다. Cutoff를 낮추면 고배음부터, Resonance를 올리면 Cutoff 부근을 강조해 '뾱~' 한 색을 더합니다.
+</Level>
+
+{/* ───────── 고급 ───────── */}
+<Level show="hard">
+## 필터가 음색을 만드는 원리
+
+오실레이터 스펙트럼(기음+배음)에 필터의 주파수 응답 `|H(f)|`를 곱한 것이 출력 스펙트럼입니다. Low Pass는 고배음 진폭을 깎고, Resonance(Q)는 Cutoff 부근에 피킹을 더해 포먼트(formant)와 유사한 색을 만듭니다.
+
+## 필터 종류로 다른 조형
+
+**Filter Type** 을 바꾸면 깎는 영역이 달라집니다 — Low Pass(고역 제거, 따뜻함), High Pass(저역 제거, 가늘고 밝음), Band Pass(특정 대역만, 라디오·말소리 같은 좁은 색). 같은 톱니파라도 필터 선택에 따라 완전히 다른 악기가 됩니다. 여기에 [엔벨로프]로 Cutoff를 시간에 따라 쓸면 클래식한 신스 '필터 스윕'이 완성됩니다.
+</Level>
+
+<Level show="easy">
+<Callout>
+- → Cutoff를 위→아래로 쓸며 거친 소리가 둥글게 깎이는 걸 들어보세요
+- → 오실레이터 파형을 Saw↔Square로 바꿔 재료의 거칠기 차이를 비교
+</Callout>
+</Level>
+
+<Level show="normal">
+<Callout>
+- → Cutoff를 낮추며 스펙트럼의 높은 배음 막대가 사라지는 것을 관찰
+- → Resonance를 올려 Cutoff 부근이 강조되는 '뾱~' 한 색을 더해보세요
+</Callout>
+</Level>
+
+<Level show="hard">
+<Callout>
+- → **Filter Type** 을 Low/High/Band로 바꿔 같은 톱니파가 전혀 다른 음색이 되는 것을 확인
+- → 출력 스펙트럼 = 오실레이터 스펙트럼 × 필터 응답임을 막대 모양으로 연결지어 보세요
+</Callout>
+</Level>

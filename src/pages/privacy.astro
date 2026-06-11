@@ -1,38 +1,103 @@
 ---
 import Base from '../layouts/Base.astro';
+const base = import.meta.env.BASE_URL;
+
+const sections = [
+  {
+    title: '수집하는 개인정보',
+    body: [
+      'SoundLab은 회원가입이나 로그인이 없으며, 이름·이메일 등 개인정보를 수집하지 않습니다.',
+      '모든 오디오는 브라우저의 Web Audio API로 기기 내에서 처리됩니다. 어떤 오디오 데이터도 서버로 전송·저장되지 않습니다.',
+      '샌드박스 구성은 공유 링크(URL)에만 담길 뿐 서버에 저장되지 않습니다.',
+    ],
+  },
+  {
+    title: '쿠키 및 광고',
+    body: [
+      '본 사이트는 향후 Google AdSense 광고를 표시할 수 있습니다. Google은 쿠키를 사용해 관심사 기반 광고를 제공할 수 있습니다.',
+    ],
+    links: [
+      { label: 'Google 개인정보처리방침', href: 'https://policies.google.com/privacy' },
+      { label: 'Google 광고 설정에서 옵트아웃', href: 'https://www.google.com/settings/ads' },
+    ],
+  },
+  {
+    title: '제3자 서비스',
+    list: [
+      ['GitHub Pages', '정적 사이트 호스팅 (접속 IP 로그 가능)'],
+      ['Google Fonts', '폰트 로딩 (IP 수집 가능)'],
+      ['jsDelivr CDN', 'Pretendard 폰트 전송'],
+      ['Google AdSense', '광고 서비스 (예정)'],
+    ],
+  },
+  {
+    title: '문의',
+    body: ['개인정보 관련 문의는 GitHub 저장소의 Issues를 통해 연락해 주세요.'],
+  },
+];
 ---
-<Base title="개인정보처리방침" description="SoundLab 개인정보처리방침">
-  <div class="max-w-2xl mx-auto px-4 sm:px-6 py-16">
-    <h1 class="text-2xl font-bold mb-8" style="font-family:'Space Grotesk'">개인정보처리방침</h1>
-    <div class="prose prose-sm text-[var(--color-ink-700)] space-y-6">
+<Base title="개인정보처리방침" description="SoundLab 개인정보처리방침 — 수집 정보, 쿠키·광고, 제3자 서비스 안내.">
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 py-12">
 
-      <p class="text-xs font-mono text-[var(--color-ink-300)]">최종 수정일: 2026-06-10</p>
+    <!-- 브레드크럼 -->
+    <nav class="flex items-center gap-2 text-xs font-mono text-[var(--color-ink-300)] mb-8">
+      <a href={base} class="hover:text-[var(--color-violet)] transition">홈</a>
+      <span>/</span>
+      <span class="text-[var(--color-ink-700)]">개인정보처리방침</span>
+    </nav>
 
-      <section>
-        <h2 class="text-base font-bold mb-2" style="font-family:'Space Grotesk'">1. 수집하는 개인정보</h2>
-        <p>SoundLab은 별도의 회원가입이나 개인정보 수집을 하지 않습니다. 브라우저의 Web Audio API를 통해 오디오가 처리되며, 어떠한 오디오 데이터도 서버로 전송되지 않습니다.</p>
-      </section>
+    <!-- 헤더 -->
+    <div class="mb-10">
+      <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Privacy Policy</span>
+      <h1 class="text-3xl sm:text-4xl font-bold mt-2 mb-3" style="font-family:'Space Grotesk'">개인정보처리방침</h1>
+      <p class="text-[var(--color-ink-500)] leading-relaxed">
+        SoundLab은 <b class="text-[var(--color-ink-700)]">계정도, 개인정보 수집도 없는</b> 사이트입니다.
+        오디오는 전부 브라우저 안에서 처리됩니다.
+      </p>
+      <p class="text-xs font-mono text-[var(--color-ink-300)] mt-3">최종 수정일 · 2026-06-11</p>
+    </div>
 
-      <section>
-        <h2 class="text-base font-bold mb-2" style="font-family:'Space Grotesk'">2. 쿠키 및 광고</h2>
-        <p>본 사이트는 Google AdSense를 통한 광고를 표시할 수 있습니다. Google은 쿠키를 사용하여 사용자의 관심사에 기반한 광고를 제공합니다. Google의 개인정보 처리방침은 <a href="https://policies.google.com/privacy" class="text-[var(--color-violet)] underline" target="_blank" rel="noopener">policies.google.com/privacy</a>에서 확인하실 수 있습니다.</p>
-        <p>Google 광고 개인화를 원하지 않으시면 <a href="https://www.google.com/settings/ads" class="text-[var(--color-violet)] underline" target="_blank" rel="noopener">Google 광고 설정</a>에서 옵트아웃 할 수 있습니다.</p>
-      </section>
+    <!-- 섹션 카드 -->
+    <div class="space-y-4">
+      {sections.map((s, i) => (
+        <section class="p-5 sm:p-6 rounded-2xl border border-[var(--color-border)] bg-white">
+          <div class="flex items-center gap-3 mb-3">
+            <span class="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-mono font-bold text-white gradient-brand">
+              {String(i + 1).padStart(2, '0')}
+            </span>
+            <h2 class="text-base font-bold" style="font-family:'Space Grotesk'">{s.title}</h2>
+          </div>
 
-      <section>
-        <h2 class="text-base font-bold mb-2" style="font-family:'Space Grotesk'">3. 제3자 서비스</h2>
-        <p>본 사이트는 다음 제3자 서비스를 사용합니다:</p>
-        <ul class="list-disc list-inside space-y-1 text-sm">
-          <li>Google Fonts — 폰트 로딩 (IP 수집 가능)</li>
-          <li>jsDelivr CDN — Pretendard 폰트</li>
-          <li>Google AdSense — 광고 서비스 (예정)</li>
-        </ul>
-      </section>
+          {s.body && (
+            <div class="space-y-2 text-sm leading-relaxed text-[var(--color-ink-700)]">
+              {s.body.map(p => <p>{p}</p>)}
+            </div>
+          )}
 
-      <section>
-        <h2 class="text-base font-bold mb-2" style="font-family:'Space Grotesk'">4. 문의</h2>
-        <p>개인정보 관련 문의는 GitHub Issues를 통해 연락해 주세요.</p>
-      </section>
+          {s.list && (
+            <ul class="space-y-2 mt-1">
+              {s.list.map(([name, desc]) => (
+                <li class="flex items-start gap-2.5 text-sm">
+                  <span class="mt-1.5 w-1.5 h-1.5 rounded-full bg-[var(--color-violet-light)] flex-none"></span>
+                  <span><b class="font-semibold text-[var(--color-ink-700)] font-mono text-xs">{name}</b><span class="text-[var(--color-ink-500)]"> — {desc}</span></span>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {s.links && (
+            <div class="flex flex-wrap gap-2 mt-3">
+              {s.links.map(l => (
+                <a href={l.href} target="_blank" rel="noopener"
+                  class="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border border-[var(--color-border)] text-[var(--color-ink-500)] hover:border-[var(--color-violet)] hover:text-[var(--color-violet)] transition">
+                  {l.label}
+                  <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5h5v5M19 5l-9 9M10 5H5v14h14v-5"/></svg>
+                </a>
+              ))}
+            </div>
+          )}
+        </section>
+      ))}
     </div>
   </div>
 </Base>

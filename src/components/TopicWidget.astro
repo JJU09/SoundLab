@@ -4,6 +4,7 @@
 import EffectPlayer from './EffectPlayer.astro';
 import SynthPlayer from './SynthPlayer.astro';
 import PhaseWidget from './PhaseWidget.astro';
+import ToneWidget from './ToneWidget.astro';
 import { MODULE_MAP, type ModuleId } from '../lib/modules';
 
 interface Props {
@@ -18,3 +19,4 @@ const effectModule = widget === 'effect' && moduleId ? MODULE_MAP[moduleId] : nu
 {effectModule && <EffectPlayer module={effectModule} />}
 {widget === 'synth' && <SynthPlayer config={config} />}
 {widget === 'phase' && <PhaseWidget config={config} />}
+{widget === 'tone' && <ToneWidget config={config} />}

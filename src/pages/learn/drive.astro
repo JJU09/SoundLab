@@ -8,15 +8,15 @@ const m = MODULE_MAP['drive'];
 
     <section>
       <h2 class="text-base font-bold mb-2" style="font-family:'Space Grotesk'">드라이브(디스토션)란?</h2>
-      <p>신호의 레벨을 증폭시켜 파형의 꼭대기를 잘라내는(클리핑) 효과입니다. 이 과정에서 원래 없던 배음(harmonics)이 생겨나 소리가 거칠고 풍성해집니다. 기타 앰프의 오버드라이브, 퍼즈 페달이 모두 이 원리입니다.</p>
+      <p>신호를 증폭시켜 파형의 꼭대기를 눌러버리는(클리핑) 효과입니다. 이 과정에서 원래 없던 배음(harmonics)이 생겨나 소리가 거칠고 풍성해집니다. 기타 앰프의 볼륨을 너무 높이면 오버드라이브가 걸리는 것, 레코딩이 너무 크게 녹음되어 찌그러지는 것이 모두 이 원리입니다.</p>
     </section>
 
     <section>
       <h2 class="text-base font-bold mb-3" style="font-family:'Space Grotesk'">하드 클리핑 vs 소프트 클리핑</h2>
       <div class="space-y-2">
         {[
-          ['하드 클리핑', '파형을 직각으로 잘라냅니다. 날카롭고 공격적인 사운드. 사각파(Square)에 가까워집니다.'],
-          ['소프트 클리핑 (SoundLab 방식)', '파형을 부드럽게 눌러줍니다. 따뜻하고 자연스러운 배음. 진공관 앰프 특성을 모사합니다.'],
+          ['하드 클리핑', '파형을 정해진 한계에서 직각으로 잘라냅니다. 날카롭고 공격적인 사운드. 디지털 클리핑, 퍼즈 페달이 대표적입니다.'],
+          ['소프트 클리핑 (SoundLab 방식)', '파형을 S자 곡선으로 부드럽게 눌러줍니다. 따뜻하고 자연스러운 배음. 진공관(튜브) 앰프의 포화 특성을 모사합니다.'],
         ].map(([title, desc]) => (
           <div class="p-3 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)]">
             <div class="font-semibold text-xs font-mono text-[var(--color-blue)] mb-1">{title}</div>
@@ -28,16 +28,48 @@ const m = MODULE_MAP['drive'];
 
     <section>
       <h2 class="text-base font-bold mb-2" style="font-family:'Space Grotesk'">왜 배음이 생길까?</h2>
-      <p>순수한 사인파(기음만 존재)를 클리핑하면 파형이 사각파에 가까워집니다. 사각파는 수학적으로 기음의 홀수 배음(3배, 5배, 7배…)의 합으로 이루어져 있기 때문에, 클리핑 = 배음 추가입니다. 스펙트럼에서 이 배음 막대들이 생겨나는 것을 직접 확인할 수 있습니다.</p>
+      <p>순수한 사인파(기음 하나만 존재)를 클리핑하면 파형이 점점 사각파에 가까워집니다. 사각파는 수학적으로 기음의 <b>홀수 배음(3배, 5배, 7배…)의 합</b>으로 이루어져 있습니다. 즉, 클리핑 = 배음 추가입니다. 스펙트럼 화면에서 배음 막대들이 줄지어 나타나는 것을 직접 확인할 수 있습니다.</p>
+    </section>
+
+    <section>
+      <h2 class="text-base font-bold mb-3" style="font-family:'Space Grotesk'">파라미터 이해</h2>
+      <div class="space-y-2">
+        {[
+          ['Amount (드라이브 강도)', '클리핑 강도를 결정합니다. 낮은 값에서도 파형은 즉시 눌리기 시작하며, 약 10%에서 진폭이 원음의 2배로 최고조에 달합니다. 그 이상은 파형이 포화(Saturation) 상태가 되어 음량보다 음색(배음 풍부도)을 조절하는 영역입니다.'],
+        ].map(([title, desc]) => (
+          <div class="p-3 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)]">
+            <div class="font-semibold text-xs font-mono text-[var(--color-blue)] mb-1">{title}</div>
+            <div class="text-xs text-[var(--color-ink-500)]">{desc}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <section>
+      <h2 class="text-base font-bold mb-2" style="font-family:'Space Grotesk'">Drive를 올릴수록 진폭이 줄어드는 이유</h2>
+      <p class="mb-3">Drive가 높아질수록 파형이 포화 상태에 도달해 더 이상 커질 공간이 없어집니다. 이 시점부터 내장된 <b>자동 볼륨 보정(Auto Makeup Gain)</b>이 출력을 계속 낮춰 찢어지는 소리를 방지합니다. 실제 기타 앰프나 플러그인도 같은 이유로 "드라이브를 올리면 음색이 진해지되 음량은 크게 변하지 않습니다."</p>
+      <div class="grid grid-cols-3 gap-2 text-center text-xs">
+        {[
+          ['Drive 0%', '0.35', '매끄러운 사인파'],
+          ['Drive 10%', '0.78 ↑최대', '파형 눌림 시작'],
+          ['Drive 100%', '0.45', '거의 사각파'],
+        ].map(([label, amp, note]) => (
+          <div class="p-2 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)]">
+            <div class="font-mono font-bold text-[var(--color-blue)] text-[11px] mb-0.5">{label}</div>
+            <div class="font-mono text-base font-bold text-[var(--color-ink-700)]">{amp}</div>
+            <div class="text-[10px] text-[var(--color-ink-500)] mt-0.5">{note}</div>
+          </div>
+        ))}
+      </div>
     </section>
 
     <div class="p-4 rounded-xl border-l-2 border-[var(--color-blue)] bg-[var(--color-blue-glow)]">
       <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-blue)] mb-2">🔊 실습 가이드</div>
       <ul class="space-y-1 text-xs text-[var(--color-ink-700)]">
         <li>→ <b>사인파(Sine)</b> 지속음으로 시작하세요 — 파형이 매끄럽고 스펙트럼에 막대 하나만 있습니다</li>
-        <li>→ Drive를 올리며 파형 꼭대기가 눌리는 클리핑을 관찰하세요</li>
-        <li>→ 스펙트럼에 배음 막대들이 줄지어 나타나는 것을 확인하세요</li>
-        <li>→ 사각파(Square)로 바꿔 이미 배음이 많은 소리와 비교해보세요</li>
+        <li>→ Drive를 천천히 올리며 파형 꼭대기가 눌리는 모양과 스펙트럼에 배음 막대가 생기는 것을 관찰하세요</li>
+        <li>→ Drive 10% 근방에서 오실로스코프 진폭이 최대가 되고, 이후 줄어드는 것을 확인하세요</li>
+        <li>→ 사각파(Square)로 바꿔 이미 배음이 많은 소리와 비교해보세요 — 클리핑 효과가 훨씬 적습니다</li>
       </ul>
     </div>
   </div>

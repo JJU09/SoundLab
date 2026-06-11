@@ -2,6 +2,13 @@
 import Base from '../layouts/Base.astro';
 import { MODULES } from '../lib/modules';
 import { PRESETS } from '../lib/presets';
+const typeShort: Record<string, string> = {
+  filter: 'FLT', drive: 'DRV', tremolo: 'TRM',
+  chorus: 'CHO', delay: 'DLY', reverb: 'RVB',
+};
+const starterPresets = PRESETS.filter(p => p.id !== 'clean');
+const presetRow1 = starterPresets.slice(0, 3);
+const presetRow2 = starterPresets.slice(3);
 ---
 <Base title="샌드박스" description="이펙터를 자유롭게 꺼내 조립하는 모듈러 페달보드. 같은 이펙터를 여러 개 배치하고 순서를 바꾸며 사운드를 디자인하세요.">
 
@@ -21,34 +28,6 @@ import { PRESETS } from '../lib/presets';
     <span class="text-xs font-mono text-[var(--color-ink-500)]">SOURCE</span>
     <svg class="w-4 h-4 text-[var(--color-border)] flex-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
     <span class="text-xs font-mono text-[var(--color-ink-500)]">OUT</span>
-  </div>
-
-  <!-- 프리셋 레시피 북 -->
-  <div class="mb-6 p-4 rounded-2xl border border-[var(--color-border)] bg-white">
-    <div class="flex items-center justify-between gap-2 mb-3">
-      <div class="flex items-center gap-2">
-        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Presets · 레시피 북</span>
-        <span class="hidden sm:inline text-[10px] text-[var(--color-ink-300)]">버튼 하나로 페달보드 전체가 구성됩니다</span>
-      </div>
-      <button id="shareBtn"
-        class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[var(--color-border)] text-xs font-medium text-[var(--color-ink-500)] hover:border-[var(--color-violet)] hover:text-[var(--color-violet)] transition whitespace-nowrap"
-        title="현재 페달보드를 링크로 복사">
-        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
-        <span id="shareLabel">링크 공유</span>
-      </button>
-    </div>
-    <div class="flex flex-wrap gap-2">
-      {PRESETS.map(p => (
-        <button class="preset-btn group flex items-center gap-2.5 px-3 py-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-violet)] hover:bg-[var(--color-violet-glow)] transition-all text-left"
-          data-preset={p.id}>
-          <span class="text-xl leading-none">{p.emoji}</span>
-          <span class="block">
-            <span class="block text-sm font-semibold text-[var(--color-ink-700)] group-hover:text-[var(--color-violet)] transition" style="font-family:'Space Grotesk'">{p.name}</span>
-            <span class="block text-[10px] text-[var(--color-ink-300)] max-w-[190px] leading-tight">{p.desc}</span>
-          </span>
-        </button>
-      ))}
-    </div>
   </div>
 
   <div class="grid grid-cols-1 lg:grid-cols-[190px_1fr_300px] gap-6">
@@ -114,12 +93,59 @@ import { PRESETS } from '../lib/presets';
 
       <!-- 이펙트 랙 (드롭존) -->
       <div id="effectRack" class="space-y-3 min-h-[160px] rounded-2xl transition-colors">
-        <div id="rackEmpty" class="flex flex-col items-center justify-center text-center py-16 px-6 rounded-2xl border-2 border-dashed border-[var(--color-border)] text-[var(--color-ink-300)]">
-          <svg class="w-10 h-10 mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v16m8-8H4"/></svg>
-          <p class="text-sm font-medium">창고에서 이펙터를 끌어다 놓으세요</p>
-          <p class="text-xs mt-1">또는 팔레트의 이펙터를 클릭하면 추가됩니다</p>
+        <div id="rackEmpty" class="rounded-2xl border-2 border-dashed border-[var(--color-border)]">
+          <!-- 빈 상태 안내 -->
+          <div class="flex flex-col items-center justify-center text-center pt-10 pb-6 px-6 text-[var(--color-ink-300)]">
+            <svg class="w-9 h-9 mb-3 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12h3l2-6 4 12 4-9 2 3h3"/>
+            </svg>
+            <p class="text-sm font-semibold text-[var(--color-ink-500)]" style="font-family:'Space Grotesk'">빈 페달보드</p>
+            <p class="text-xs mt-1 text-[var(--color-ink-300)]">창고에서 이펙터를 클릭하거나 드래그해 추가하세요</p>
+          </div>
+          <!-- 구분선 -->
+          <div class="flex items-center gap-3 px-6 pb-4">
+            <div class="flex-1 h-px bg-[var(--color-border)]"></div>
+            <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)]">또는 예시로 시작</span>
+            <div class="flex-1 h-px bg-[var(--color-border)]"></div>
+          </div>
+          <!-- 프리셋 스타터 -->
+          <div class="flex flex-col items-center gap-2 px-6 pb-6">
+            <div class="flex gap-2 justify-center flex-wrap">
+              {presetRow1.map(p => (
+                <button class="preset-btn group flex flex-col items-center gap-2 px-4 py-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-violet)] hover:bg-[var(--color-violet-glow)] transition-all text-center"
+                  data-preset={p.id}>
+                  <span class="text-xs font-semibold text-[var(--color-ink-600)] group-hover:text-[var(--color-violet)] transition leading-none" style="font-family:'Space Grotesk'">{p.name}</span>
+                  <span class="flex items-center gap-1">
+                    {p.state.instances?.map((inst, i) => (
+                      <>
+                        {i > 0 && <span class="text-[var(--color-ink-300)] text-[10px] font-mono leading-none">→</span>}
+                        <span class="gradient-brand text-white text-[9px] font-mono font-bold px-1.5 py-0.5 rounded leading-none">{typeShort[inst.type] ?? inst.type.slice(0,3).toUpperCase()}</span>
+                      </>
+                    ))}
+                  </span>
+                </button>
+              ))}
+            </div>
+            <div class="flex gap-2 justify-center flex-wrap">
+              {presetRow2.map(p => (
+                <button class="preset-btn group flex flex-col items-center gap-2 px-4 py-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-violet)] hover:bg-[var(--color-violet-glow)] transition-all text-center"
+                  data-preset={p.id}>
+                  <span class="text-xs font-semibold text-[var(--color-ink-600)] group-hover:text-[var(--color-violet)] transition leading-none" style="font-family:'Space Grotesk'">{p.name}</span>
+                  <span class="flex items-center gap-1">
+                    {p.state.instances?.map((inst, i) => (
+                      <>
+                        {i > 0 && <span class="text-[var(--color-ink-300)] text-[10px] font-mono leading-none">→</span>}
+                        <span class="gradient-brand text-white text-[9px] font-mono font-bold px-1.5 py-0.5 rounded leading-none">{typeShort[inst.type] ?? inst.type.slice(0,3).toUpperCase()}</span>
+                      </>
+                    ))}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
+
     </div>
 
     <!-- 우: 비주얼라이저 -->
@@ -319,6 +345,13 @@ function bindCard(card: HTMLElement, id: string, type: string) {
   card.dataset.instanceId = id;
   card.dataset.type = type;
 
+  // 인스턴스 번호 배지: 타입 고정번호(01~06) → 인스턴스 순번 (filter-3 → "3")
+  const numBadge = card.querySelector<HTMLElement>('div.gradient-brand');
+  if (numBadge) numBadge.textContent = id.split('-').pop() ?? '';
+
+  // 새 카드는 기본 ON (writeStateToDOM이 URL/프리셋 복원 시 덮어씀)
+  setPwrVisual(card, true);
+
   // 슬라이더: 초기 위치 + 입력 핸들러
   card.querySelectorAll<HTMLElement>('.slider-wrap').forEach(wrap => {
     const input = wrap.querySelector<HTMLInputElement>('input')!;
@@ -382,6 +415,7 @@ function spawnCard(type: string, beforeEl: HTMLElement | null = null): string {
   if (beforeEl) rack.insertBefore(card, beforeEl); else rack.appendChild(card);
   bindCard(card, id, type);
   engine?.addInstance(id, type);
+  engine?.setEnabled(id, true); // 팔레트에서 추가된 카드는 바로 ON
   syncChain();
   updatePlaceholder();
   return id;
@@ -541,18 +575,15 @@ playBtn.addEventListener('click', async () => {
 
 const bypassBtn = document.getElementById('bypassBtn')!;
 const bypassDot = document.getElementById('bypassDot')!;
-const bypassLabel = document.getElementById('bypassLabel')!;
 bypassBtn.addEventListener('click', () => {
   const on = bypassBtn.getAttribute('aria-pressed') !== 'true';
   bypassBtn.setAttribute('aria-pressed', String(on));
   if (on) {
     bypassBtn.style.cssText = 'background:var(--color-ink-700);color:white;border-color:var(--color-ink-700)';
     bypassDot.style.cssText = 'background:#f59e0b;box-shadow:0 0 8px #f59e0b';
-    bypassLabel.textContent = '원음 (이펙터 OFF)';
   } else {
     bypassBtn.style.cssText = '';
     bypassDot.style.cssText = 'background:var(--color-border)';
-    bypassLabel.textContent = '원음 비교';
   }
   engine?.setBypassAll(on);
 });
@@ -568,14 +599,6 @@ document.querySelectorAll<HTMLElement>('.preset-btn').forEach(btn => {
   });
 });
 
-const shareBtn = document.getElementById('shareBtn')!;
-const shareLabel = document.getElementById('shareLabel')!;
-shareBtn.addEventListener('click', async () => {
-  const url = `${location.origin}${location.pathname}?p=${encodeState(readStateFromDOM())}`;
-  try { await navigator.clipboard.writeText(url); shareLabel.textContent = '복사됨!'; }
-  catch (e) { shareLabel.textContent = '복사 실패'; }
-  setTimeout(() => { shareLabel.textContent = '링크 공유'; }, 1600);
-});
 
 // ── 팔레트 + 랙 Drag & Drop ──
 document.querySelectorAll<HTMLElement>('.palette-chip').forEach(chip => {

@@ -9,7 +9,7 @@ const hubs = [...HUBS]
   .sort((a, b) => HUB_META[a].order - HUB_META[b].order)
   .map(h => ({ id: h, ...HUB_META[h], count: all.filter(t => t.data.hub === h).length }));
 ---
-<Base title="홈" description="Web Audio API로 배우는 사운드 이펙트 실습 플레이그라운드. 필터·드라이브·딜레이·리버브를 직접 조작하며 소리가 바뀌는 원리를 배웁니다.">
+<Base title="홈" description="음향 물리부터 신디시스·이펙트·믹싱까지, Web Audio API로 듣고 만지며 배우는 인터랙티브 사운드 백과사전.">
 
   <!-- Hero -->
   <section class="relative max-w-6xl mx-auto px-4 sm:px-6 pt-20 pb-16 text-center overflow-hidden">
@@ -26,12 +26,12 @@ const hubs = [...HUBS]
       </span>
 
       <h1 class="text-4xl sm:text-6xl font-bold tracking-tight mb-5 leading-tight" style="font-family:'Space Grotesk'">
-        소리를 <span class="gradient-brand-text">직접 만지며</span><br/>배우는 이펙트
+        소리를 <span class="gradient-brand-text">직접 만지며</span><br/>배우는 사운드 백과사전
       </h1>
 
       <p class="text-lg text-[var(--color-ink-500)] max-w-xl mx-auto mb-10 leading-relaxed">
-        노브를 돌리면 파형과 주파수가 실시간으로 바뀝니다.<br/>
-        보고 듣고 느끼며 사운드 엔지니어링을 익히세요.
+        음향 물리부터 신디시스·이펙트·믹싱까지.<br/>
+        노브를 돌리고 파형을 보며 사운드의 원리를 익히세요.
       </p>
 
       <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -97,7 +97,7 @@ const hubs = [...HUBS]
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
         {[
           { icon: '🎛️', title: '즉각적인 피드백', desc: '슬라이더를 움직이면 파형과 스펙트럼이 실시간으로 반응합니다.' },
-          { icon: '📖', title: '개념 내장 학습', desc: '각 이펙트마다 원리 설명과 "들어볼 것 / 볼 것" 가이드가 내장되어 있습니다.' },
+          { icon: '📖', title: '개념 내장 학습', desc: '각 토픽마다 원리 설명과 "들어볼 것 / 볼 것" 가이드, 확인 퀴즈가 내장되어 있습니다.' },
           { icon: '🔗', title: '설치 없이 즉시 시작', desc: '브라우저만 있으면 됩니다. 앱 설치, 회원가입 없이 링크 하나로 실습합니다.' },
         ].map(f => (
           <div class="p-5 rounded-2xl bg-white border border-[var(--color-border)]">

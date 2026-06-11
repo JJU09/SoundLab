@@ -12,12 +12,14 @@ const c = {
   release: config.release ?? 400,  // ms
 };
 const waves: [OscillatorType, string][] = [['sine','Sine'],['square','Square'],['sawtooth','Saw'],['triangle','Tri']];
+// tier: easy=Attack·Release(탄생·죽음) 집중, normal=Decay·Sustain 추가
 const knobs = [
-  { p: 'attack', label: 'Attack', min: 1, max: 2000, step: 1, val: c.attack, unit: 'ms' },
-  { p: 'decay', label: 'Decay', min: 1, max: 2000, step: 1, val: c.decay, unit: 'ms' },
-  { p: 'sustain', label: 'Sustain', min: 0, max: 100, step: 1, val: c.sustain, unit: '%' },
-  { p: 'release', label: 'Release', min: 1, max: 3000, step: 1, val: c.release, unit: 'ms' },
+  { p: 'attack', label: 'Attack', min: 1, max: 2000, step: 1, val: c.attack, unit: 'ms', tier: 'easy' },
+  { p: 'decay', label: 'Decay', min: 1, max: 2000, step: 1, val: c.decay, unit: 'ms', tier: 'normal' },
+  { p: 'sustain', label: 'Sustain', min: 0, max: 100, step: 1, val: c.sustain, unit: '%', tier: 'normal' },
+  { p: 'release', label: 'Release', min: 1, max: 3000, step: 1, val: c.release, unit: 'ms', tier: 'easy' },
 ];
+const adv = (tier?: string) => (tier && tier !== 'easy' ? { 'data-adv': tier } : {});
 ---
 <div class="synth-player rounded-2xl border border-[var(--color-border)] bg-white overflow-hidden"
   data-wave={c.wave} data-attack={c.attack} data-decay={c.decay} data-sustain={c.sustain} data-release={c.release}>
@@ -49,7 +51,7 @@ const knobs = [
     </div>
 
     <!-- 파형 선택 -->
-    <div>
+    <div {...adv('normal')}>
       <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">Waveform</div>
       <div class="flex gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" role="group">
         {waves.map(([v, t]) => (
@@ -61,7 +63,7 @@ const knobs = [
 
     <!-- ADSR 슬라이더 -->
     {knobs.map(k => (
-      <div>
+      <div {...adv(k.tier)}>
         <div class="flex items-center justify-between mb-1">
           <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">{k.label}</span>
           <span class="adsr-val text-sm font-mono text-[var(--color-ink-700)]" data-for={k.p}>{k.val}{k.unit}</span>

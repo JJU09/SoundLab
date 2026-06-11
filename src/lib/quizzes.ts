@@ -287,24 +287,60 @@ export const QUIZZES: Record<string, QuizQuestion[] | LevelQuizzes> = {
       },
     ],
   },
-  adsr: [
-    {
-      q: 'ADSR 엔벨로프에서 A(Attack)가 결정하는 것은?',
-      options: ['소리가 0에서 최대까지 도달하는 시간', '유지되는 음량 레벨', '소리가 사라지는 시간', '음정의 높이'],
-      answer: 0,
-      explain: 'Attack은 건반을 누른 순간부터 음량이 0 → 최대(peak)에 도달하기까지의 시간입니다. 짧으면 타악기처럼, 길면 현악기처럼 서서히 차오릅니다.',
-    },
-    {
-      q: 'Sustain은 다른 셋과 성격이 다릅니다. 무엇일까요?',
-      options: ['시간(time)이 아니라 레벨(level)이다', '가장 긴 시간 구간이다', '음정을 결정한다', '항상 0이다'],
-      answer: 0,
-      explain: 'A·D·R은 모두 "시간"이지만 Sustain은 건반을 누르고 있는 동안 유지되는 "음량 레벨"입니다. Decay는 peak에서 이 Sustain 레벨까지 떨어지는 시간이고요.',
-    },
-    {
-      q: '건반에서 손을 뗀 뒤 소리가 사라지기까지의 시간은?',
-      options: ['Attack', 'Decay', 'Sustain', 'Release'],
-      answer: 3,
-      explain: 'Release는 노트 오프(손을 뗀) 시점부터 음량이 0으로 잦아드는 시간입니다. 길면 피아노 페달처럼 여운이 남습니다.',
-    },
-  ],
+  adsr: {
+    easy: [
+      {
+        q: '피아노는 "땅!" 하고 터지고 바이올린은 "스르륵" 차오릅니다. 이 차이를 정하는 것은?',
+        options: ['소리가 태어나는 속도(Attack)', '음정', '음량의 최대치', '잔향'],
+        answer: 0,
+        explain: 'Attack은 소리가 0에서 최대까지 차오르는 속도예요. 짧으면 피아노처럼 터지고, 길면 바이올린처럼 스르륵 나타납니다.',
+      },
+      {
+        q: 'Release를 길게 하면?',
+        options: ['손 뗀 뒤 여운이 길게 남는다', '소리가 즉시 끊긴다', '음정이 올라간다', '더 커진다'],
+        answer: 0,
+        explain: 'Release는 손을 뗀 뒤 소리가 사라지는 속도예요. 길수록 피아노 페달처럼 여운이 남습니다.',
+      },
+    ],
+    normal: [
+      {
+        q: 'ADSR 엔벨로프에서 A(Attack)가 결정하는 것은?',
+        options: ['소리가 0에서 최대까지 도달하는 시간', '유지되는 음량 레벨', '소리가 사라지는 시간', '음정의 높이'],
+        answer: 0,
+        explain: 'Attack은 건반을 누른 순간부터 음량이 0 → 최대(peak)에 도달하기까지의 시간입니다. 짧으면 타악기처럼, 길면 현악기처럼 서서히 차오릅니다.',
+      },
+      {
+        q: 'Sustain은 다른 셋과 성격이 다릅니다. 무엇일까요?',
+        options: ['시간(time)이 아니라 레벨(level)이다', '가장 긴 시간 구간이다', '음정을 결정한다', '항상 0이다'],
+        answer: 0,
+        explain: 'A·D·R은 모두 "시간"이지만 Sustain은 건반을 누르고 있는 동안 유지되는 "음량 레벨"입니다. Decay는 peak에서 이 Sustain 레벨까지 떨어지는 시간이고요.',
+      },
+      {
+        q: '건반에서 손을 뗀 뒤 소리가 사라지기까지의 시간은?',
+        options: ['Attack', 'Decay', 'Sustain', 'Release'],
+        answer: 3,
+        explain: 'Release는 노트 오프(손을 뗀) 시점부터 음량이 0으로 잦아드는 시간입니다. 길면 피아노 페달처럼 여운이 남습니다.',
+      },
+    ],
+    hard: [
+      {
+        q: '엔벨로프에서 Release 구간이 시작되는 시점은?',
+        options: ['Gate On(노트 온)', 'Gate Off(노트 오프)', 'Attack 끝', '항상 시작과 동시'],
+        answer: 1,
+        explain: 'Gate Off(건반에서 손을 뗀) 순간부터 Release가 시작됩니다. Attack→Decay→Sustain은 Gate On 동안 진행됩니다.',
+      },
+      {
+        q: '아날로그 엔벨로프의 게인이 지수(exponential) 곡선을 그리는 근본 이유는?',
+        options: ['LFO 변조', 'RC 회로의 충·방전 특성', '컨볼루션', '클리핑'],
+        answer: 1,
+        explain: '아날로그 엔벨로프는 저항-커패시터(RC) 회로의 충·방전이라 게인이 지수 형태로 변합니다. 타임 상수가 곡선의 빠르기를 정합니다.',
+      },
+      {
+        q: 'A·D·R과 달리 Sustain만 단위가 다른 이유는?',
+        options: ['Sustain은 시간이 아니라 유지 레벨이라서', 'Sustain이 가장 길어서', '음정 단위라서', '항상 100%라서'],
+        answer: 0,
+        explain: 'A·D·R은 시간(상수)이지만 Sustain은 게이트가 유지되는 동안의 음량 레벨입니다. Decay는 peak에서 이 레벨까지 가는 시간이고요.',
+      },
+    ],
+  },
 };

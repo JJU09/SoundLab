@@ -1,0 +1,145 @@
+---
+// 빗필터 위젯 — 노이즈 + 지연 복사본 합성 → 스펙트럼에 빗(comb) 모양 노치.
+// 위상상쇄를 전 주파수로 확장. AudioCore 위 noise→(direct + delay)→core.input.
+interface Props {
+  config?: Record<string, any>;
+}
+const { config = {} } = Astro.props;
+const c = { delay: config.delay ?? 5, mix: config.mix ?? 80, feedback: config.feedback ?? 0 };
+const adv = (tier?: string) => (tier && tier !== 'easy' ? { 'data-adv': tier } : {});
+---
+<div class="comb-widget rounded-2xl border border-[var(--color-border)] bg-white overflow-hidden"
+  data-delay={c.delay} data-mix={c.mix} data-feedback={c.feedback}>
+
+  <div class="flex items-center justify-between px-5 py-4 border-b border-[var(--color-border)] bg-[var(--color-surface)]">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg flex items-center justify-center gradient-brand">
+        <svg class="text-white" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M4 20V8M9 20V4M14 20V8M19 20V4"/></svg>
+      </div>
+      <div>
+        <span class="font-bold text-base" style="font-family:'Space Grotesk'">빗필터</span>
+        <span class="text-sm text-[var(--color-ink-300)] ml-2">Comb Filter</span>
+      </div>
+    </div>
+    <button class="play-btn gradient-brand text-white text-sm font-semibold px-4 py-1.5 rounded-full transition hover:opacity-90" style="font-family:'Space Grotesk'">▶ 소리 켜기</button>
+  </div>
+
+  <div class="p-5 space-y-4">
+    <!-- 스펙트럼 (빗 노치) -->
+    <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]">
+      <canvas class="spec-cv block w-full" style="height:140px"></canvas>
+      <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-blue)] opacity-70">Spectrum · 빗(comb) 노치</span>
+    </div>
+    <p class="text-[11px] text-[var(--color-ink-300)] -mt-1">노이즈를 흘려보내면 지연 간격마다 주파수가 깎여 빗살 무늬가 생깁니다.</p>
+
+    <!-- 지연 시간 (easy) -->
+    <div>
+      <div class="flex items-center justify-between mb-1">
+        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Delay · 지연</span>
+        <span class="delay-val text-sm font-mono text-[var(--color-ink-700)]">{c.delay}ms</span>
+      </div>
+      <input type="range" class="sl-range delay-range" min="0.3" max="20" step="0.1" value={c.delay} aria-label="지연 시간" />
+      <div class="spacing-hint text-[10px] font-mono text-[var(--color-ink-300)] mt-1">노치 간격 ≈ — Hz</div>
+    </div>
+    <!-- 깊이 (normal) -->
+    <div {...adv('normal')}>
+      <div class="flex items-center justify-between mb-1">
+        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Depth · 복사본 양</span>
+        <span class="mix-val text-sm font-mono text-[var(--color-ink-700)]">{c.mix}%</span>
+      </div>
+      <input type="range" class="sl-range mix-range" min="0" max="100" step="1" value={c.mix} aria-label="복사본 양" />
+    </div>
+    <!-- 피드백 (hard) -->
+    <div {...adv('hard')}>
+      <div class="flex items-center justify-between mb-1">
+        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Feedback · 공진</span>
+        <span class="fb-val text-sm font-mono text-[var(--color-ink-700)]">{c.feedback}%</span>
+      </div>
+      <input type="range" class="sl-range fb-range" min="0" max="90" step="1" value={c.feedback} aria-label="피드백" />
+    </div>
+  </div>
+</div>
+
+<script>
+import { AudioCore } from '../audio/core';
+
+function initComb(root: HTMLElement) {
+  const core = new AudioCore();
+  let dly = Number(root.dataset.delay) || 5;
+  let mix = Number(root.dataset.mix) || 80;
+  let fb = Number(root.dataset.feedback) || 0;
+  let playing = false;
+
+  // 그래프: noise → directGain → input ; noise → delay → wetGain → input ; delay → fbGain → delay
+  const directGain = core.gain(0.5), wetGain = core.gain(mix / 100 * 0.5);
+  const delay = core.ctx.createDelay(0.05);
+  const fbGain = core.gain(fb / 100);
+  delay.delayTime.value = dly / 1000;
+  directGain.connect(core.input);
+  delay.connect(wetGain); wetGain.connect(core.input);
+  delay.connect(fbGain); fbGain.connect(delay);
+
+  // 노이즈 버퍼 (2초 루프)
+  const len = core.ctx.sampleRate * 2;
+  const noiseBuf = core.ctx.createBuffer(1, len, core.ctx.sampleRate);
+  const nd = noiseBuf.getChannelData(0);
+  for (let i = 0; i < len; i++) nd[i] = Math.random() * 2 - 1;
+  let noise: AudioBufferSourceNode | null = null;
+
+  async function start() {
+    await core.resume();
+    noise = core.ctx.createBufferSource(); noise.buffer = noiseBuf; noise.loop = true;
+    noise.connect(directGain); noise.connect(delay); noise.start();
+    playing = true;
+  }
+  function stop() { if (noise) { try { noise.stop(); } catch (e) {} noise.disconnect(); noise = null; } playing = false; }
+
+  const spec = root.querySelector('.spec-cv') as HTMLCanvasElement;
+  const fit = () => { const r = spec.getBoundingClientRect(); spec.width = Math.max(1, r.width * devicePixelRatio); spec.height = Math.max(1, r.height * devicePixelRatio); };
+  fit(); addEventListener('resize', fit);
+
+  const fd = new Uint8Array(core.analyser.frequencyBinCount);
+  function draw() {
+    const ctx = spec.getContext('2d')!, W = spec.width, H = spec.height;
+    core.analyser.getByteFrequencyData(fd);
+    ctx.clearRect(0, 0, W, H);
+    // 라인으로 그려야 빗 노치(골)가 또렷
+    ctx.beginPath();
+    const n = Math.min(fd.length, 512);
+    for (let i = 0; i < n; i++) { const x = (i / n) * W, y = H - (fd[i] / 255) * H; i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+    ctx.lineTo(W, H); ctx.lineTo(0, H); ctx.closePath();
+    ctx.fillStyle = 'rgba(37,99,235,0.18)'; ctx.fill();
+    ctx.beginPath();
+    for (let i = 0; i < n; i++) { const x = (i / n) * W, y = H - (fd[i] / 255) * H; i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+    ctx.strokeStyle = '#2563eb'; ctx.lineWidth = 1.4 * devicePixelRatio; ctx.stroke();
+    requestAnimationFrame(draw);
+  }
+  draw();
+
+  const hint = root.querySelector('.spacing-hint') as HTMLElement;
+  const updateHint = () => { hint.textContent = `노치 간격 ≈ ${Math.round(1000 / dly)} Hz`; };
+  updateHint();
+
+  // 컨트롤
+  const playBtn = root.querySelector('.play-btn') as HTMLButtonElement;
+  playBtn.addEventListener('click', async () => {
+    if (playing) { stop(); playBtn.textContent = '▶ 소리 켜기'; }
+    else { await start(); playBtn.textContent = '⏸ 소리 끄기'; }
+  });
+
+  const setPct = (el: HTMLInputElement) => el.style.setProperty('--sl-pct', ((+el.value - +el.min) / (+el.max - +el.min) * 100) + '%');
+  const dRange = root.querySelector('.delay-range') as HTMLInputElement, dVal = root.querySelector('.delay-val') as HTMLElement;
+  setPct(dRange);
+  dRange.addEventListener('input', () => { dly = +dRange.value; dVal.textContent = dly + 'ms'; setPct(dRange); core.smooth(delay.delayTime, dly / 1000, 0.01); updateHint(); });
+
+  const mRange = root.querySelector('.mix-range') as HTMLInputElement, mVal = root.querySelector('.mix-val') as HTMLElement;
+  setPct(mRange);
+  mRange.addEventListener('input', () => { mix = +mRange.value; mVal.textContent = mix + '%'; setPct(mRange); core.smooth(wetGain.gain, mix / 100 * 0.5); });
+
+  const fRange = root.querySelector('.fb-range') as HTMLInputElement, fVal = root.querySelector('.fb-val') as HTMLElement;
+  setPct(fRange);
+  fRange.addEventListener('input', () => { fb = +fRange.value; fVal.textContent = fb + '%'; setPct(fRange); core.smooth(fbGain.gain, fb / 100); });
+}
+
+document.querySelectorAll<HTMLElement>('.comb-widget').forEach(initComb);
+</script>

@@ -1,0 +1,85 @@
+---
+hub: acoustics
+title: Comb Filtering
+kr: 빗필터
+order: 3
+color: violet
+tagline: 반사음이 만드는 빗살 무늬
+desc: 소리가 벽에 반사돼 원음과 살짝 늦게 겹치면, 주파수마다 보강·상쇄가 번갈아 일어나 스펙트럼이 빗(comb) 모양으로 깎입니다. 위상 간섭을 전 주파수로 확장한 현상입니다.
+widget: comb
+widgetConfig:
+  delay: 5
+  mix: 80
+  feedback: 0
+quiz: comb
+scaffold: true
+---
+import Level from '../../../components/doc/Level.astro';
+import DefList from '../../../components/doc/DefList.astro';
+import DefCard from '../../../components/doc/DefCard.astro';
+import Callout from '../../../components/doc/Callout.astro';
+
+{/* ───────── 초급 ───────── */}
+<Level show="easy">
+## 소리가 벽에 부딪히면
+
+방에서 소리를 내면 벽에 반사된 소리가 **아주 조금 늦게** 귀에 다시 도착해요. 원래 소리와 이 늦은 복사본이 겹치면, 어떤 음은 더 커지고 어떤 음은 사라져 소리가 **빗으로 빗은 듯** 묘하게 깎입니다.
+
+좁은 복도나 욕실에서 소리가 '쇠~한' 금속성으로 들리는 게 바로 이 현상이에요.
+
+## 직접 해보기
+
+**소리 켜기** 후 **Delay(지연)** 슬라이더를 움직여보세요. 스펙트럼의 빗살 무늬 간격이 촘촘해졌다 넓어지고, 소리 색깔도 함께 바뀝니다.
+</Level>
+
+{/* ───────── 중급 ───────── */}
+<Level show="normal">
+## 빗필터란?
+
+원음과 **지연된 복사본**을 더하면, 위상 간섭이 주파수마다 다르게 일어납니다. 어떤 주파수는 보강(피크), 어떤 주파수는 상쇄(노치)되어 스펙트럼에 빗살 무늬가 생깁니다.
+
+<DefList>
+  <DefCard term="노치 간격">지연 시간 τ에 반비례 → 1/τ Hz 간격. 지연이 짧을수록 빗살이 넓어짐.</DefCard>
+  <DefCard term="Depth (복사본 양)">복사본 비율이 클수록 노치가 깊어짐(완전 상쇄에 근접).</DefCard>
+</DefList>
+
+## 위상 간섭과의 관계
+
+[위상 간섭]은 한 주파수에서의 보강/상쇄였습니다. 빗필터는 같은 지연이 주파수마다 다른 위상차를 만들어, **모든 주파수에 걸쳐 보강·상쇄가 반복**되는 것입니다.
+</Level>
+
+{/* ───────── 고급 ───────── */}
+<Level show="hard">
+## 전달 함수와 노치 위치
+
+피드포워드 빗필터 `y = x + g·x(t−τ)`의 주파수 응답 크기는:
+
+`|H(f)| = |1 + g·e^(−j2πfτ)|`
+
+f·τ가 정수일 때 보강(피크), 반정수(0.5, 1.5…)일 때 상쇄(노치)됩니다. 즉 노치는 `f = (2k+1)/(2τ)`, 간격은 `1/τ`입니다.
+
+## 피드백 = 공진 빗필터
+
+피드백 경로 `y = x + g·y(t−τ)`를 더하면 피크가 날카로워지는 **공진 빗필터**가 됩니다(플랜저·물리 모델링 현악의 토대). Feedback을 올리면 빗살 피크가 뾰족해지며 특정 음정이 '삐~' 하고 도드라집니다.
+</Level>
+
+<Level show="easy">
+<Callout>
+- → Delay를 짧게 → 빗살이 넓어지고, 길게 → 촘촘해지는 걸 스펙트럼으로 확인
+- → 좁은 욕실의 '쇠~한' 금속성 소리를 떠올리며 음색 변화를 들어보세요
+</Callout>
+</Level>
+
+<Level show="normal">
+<Callout>
+- → Delay를 5ms로 두면 노치 간격 ≈ 200Hz — 슬라이더 옆 표시와 스펙트럼을 비교
+- → Depth를 올려 노치가 깊어지는(상쇄가 강해지는) 것을 관찰
+</Callout>
+</Level>
+
+<Level show="hard">
+<Callout>
+- → 노치 위치 f=(2k+1)/(2τ)가 맞는지 Delay별 노치 주파수를 확인
+- → **Feedback** 을 올려 피드포워드(대칭 빗살) → 공진 빗필터(뾰족한 피크)로 변하는 것을 관찰
+</Callout>
+</Level>

@@ -96,12 +96,26 @@ const hubs = [...HUBS]
       <h2 class="text-xl font-bold text-center mb-10" style="font-family:'Space Grotesk'">왜 SoundLab인가요?</h2>
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
         {[
-          { icon: '🎛️', title: '즉각적인 피드백', desc: '슬라이더를 움직이면 파형과 스펙트럼이 실시간으로 반응합니다.' },
-          { icon: '📖', title: '개념 내장 학습', desc: '각 토픽마다 원리 설명과 "들어볼 것 / 볼 것" 가이드, 확인 퀴즈가 내장되어 있습니다.' },
-          { icon: '🔗', title: '설치 없이 즉시 시작', desc: '브라우저만 있으면 됩니다. 앱 설치, 회원가입 없이 링크 하나로 실습합니다.' },
+          {
+            title: '즉각적인 피드백', desc: '슬라이더를 움직이면 파형과 스펙트럼이 실시간으로 반응합니다.',
+            // 실시간 파형 (브랜드 로고 라인)
+            icon: '<path d="M2 12h3l2-7 3 14 3-10 2 6h7" />',
+          },
+          {
+            title: '개념 내장 학습', desc: '각 토픽마다 원리 설명과 "들어볼 것 / 볼 것" 가이드, 확인 퀴즈가 내장되어 있습니다.',
+            // 펼친 책
+            icon: '<path d="M12 6.5C10.5 5.5 8 5 4 5v12c4 0 6.5.5 8 1.5M12 6.5C13.5 5.5 16 5 20 5v12c-4 0-6.5.5-8 1.5M12 6.5v12" />',
+          },
+          {
+            title: '설치 없이 즉시 시작', desc: '브라우저만 있으면 됩니다. 앱 설치, 회원가입 없이 링크 하나로 실습합니다.',
+            // 번개
+            icon: '<path d="M13 3 5 13h6l-1 8 8-10h-6l1-8z" />',
+          },
         ].map(f => (
-          <div class="p-5 rounded-2xl bg-white border border-[var(--color-border)]">
-            <div class="text-2xl mb-3">{f.icon}</div>
+          <div class="group p-5 rounded-2xl bg-white border border-[var(--color-border)] hover:border-[var(--color-violet-light)] transition-colors">
+            <div class="w-11 h-11 rounded-xl gradient-brand flex items-center justify-center mb-4 shadow-sm">
+              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" set:html={f.icon} />
+            </div>
             <h3 class="font-semibold mb-2" style="font-family:'Space Grotesk'">{f.title}</h3>
             <p class="text-sm text-[var(--color-ink-500)] leading-relaxed">{f.desc}</p>
           </div>

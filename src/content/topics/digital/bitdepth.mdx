@@ -1,0 +1,85 @@
+---
+hub: digital
+title: Bit Depth & Quantization
+kr: 비트 뎁스
+order: 1
+color: blue
+tagline: 소리를 계단으로 끊어 담다
+desc: 디지털은 소리의 높낮이를 정해진 단계로만 기록합니다. 비트 수가 적을수록 계단이 거칠어지고, 그 오차가 '치직' 하는 양자화 노이즈로 들립니다.
+widget: bitcrush
+widgetConfig:
+  bits: 16
+  freq: 220
+  wave: sine
+quiz: bitdepth
+scaffold: true
+---
+import Level from '../../../components/doc/Level.astro';
+import DefList from '../../../components/doc/DefList.astro';
+import DefCard from '../../../components/doc/DefCard.astro';
+import Callout from '../../../components/doc/Callout.astro';
+
+{/* ───────── 초급 ───────── */}
+<Level show="easy">
+## 소리를 '계단'으로 담는다
+
+디지털 녹음은 소리의 크기를 **정해진 칸(단계)에만** 담을 수 있어요. 칸이 많으면(비트 수↑) 부드러운 곡선을 거의 그대로 담지만, 칸이 적으면(비트 수↓) 매끈하던 파형이 **계단처럼 거칠게** 끊깁니다.
+
+옛날 게임기·8비트 음악의 '띠리리' 한 거친 소리가 바로 이거예요.
+
+## 직접 해보기
+
+**소리 켜기** 후 **Bit Depth** 슬라이더를 16에서 1로 내려보세요. 파형이 점점 계단처럼 거칠어지고 소리에 '치직' 하는 잡음이 끼는 걸 들어보세요.
+</Level>
+
+{/* ───────── 중급 ───────── */}
+<Level show="normal">
+## 비트 뎁스와 양자화
+
+디지털 오디오는 매 순간의 진폭을 **유한한 단계**로 반올림해 저장합니다(양자화). **n비트**면 2ⁿ 단계를 표현합니다.
+
+<DefList>
+  <DefCard term="비트 뎁스" color="blue">진폭을 몇 단계로 나눌지. 16비트 = 65,536단계, 1비트 = 2단계.</DefCard>
+  <DefCard term="양자화 오차" color="blue">실제 값과 가장 가까운 단계의 차이. 이 오차가 노이즈로 들림.</DefCard>
+</DefList>
+
+## 양자화 노이즈
+
+반올림 오차는 신호에 더해진 잡음처럼 작용합니다. 비트가 낮을수록 오차(계단 높이)가 커져 **양자화 노이즈**가 커지고, 스펙트럼에 없던 성분이 깔립니다. 오른쪽 스펙트럼에서 비트를 낮출 때 잡음 바닥이 올라오는 것을 확인하세요.
+</Level>
+
+{/* ───────── 고급 ───────── */}
+<Level show="hard">
+## SNR과 6dB 법칙
+
+양자화 노이즈 대비 신호의 비율(SNR)은 비트당 약 **6dB** 개선됩니다:
+
+`SNR ≈ 6.02·n + 1.76 (dB)`
+
+즉 16비트 ≈ 98dB, 8비트 ≈ 50dB의 다이내믹 레인지. 비트를 1 줄일 때마다 잡음이 약 6dB 커집니다.
+
+## 디더링(Dithering)
+
+저비트에서 양자화 오차는 신호와 **상관**되어 거슬리는 왜곡(하모닉 디스토션)을 만듭니다. 양자화 직전에 미세한 잡음(약 1 LSB)을 더하는 **디더링**은 이 오차를 무상관 백색 잡음으로 바꿔, 거슬리는 왜곡 대신 부드러운 히스로 전환합니다. **Dither** 토글로 1비트 차이를 비교해보세요.
+</Level>
+
+<Level show="easy">
+<Callout color="blue">
+- → Bit Depth를 16 → 4 → 1로 내리며 파형이 계단처럼 거칠어지는 걸 확인
+- → 비트가 낮을수록 '치직' 하는 잡음이 끼는 걸 들어보세요
+</Callout>
+</Level>
+
+<Level show="normal">
+<Callout color="blue">
+- → 비트를 낮추며 오른쪽 스펙트럼의 잡음 바닥이 올라오는 것을 관찰
+- → 단계 수 표시(2ⁿ)와 계단의 거칠기를 연결지어 보세요
+</Callout>
+</Level>
+
+<Level show="hard">
+<Callout color="blue">
+- → 비트를 1 줄일 때마다 잡음이 ≈6dB 커지는 것을 SNR 공식과 연결
+- → 저비트(3~4bit)에서 **Dither On/Off** 를 비교 — 거슬리는 왜곡 ↔ 부드러운 히스
+</Callout>
+</Level>

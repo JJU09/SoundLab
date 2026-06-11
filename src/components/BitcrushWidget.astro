@@ -1,0 +1,189 @@
+---
+// 비트 뎁스/양자화 위젯 — WaveShaper 계단 곡선으로 진폭을 N단계로 양자화.
+// AudioCore 위 osc(+dither)→shaper→core.input. AudioWorklet 없이 양자화 시연.
+interface Props {
+  config?: Record<string, any>;
+}
+const { config = {} } = Astro.props;
+const c = { bits: config.bits ?? 16, freq: config.freq ?? 220, wave: config.wave ?? 'sine' };
+const waves: [OscillatorType, string][] = [['sine','Sine'],['sawtooth','Saw'],['triangle','Tri']];
+const adv = (tier?: string) => (tier && tier !== 'easy' ? { 'data-adv': tier } : {});
+---
+<div class="bitcrush-widget rounded-2xl border border-[var(--color-border)] bg-white overflow-hidden"
+  data-bits={c.bits} data-freq={c.freq} data-wave={c.wave}>
+
+  <div class="flex items-center justify-between px-5 py-4 border-b border-[var(--color-border)] bg-[var(--color-surface)]">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg flex items-center justify-center gradient-brand">
+        <svg class="text-white" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M3 17h3v-4h4V9h4V5h4"/></svg>
+      </div>
+      <div>
+        <span class="font-bold text-base" style="font-family:'Space Grotesk'">비트 뎁스</span>
+        <span class="text-sm text-[var(--color-ink-300)] ml-2">Quantization</span>
+      </div>
+    </div>
+    <button class="play-btn gradient-brand text-white text-sm font-semibold px-4 py-1.5 rounded-full transition hover:opacity-90" style="font-family:'Space Grotesk'">▶ 소리 켜기</button>
+  </div>
+
+  <div class="p-5 space-y-4">
+    <!-- 파형 (계단) -->
+    <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]">
+      <canvas class="scope-cv block w-full" style="height:120px"></canvas>
+      <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)] opacity-70">Waveform · 계단 양자화</span>
+    </div>
+    <!-- 스펙트럼 (normal: 양자화 노이즈) -->
+    <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]" {...adv('normal')}>
+      <canvas class="spec-cv block w-full" style="height:80px"></canvas>
+      <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-blue)] opacity-70">Spectrum · 양자화 노이즈</span>
+    </div>
+
+    <!-- 비트 뎁스 (easy) -->
+    <div>
+      <div class="flex items-center justify-between mb-1">
+        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Bit Depth · 비트 수</span>
+        <span class="bits-val text-sm font-mono text-[var(--color-ink-700)]">{c.bits}-bit</span>
+      </div>
+      <input type="range" class="sl-range bits-range" min="1" max="16" step="1" value={c.bits} aria-label="비트 뎁스" />
+      <div class="levels-hint text-[10px] font-mono text-[var(--color-ink-300)] mt-1">표현 가능 단계 = — 개</div>
+    </div>
+    <!-- 음높이 (normal) -->
+    <div {...adv('normal')}>
+      <div class="flex items-center justify-between mb-1">
+        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Frequency</span>
+        <span class="freq-val text-sm font-mono text-[var(--color-ink-700)]">{c.freq}Hz</span>
+      </div>
+      <input type="range" class="sl-range freq-range" min="80" max="660" step="1" value={c.freq} aria-label="주파수" />
+    </div>
+    <!-- 파형 (normal) -->
+    <div {...adv('normal')}>
+      <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">Waveform</div>
+      <div class="flex gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl w-fit" role="group">
+        {waves.map(([v, t]) => (
+          <button class="wave-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-[var(--color-ink-500)]"
+            data-wave={v} aria-pressed={v === c.wave ? 'true' : 'false'} style="font-family:'Space Grotesk'">{t}</button>
+        ))}
+      </div>
+    </div>
+    <!-- 디더 (hard) -->
+    <div {...adv('hard')}>
+      <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">Dither · 디더링</div>
+      <div class="flex gap-1.5 p-1 bg-[var(--color-surface-2)] rounded-xl w-fit dither-group" role="group">
+        <button class="dither-btn px-3 py-1.5 rounded-lg text-xs font-mono transition-all text-[var(--color-ink-500)]" data-on="0" aria-pressed="true">Off</button>
+        <button class="dither-btn px-3 py-1.5 rounded-lg text-xs font-mono transition-all text-[var(--color-ink-500)]" data-on="1" aria-pressed="false">On</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+import { AudioCore } from '../audio/core';
+
+function initBitcrush(root: HTMLElement) {
+  const core = new AudioCore();
+  let bits = Number(root.dataset.bits) || 16;
+  let freq = Number(root.dataset.freq) || 220;
+  let wave = (root.dataset.wave as OscillatorType) || 'sine';
+  let dither = false;
+  let playing = false;
+
+  // osc → preSum → shaper → outGain → input ; noise → ditherGain → preSum
+  const preSum = core.gain(1), outGain = core.gain(0.5);
+  const shaper = core.ctx.createWaveShaper();
+  preSum.connect(shaper); shaper.connect(outGain); outGain.connect(core.input);
+  const ditherGain = core.gain(0);
+  ditherGain.connect(preSum);
+
+  // 디더 노이즈
+  const nlen = core.ctx.sampleRate * 2;
+  const nbuf = core.ctx.createBuffer(1, nlen, core.ctx.sampleRate);
+  const ndat = nbuf.getChannelData(0); for (let i = 0; i < nlen; i++) ndat[i] = Math.random() * 2 - 1;
+
+  let osc: OscillatorNode | null = null, noise: AudioBufferSourceNode | null = null;
+
+  function levels() { return Math.pow(2, bits); }
+  function buildCurve() {
+    const L = levels(), n = 2048, curve = new Float32Array(n);
+    const step = (L - 1) / 2;
+    for (let i = 0; i < n; i++) {
+      const x = (i / (n - 1)) * 2 - 1;
+      curve[i] = Math.round(x * step) / step; // N단계로 양자화
+    }
+    shaper.curve = curve;
+  }
+  buildCurve();
+
+  async function start() {
+    await core.resume();
+    osc = core.ctx.createOscillator(); osc.type = wave; osc.frequency.value = freq; osc.connect(preSum); osc.start();
+    noise = core.ctx.createBufferSource(); noise.buffer = nbuf; noise.loop = true; noise.connect(ditherGain); noise.start();
+    playing = true;
+  }
+  function stop() {
+    [osc, noise].forEach(o => { if (o) { try { o.stop(); } catch (e) {} o.disconnect(); } });
+    osc = noise = null; playing = false;
+  }
+
+  const scope = root.querySelector('.scope-cv') as HTMLCanvasElement;
+  const spec = root.querySelector('.spec-cv') as HTMLCanvasElement;
+  const fit = (cv: HTMLCanvasElement) => { const r = cv.getBoundingClientRect(); cv.width = Math.max(1, r.width * devicePixelRatio); cv.height = Math.max(1, r.height * devicePixelRatio); };
+  fit(scope); fit(spec); addEventListener('resize', () => { fit(scope); fit(spec); });
+
+  const td = new Uint8Array(core.analyser.fftSize);
+  const fd = new Uint8Array(core.analyser.frequencyBinCount);
+  function draw() {
+    let ctx = scope.getContext('2d')!; let W = scope.width, H = scope.height;
+    core.analyser.getByteTimeDomainData(td);
+    ctx.clearRect(0, 0, W, H); ctx.beginPath();
+    for (let i = 0; i < td.length; i++) { const x = (i / td.length) * W, y = (td[i] / 255) * H; i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+    ctx.strokeStyle = '#7c3aed'; ctx.lineWidth = 1.6 * devicePixelRatio; ctx.stroke();
+    ctx = spec.getContext('2d')!; W = spec.width; H = spec.height;
+    core.analyser.getByteFrequencyData(fd);
+    ctx.clearRect(0, 0, W, H);
+    const bins = 96, bw = W / bins;
+    for (let i = 0; i < bins; i++) { const v = fd[i] / 255; ctx.fillStyle = `rgba(37,99,235,${0.3 + v * 0.5})`; ctx.fillRect(i * bw, H - v * H, bw * 0.8, v * H); }
+    requestAnimationFrame(draw);
+  }
+  draw();
+
+  const levelsHint = root.querySelector('.levels-hint') as HTMLElement;
+  const updateHint = () => { levelsHint.textContent = `표현 가능 단계 = ${levels().toLocaleString()} 개`; };
+  updateHint();
+  const applyDither = () => core.smooth(ditherGain.gain, dither ? 1 / levels() : 0, 0.01);
+
+  // 컨트롤
+  const playBtn = root.querySelector('.play-btn') as HTMLButtonElement;
+  playBtn.addEventListener('click', async () => {
+    if (playing) { stop(); playBtn.textContent = '▶ 소리 켜기'; }
+    else { await start(); playBtn.textContent = '⏸ 소리 끄기'; }
+  });
+
+  const setPct = (el: HTMLInputElement) => el.style.setProperty('--sl-pct', ((+el.value - +el.min) / (+el.max - +el.min) * 100) + '%');
+  const bRange = root.querySelector('.bits-range') as HTMLInputElement, bVal = root.querySelector('.bits-val') as HTMLElement;
+  setPct(bRange);
+  bRange.addEventListener('input', () => { bits = +bRange.value; bVal.textContent = bits + '-bit'; setPct(bRange); buildCurve(); updateHint(); applyDither(); });
+
+  const fRange = root.querySelector('.freq-range') as HTMLInputElement, fVal = root.querySelector('.freq-val') as HTMLElement;
+  setPct(fRange);
+  fRange.addEventListener('input', () => { freq = +fRange.value; fVal.textContent = freq + 'Hz'; setPct(fRange); if (osc) core.smooth(osc.frequency, freq); });
+
+  root.querySelectorAll<HTMLButtonElement>('.wave-btn').forEach(btn => {
+    const sel = () => { btn.style.cssText = 'background:white;color:var(--color-violet);box-shadow:0 1px 4px rgba(0,0,0,0.08)'; };
+    btn.addEventListener('click', () => {
+      root.querySelectorAll('.wave-btn').forEach(b => { (b as HTMLElement).setAttribute('aria-pressed','false'); (b as HTMLElement).style.cssText = ''; });
+      btn.setAttribute('aria-pressed','true'); sel(); wave = btn.dataset.wave as OscillatorType; if (osc) osc.type = wave;
+    });
+    if (btn.getAttribute('aria-pressed') === 'true') sel();
+  });
+
+  root.querySelectorAll<HTMLButtonElement>('.dither-btn').forEach(btn => {
+    const sel = () => { btn.style.cssText = 'background:white;color:var(--color-violet);box-shadow:0 1px 4px rgba(0,0,0,0.08)'; };
+    btn.addEventListener('click', () => {
+      root.querySelectorAll('.dither-btn').forEach(b => { (b as HTMLElement).setAttribute('aria-pressed','false'); (b as HTMLElement).style.cssText = ''; });
+      btn.setAttribute('aria-pressed','true'); sel(); dither = btn.dataset.on === '1'; applyDither();
+    });
+    if (btn.getAttribute('aria-pressed') === 'true') sel();
+  });
+}
+
+document.querySelectorAll<HTMLElement>('.bitcrush-widget').forEach(initBitcrush);
+</script>

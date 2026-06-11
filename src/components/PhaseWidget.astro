@@ -1,0 +1,176 @@
+---
+// 위상 간섭/상쇄 위젯 — 같은 주파수 사인파 2개를 합성, 위상차에 따라 보강/상쇄.
+// AudioCore 위에 osc 2개(한쪽 DelayNode로 위상 시프트) → core.input. 코어 셋째 소비자.
+interface Props {
+  config?: Record<string, any>;
+}
+const { config = {} } = Astro.props;
+const c = { freq: config.freq ?? 220, phase: config.phase ?? 0 };
+const adv = (tier?: string) => (tier && tier !== 'easy' ? { 'data-adv': tier } : {});
+---
+<div class="phase-widget rounded-2xl border border-[var(--color-border)] bg-white overflow-hidden"
+  data-freq={c.freq} data-phase={c.phase}>
+
+  <div class="flex items-center justify-between px-5 py-4 border-b border-[var(--color-border)] bg-[var(--color-surface)]">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-mono font-bold text-white gradient-brand">∿</div>
+      <div>
+        <span class="font-bold text-base" style="font-family:'Space Grotesk'">위상 간섭</span>
+        <span class="text-sm text-[var(--color-ink-300)] ml-2">Interference</span>
+      </div>
+    </div>
+    <button class="play-btn gradient-brand text-white text-sm font-semibold px-4 py-1.5 rounded-full transition hover:opacity-90" style="font-family:'Space Grotesk'">▶ 소리 켜기</button>
+  </div>
+
+  <div class="p-5 space-y-4">
+    <!-- A·B·합성 다이어그램 -->
+    <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]">
+      <canvas class="diag-cv block w-full" style="height:150px"></canvas>
+      <div class="absolute top-2 left-2.5 flex gap-3 text-[10px] font-mono">
+        <span style="color:#60a5fa">파형 A</span>
+        <span style="color:#a78bfa">파형 B</span>
+        <span class="font-bold" style="color:#7c3aed">합성</span>
+      </div>
+    </div>
+    <!-- 합성 진폭(상쇄율) -->
+    <div class="flex items-center gap-2">
+      <span class="text-[10px] font-mono text-[var(--color-ink-300)] whitespace-nowrap">합성 진폭</span>
+      <div class="flex-1 h-2 rounded-full bg-[var(--color-surface-2)] border border-[var(--color-border)] overflow-hidden">
+        <div class="amp-fill h-full w-0 rounded-full gradient-brand transition-[width] duration-75"></div>
+      </div>
+      <span class="amp-val text-xs font-mono text-[var(--color-ink-700)] w-10 text-right">—</span>
+    </div>
+    <!-- 실제 출력 스코프 -->
+    <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]">
+      <canvas class="scope-cv block w-full" style="height:70px"></canvas>
+      <span class="absolute top-1.5 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Output · 실제 합성음</span>
+    </div>
+
+    <!-- 위상 슬라이더 (easy) -->
+    <div>
+      <div class="flex items-center justify-between mb-1">
+        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Phase · 위상차</span>
+        <span class="phase-val text-sm font-mono text-[var(--color-ink-700)]">{c.phase}°</span>
+      </div>
+      <input type="range" class="sl-range phase-range" min="0" max="360" step="1" value={c.phase} aria-label="위상차" />
+      <div class="flex gap-1.5 mt-2">
+        <button class="preset-phase px-2.5 py-1 rounded-lg text-[11px] font-mono border border-[var(--color-border)] text-[var(--color-ink-500)] hover:border-[var(--color-violet)] transition" data-phase="0">0° (보강)</button>
+        <button class="preset-phase px-2.5 py-1 rounded-lg text-[11px] font-mono border border-[var(--color-border)] text-[var(--color-ink-500)] hover:border-[var(--color-violet)] transition" data-phase="180">180° (상쇄)</button>
+      </div>
+    </div>
+
+    <!-- 주파수 (normal) -->
+    <div {...adv('normal')}>
+      <div class="flex items-center justify-between mb-1">
+        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Frequency</span>
+        <span class="freq-val text-sm font-mono text-[var(--color-ink-700)]">{c.freq}Hz</span>
+      </div>
+      <input type="range" class="sl-range freq-range" min="80" max="880" step="1" value={c.freq} aria-label="주파수" />
+    </div>
+  </div>
+</div>
+
+<script>
+import { AudioCore } from '../audio/core';
+
+function initPhase(root: HTMLElement) {
+  const core = new AudioCore();
+  let freq = Number(root.dataset.freq) || 220;
+  let phase = Number(root.dataset.phase) || 0; // degrees
+  let playing = false;
+
+  // 오디오: oscA→gainA→input, oscB→delay→gainB→input. 위상차 = delay(초)
+  const gainA = core.gain(0.4), gainB = core.gain(0.4);
+  const delay = core.ctx.createDelay(0.05);
+  let oscA: OscillatorNode | null = null, oscB: OscillatorNode | null = null;
+  gainA.connect(core.input); delay.connect(gainB); gainB.connect(core.input);
+
+  const phaseToDelay = () => (phase / 360) / freq; // 한 주기의 위상 비율만큼 지연
+  function applyAudio() {
+    if (oscA) oscA.frequency.value = freq;
+    if (oscB) oscB.frequency.value = freq;
+    delay.delayTime.value = phaseToDelay();
+  }
+
+  async function start() {
+    await core.resume();
+    oscA = core.ctx.createOscillator(); oscA.type = 'sine'; oscA.frequency.value = freq; oscA.connect(gainA); oscA.start();
+    oscB = core.ctx.createOscillator(); oscB.type = 'sine'; oscB.frequency.value = freq; oscB.connect(delay); oscB.start();
+    applyAudio();
+    playing = true;
+  }
+  function stop() {
+    [oscA, oscB].forEach(o => { if (o) { try { o.stop(); } catch (e) {} o.disconnect(); } });
+    oscA = oscB = null; playing = false;
+  }
+
+  const diag = root.querySelector('.diag-cv') as HTMLCanvasElement;
+  const scope = root.querySelector('.scope-cv') as HTMLCanvasElement;
+  const fit = (cv: HTMLCanvasElement) => { const r = cv.getBoundingClientRect(); cv.width = Math.max(1, r.width * devicePixelRatio); cv.height = Math.max(1, r.height * devicePixelRatio); };
+  fit(diag); fit(scope);
+  addEventListener('resize', () => { fit(diag); fit(scope); drawDiag(); });
+
+  // A·B·합성 다이어그램 (계산식, 2주기)
+  function drawDiag() {
+    const ctx = diag.getContext('2d')!; const W = diag.width, H = diag.height, mid = H / 2, amp = H * 0.2;
+    const pr = phase * Math.PI / 180;
+    ctx.clearRect(0, 0, W, H);
+    ctx.strokeStyle = 'rgba(160,160,192,0.25)'; ctx.lineWidth = devicePixelRatio; ctx.beginPath(); ctx.moveTo(0, mid); ctx.lineTo(W, mid); ctx.stroke();
+    const wave = (fn: (x: number) => number, color: string, lw: number) => {
+      ctx.beginPath();
+      for (let i = 0; i <= W; i++) { const t = (i / W) * 4 * Math.PI; const y = mid - fn(t) * amp; i ? ctx.lineTo(i, y) : ctx.moveTo(i, y); }
+      ctx.strokeStyle = color; ctx.lineWidth = lw * devicePixelRatio; ctx.stroke();
+    };
+    wave(t => Math.sin(t), '#60a5fa', 1.2);
+    wave(t => Math.sin(t + pr), '#a78bfa', 1.2);
+    wave(t => (Math.sin(t) + Math.sin(t + pr)) / 2, '#7c3aed', 2.2);
+  }
+
+  // 합성 진폭 (보강=1, 상쇄=0): |cos(phase/2)|
+  const ampFill = root.querySelector('.amp-fill') as HTMLElement;
+  const ampVal = root.querySelector('.amp-val') as HTMLElement;
+  function updateAmp() {
+    const a = Math.abs(Math.cos(phase * Math.PI / 360)); // cos(phase/2)
+    ampFill.style.width = (a * 100) + '%';
+    ampVal.textContent = Math.round(a * 100) + '%';
+  }
+
+  // 실제 출력 스코프
+  const td = new Uint8Array(core.analyser.fftSize);
+  function drawScope() {
+    const ctx = scope.getContext('2d')!; const W = scope.width, H = scope.height;
+    core.analyser.getByteTimeDomainData(td);
+    ctx.clearRect(0, 0, W, H); ctx.beginPath();
+    for (let i = 0; i < td.length; i++) { const x = (i / td.length) * W, y = (td[i] / 255) * H; i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+    ctx.strokeStyle = '#7c3aed'; ctx.lineWidth = 1.5 * devicePixelRatio; ctx.stroke();
+    requestAnimationFrame(drawScope);
+  }
+
+  function refresh() { drawDiag(); updateAmp(); applyAudio(); }
+  drawScope(); refresh();
+
+  // 컨트롤
+  const playBtn = root.querySelector('.play-btn') as HTMLButtonElement;
+  playBtn.addEventListener('click', async () => {
+    if (playing) { stop(); playBtn.textContent = '▶ 소리 켜기'; }
+    else { await start(); playBtn.textContent = '⏸ 소리 끄기'; }
+  });
+
+  const phaseRange = root.querySelector('.phase-range') as HTMLInputElement;
+  const phaseVal = root.querySelector('.phase-val') as HTMLElement;
+  const setPct = (el: HTMLInputElement) => el.style.setProperty('--sl-pct', ((+el.value - +el.min) / (+el.max - +el.min) * 100) + '%');
+  setPct(phaseRange);
+  phaseRange.addEventListener('input', () => { phase = +phaseRange.value; phaseVal.textContent = phase + '°'; setPct(phaseRange); refresh(); });
+
+  root.querySelectorAll<HTMLButtonElement>('.preset-phase').forEach(b => b.addEventListener('click', () => {
+    phase = Number(b.dataset.phase); phaseRange.value = String(phase); phaseVal.textContent = phase + '°'; setPct(phaseRange); refresh();
+  }));
+
+  const freqRange = root.querySelector('.freq-range') as HTMLInputElement;
+  const freqVal = root.querySelector('.freq-val') as HTMLElement;
+  setPct(freqRange);
+  freqRange.addEventListener('input', () => { freq = +freqRange.value; freqVal.textContent = freq + 'Hz'; setPct(freqRange); refresh(); });
+}
+
+document.querySelectorAll<HTMLElement>('.phase-widget').forEach(initPhase);
+</script>

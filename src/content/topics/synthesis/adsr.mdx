@@ -1,0 +1,44 @@
+---
+hub: synthesis
+title: ADSR Envelope
+kr: 엔벨로프
+order: 1
+color: violet
+tagline: 소리의 시간적 윤곽을 빚다
+desc: 하나의 음이 시작되고 사라지기까지 음량이 어떻게 변하는지를 Attack·Decay·Sustain·Release 네 단계로 그려냅니다. 신디사이저로 악기의 성격을 결정하는 핵심 도구입니다.
+widget: synth
+widgetConfig:
+  wave: sawtooth
+  attack: 10
+  decay: 200
+  sustain: 60
+  release: 400
+quiz: adsr
+---
+import DefList from '../../../components/doc/DefList.astro';
+import DefCard from '../../../components/doc/DefCard.astro';
+import Callout from '../../../components/doc/Callout.astro';
+
+## 엔벨로프란?
+
+같은 톱니파라도 피아노처럼 '띵' 하고 사라질 수도, 바이올린처럼 '우우웅~' 하고 차오를 수도 있습니다. 차이는 **음량이 시간에 따라 변하는 윤곽** — 엔벨로프(envelope)입니다. 신디사이저는 이 윤곽을 **ADSR** 네 단계로 제어합니다.
+
+## 네 단계
+
+<DefList>
+  <DefCard term="Attack (어택)">건반을 누른 순간부터 음량이 0 → 최대(peak)에 도달하는 **시간**. 짧으면 타악기처럼 때리는 소리, 길면 서서히 부풀어 오르는 소리.</DefCard>
+  <DefCard term="Decay (디케이)">peak에서 Sustain 레벨까지 떨어지는 **시간**. 초반의 '탁' 치는 어택감을 얼마나 빨리 가라앉힐지 결정.</DefCard>
+  <DefCard term="Sustain (서스테인)">건반을 누르고 있는 동안 유지되는 **음량 레벨**. 셋 중 유일하게 시간이 아니라 높이(0~100%) — 헷갈리기 쉬운 지점.</DefCard>
+  <DefCard term="Release (릴리즈)">건반에서 손을 뗀 뒤 음량이 0으로 잦아드는 **시간**. 길면 페달 밟은 피아노처럼 여운이 남음.</DefCard>
+</DefList>
+
+## 왜 중요한가?
+
+같은 오실레이터·필터라도 엔벨로프만 바꾸면 전혀 다른 악기가 됩니다. 빠른 Attack + 짧은 Release = 타악기/플럭. 느린 Attack + 긴 Release = 패드/스트링. 음색(파형)이 '무엇'이라면, 엔벨로프는 그 소리의 '몸짓'입니다.
+
+<Callout>
+- → **트리거** 버튼을 눌러 현재 엔벨로프로 한 음을 들어보세요
+- → Attack을 길게(1000ms+) 올리면 소리가 서서히 차오르는 패드 느낌
+- → Sustain을 0%로 내리면 Decay 후 바로 사라지는 플럭/타악기 느낌
+- → Release를 길게 올리면 손 뗀 뒤에도 여운이 남는 것을 다이어그램과 함께 확인
+</Callout>

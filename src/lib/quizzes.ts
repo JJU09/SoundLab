@@ -1,5 +1,3 @@
-import type { ModuleId } from './modules';
-
 export interface QuizQuestion {
   q: string;
   options: string[];
@@ -7,8 +5,8 @@ export interface QuizQuestion {
   explain: string;
 }
 
-// 각 레슨 하단에 들어가는 개념 이해 확인용 객관식 퀴즈
-export const QUIZZES: Record<ModuleId, QuizQuestion[]> = {
+// 토픽 하단 개념 확인용 객관식 퀴즈. 키 = 토픽 프런트매터 quiz 값.
+export const QUIZZES: Record<string, QuizQuestion[]> = {
   filter: [
     {
       q: 'Low Pass 필터의 Cutoff 주파수를 낮추면 소리는 어떻게 변할까요?',
@@ -97,6 +95,26 @@ export const QUIZZES: Record<ModuleId, QuizQuestion[]> = {
       options: ['더 좁은 방의 짧은 잔향', '더 큰 공간의 긴 잔향', '잔향이 사라진다', '음량이 커진다'],
       answer: 1,
       explain: 'Size는 가상 공간의 크기로, 키울수록 큰 홀처럼 길고 넓게 퍼지는 잔향이 만들어집니다.',
+    },
+  ],
+  adsr: [
+    {
+      q: 'ADSR 엔벨로프에서 A(Attack)가 결정하는 것은?',
+      options: ['소리가 0에서 최대까지 도달하는 시간', '유지되는 음량 레벨', '소리가 사라지는 시간', '음정의 높이'],
+      answer: 0,
+      explain: 'Attack은 건반을 누른 순간부터 음량이 0 → 최대(peak)에 도달하기까지의 시간입니다. 짧으면 타악기처럼, 길면 현악기처럼 서서히 차오릅니다.',
+    },
+    {
+      q: 'Sustain은 다른 셋과 성격이 다릅니다. 무엇일까요?',
+      options: ['시간(time)이 아니라 레벨(level)이다', '가장 긴 시간 구간이다', '음정을 결정한다', '항상 0이다'],
+      answer: 0,
+      explain: 'A·D·R은 모두 "시간"이지만 Sustain은 건반을 누르고 있는 동안 유지되는 "음량 레벨"입니다. Decay는 peak에서 이 Sustain 레벨까지 떨어지는 시간이고요.',
+    },
+    {
+      q: '건반에서 손을 뗀 뒤 소리가 사라지기까지의 시간은?',
+      options: ['Attack', 'Decay', 'Sustain', 'Release'],
+      answer: 3,
+      explain: 'Release는 노트 오프(손을 뗀) 시점부터 음량이 0으로 잦아드는 시간입니다. 길면 피아노 페달처럼 여운이 남습니다.',
     },
   ],
 };

@@ -1,0 +1,174 @@
+---
+// ADSR 신스 위젯 — AudioCore + SynthVoice. 엔벨로프 다이어그램 + 라이브 스코프.
+interface Props {
+  config?: Record<string, any>;
+}
+const { config = {} } = Astro.props;
+const c = {
+  wave: config.wave ?? 'sawtooth',
+  attack: config.attack ?? 10,     // ms
+  decay: config.decay ?? 200,      // ms
+  sustain: config.sustain ?? 60,   // %
+  release: config.release ?? 400,  // ms
+};
+const waves: [OscillatorType, string][] = [['sine','Sine'],['square','Square'],['sawtooth','Saw'],['triangle','Tri']];
+const knobs = [
+  { p: 'attack', label: 'Attack', min: 1, max: 2000, step: 1, val: c.attack, unit: 'ms' },
+  { p: 'decay', label: 'Decay', min: 1, max: 2000, step: 1, val: c.decay, unit: 'ms' },
+  { p: 'sustain', label: 'Sustain', min: 0, max: 100, step: 1, val: c.sustain, unit: '%' },
+  { p: 'release', label: 'Release', min: 1, max: 3000, step: 1, val: c.release, unit: 'ms' },
+];
+---
+<div class="synth-player rounded-2xl border border-[var(--color-border)] bg-white overflow-hidden"
+  data-wave={c.wave} data-attack={c.attack} data-decay={c.decay} data-sustain={c.sustain} data-release={c.release}>
+
+  <!-- 헤더 -->
+  <div class="flex items-center justify-between px-5 py-4 border-b border-[var(--color-border)] bg-[var(--color-surface)]">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-mono font-bold text-white gradient-brand">EN</div>
+      <div>
+        <span class="font-bold text-base" style="font-family:'Space Grotesk'">ADSR Envelope</span>
+        <span class="text-sm text-[var(--color-ink-300)] ml-2">엔벨로프</span>
+      </div>
+    </div>
+    <button class="trig-btn gradient-brand text-white text-sm font-semibold px-4 py-1.5 rounded-full transition hover:opacity-90" style="font-family:'Space Grotesk'">
+      ▶ 트리거
+    </button>
+  </div>
+
+  <div class="p-5 space-y-4">
+    <!-- 엔벨로프 다이어그램 -->
+    <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]">
+      <canvas class="env-cv block w-full" style="height:120px"></canvas>
+      <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)] opacity-70">Envelope</span>
+    </div>
+    <!-- 라이브 스코프 -->
+    <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]">
+      <canvas class="scope-cv block w-full" style="height:90px"></canvas>
+      <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-blue)] opacity-70">Output</span>
+    </div>
+
+    <!-- 파형 선택 -->
+    <div>
+      <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">Waveform</div>
+      <div class="flex gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" role="group">
+        {waves.map(([v, t]) => (
+          <button class="wave-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-[var(--color-ink-500)]"
+            data-wave={v} aria-pressed={v === c.wave ? 'true' : 'false'} style="font-family:'Space Grotesk'">{t}</button>
+        ))}
+      </div>
+    </div>
+
+    <!-- ADSR 슬라이더 -->
+    {knobs.map(k => (
+      <div>
+        <div class="flex items-center justify-between mb-1">
+          <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">{k.label}</span>
+          <span class="adsr-val text-sm font-mono text-[var(--color-ink-700)]" data-for={k.p}>{k.val}{k.unit}</span>
+        </div>
+        <input type="range" class="sl-range adsr-range" data-param={k.p} data-unit={k.unit}
+          min={k.min} max={k.max} step={k.step} value={k.val} aria-label={k.label} />
+      </div>
+    ))}
+  </div>
+</div>
+
+<script>
+import { AudioCore } from '../audio/core';
+import { SynthVoice } from '../audio/synth';
+
+function initSynth(root: HTMLElement) {
+  const core = new AudioCore();
+  const voice = new SynthVoice(core);
+  const ds = root.dataset;
+  voice.wave = (ds.wave as OscillatorType) || 'sawtooth';
+  voice.attack = Number(ds.attack) / 1000;
+  voice.decay = Number(ds.decay) / 1000;
+  voice.sustain = Number(ds.sustain) / 100;
+  voice.release = Number(ds.release) / 1000;
+
+  const envCv = root.querySelector('.env-cv') as HTMLCanvasElement;
+  const scopeCv = root.querySelector('.scope-cv') as HTMLCanvasElement;
+
+  function fit(cv: HTMLCanvasElement) {
+    const r = cv.getBoundingClientRect();
+    cv.width = Math.max(1, Math.floor(r.width * devicePixelRatio));
+    cv.height = Math.max(1, Math.floor(r.height * devicePixelRatio));
+  }
+  fit(envCv); fit(scopeCv);
+  addEventListener('resize', () => { fit(envCv); fit(scopeCv); drawEnv(); });
+
+  // ── 엔벨로프 다이어그램 ──
+  function drawEnv() {
+    const ctx = envCv.getContext('2d')!;
+    const W = envCv.width, H = envCv.height, pad = 10 * devicePixelRatio;
+    ctx.clearRect(0, 0, W, H);
+    const a = voice.attack, d = voice.decay, r = voice.release, s = voice.sustain;
+    const gate = 0.4; // sustain 유지 구간 (시각화용)
+    const total = a + d + gate + r || 1;
+    const x0 = pad, x1 = W - pad, y0 = pad, y1 = H - pad;
+    const tx = (t: number) => x0 + (t / total) * (x1 - x0);
+    const ly = (v: number) => y1 - v * (y1 - y0);
+    const pts: [number, number][] = [
+      [0, 0], [a, 1], [a + d, s], [a + d + gate, s], [a + d + gate + r, 0],
+    ];
+    // 채움
+    ctx.beginPath(); ctx.moveTo(tx(0), ly(0));
+    for (const [t, v] of pts) ctx.lineTo(tx(t), ly(v));
+    ctx.lineTo(tx(total), ly(0)); ctx.closePath();
+    ctx.fillStyle = 'rgba(124,58,237,0.12)'; ctx.fill();
+    // 선
+    ctx.beginPath(); ctx.moveTo(tx(0), ly(0));
+    for (const [t, v] of pts) ctx.lineTo(tx(t), ly(v));
+    ctx.strokeStyle = '#7c3aed'; ctx.lineWidth = 2 * devicePixelRatio; ctx.stroke();
+    // 단계 경계 점선
+    ctx.strokeStyle = 'rgba(160,160,192,0.4)'; ctx.lineWidth = devicePixelRatio; ctx.setLineDash([3 * devicePixelRatio, 3 * devicePixelRatio]);
+    for (const t of [a, a + d, a + d + gate]) { ctx.beginPath(); ctx.moveTo(tx(t), y0); ctx.lineTo(tx(t), y1); ctx.stroke(); }
+    ctx.setLineDash([]);
+  }
+  drawEnv();
+
+  // ── 라이브 스코프 ──
+  const td = new Uint8Array(core.analyser.fftSize);
+  function drawScope() {
+    const ctx = scopeCv.getContext('2d')!;
+    const W = scopeCv.width, H = scopeCv.height;
+    core.analyser.getByteTimeDomainData(td);
+    ctx.clearRect(0, 0, W, H);
+    ctx.beginPath();
+    for (let i = 0; i < td.length; i++) {
+      const x = (i / td.length) * W, y = (td[i] / 255) * H;
+      i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+    }
+    ctx.strokeStyle = '#2563eb'; ctx.lineWidth = 1.5 * devicePixelRatio; ctx.stroke();
+    requestAnimationFrame(drawScope);
+  }
+  drawScope();
+
+  // ── 컨트롤 ──
+  root.querySelector('.trig-btn')!.addEventListener('click', () => voice.trigger());
+
+  root.querySelectorAll<HTMLButtonElement>('.wave-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      root.querySelectorAll('.wave-btn').forEach(b => b.setAttribute('aria-pressed', 'false'));
+      btn.setAttribute('aria-pressed', 'true');
+      voice.set('wave', btn.dataset.wave!);
+    });
+  });
+
+  root.querySelectorAll<HTMLInputElement>('.adsr-range').forEach(sl => {
+    const setPct = () => sl.style.setProperty('--sl-pct', ((+sl.value - +sl.min) / (+sl.max - +sl.min) * 100) + '%');
+    setPct();
+    sl.addEventListener('input', () => {
+      const p = sl.dataset.param!, raw = Number(sl.value);
+      const val = p === 'sustain' ? raw / 100 : raw / 1000;
+      voice.set(p, val);
+      const lbl = root.querySelector(`.adsr-val[data-for="${p}"]`)!;
+      lbl.textContent = raw + (sl.dataset.unit || '');
+      setPct(); drawEnv();
+    });
+  });
+}
+
+document.querySelectorAll<HTMLElement>('.synth-player').forEach(initSynth);
+</script>

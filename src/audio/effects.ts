@@ -27,9 +27,10 @@ function shell(core: AudioCore, kind: 'series' | 'parallel'): FxModule {
 function makeFilter(core: AudioCore): FxModule {
   const m = shell(core, 'series');
   const bq = core.ctx.createBiquadFilter();
-  bq.type = 'lowpass'; bq.frequency.value = 1200; bq.Q.value = 1;
-  m.input.connect(bq); bq.connect(m.wet);
-  return { ...m, bq };
+  const bq2 = core.ctx.createBiquadFilter(); // 차수(Slope) 24dB/oct용 직렬 2단
+  for (const b of [bq, bq2]) { b.type = 'lowpass'; b.frequency.value = 1200; b.Q.value = 1; }
+  m.input.connect(bq); bq.connect(m.wet); // 기본 -12dB/oct: 단일 (bq2 미연결)
+  return { ...m, bq, bq2, slope: 12 };
 }
 
 function makeDrive(core: AudioCore): FxModule {
@@ -116,9 +117,18 @@ export function applyMix(core: AudioCore, m: FxModule, active: boolean) {
 // 인스턴스 파라미터 조작. active = 현재 유효 on/off (mix 파라미터 재반영에 필요).
 export function setParam(core: AudioCore, m: FxModule, param: string, value: number | string, active: boolean) {
   switch (`${m.type}.${param}`) {
-    case 'filter.type': m.bq!.type = value as BiquadFilterType; break;
-    case 'filter.freq': core.smooth(m.bq!.frequency, value as number); break;
-    case 'filter.q': core.smooth(m.bq!.Q, value as number); break;
+    case 'filter.type': m.bq!.type = value as BiquadFilterType; m.bq2!.type = value as BiquadFilterType; break;
+    case 'filter.freq': core.smooth(m.bq!.frequency, value as number); core.smooth(m.bq2!.frequency, value as number); break;
+    case 'filter.q': core.smooth(m.bq!.Q, value as number); core.smooth(m.bq2!.Q, value as number); break;
+    case 'filter.slope': {
+      const to24 = Number(value) === 24;
+      try { m.bq!.disconnect(); } catch (e) {}
+      try { m.bq2!.disconnect(); } catch (e) {}
+      if (to24) { m.bq!.connect(m.bq2!); m.bq2!.connect(m.wet); } // input→bq→bq2→wet (-24)
+      else { m.bq!.connect(m.wet); }                              // input→bq→wet (-12)
+      m.slope = to24 ? 24 : 12;
+      break;
+    }
     case 'drive.amount': setDrive(core, m, value as number); break;
     case 'tremolo.rate': core.smooth(m.lfo!.frequency, value as number); break;
     case 'tremolo.depth': setTremDepth(core, m, value as number); break;

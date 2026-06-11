@@ -14,6 +14,8 @@ export interface FxModule {
   params?: Record<string, number | string>;
   // 타입별 노드 (해당 이펙트에만 존재)
   bq?: BiquadFilterNode;
+  bq2?: BiquadFilterNode; // 필터 차수(Slope) 2단
+  slope?: number;
   shaper?: WaveShaperNode;
   post?: GainNode;
   trem?: GainNode;

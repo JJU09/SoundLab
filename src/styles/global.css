@@ -67,25 +67,27 @@
 }
 
 @layer components {
-  /* MDX 토픽 본문 — 마크다운 헤딩·문단·리스트 기본 스타일 */
-  .topic-body > h2 {
+  /* MDX 토픽 본문 — 마크다운 헤딩·문단·리스트 기본 스타일 (.lvl 블록 내부 포함) */
+  .topic-body > h2, .topic-body .lvl > h2 {
     font-family: "Space Grotesk", var(--font-sans);
     font-size: 1rem;
     font-weight: 700;
     color: var(--color-ink-900);
     margin-bottom: 0.5rem;
   }
-  .topic-body > h2:not(:first-child) { margin-top: 0.5rem; }
-  .topic-body > h3 {
+  .topic-body > h2:not(:first-child), .topic-body .lvl > h2:not(:first-child) { margin-top: 0.5rem; }
+  .topic-body > h3, .topic-body .lvl > h3 {
     font-family: "Space Grotesk", var(--font-sans);
     font-size: 0.9rem;
     font-weight: 700;
     color: var(--color-ink-700);
     margin-bottom: 0.4rem;
   }
-  .topic-body > p { color: var(--color-ink-700); }
-  .topic-body > ul { list-style: disc; padding-left: 1.2rem; }
-  .topic-body > ul > li { margin-bottom: 0.25rem; }
+  .topic-body > p, .topic-body .lvl > p { color: var(--color-ink-700); }
+  .topic-body > ul, .topic-body .lvl > ul { list-style: disc; padding-left: 1.2rem; }
+  .topic-body > ul > li, .topic-body .lvl > ul > li { margin-bottom: 0.25rem; }
+  /* .lvl 블록 내부 섹션 간 간격 */
+  .topic-body .lvl > * + * { margin-top: 0.75rem; }
   .topic-body strong { color: var(--color-ink-900); font-weight: 600; }
   .topic-body code {
     font-family: var(--font-mono);
@@ -94,6 +96,16 @@
     padding: 0.1rem 0.35rem;
     border-radius: 0.3rem;
   }
+
+  /* 수준별 스캐폴딩 — data-level과 일치하는 .lvl만 표시 */
+  .lvl { display: none; }
+  [data-level="easy"] .lvl[data-levels~="easy"],
+  [data-level="normal"] .lvl[data-levels~="normal"],
+  [data-level="hard"] .lvl[data-levels~="hard"] { display: block; }
+  /* 위젯 노브 tier — 현재 레벨에서 허용된 컨트롤만 표시 (data-adv 태그 기준) */
+  [data-level="easy"] [data-adv~="normal"],
+  [data-level="easy"] [data-adv~="hard"],
+  [data-level="normal"] [data-adv~="hard"] { display: none; }
 
   .callout-body ul { list-style: none; padding: 0; margin: 0; }
   .callout-body li { margin-bottom: 0.25rem; }

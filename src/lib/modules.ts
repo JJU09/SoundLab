@@ -1,5 +1,7 @@
 export type ModuleId = 'filter' | 'drive' | 'tremolo' | 'chorus' | 'delay' | 'reverb';
 
+export type Tier = 'easy' | 'normal' | 'hard';
+
 export interface KnobDef {
   param: string;
   label: string;
@@ -9,6 +11,15 @@ export interface KnobDef {
   curve?: 'log' | 'lin';
   unit?: string;
   fmt?: (v: number) => string;
+  tier?: Tier; // 수준별 노출 (없으면 always). easy=항상, normal=중급↑, hard=고급만
+}
+
+export interface SelectorDef {
+  param: string;
+  label: string;
+  options: [string, string][];
+  value: string;
+  tier?: Tier;
 }
 
 export interface ModuleDef {
@@ -19,8 +30,9 @@ export interface ModuleDef {
   color: 'violet' | 'blue';
   tagline: string;
   desc: string;
-  type?: { options: [string, string][]; value: string };
+  type?: { options: [string, string][]; value: string; tier?: Tier };
   knobs: KnobDef[];
+  selectors?: SelectorDef[]; // type 외 추가 셀렉터 (예: 필터 Slope)
   defaultSrc: 'tone' | 'pluck' | 'noise';
   defaultWave?: OscillatorType;
 }
@@ -34,10 +46,13 @@ export const MODULES: ModuleDef[] = [
     id: 'filter', name: 'Filter', kr: '필터', num: '01', color: 'violet',
     tagline: '주파수를 골라 음색을 빚다',
     desc: '특정 주파수 대역을 통과시키거나 차단합니다. Cutoff는 경계 주파수, Resonance(Q)는 그 경계를 얼마나 강조할지 정합니다.',
-    type: { options: [['lowpass', 'Low Pass'], ['highpass', 'High Pass'], ['bandpass', 'Band Pass']], value: 'lowpass' },
+    type: { options: [['lowpass', 'Low Pass'], ['highpass', 'High Pass'], ['bandpass', 'Band Pass']], value: 'lowpass', tier: 'normal' },
     knobs: [
-      { param: 'freq', label: 'Cutoff', min: 30, max: 18000, value: 1200, curve: 'log', fmt: fHz },
-      { param: 'q', label: 'Resonance', min: 0.1, max: 20, value: 1, curve: 'log', fmt: v => v.toFixed(1) },
+      { param: 'freq', label: 'Cutoff', min: 30, max: 18000, value: 1200, curve: 'log', fmt: fHz, tier: 'easy' },
+      { param: 'q', label: 'Resonance', min: 0.1, max: 20, value: 1, curve: 'log', fmt: v => v.toFixed(1), tier: 'normal' },
+    ],
+    selectors: [
+      { param: 'slope', label: 'Slope (차수)', options: [['12', '-12 dB/oct'], ['24', '-24 dB/oct']], value: '12', tier: 'hard' },
     ],
     defaultSrc: 'noise',
   },

@@ -31,6 +31,7 @@ const topics = defineCollection({
     // 위젯별 초기 설정. effect → { moduleId }, synth → ADSR 등. 위젯이 자체 해석.
     widgetConfig: z.record(z.string(), z.any()).optional(),
     quiz: z.string().optional(),                // QUIZZES 키 (없으면 퀴즈 생략)
+    scaffold: z.boolean().default(false),       // 수준별 동적 스캐폴딩(Easy/Normal/Hard) 활성
     draft: z.boolean().default(false),
   }),
 });

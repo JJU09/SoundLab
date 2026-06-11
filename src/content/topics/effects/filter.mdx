@@ -10,29 +10,67 @@ widget: effect
 widgetConfig:
   moduleId: filter
 quiz: filter
+scaffold: true
 ---
+import Level from '../../../components/doc/Level.astro';
 import DefList from '../../../components/doc/DefList.astro';
 import DefCard from '../../../components/doc/DefCard.astro';
 import Callout from '../../../components/doc/Callout.astro';
 
+{/* ───────── 초급 (Easy) · 빛과 커튼 ───────── */}
+<Level show="easy">
+## 필터는 '소리 커튼'이에요
+
+소리에도 밝은 소리(고음)와 어두운 소리(저음)가 있어요. 필터는 소리 앞에 **두꺼운 커튼**을 쳐서, 밝은 고음은 가로막고 어두운 저음만 통과시키는 장치예요.
+
+커튼을 많이 칠수록 소리가 점점 **먹먹하고 둔탁**해집니다. 라디오에서 나오는 소리, 물속에서 듣는 소리가 바로 이런 느낌이에요.
+
+## 직접 해보기
+
+오른쪽 위젯의 큰 노브를 왼쪽으로 돌려보세요. 밝던 소리가 점점 어두워지고 먹먹해지는 걸 **귀로** 느껴보세요. 숫자는 신경 쓰지 않아도 돼요!
+</Level>
+
+{/* ───────── 중급 (Normal) · 체(Sieve) ───────── */}
+<Level show="normal">
 ## 필터란?
 
-필터는 오디오 신호에서 원하는 주파수 대역만 통과시키고 나머지를 줄이는 장치입니다. EQ(이퀄라이저)의 기초이며, 신디사이저의 가장 핵심적인 음색 조절 도구입니다.
+필터는 소리를 주파수(높낮이) 크기별로 걸러내는 **체(Sieve)** 입니다. 어떤 주파수 대역은 통과시키고 나머지는 줄여, EQ와 신디사이저 음색 설계의 기초가 됩니다.
 
-## 세 가지 필터 타입
+## 세 가지 타입
 
 <DefList>
-  <DefCard term="Low Pass (로우패스)">Cutoff 이하만 통과. 고음을 깎아 따뜻하고 둔탁하게 만듭니다. 신스 사운드 디자인에서 가장 많이 쓰입니다.</DefCard>
-  <DefCard term="High Pass (하이패스)">Cutoff 이상만 통과. 저음을 제거해 얇고 밝게 만듭니다. 킥·베이스의 공간 확보에 활용됩니다.</DefCard>
-  <DefCard term="Band Pass (밴드패스)">Cutoff 주변 좁은 대역만 통과. 라디오·전화 음색처럼 특정 주파수만 강조됩니다.</DefCard>
+  <DefCard term="Low Pass (로우패스)">Cutoff 이하만 통과. 고음을 깎아 따뜻하고 둔탁하게. 신스에서 가장 많이 쓰임.</DefCard>
+  <DefCard term="High Pass (하이패스)">Cutoff 이상만 통과. 저음을 제거해 얇고 밝게.</DefCard>
+  <DefCard term="Band Pass (밴드패스)">Cutoff 주변 좁은 대역만 통과. 라디오·전화 음색.</DefCard>
 </DefList>
 
-## Resonance(Q)란?
+## Cutoff와 Resonance(Q)
 
-Cutoff 주파수 근처를 얼마나 강조할지 정합니다. Q를 높이면 컷오프 지점에서 뾰족하게 울리는 공진(resonance) 현상이 나타납니다. 극단적으로 높이면 자기 발진(self-oscillation)이 발생해 순수한 음정을 만들기도 합니다.
+**Cutoff**는 통과/차단을 가르는 경계 주파수(Hz)입니다. **Resonance(Q)** 는 그 경계 부근을 얼마나 강조할지로, 높이면 컷오프 지점이 뾰족하게 울리는 공진이 생깁니다.
+</Level>
+
+{/* ───────── 고급 (Hard) · 전달 함수 ───────── */}
+<Level show="hard">
+## 2차 IIR 필터와 전달 함수
+
+SoundLab의 필터는 Web Audio `BiquadFilterNode` — 2차 IIR(Infinite Impulse Response) 필터입니다. 전달 함수는 다음 형태를 가집니다:
+
+`H(z) = (b0 + b1·z⁻¹ + b2·z⁻²) / (a0 + a1·z⁻¹ + a2·z⁻²)`
+
+Cutoff와 Q는 이 계수(bₙ, aₙ)를 결정하며, Q는 극(pole)이 단위원에 얼마나 가까운지를 좌우해 컷오프 부근의 피킹(공진)을 만듭니다.
+
+## 차수(Order)와 롤오프
+
+단일 biquad는 **2차 = -12dB/oct** 롤오프입니다. 같은 필터를 직렬로 캐스케이드하면 **4차 = -24dB/oct**로 차단 기울기가 가팔라집니다. 위젯의 **Slope** 스위치(Hard 전용)로 -12/-24dB/oct를 전환해 차단 경사를 비교하세요.
+
+## 위상 천이(Phase Shift)
+
+IIR 필터는 진폭뿐 아니라 **위상**도 바꿉니다. Cutoff 부근에서 위상이 천이되며, 차수가 높을수록 위상 회전량이 커집니다. 멀티밴드 합성·크로스오버 설계에서 이 위상 정렬이 핵심 변수입니다.
+</Level>
 
 <Callout>
+- → 레벨 바의 **"너무 어려워요 / 좀 쉬워요"** 로 설명 깊이와 위젯 노브 수를 동시에 바꿔보세요
 - → **노이즈** 음원 + Low Pass: Cutoff를 낮추며 고음이 잘려나가는 소리를 들어보세요
-- → Resonance를 올리며 Cutoff 부근의 공진 소리를 확인하세요
-- → 스펙트럼에서 오른쪽 고역 막대가 사라지는 것을 눈으로 확인하세요
+- → Resonance를 올리며 Cutoff 부근의 공진을 확인하세요 (중급 이상)
+- → Hard 모드에서 **Slope** 를 -24dB/oct로 올려 차단 경사가 가팔라지는 것을 스펙트럼으로 확인하세요
 </Callout>

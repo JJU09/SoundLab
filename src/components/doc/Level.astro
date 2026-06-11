@@ -1,0 +1,10 @@
+---
+// 수준별 본문 블록. 부모 [data-level]과 일치할 때만 표시(순수 CSS).
+// show: 'easy' | 'normal' | 'hard' (공백/쉼표로 복수 지정 가능, 예: "normal hard")
+interface Props {
+  show: string;
+}
+const { show } = Astro.props;
+const levels = show.split(/[\s,]+/).filter(Boolean).join(' ');
+---
+<div class="lvl" data-levels={levels}><slot /></div>

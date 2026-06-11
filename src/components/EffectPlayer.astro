@@ -5,6 +5,8 @@ interface Props {
   module: ModuleDef;
 }
 const { module: m } = Astro.props;
+// 수준별 노출 태그: easy/없음=항상, normal=중급↑, hard=고급만 (CSS가 data-level과 매칭해 숨김)
+const adv = (tier?: string) => (tier && tier !== 'easy' ? { 'data-adv': tier } : {});
 ---
 
 <div class="effect-player rounded-2xl border border-[var(--color-border)] bg-white overflow-hidden"
@@ -37,7 +39,7 @@ const { module: m } = Astro.props;
 
   <!-- 타입 선택 (Filter만) -->
   {m.type && (
-    <div class="px-5 pt-4">
+    <div class="px-5 pt-4" {...adv(m.type.tier)}>
       <div class="flex gap-1.5 p-1 bg-[var(--color-surface-2)] rounded-xl w-fit" role="group" aria-label="필터 타입">
         {m.type.options.map(([val, txt]) => (
           <button
@@ -51,10 +53,25 @@ const { module: m } = Astro.props;
     </div>
   )}
 
+  <!-- 추가 셀렉터 (예: 필터 Slope · 고급) -->
+  {m.selectors?.map(sel => (
+    <div class="px-5 pt-3" {...adv(sel.tier)}>
+      <div class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">{sel.label}</div>
+      <div class="sel-group flex gap-1.5 p-1 bg-[var(--color-surface-2)] rounded-xl w-fit" role="group" data-sel-param={sel.param}>
+        {sel.options.map(([val, txt]) => (
+          <button class="sel-btn px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition-all text-[var(--color-ink-500)]"
+            data-val={val} aria-pressed={val === sel.value ? 'true' : 'false'}>
+            {txt}
+          </button>
+        ))}
+      </div>
+    </div>
+  ))}
+
   <!-- 슬라이더들 -->
   <div class="px-5 py-5 flex flex-col gap-5">
     {m.knobs.map(k => (
-      <div class="slider-wrap" data-param={k.param}
+      <div class="slider-wrap" data-param={k.param} {...adv(k.tier)}
         data-min={k.min} data-max={k.max} data-value={k.value} data-curve={k.curve ?? 'lin'}>
         <div class="flex items-center justify-between mb-2">
           <label class="text-xs font-mono uppercase tracking-widest text-[var(--color-ink-500)]">{k.label}</label>
@@ -276,6 +293,20 @@ document.querySelectorAll<HTMLElement>('.effect-player').forEach(el => {
     if (btn.getAttribute('aria-pressed') === 'true') {
       btn.style.cssText = 'background:white;color:var(--color-violet);box-shadow:0 1px 4px rgba(0,0,0,0.08)';
     }
+  });
+
+  // 추가 셀렉터 버튼 (Slope 등)
+  el.querySelectorAll<HTMLElement>('.sel-group').forEach(group => {
+    const param = group.dataset.selParam!;
+    group.querySelectorAll<HTMLButtonElement>('.sel-btn').forEach(btn => {
+      const sel = () => { btn.style.cssText = 'background:white;color:var(--color-violet);box-shadow:0 1px 4px rgba(0,0,0,0.08)'; };
+      btn.addEventListener('click', () => {
+        group.querySelectorAll('.sel-btn').forEach(b => { (b as HTMLElement).setAttribute('aria-pressed','false'); (b as HTMLElement).style.cssText = ''; });
+        btn.setAttribute('aria-pressed','true'); sel();
+        engine?.set(moduleId, param, btn.dataset.val!);
+      });
+      if (btn.getAttribute('aria-pressed') === 'true') sel();
+    });
   });
 
   // 음원 버튼

@@ -7,6 +7,7 @@ import PhaseWidget from './PhaseWidget.astro';
 import ToneWidget from './ToneWidget.astro';
 import CombWidget from './CombWidget.astro';
 import BitcrushWidget from './BitcrushWidget.astro';
+import AliasWidget from './AliasWidget.astro';
 import { MODULE_MAP, type ModuleId } from '../lib/modules';
 
 interface Props {
@@ -24,3 +25,4 @@ const effectModule = widget === 'effect' && moduleId ? MODULE_MAP[moduleId] : nu
 {widget === 'tone' && <ToneWidget config={config} />}
 {widget === 'comb' && <CombWidget config={config} />}
 {widget === 'bitcrush' && <BitcrushWidget config={config} />}
+{widget === 'aliasing' && <AliasWidget config={config} />}

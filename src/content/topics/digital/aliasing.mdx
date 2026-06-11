@@ -1,0 +1,84 @@
+---
+hub: digital
+title: Sampling & Aliasing
+kr: 샘플링과 에일리어싱
+order: 2
+color: blue
+tagline: 너무 높은 음이 낮게 둔갑하다
+desc: 디지털은 소리를 일정 간격으로 '점 찍어' 기록합니다. 샘플레이트의 절반(나이퀴스트)보다 높은 주파수는 엉뚱한 낮은 음으로 접혀 들리는데, 이것이 에일리어싱입니다.
+widget: aliasing
+widgetConfig:
+  freq: 1200
+  sr: 3000
+quiz: aliasing
+scaffold: true
+---
+import Level from '../../../components/doc/Level.astro';
+import DefList from '../../../components/doc/DefList.astro';
+import DefCard from '../../../components/doc/DefCard.astro';
+import Callout from '../../../components/doc/Callout.astro';
+
+{/* ───────── 초급 ───────── */}
+<Level show="easy">
+## 너무 빠르면 바퀴가 거꾸로 돈다
+
+영화에서 빠르게 도는 자동차 바퀴가 **멈추거나 거꾸로 도는 것처럼** 보인 적 있죠? 카메라가 1초에 정해진 장면만 찍기 때문에, 너무 빠른 움직임을 놓쳐 엉뚱하게 보이는 거예요.
+
+소리도 똑같아요. 디지털은 소리를 일정 간격으로 점 찍어 기록하는데, **너무 높은 음은 점 사이로 빠져나가** 엉뚱한 낮은 음으로 둔갑합니다.
+
+## 직접 해보기
+
+**소리 켜기** 후 **원본 주파수** 를 천천히 올려보세요. 어느 순간 음이 더 높아지지 않고 **오히려 낮아지기 시작**합니다 — 빨간 샘플점이 원본 파형을 따라가지 못하는 순간이에요.
+</Level>
+
+{/* ───────── 중급 ───────── */}
+<Level show="normal">
+## 나이퀴스트 정리
+
+신호를 정확히 담으려면 샘플레이트가 **신호 최고 주파수의 2배보다 커야** 합니다. 이 경계인 `샘플레이트 / 2`를 **나이퀴스트 주파수**라 합니다.
+
+<DefList>
+  <DefCard term="샘플레이트" color="blue">1초에 몇 번 점을 찍는지(Hz). CD는 44,100Hz.</DefCard>
+  <DefCard term="나이퀴스트 한계" color="blue">샘플레이트의 절반. 이보다 높은 음은 정확히 담을 수 없음.</DefCard>
+</DefList>
+
+## 접힘(Folding)
+
+나이퀴스트를 넘는 주파수는 그 경계를 거울 삼아 **접혀(fold)** 낮은 주파수로 둔갑합니다. 위젯에서 원본 주파수가 나이퀴스트를 넘으면 '들리는 음'이 낮아지는 것을 스펙트럼에서 확인하세요.
+</Level>
+
+{/* ───────── 고급 ───────── */}
+<Level show="hard">
+## 에일리어스 주파수 공식
+
+샘플레이트 `fs`로 표본화한 주파수 `f`의 에일리어스는 `fs`를 주기로 접힙니다:
+
+`f_alias = | f − fs·round(f / fs) |`
+
+`f < fs/2`면 그대로, 넘으면 `fs/2`를 축으로 반사됩니다. 예: fs=3000, f=2000 → 나이퀴스트 1500 초과 → 3000−2000 = **1000Hz**로 들림.
+
+## 안티에일리어싱
+
+실제 ADC는 표본화 **전에** 나이퀴스트 이상을 잘라내는 저역통과(anti-aliasing) 필터를 둬 접힘을 막습니다. 이 위젯은 필터가 없는 순수 표본화라, 영차홀드 계단에 고주파 이미지(fs±f)까지 실려 거친 소리가 납니다.
+</Level>
+
+<Level show="easy">
+<Callout color="blue">
+- → 원본 주파수를 올리다 보면 음이 더 높아지지 않고 낮아지는 지점(에일리어싱)을 찾아보세요
+- → **샘플레이트** 를 낮추면 그 지점이 더 빨리 찾아옵니다 (점이 듬성듬성)
+</Callout>
+</Level>
+
+<Level show="normal">
+<Callout color="blue">
+- → 원본 주파수를 나이퀴스트(샘플레이트/2) 위아래로 옮기며 경고 표시를 확인
+- → 스펙트럼의 피크가 슬라이더 값보다 낮은 곳에 찍히는 것이 접힘의 증거입니다
+</Callout>
+</Level>
+
+<Level show="hard">
+<Callout color="blue">
+- → fs=3000, f=2000을 맞추고 들리는 음이 공식대로 1000Hz인지 스펙트럼으로 확인
+- → 계단(영차홀드)에 실린 고주파 이미지(fs±f)가 거친 음색을 만드는 것을 관찰
+</Callout>
+</Level>

@@ -5,28 +5,68 @@ export interface QuizQuestion {
   explain: string;
 }
 
+// 수준별 퀴즈 (스캐폴딩 토픽용). 레벨별로 다른 문항.
+export type LevelQuizzes = Partial<Record<'easy' | 'normal' | 'hard', QuizQuestion[]>>;
+
 // 토픽 하단 개념 확인용 객관식 퀴즈. 키 = 토픽 프런트매터 quiz 값.
-export const QUIZZES: Record<string, QuizQuestion[]> = {
-  filter: [
-    {
-      q: 'Low Pass 필터의 Cutoff 주파수를 낮추면 소리는 어떻게 변할까요?',
-      options: ['고음이 잘려 둔탁해진다', '저음이 잘려 얇아진다', '음량이 커진다', '음정이 높아진다'],
-      answer: 0,
-      explain: 'Low Pass는 Cutoff "이하"만 통과시키므로, Cutoff를 낮추면 고음이 제거되어 따뜻하고 둔탁한 소리가 됩니다.',
-    },
-    {
-      q: 'Resonance(Q)를 높이면 나타나는 현상은?',
-      options: ['전체 음량이 일정해진다', 'Cutoff 부근이 뾰족하게 강조되어 공진한다', '저음만 통과된다', '잡음이 사라진다'],
-      answer: 1,
-      explain: 'Q를 높이면 Cutoff 주파수 근처가 강조되어 뾰족하게 울리는 공진(resonance)이 발생하고, 극단적으로는 자기 발진까지 일어납니다.',
-    },
-    {
-      q: '라디오·전화 음색처럼 특정 대역만 강조하려면 어떤 필터가 적합할까요?',
-      options: ['Low Pass', 'High Pass', 'Band Pass', '필터 없음'],
-      answer: 2,
-      explain: 'Band Pass는 Cutoff 주변의 좁은 대역만 통과시켜, 라디오나 전화처럼 특정 주파수만 남은 음색을 만듭니다.',
-    },
-  ],
+// 값 = 평면 배열(레벨 무관) 또는 {easy,normal,hard} 레벨별 객체.
+export const QUIZZES: Record<string, QuizQuestion[] | LevelQuizzes> = {
+  filter: {
+    easy: [
+      {
+        q: '필터를 "소리 커튼"에 비유했어요. 커튼을 많이 칠수록 소리는?',
+        options: ['더 밝고 또렷해진다', '더 먹먹하고 둔탁해진다', '더 커진다', '변화 없다'],
+        answer: 1,
+        explain: '커튼(필터)이 밝은 고음을 가로막을수록 어두운 저음만 남아 먹먹하고 둔탁해집니다. 라디오·물속 소리 같은 느낌이에요.',
+      },
+      {
+        q: '오른쪽 위젯의 큰 노브(Cutoff)를 왼쪽으로 돌리면?',
+        options: ['소리가 점점 어두워진다', '소리가 점점 밝아진다', '소리가 멈춘다', '음정이 올라간다'],
+        answer: 0,
+        explain: 'Cutoff를 낮추면(왼쪽) 밝은 고음부터 차단되어 소리가 점점 어둡고 먹먹해집니다.',
+      },
+    ],
+    normal: [
+      {
+        q: 'Low Pass 필터의 Cutoff 주파수를 낮추면 소리는 어떻게 변할까요?',
+        options: ['고음이 잘려 둔탁해진다', '저음이 잘려 얇아진다', '음량이 커진다', '음정이 높아진다'],
+        answer: 0,
+        explain: 'Low Pass는 Cutoff "이하"만 통과시키므로, Cutoff를 낮추면 고음이 제거되어 따뜻하고 둔탁한 소리가 됩니다.',
+      },
+      {
+        q: 'Resonance(Q)를 높이면 나타나는 현상은?',
+        options: ['전체 음량이 일정해진다', 'Cutoff 부근이 뾰족하게 강조되어 공진한다', '저음만 통과된다', '잡음이 사라진다'],
+        answer: 1,
+        explain: 'Q를 높이면 Cutoff 주파수 근처가 강조되어 뾰족하게 울리는 공진(resonance)이 발생하고, 극단적으로는 자기 발진까지 일어납니다.',
+      },
+      {
+        q: '라디오·전화 음색처럼 특정 대역만 강조하려면 어떤 필터가 적합할까요?',
+        options: ['Low Pass', 'High Pass', 'Band Pass', '필터 없음'],
+        answer: 2,
+        explain: 'Band Pass는 Cutoff 주변의 좁은 대역만 통과시켜, 라디오나 전화처럼 특정 주파수만 남은 음색을 만듭니다.',
+      },
+    ],
+    hard: [
+      {
+        q: 'SoundLab의 BiquadFilterNode는 몇 차 IIR 필터이며 기본 롤오프는?',
+        options: ['1차 / -6dB/oct', '2차 / -12dB/oct', '4차 / -24dB/oct', '차수 없음 / 평탄'],
+        answer: 1,
+        explain: 'Biquad는 2차 IIR 필터로 기본 -12dB/oct 롤오프입니다. 직렬 캐스케이드하면 4차 -24dB/oct가 됩니다.',
+      },
+      {
+        q: 'Slope를 -24dB/oct로 바꾸면 내부적으로 어떤 일이 일어날까요?',
+        options: ['Q가 2배가 된다', '같은 biquad를 2단 직렬 연결한다', 'Cutoff가 절반이 된다', 'FIR 필터로 바뀐다'],
+        answer: 1,
+        explain: '동일한 2차 biquad를 직렬로 한 단 더 거치면 감쇄 기울기가 합쳐져 4차 -24dB/oct가 됩니다. 차단이 더 가파릅니다.',
+      },
+      {
+        q: 'IIR 필터가 진폭 외에 추가로 바꾸는 특성은?',
+        options: ['샘플레이트', '비트 뎁스', '위상(Phase)', '채널 수'],
+        answer: 2,
+        explain: 'IIR 필터는 Cutoff 부근에서 위상을 천이시키며, 차수가 높을수록 위상 회전량이 커집니다. 크로스오버 설계의 핵심 변수입니다.',
+      },
+    ],
+  },
   drive: [
     {
       q: '디스토션(Drive)이 소리를 거칠게 만드는 근본 원리는?',

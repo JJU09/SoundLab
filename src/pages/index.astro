@@ -1,7 +1,13 @@
 ---
 import Base from '../layouts/Base.astro';
-import { MODULES } from '../lib/modules';
+import { getCollection } from 'astro:content';
+import { HUB_META, HUBS } from '../content.config';
 const base = import.meta.env.BASE_URL;
+
+const all = (await getCollection('topics')).filter(t => !t.data.draft);
+const hubs = [...HUBS]
+  .sort((a, b) => HUB_META[a].order - HUB_META[b].order)
+  .map(h => ({ id: h, ...HUB_META[h], count: all.filter(t => t.data.hub === h).length }));
 ---
 <Base title="홈" description="Web Audio API로 배우는 사운드 이펙트 실습 플레이그라운드. 필터·드라이브·딜레이·리버브를 직접 조작하며 소리가 바뀌는 원리를 배웁니다.">
 
@@ -43,50 +49,44 @@ const base = import.meta.env.BASE_URL;
     </div>
   </section>
 
-  <!-- 이펙트 카드 그리드 -->
+  <!-- 지식 허브 쇼케이스 -->
   <section class="max-w-6xl mx-auto px-4 sm:px-6 pb-20">
     <div class="flex items-baseline gap-3 mb-8">
-      <h2 class="text-xl font-bold" style="font-family:'Space Grotesk'">6가지 이펙트 레슨</h2>
-      <span class="text-sm text-[var(--color-ink-300)] font-mono">각 카드를 클릭해 인터랙티브 레슨을 시작하세요</span>
+      <h2 class="text-xl font-bold" style="font-family:'Space Grotesk'">5가지 지식 허브</h2>
+      <span class="text-sm text-[var(--color-ink-300)] font-mono">소리 물리부터 믹싱까지 — 듣고 만지며 배우는 백과사전</span>
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {MODULES.map((m) => (
-        <a href={`${base}learn/effects/${m.id}/`}
-          class="group block p-5 rounded-2xl border border-[var(--color-border)] bg-white hover:border-transparent transition-all duration-200"
-          style={`--hover-color: ${m.color === 'violet' ? 'rgba(124,58,237,0.4)' : 'rgba(37,99,235,0.4)'}`}
-          onmouseover="this.style.boxShadow=`0 0 0 1.5px var(--hover-color), 0 8px 30px -10px var(--hover-color)`"
-          onmouseout="this.style.boxShadow=''"
-        >
-          <div class="flex items-start justify-between mb-3">
-            <div class={`w-9 h-9 rounded-xl flex items-center justify-center text-sm font-mono font-bold text-white ${m.color === 'violet' ? 'gradient-brand' : ''}`}
-              style={m.color === 'blue' ? 'background: linear-gradient(135deg,#2563eb,#7c3aed)' : ''}>
-              {m.num}
+      {hubs.map((h, i) => {
+        const ready = h.count > 0;
+        const inner = (
+          <>
+            <div class="flex items-baseline justify-between mb-3">
+              <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">{h.label}</span>
+              {ready
+                ? <span class="text-[10px] font-mono text-[var(--color-violet)]">{h.count}개 토픽</span>
+                : <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[var(--color-surface-2)] text-[var(--color-ink-300)]">준비 중</span>}
             </div>
-            <span class={`text-xs font-mono px-2 py-0.5 rounded-full border ${
-              m.color === 'violet'
-                ? 'border-[var(--color-violet-light)] text-[var(--color-violet)] bg-[var(--color-violet-glow)]'
-                : 'border-[var(--color-blue-light)] text-[var(--color-blue)] bg-[var(--color-blue-glow)]'
-            }`}>{m.kr}</span>
-          </div>
-
-          <h3 class="font-bold text-lg mb-1 group-hover:gradient-brand-text transition" style="font-family:'Space Grotesk'">{m.name}</h3>
-          <p class="text-sm text-[var(--color-ink-500)] mb-4 leading-relaxed">{m.tagline}</p>
-
-          <div class="flex items-center gap-1.5 flex-wrap">
-            {m.knobs.map(k => (
-              <span class="text-[11px] font-mono px-2 py-0.5 bg-[var(--color-surface)] rounded-md text-[var(--color-ink-500)]">
-                {k.label}
+            <div class="flex items-center gap-2 mb-1">
+              <span class={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-mono font-bold text-white ${ready ? 'gradient-brand' : 'bg-[var(--color-ink-300)]'}`}>
+                {String(i + 1).padStart(2, '0')}
               </span>
-            ))}
-            {m.type && (
-              <span class="text-[11px] font-mono px-2 py-0.5 bg-[var(--color-surface)] rounded-md text-[var(--color-ink-500)]">
-                Type
-              </span>
-            )}
-          </div>
-        </a>
-      ))}
+              <h3 class={`font-bold text-lg ${ready ? 'group-hover:gradient-brand-text transition' : ''}`} style="font-family:'Space Grotesk'">{h.kr}</h3>
+            </div>
+            <p class="text-sm text-[var(--color-ink-500)] leading-relaxed">{h.desc}</p>
+          </>
+        );
+        return ready ? (
+          <a href={`${base}learn/${h.id}/`}
+            class="group block p-5 rounded-2xl border border-[var(--color-border)] bg-white hover:border-transparent transition-all duration-200"
+            style="--hover-color: rgba(124,58,237,0.4)"
+            onmouseover="this.style.boxShadow=`0 0 0 1.5px var(--hover-color), 0 8px 30px -10px var(--hover-color)`"
+            onmouseout="this.style.boxShadow=''"
+          >{inner}</a>
+        ) : (
+          <div class="p-5 rounded-2xl border border-dashed border-[var(--color-border)] bg-[var(--color-surface)] opacity-70">{inner}</div>
+        );
+      })}
     </div>
   </section>
 

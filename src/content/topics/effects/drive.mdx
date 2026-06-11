@@ -10,57 +10,82 @@ widget: effect
 widgetConfig:
   moduleId: drive
 quiz: drive
+scaffold: true
 ---
+import Level from '../../../components/doc/Level.astro';
 import DefList from '../../../components/doc/DefList.astro';
 import DefCard from '../../../components/doc/DefCard.astro';
 import Callout from '../../../components/doc/Callout.astro';
 
+{/* ───────── 초급 ───────── */}
+<Level show="easy">
+## 드라이브는 '소리 찌그러뜨리기'예요
+
+기타 앰프 볼륨을 끝까지 올리면 소리가 **지글지글 거칠게 찌그러지죠**? 그게 바로 드라이브(디스토션)예요. 깨끗하고 매끈하던 소리가 거칠고 두꺼워집니다.
+
+록 기타의 묵직한 사운드, 일렉트로닉 음악의 거친 베이스가 모두 이 효과로 만들어져요.
+
+## 직접 해보기
+
+큰 노브(Drive)를 천천히 올리며 소리가 점점 거칠어지는 걸 들어보세요. 매끈한 곡선이던 파형의 위아래가 **납작하게 눌리는** 모양도 함께 보세요.
+</Level>
+
+{/* ───────── 중급 ───────── */}
+<Level show="normal">
 ## 드라이브(디스토션)란?
 
-신호를 증폭시켜 파형의 꼭대기를 눌러버리는(클리핑) 효과입니다. 이 과정에서 원래 없던 배음(harmonics)이 생겨나 소리가 거칠고 풍성해집니다. 기타 앰프의 볼륨을 너무 높이면 오버드라이브가 걸리는 것, 레코딩이 너무 크게 녹음되어 찌그러지는 것이 모두 이 원리입니다.
+신호를 증폭시켜 파형의 꼭대기를 눌러버리는(클리핑) 효과입니다. 이 과정에서 원래 없던 배음(harmonics)이 생겨나 소리가 거칠고 풍성해집니다. 기타 앰프의 오버드라이브, 과하게 녹음된 소리의 찌그러짐이 모두 이 원리입니다.
 
-## 하드 클리핑 vs 소프트 클리핑
-
-<DefList>
-  <DefCard term="하드 클리핑" color="blue">파형을 정해진 한계에서 직각으로 잘라냅니다. 날카롭고 공격적인 사운드. 디지털 클리핑, 퍼즈 페달이 대표적입니다.</DefCard>
-  <DefCard term="소프트 클리핑 (SoundLab 방식)" color="blue">파형을 S자 곡선으로 부드럽게 눌러줍니다. 따뜻하고 자연스러운 배음. 진공관(튜브) 앰프의 포화 특성을 모사합니다.</DefCard>
-</DefList>
-
-## 왜 배음이 생길까?
-
-순수한 사인파(기음 하나만 존재)를 클리핑하면 파형이 점점 사각파에 가까워집니다. 사각파는 수학적으로 기음의 **홀수 배음(3배, 5배, 7배…)의 합**으로 이루어져 있습니다. 즉, 클리핑 = 배음 추가입니다. 스펙트럼 화면에서 배음 막대들이 줄지어 나타나는 것을 직접 확인할 수 있습니다.
-
-## 파라미터 이해
+## 하드 vs 소프트 클리핑
 
 <DefList>
-  <DefCard term="Amount (드라이브 강도)" color="blue">클리핑 강도를 결정합니다. 낮은 값에서도 파형은 즉시 눌리기 시작하며, 약 10%에서 진폭이 원음의 2배로 최고조에 달합니다. 그 이상은 파형이 포화(Saturation) 상태가 되어 음량보다 음색(배음 풍부도)을 조절하는 영역입니다.</DefCard>
+  <DefCard term="하드 클리핑" color="blue">한계에서 직각으로 잘라냄. 날카롭고 공격적. 디지털 클리핑·퍼즈.</DefCard>
+  <DefCard term="소프트 클리핑 (SoundLab)" color="blue">S자 곡선으로 부드럽게 눌러줌. 따뜻한 배음. 진공관 앰프 특성.</DefCard>
 </DefList>
 
-## Drive를 올릴수록 진폭이 줄어드는 이유
+## 왜 배음이 생기나?
 
-Drive가 높아질수록 파형이 포화 상태에 도달해 더 이상 커질 공간이 없어집니다. 이 시점부터 내장된 **자동 볼륨 보정(Auto Makeup Gain)** 이 출력을 계속 낮춰 찢어지는 소리를 방지합니다. 실제 기타 앰프나 플러그인도 같은 이유로 "드라이브를 올리면 음색이 진해지되 음량은 크게 변하지 않습니다."
+사인파를 클리핑하면 파형이 사각파에 가까워집니다. 사각파는 수학적으로 기음의 **홀수 배음(3·5·7배…)의 합**이므로, 클리핑 = 배음 추가입니다.
+</Level>
+
+{/* ───────── 고급 ───────── */}
+<Level show="hard">
+## WaveShaper 전달 곡선
+
+SoundLab의 드라이브는 `WaveShaperNode`에 다음 곡선을 매핑합니다 (소프트 클리핑, k는 드라이브 강도):
+
+`f(x) = (1 + k)·x / (1 + k·|x|)`
+
+k가 커질수록 곡선이 가팔라져 입력이 작아도 빠르게 ±1로 포화합니다. 곡선의 비선형성이 푸리에 전개에서 고차 배음 항을 생성합니다.
+
+## 자동 메이크업 게인
+
+클리핑은 음량을 키우므로, 후단에 보정 게인 `1/(1 + amt·0.012)`을 둬 출력을 낮춥니다. 그 결과 약 10% 부근에서 진폭이 최대(원음의 약 2배)가 된 뒤, 포화가 한계에 부딪히고 보정만 계속돼 오히려 진폭이 줄어듭니다.
 
 <div class="grid grid-cols-3 gap-2 text-center text-xs not-prose">
-  <div class="p-2 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)]">
-    <div class="font-mono font-bold text-[var(--color-blue)] text-[11px] mb-0.5">Drive 0%</div>
-    <div class="font-mono text-base font-bold text-[var(--color-ink-700)]">0.35</div>
-    <div class="text-[10px] text-[var(--color-ink-500)] mt-0.5">매끄러운 사인파</div>
-  </div>
-  <div class="p-2 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)]">
-    <div class="font-mono font-bold text-[var(--color-blue)] text-[11px] mb-0.5">Drive 10%</div>
-    <div class="font-mono text-base font-bold text-[var(--color-ink-700)]">0.78 ↑최대</div>
-    <div class="text-[10px] text-[var(--color-ink-500)] mt-0.5">파형 눌림 시작</div>
-  </div>
-  <div class="p-2 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)]">
-    <div class="font-mono font-bold text-[var(--color-blue)] text-[11px] mb-0.5">Drive 100%</div>
-    <div class="font-mono text-base font-bold text-[var(--color-ink-700)]">0.45</div>
-    <div class="text-[10px] text-[var(--color-ink-500)] mt-0.5">거의 사각파</div>
-  </div>
+  <div class="p-2 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)]"><div class="font-mono font-bold text-[var(--color-blue)] text-[11px]">Drive 0%</div><div class="font-mono text-base font-bold text-[var(--color-ink-700)]">0.35</div></div>
+  <div class="p-2 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)]"><div class="font-mono font-bold text-[var(--color-blue)] text-[11px]">Drive 10%</div><div class="font-mono text-base font-bold text-[var(--color-ink-700)]">0.78 ↑</div></div>
+  <div class="p-2 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)]"><div class="font-mono font-bold text-[var(--color-blue)] text-[11px]">Drive 100%</div><div class="font-mono text-base font-bold text-[var(--color-ink-700)]">0.45</div></div>
 </div>
+</Level>
 
+<Level show="easy">
 <Callout color="blue">
-- → **사인파(Sine)** 지속음으로 시작하세요 — 파형이 매끄럽고 스펙트럼에 막대 하나만 있습니다
-- → Drive를 천천히 올리며 파형 꼭대기가 눌리는 모양과 스펙트럼에 배음 막대가 생기는 것을 관찰하세요
-- → Drive 10% 근방에서 오실로스코프 진폭이 최대가 되고, 이후 줄어드는 것을 확인하세요
-- → 사각파(Square)로 바꿔 이미 배음이 많은 소리와 비교해보세요 — 클리핑 효과가 훨씬 적습니다
+- → **소리 켜기** 후 Drive 노브를 0 → 100%로 천천히 올려보세요
+- → 파형 위아래가 납작하게 눌리고 소리가 거칠어지는 걸 느껴보세요
 </Callout>
+</Level>
+
+<Level show="normal">
+<Callout color="blue">
+- → **사인파(Sine)** 로 시작 — 스펙트럼에 막대 하나 → Drive 올리면 배음 막대가 줄지어 생김
+- → **사각파(Square)** 로 바꿔 이미 배음 많은 소리와 비교 (클리핑 효과 적음)
+</Callout>
+</Level>
+
+<Level show="hard">
+<Callout color="blue">
+- → Drive ≈10% 부근에서 오실로스코프 진폭이 최대, 이후 자동 게인으로 감소하는 것을 확인
+- → 음압보다 **음색(배음 분포)** 을 조절하는 영역임을 스펙트럼으로 관찰
+</Callout>
+</Level>

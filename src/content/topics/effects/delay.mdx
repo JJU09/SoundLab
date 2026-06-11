@@ -10,30 +10,69 @@ widget: effect
 widgetConfig:
   moduleId: delay
 quiz: delay
+scaffold: true
 ---
+import Level from '../../../components/doc/Level.astro';
 import DefList from '../../../components/doc/DefList.astro';
 import DefCard from '../../../components/doc/DefCard.astro';
 import Callout from '../../../components/doc/Callout.astro';
 
+{/* ───────── 초급 ───────── */}
+<Level show="easy">
+## 딜레이는 '메아리'예요
+
+산에서 "야호!" 하면 잠시 뒤 **"야호…야호…"** 하고 메아리가 돌아오죠? 딜레이는 소리를 조금 늦게 다시 들려줘 이 메아리(에코)를 만드는 효과예요.
+
+## 직접 해보기
+
+**플럭** 음원으로 켜고 큰 노브(Time)를 조절해보세요. 음 하나마다 메아리가 따라붙는 걸 들어보세요.
+</Level>
+
+{/* ───────── 중급 ───────── */}
+<Level show="normal">
 ## 딜레이란?
 
-오디오 신호를 일정 시간만큼 늦춰 메아리(에코)를 만드는 효과입니다. 자연계에서 소리가 벽에 반사되어 늦게 들리는 현상을 전자적으로 구현합니다. 스페이시한 분위기, 리듬감, 깊이감을 만드는 데 필수적인 이펙터입니다.
-
-## 파라미터 이해
+신호를 일정 시간 늦춰 메아리를 만드는 효과입니다. 소리가 벽에 반사돼 늦게 들리는 현상을 전자적으로 구현합니다. 공간감·리듬감·깊이를 만드는 필수 이펙터입니다.
 
 <DefList>
-  <DefCard term="Time (딜레이 타임)">메아리가 얼마나 늦게 들릴지. BPM에 맞추면 리듬감 있는 딜레이를 만들 수 있습니다.</DefCard>
-  <DefCard term="Feedback (피드백)">메아리를 다시 입력으로 돌려보내는 비율. 높을수록 메아리가 더 오래 반복됩니다. 100% 이상이면 무한 반복(발진).</DefCard>
-  <DefCard term="Mix">원음 대비 딜레이 신호 비율. 높을수록 에코가 강해집니다.</DefCard>
+  <DefCard term="Time">메아리가 얼마나 늦게 들릴지. BPM에 맞추면 리듬감 있는 딜레이.</DefCard>
+  <DefCard term="Feedback">메아리를 다시 입력으로 돌려보내는 비율. 높을수록 더 오래 반복.</DefCard>
+  <DefCard term="Mix">원음 대비 딜레이 비율.</DefCard>
 </DefList>
 
-## BPM 싱크 딜레이
+## BPM 싱크
 
-딜레이 타임을 BPM에 맞추면 메아리가 박자에 딱 떨어집니다. 공식: `Time(ms) = 60000 / BPM` (4분음표 기준). 예: 120 BPM → 500ms, 절반음표 → 1000ms.
+`Time(ms) = 60000 / BPM` (4분음표). 예: 120 BPM → 500ms. 박자에 딱 떨어지는 딜레이를 만듭니다.
+</Level>
 
+{/* ───────── 고급 ───────── */}
+<Level show="hard">
+## 피드백 지연선과 빗필터
+
+딜레이는 피드백 게인 g를 가진 **지연선(feedback delay line)** 입니다. 임펄스 응답은 `g, g², g³…`로 지수 감쇠하며, g≥1이면 발산(무한 발진)합니다. SoundLab은 피드백 경로에 로우패스(damp)를 둬 반복마다 고역을 깎습니다(아날로그 테이프 에코 모사).
+
+## 짧은 딜레이 = 빗필터
+
+지연이 수 ms로 짧아지면 원음과 합쳐져 `f = 1/τ` 간격의 **빗필터(comb filter)** 노치가 스펙트럼에 생깁니다. 메아리로 인지되던 것이 음색 변화로 바뀌는 경계입니다.
+</Level>
+
+<Level show="easy">
 <Callout>
-- → **플럭** 음원으로 시작하세요 — 각 음마다 메아리가 붙는 것이 또렷이 들립니다
-- → Time을 300ms로, Feedback을 50%로 설정해보세요
-- → Feedback을 80% 이상으로 올리며 메아리가 점점 쌓이는 것을 들어보세요
-- → 오실로스코프에서 원래 신호 뒤에 점점 작아지는 반복이 보입니다
+- → **플럭** 음원으로 켜고 Time을 조절 — 음마다 메아리가 붙어요
+- → 메아리가 점점 작아지며 사라지는 걸 들어보세요
 </Callout>
+</Level>
+
+<Level show="normal">
+<Callout>
+- → Time 300ms, Feedback 50%로 설정
+- → Feedback을 80%↑로 올리며 메아리가 점점 쌓이는 것을 들어보세요
+</Callout>
+</Level>
+
+<Level show="hard">
+<Callout>
+- → Feedback을 한계까지 올려 지수 감쇠(g, g², g³…)가 길어지는 것을 관찰
+- → Time을 수 ms로 줄여 메아리 → 빗필터 음색 변화로 바뀌는 경계를 스펙트럼으로 확인
+</Callout>
+</Level>

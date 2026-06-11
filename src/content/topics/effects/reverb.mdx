@@ -10,33 +10,68 @@ widget: effect
 widgetConfig:
   moduleId: reverb
 quiz: reverb
+scaffold: true
 ---
+import Level from '../../../components/doc/Level.astro';
 import DefList from '../../../components/doc/DefList.astro';
 import DefCard from '../../../components/doc/DefCard.astro';
 import Callout from '../../../components/doc/Callout.astro';
 
+{/* ───────── 초급 ───────── */}
+<Level show="easy">
+## 리버브는 '공간의 울림'이에요
+
+목욕탕이나 큰 강당에서 말하면 소리가 **웅~ 하고 울리며 퍼지죠**? 리버브는 이 공간의 울림(잔향)을 소리에 입혀, 마치 그 장소에서 연주하는 것처럼 만들어요.
+
+## 직접 해보기
+
+큰 노브(Size)를 올리면 공간이 커집니다. 작은 방 → 거대한 콘서트홀로 울림이 길어지는 걸 들어보세요.
+</Level>
+
+{/* ───────── 중급 ───────── */}
+<Level show="normal">
 ## 리버브란?
 
-실제 공간에서 소리는 벽·천장·바닥에 수천 번 반사됩니다. 이 수많은 반사음이 겹쳐 잔향(Reverb)을 만들어냅니다. 디지털 리버브는 이 과정을 임펄스 응답(Impulse Response, IR)을 이용해 수학적으로 재현합니다.
+실제 공간에서 소리는 벽·천장·바닥에 수천 번 반사됩니다. 이 반사음이 겹쳐 잔향(reverb)을 만듭니다. 디지털 리버브는 이를 임펄스 응답(IR)으로 재현합니다.
 
-## 컨볼루션 리버브란?
+## 컨볼루션 리버브
 
-실제 공간에서 짧은 충격음(임펄스)을 녹음한 IR 파일과 원음 신호를 **컨볼루션(합성곱)** 연산하면 마치 그 공간에서 연주한 것처럼 잔향이 추가됩니다. SoundLab은 합성 임펄스를 생성해 실시간으로 리버브를 만듭니다.
-
-## 파라미터 이해
+짧은 충격음(임펄스)을 녹음한 IR과 원음을 **컨볼루션(합성곱)** 하면 그 공간에서 연주한 듯한 잔향이 더해집니다. SoundLab은 합성 임펄스를 생성해 실시간 처리합니다.
 
 <DefList>
-  <DefCard term="Size (공간 크기)" color="blue">임펄스의 길이. 클수록 대형 홀, 작을수록 작은 방 느낌. 길어질수록 잔향이 오래 지속됩니다.</DefCard>
-  <DefCard term="Mix" color="blue">원음 대비 잔향 비율. 너무 높으면 소리가 뭉개집니다. 보통 20~40%가 자연스럽습니다.</DefCard>
+  <DefCard term="Size (공간 크기)" color="blue">임펄스 길이. 클수록 대형 홀, 길게 지속.</DefCard>
+  <DefCard term="Mix" color="blue">원음 대비 잔향 비율. 보통 20~40%.</DefCard>
 </DefList>
+</Level>
 
-## 딜레이와의 차이
+{/* ───────── 고급 ───────── */}
+<Level show="hard">
+## 컨볼루션과 임펄스 응답
 
-딜레이는 특정 시간마다 반복되는 뚜렷한 에코, 리버브는 수천 개의 반사음이 뭉쳐 부드럽게 퍼지는 잔향입니다. 딜레이는 박자감을, 리버브는 공간감을 만드는 데 더 적합합니다.
+리버브 출력은 입력 x와 임펄스 응답 h의 **컨볼루션** `y[n] = Σ x[k]·h[n-k]`입니다. SoundLab은 `ConvolverNode`에 합성 IR을 넣습니다 — 백색 잡음에 지수 감쇠 포락선 `(1 - i/len)^decay`를 곱해 생성하며, Size가 길이(초)를 결정합니다.
 
+## RT60와 딜레이의 차이
+
+잔향이 -60dB로 감쇠하는 시간을 **RT60**이라 합니다. 딜레이는 `τ` 간격의 이산 반복(빗필터)이지만, 리버브는 수천 개 반사가 뭉친 연속 밀도의 감쇠 꼬리라 박자감 없이 부드럽게 퍼집니다.
+</Level>
+
+<Level show="easy">
 <Callout color="blue">
-- → **플럭** 음원 + 헤드폰 착용 — 공간감이 훨씬 또렷하게 들립니다
-- → Size를 0.5s → 4s로 올리며 작은 방에서 대형 콘서트홀로 변화를 느껴보세요
-- → 음이 끝난 뒤에도 파형이 서서히 잦아드는 잔향 꼬리를 관찰하세요
-- → Mix를 100%로 올리면 잔향만 남아 소리가 뭉개지는 것을 확인하세요
+- → **플럭** 음원 + 헤드폰 — 공간감이 또렷해요
+- → Size를 올리며 작은 방 → 큰 홀로 울림이 길어지는 걸 들어보세요
 </Callout>
+</Level>
+
+<Level show="normal">
+<Callout color="blue">
+- → Size 0.5s → 4s로 올리며 잔향 길이 변화를 비교
+- → 음이 끝난 뒤에도 서서히 잦아드는 잔향 꼬리를 관찰
+</Callout>
+</Level>
+
+<Level show="hard">
+<Callout color="blue">
+- → Size(IR 길이)를 늘려 RT60(잔향 감쇠 시간)이 길어지는 것을 엔벨로프로 확인
+- → Mix 100%로 원음을 빼고 컨볼루션 잔향만 남겨 감쇠 꼬리의 밀도를 관찰
+</Callout>
+</Level>

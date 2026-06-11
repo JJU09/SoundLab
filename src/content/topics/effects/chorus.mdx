@@ -10,30 +10,69 @@ widget: effect
 widgetConfig:
   moduleId: chorus
 quiz: chorus
+scaffold: true
 ---
+import Level from '../../../components/doc/Level.astro';
 import DefList from '../../../components/doc/DefList.astro';
 import DefCard from '../../../components/doc/DefCard.astro';
 import Callout from '../../../components/doc/Callout.astro';
 
+{/* ───────── 초급 ───────── */}
+<Level show="easy">
+## 코러스는 '여러 명이 같이'예요
+
+혼자 부르는 노래보다 **여러 명이 함께 부르는 합창**이 더 두껍고 풍성하게 들리죠? 코러스는 한 소리를 살짝 다른 복사본과 겹쳐, 마치 여러 명이 연주하는 것처럼 두껍게 만들어요.
+
+## 직접 해보기
+
+큰 노브(Mix)를 0 → 100%로 올리며 소리가 점점 두껍고 넓게 퍼지는 걸 들어보세요.
+</Level>
+
+{/* ───────── 중급 ───────── */}
+<Level show="normal">
 ## 코러스란?
 
-원음을 아주 짧게(15~35ms) 지연시킨 복사본을 만들고, LFO로 그 지연 시간을 미세하게 흔들어 원음과 섞는 효과입니다. 여러 연주자가 같은 음을 동시에 연주할 때 생기는 자연스러운 음정·타이밍 차이를 인공적으로 만들어 냅니다.
+원음을 아주 짧게(15~35ms) 지연시킨 복사본을 만들고, LFO로 그 지연 시간을 미세하게 흔들어 원음과 섞습니다. 여러 연주자의 자연스러운 음정·타이밍 차이를 인공적으로 만들어 냅니다.
 
-## 왜 두꺼워지는가?
+## 왜 두꺼워지나?
 
-지연 시간이 LFO에 의해 계속 변하면 복사본의 음정도 미세하게 오르내립니다(도플러 효과와 유사). 이 복사본을 원음과 합치면 음정이 살짝 다른 두 소리가 섞이고, 이것이 앙상블감·두께감으로 인지됩니다.
-
-## 파라미터 이해
+지연 시간이 LFO로 변하면 복사본의 음정도 미세하게 오르내립니다(도플러 효과 유사). 음정이 살짝 다른 두 소리가 합쳐져 앙상블감·두께감으로 인지됩니다.
 
 <DefList>
-  <DefCard term="Rate" color="blue">LFO 속도. 빠를수록 출렁이는 느낌이 심해집니다.</DefCard>
-  <DefCard term="Depth" color="blue">지연 시간 변동 폭. 클수록 음정 흔들림이 심해져 과장된 코러스 효과.</DefCard>
-  <DefCard term="Mix" color="blue">원음 대비 효과음 비율. 50%가 일반적인 코러스 세팅.</DefCard>
+  <DefCard term="Rate" color="blue">LFO 속도. 빠를수록 출렁임이 심해짐.</DefCard>
+  <DefCard term="Depth" color="blue">지연 변동 폭. 클수록 음정 흔들림이 커짐.</DefCard>
+  <DefCard term="Mix" color="blue">원음 대비 효과음 비율. 50%가 일반적.</DefCard>
 </DefList>
+</Level>
 
+{/* ───────── 고급 ───────── */}
+<Level show="hard">
+## 시변 지연과 도플러 피치 변조
+
+코러스는 LFO로 변조되는 **시변 지연선(time-varying delay line)** 입니다. 지연 시간 τ(t)가 변하면 순간 재생 피치가 `f' = f·(1 - dτ/dt)`로 시프트됩니다. 이 미세한 디튠이 원음과의 맥놀이(beating)를 만듭니다.
+
+## 플랜저와의 경계
+
+지연이 더 짧고(1~10ms) 피드백이 있으면 빗필터(comb filter)의 노치가 LFO로 쓸려 **플랜저**가 됩니다. 코러스는 지연이 길고 피드백이 없어 빗필터 효과보다 디튠 앙상블감이 지배적입니다.
+</Level>
+
+<Level show="easy">
 <Callout color="blue">
-- → **플럭** 음원으로 시작하세요 — 코러스가 반복 멜로디에서 잘 들립니다
-- → Mix를 0 → 100%로 올리며 원음과 효과음의 차이를 들어보세요
-- → Depth를 높이면 피치 흔들림이 심해지며 플랜저(Flanger)와 비슷해집니다
-- → 오실로스코프에서 파형이 미세하게 번지는 것을 관찰하세요
+- → **플럭** 음원으로 시작 — 반복 멜로디에서 코러스가 잘 들려요
+- → Mix를 올리며 소리가 두꺼워지는 걸 느껴보세요
 </Callout>
+</Level>
+
+<Level show="normal">
+<Callout color="blue">
+- → Mix를 0 → 100%로 올리며 원음과 효과음 차이를 비교
+- → Depth를 높이면 피치 흔들림이 심해져 플랜저와 비슷해집니다
+</Callout>
+</Level>
+
+<Level show="hard">
+<Callout color="blue">
+- → Depth를 키워 도플러 디튠 폭을 넓히고 맥놀이(beating)가 빨라지는 것을 들어보세요
+- → 오실로스코프에서 파형이 미세하게 번지는(위상 어긋남) 모습을 관찰
+</Callout>
+</Level>

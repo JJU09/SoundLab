@@ -1,0 +1,38 @@
+import { defineCollection, z } from 'astro:content';
+import { glob } from 'astro/loaders';
+
+// 5대 지식 허브 — 디렉터리(src/content/topics/<hub>/)와 일치
+export const HUBS = ['acoustics', 'digital', 'synthesis', 'effects', 'mixing'] as const;
+export type Hub = (typeof HUBS)[number];
+
+// 허브 메타 (내비·라벨·순서). 코드 단일 소스.
+export const HUB_META: Record<Hub, { kr: string; label: string; order: number; desc: string }> = {
+  acoustics: { kr: '음향물리', label: 'Acoustics', order: 1, desc: '소리의 본질을 눈으로 보다' },
+  digital:   { kr: '디지털오디오', label: 'Digital Audio', order: 2, desc: '컴퓨터가 소리를 다루는 법' },
+  synthesis: { kr: '신디시스', label: 'Synthesis', order: 3, desc: '무에서 소리를 창조하다' },
+  effects:   { kr: '이펙트', label: 'Effects', order: 4, desc: '소리를 빚고 가공하다' },
+  mixing:    { kr: '믹싱', label: 'Mixing', order: 5, desc: '여러 소리를 조화롭게 섞다' },
+};
+
+// 위젯 타입 — MDX가 어떤 인터랙티브 컴포넌트를 띄울지 결정
+export const WIDGETS = ['effect', 'synth', 'phase', 'aliasing', 'none'] as const;
+
+const topics = defineCollection({
+  loader: glob({ pattern: '**/*.mdx', base: './src/content/topics' }),
+  schema: z.object({
+    hub: z.enum(HUBS),
+    title: z.string(),
+    kr: z.string(),
+    order: z.number(),                          // 허브 내 순서 (prev/next 파생)
+    color: z.enum(['violet', 'blue']).default('violet'),
+    tagline: z.string(),
+    desc: z.string(),
+    widget: z.enum(WIDGETS).default('none'),
+    // 위젯별 초기 설정. effect → { moduleId }, synth → ADSR 등. 위젯이 자체 해석.
+    widgetConfig: z.record(z.string(), z.any()).optional(),
+    quiz: z.string().optional(),                // QUIZZES 키 (없으면 퀴즈 생략)
+    draft: z.boolean().default(false),
+  }),
+});
+
+export const collections = { topics };

@@ -1,0 +1,38 @@
+---
+hub: effects
+title: Filter
+kr: 필터
+order: 1
+color: violet
+tagline: 주파수를 골라 음색을 빚다
+desc: 특정 주파수 대역을 통과시키거나 차단합니다. Cutoff는 경계 주파수, Resonance(Q)는 그 경계를 얼마나 강조할지 정합니다.
+widget: effect
+widgetConfig:
+  moduleId: filter
+quiz: filter
+---
+import DefList from '../../../components/doc/DefList.astro';
+import DefCard from '../../../components/doc/DefCard.astro';
+import Callout from '../../../components/doc/Callout.astro';
+
+## 필터란?
+
+필터는 오디오 신호에서 원하는 주파수 대역만 통과시키고 나머지를 줄이는 장치입니다. EQ(이퀄라이저)의 기초이며, 신디사이저의 가장 핵심적인 음색 조절 도구입니다.
+
+## 세 가지 필터 타입
+
+<DefList>
+  <DefCard term="Low Pass (로우패스)">Cutoff 이하만 통과. 고음을 깎아 따뜻하고 둔탁하게 만듭니다. 신스 사운드 디자인에서 가장 많이 쓰입니다.</DefCard>
+  <DefCard term="High Pass (하이패스)">Cutoff 이상만 통과. 저음을 제거해 얇고 밝게 만듭니다. 킥·베이스의 공간 확보에 활용됩니다.</DefCard>
+  <DefCard term="Band Pass (밴드패스)">Cutoff 주변 좁은 대역만 통과. 라디오·전화 음색처럼 특정 주파수만 강조됩니다.</DefCard>
+</DefList>
+
+## Resonance(Q)란?
+
+Cutoff 주파수 근처를 얼마나 강조할지 정합니다. Q를 높이면 컷오프 지점에서 뾰족하게 울리는 공진(resonance) 현상이 나타납니다. 극단적으로 높이면 자기 발진(self-oscillation)이 발생해 순수한 음정을 만들기도 합니다.
+
+<Callout>
+- → **노이즈** 음원 + Low Pass: Cutoff를 낮추며 고음이 잘려나가는 소리를 들어보세요
+- → Resonance를 올리며 Cutoff 부근의 공진 소리를 확인하세요
+- → 스펙트럼에서 오른쪽 고역 막대가 사라지는 것을 눈으로 확인하세요
+</Callout>

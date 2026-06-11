@@ -1,0 +1,39 @@
+---
+hub: effects
+title: Chorus
+kr: 코러스
+order: 4
+color: blue
+tagline: 미세한 지연으로 소리를 두껍게
+desc: 아주 짧게 지연된 복사본을 LFO로 흔들어 원음과 섞습니다. 살짝 어긋난 음정이 합쳐져 풍성해집니다.
+widget: effect
+widgetConfig:
+  moduleId: chorus
+quiz: chorus
+---
+import DefList from '../../../components/doc/DefList.astro';
+import DefCard from '../../../components/doc/DefCard.astro';
+import Callout from '../../../components/doc/Callout.astro';
+
+## 코러스란?
+
+원음을 아주 짧게(15~35ms) 지연시킨 복사본을 만들고, LFO로 그 지연 시간을 미세하게 흔들어 원음과 섞는 효과입니다. 여러 연주자가 같은 음을 동시에 연주할 때 생기는 자연스러운 음정·타이밍 차이를 인공적으로 만들어 냅니다.
+
+## 왜 두꺼워지는가?
+
+지연 시간이 LFO에 의해 계속 변하면 복사본의 음정도 미세하게 오르내립니다(도플러 효과와 유사). 이 복사본을 원음과 합치면 음정이 살짝 다른 두 소리가 섞이고, 이것이 앙상블감·두께감으로 인지됩니다.
+
+## 파라미터 이해
+
+<DefList>
+  <DefCard term="Rate" color="blue">LFO 속도. 빠를수록 출렁이는 느낌이 심해집니다.</DefCard>
+  <DefCard term="Depth" color="blue">지연 시간 변동 폭. 클수록 음정 흔들림이 심해져 과장된 코러스 효과.</DefCard>
+  <DefCard term="Mix" color="blue">원음 대비 효과음 비율. 50%가 일반적인 코러스 세팅.</DefCard>
+</DefList>
+
+<Callout color="blue">
+- → **플럭** 음원으로 시작하세요 — 코러스가 반복 멜로디에서 잘 들립니다
+- → Mix를 0 → 100%로 올리며 원음과 효과음의 차이를 들어보세요
+- → Depth를 높이면 피치 흔들림이 심해지며 플랜저(Flanger)와 비슷해집니다
+- → 오실로스코프에서 파형이 미세하게 번지는 것을 관찰하세요
+</Callout>

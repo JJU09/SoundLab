@@ -1,0 +1,39 @@
+---
+import { getCollection, render } from 'astro:content';
+import TopicLayout from '../../../layouts/TopicLayout.astro';
+
+export async function getStaticPaths() {
+  const all = (await getCollection('topics')).filter(t => !t.data.draft);
+
+  // 엔트리 id = "<hub>/<slug>" (glob 로더). slug만 추출.
+  const slugOf = (id: string) => id.split('/').slice(1).join('/');
+
+  return all.map(entry => {
+    const hub = entry.data.hub;
+    const slug = slugOf(entry.id);
+    // 같은 허브 내 order 정렬 → prev/next
+    const siblings = all
+      .filter(t => t.data.hub === hub)
+      .sort((a, b) => a.data.order - b.data.order);
+    const idx = siblings.findIndex(t => t.id === entry.id);
+    const toLink = (t?: typeof entry) => t
+      ? { slug: slugOf(t.id), title: t.data.title, kr: t.data.kr }
+      : null;
+
+    return {
+      params: { hub, slug },
+      props: {
+        entry,
+        prev: toLink(siblings[idx - 1]),
+        next: toLink(siblings[idx + 1]),
+      },
+    };
+  });
+}
+
+const { entry, prev, next } = Astro.props;
+const { Content } = await render(entry);
+---
+<TopicLayout data={entry.data} prev={prev} next={next}>
+  <Content />
+</TopicLayout>

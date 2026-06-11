@@ -1,0 +1,17 @@
+---
+// 실습 가이드/팁 콜아웃 — 색상 좌측 보더 박스.
+interface Props {
+  label?: string;
+  color?: 'violet' | 'blue';
+}
+const { label = '실습 가이드', color = 'violet' } = Astro.props;
+const border = color === 'violet' ? 'border-[var(--color-violet)]' : 'border-[var(--color-blue)]';
+const bg = color === 'violet' ? 'bg-[var(--color-violet-glow)]' : 'bg-[var(--color-blue-glow)]';
+const text = color === 'violet' ? 'text-[var(--color-violet)]' : 'text-[var(--color-blue)]';
+---
+<div class={`p-4 rounded-xl border-l-2 ${border} ${bg} not-prose`}>
+  <div class={`text-xs font-mono uppercase tracking-wider ${text} mb-2`}>🔊 {label}</div>
+  <div class="callout-body space-y-1 text-xs text-[var(--color-ink-700)]">
+    <slot />
+  </div>
+</div>

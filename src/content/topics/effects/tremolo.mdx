@@ -1,0 +1,38 @@
+---
+hub: effects
+title: Tremolo
+kr: 트레몰로
+order: 3
+color: violet
+tagline: LFO로 음량에 숨결을 불어넣다
+desc: 저주파 발진기(LFO)로 음량을 주기적으로 흔듭니다. Rate는 떨림의 속도, Depth는 떨림의 깊이입니다.
+widget: effect
+widgetConfig:
+  moduleId: tremolo
+quiz: tremolo
+---
+import DefList from '../../../components/doc/DefList.astro';
+import DefCard from '../../../components/doc/DefCard.astro';
+import Callout from '../../../components/doc/Callout.astro';
+
+## 트레몰로란?
+
+저주파 발진기(LFO, Low-Frequency Oscillator)를 이용해 음량(amplitude)을 주기적으로 흔드는 효과입니다. 클래식 기타의 오른손 빠른 피킹이나 비브라폰의 떨림 소리가 바로 트레몰로입니다.
+
+## LFO란?
+
+가청 주파수(20Hz) 이하의 아주 느린 진동입니다. 이 진동 자체를 소리로 듣는 것이 아니라, **다른 파라미터를 조절하는 신호**로 사용합니다. 트레몰로는 LFO → 음량, 비브라토는 LFO → 피치, 와우는 LFO → 필터 컷오프에 연결한 것입니다.
+
+## 파라미터 이해
+
+<DefList>
+  <DefCard term="Rate (속도)">음량이 몇 번/초 떨리는지. 1Hz = 1초에 한 번. 빠를수록 윙윙거리는 느낌.</DefCard>
+  <DefCard term="Depth (깊이)">음량이 얼마나 크게 변하는지. 0%이면 변화 없음, 100%이면 완전 무음까지 내려갔다 올라옴.</DefCard>
+</DefList>
+
+<Callout>
+- → **삼각파(Tri)** 지속음으로 시작하세요
+- → Rate 2Hz, Depth 80%로 맞추고 규칙적인 맥동을 들어보세요
+- → Rate를 10Hz 이상으로 올리면 떨림이 아닌 독특한 링 모듈레이션처럼 들립니다
+- → 오실로스코프에서 파형 진폭(높이)이 주기적으로 변하는 것을 확인하세요
+</Callout>

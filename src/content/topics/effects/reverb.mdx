@@ -1,0 +1,42 @@
+---
+hub: effects
+title: Reverb
+kr: 리버브
+order: 6
+color: blue
+tagline: 공간의 잔향을 신호에 입히다
+desc: 수천 개의 반사음을 합성한 임펄스와 신호를 컨볼루션해 방·홀의 잔향을 만듭니다. Size는 공간의 크기입니다.
+widget: effect
+widgetConfig:
+  moduleId: reverb
+quiz: reverb
+---
+import DefList from '../../../components/doc/DefList.astro';
+import DefCard from '../../../components/doc/DefCard.astro';
+import Callout from '../../../components/doc/Callout.astro';
+
+## 리버브란?
+
+실제 공간에서 소리는 벽·천장·바닥에 수천 번 반사됩니다. 이 수많은 반사음이 겹쳐 잔향(Reverb)을 만들어냅니다. 디지털 리버브는 이 과정을 임펄스 응답(Impulse Response, IR)을 이용해 수학적으로 재현합니다.
+
+## 컨볼루션 리버브란?
+
+실제 공간에서 짧은 충격음(임펄스)을 녹음한 IR 파일과 원음 신호를 **컨볼루션(합성곱)** 연산하면 마치 그 공간에서 연주한 것처럼 잔향이 추가됩니다. SoundLab은 합성 임펄스를 생성해 실시간으로 리버브를 만듭니다.
+
+## 파라미터 이해
+
+<DefList>
+  <DefCard term="Size (공간 크기)" color="blue">임펄스의 길이. 클수록 대형 홀, 작을수록 작은 방 느낌. 길어질수록 잔향이 오래 지속됩니다.</DefCard>
+  <DefCard term="Mix" color="blue">원음 대비 잔향 비율. 너무 높으면 소리가 뭉개집니다. 보통 20~40%가 자연스럽습니다.</DefCard>
+</DefList>
+
+## 딜레이와의 차이
+
+딜레이는 특정 시간마다 반복되는 뚜렷한 에코, 리버브는 수천 개의 반사음이 뭉쳐 부드럽게 퍼지는 잔향입니다. 딜레이는 박자감을, 리버브는 공간감을 만드는 데 더 적합합니다.
+
+<Callout color="blue">
+- → **플럭** 음원 + 헤드폰 착용 — 공간감이 훨씬 또렷하게 들립니다
+- → Size를 0.5s → 4s로 올리며 작은 방에서 대형 콘서트홀로 변화를 느껴보세요
+- → 음이 끝난 뒤에도 파형이 서서히 잦아드는 잔향 꼬리를 관찰하세요
+- → Mix를 100%로 올리면 잔향만 남아 소리가 뭉개지는 것을 확인하세요
+</Callout>

@@ -67,6 +67,38 @@
 }
 
 @layer components {
+  /* MDX 토픽 본문 — 마크다운 헤딩·문단·리스트 기본 스타일 */
+  .topic-body > h2 {
+    font-family: "Space Grotesk", var(--font-sans);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-ink-900);
+    margin-bottom: 0.5rem;
+  }
+  .topic-body > h2:not(:first-child) { margin-top: 0.5rem; }
+  .topic-body > h3 {
+    font-family: "Space Grotesk", var(--font-sans);
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--color-ink-700);
+    margin-bottom: 0.4rem;
+  }
+  .topic-body > p { color: var(--color-ink-700); }
+  .topic-body > ul { list-style: disc; padding-left: 1.2rem; }
+  .topic-body > ul > li { margin-bottom: 0.25rem; }
+  .topic-body strong { color: var(--color-ink-900); font-weight: 600; }
+  .topic-body code {
+    font-family: var(--font-mono);
+    font-size: 0.8em;
+    background: var(--color-surface);
+    padding: 0.1rem 0.35rem;
+    border-radius: 0.3rem;
+  }
+
+  .callout-body ul { list-style: none; padding: 0; margin: 0; }
+  .callout-body li { margin-bottom: 0.25rem; }
+  .callout-body strong { color: var(--color-ink-900); font-weight: 600; }
+
   /* 슬라이더 */
   .sl-range {
     appearance: none;

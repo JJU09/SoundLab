@@ -1,0 +1,21 @@
+---
+// 토픽 프런트매터의 widget/widgetConfig → 실제 인터랙티브 컴포넌트로 리졸브.
+// 새 위젯(synth/phase/aliasing)은 여기 분기만 추가하면 됨.
+import EffectPlayer from './EffectPlayer.astro';
+import { MODULE_MAP, type ModuleId } from '../lib/modules';
+
+interface Props {
+  widget: string;
+  config?: Record<string, any>;
+}
+const { widget, config = {} } = Astro.props;
+
+const moduleId = config.moduleId as ModuleId | undefined;
+const effectModule = widget === 'effect' && moduleId ? MODULE_MAP[moduleId] : null;
+---
+{effectModule && <EffectPlayer module={effectModule} />}
+{widget === 'synth' && (
+  <div class="rounded-2xl border border-dashed border-[var(--color-border)] p-6 text-center text-sm text-[var(--color-ink-300)]">
+    신디시스 위젯 — 곧 추가됩니다
+  </div>
+)}

@@ -1,0 +1,114 @@
+---
+import Base from './Base.astro';
+import TopicWidget from '../components/TopicWidget.astro';
+import Quiz from '../components/Quiz.astro';
+import { HUB_META } from '../content.config';
+import { QUIZZES } from '../lib/quizzes';
+
+interface TopicData {
+  hub: keyof typeof HUB_META;
+  title: string;
+  kr: string;
+  order: number;
+  color: 'violet' | 'blue';
+  tagline: string;
+  desc: string;
+  widget: string;
+  widgetConfig?: Record<string, any>;
+  quiz?: string;
+}
+interface NavLink { slug: string; title: string; kr: string; }
+
+interface Props {
+  data: TopicData;
+  prev?: NavLink | null;
+  next?: NavLink | null;
+}
+const { data, prev, next } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const hub = HUB_META[data.hub];
+const hasWidget = data.widget && data.widget !== 'none';
+const quiz = data.quiz ? QUIZZES[data.quiz] : null;
+const num = String(data.order).padStart(2, '0');
+const accent = data.color === 'violet'
+  ? 'border-[var(--color-violet-light)] text-[var(--color-violet)] bg-[var(--color-violet-glow)]'
+  : 'border-[var(--color-blue-light)] text-[var(--color-blue)] bg-[var(--color-blue-glow)]';
+---
+<Base title={`${data.title} (${data.kr})`} description={data.desc}>
+
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 py-10">
+
+    <!-- 브레드크럼 -->
+    <nav class="flex items-center gap-2 text-xs font-mono text-[var(--color-ink-300)] mb-8">
+      <a href={base} class="hover:text-[var(--color-violet)] transition">홈</a>
+      <span>/</span>
+      <a href={`${base}learn/${data.hub}/`} class="hover:text-[var(--color-violet)] transition">{hub.kr}</a>
+      <span>/</span>
+      <span class="text-[var(--color-ink-700)]">{data.title}</span>
+    </nav>
+
+    <div class={`grid grid-cols-1 gap-10 ${hasWidget ? 'lg:grid-cols-[1fr_380px]' : ''}`}>
+
+      <!-- 왼쪽: 개념 설명 -->
+      <div>
+        <div class="flex items-center gap-3 mb-4">
+          <span class={`text-xs font-mono px-2.5 py-1 rounded-full border ${accent}`}>
+            {hub.label.toUpperCase()} · {num}
+          </span>
+        </div>
+
+        <h1 class="text-3xl sm:text-4xl font-bold mb-2 leading-tight" style="font-family:'Space Grotesk'">
+          {data.title}
+          <span class="text-[var(--color-ink-300)] font-medium text-2xl ml-2">{data.kr}</span>
+        </h1>
+        <p class={`text-lg font-medium mb-6 ${data.color === 'violet' ? 'gradient-brand-text' : ''}`}
+          style={data.color === 'blue' ? 'color:var(--color-blue)' : ''}>
+          {data.tagline}
+        </p>
+
+        <p class="text-[var(--color-ink-700)] leading-relaxed mb-8">{data.desc}</p>
+
+        <!-- MDX 본문 -->
+        <div class="topic-body space-y-6 text-sm leading-relaxed text-[var(--color-ink-700)]">
+          <slot />
+        </div>
+
+        <!-- 객관식 퀴즈 -->
+        {quiz && <Quiz questions={quiz} color={data.color} />}
+
+        <!-- 이전/다음 -->
+        <div class="flex items-center justify-between mt-12 pt-8 border-t border-[var(--color-border)]">
+          {prev ? (
+            <a href={`${base}learn/${data.hub}/${prev.slug}/`}
+              class="flex items-center gap-2 text-sm font-medium text-[var(--color-ink-500)] hover:text-[var(--color-violet)] transition group">
+              <svg class="w-4 h-4 transition group-hover:-translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+              <div>
+                <div class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)]">이전</div>
+                <div>{prev.title} ({prev.kr})</div>
+              </div>
+            </a>
+          ) : <div />}
+
+          {next ? (
+            <a href={`${base}learn/${data.hub}/${next.slug}/`}
+              class="flex items-center gap-2 text-sm font-medium text-[var(--color-ink-500)] hover:text-[var(--color-violet)] transition group text-right">
+              <div>
+                <div class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)]">다음</div>
+                <div>{next.title} ({next.kr})</div>
+              </div>
+              <svg class="w-4 h-4 transition group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </a>
+          ) : <div />}
+        </div>
+      </div>
+
+      <!-- 오른쪽: 인터랙티브 위젯 -->
+      {hasWidget && (
+        <div class="lg:sticky lg:top-20 self-start">
+          <TopicWidget widget={data.widget} config={data.widgetConfig} />
+        </div>
+      )}
+
+    </div>
+  </div>
+</Base>

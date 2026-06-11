@@ -1,0 +1,13 @@
+---
+// 용어 정의 카드 — 레슨 prose에서 파라미터/타입 설명에 반복 사용.
+interface Props {
+  term: string;
+  color?: 'violet' | 'blue';
+}
+const { term, color = 'violet' } = Astro.props;
+const termColor = color === 'violet' ? 'text-[var(--color-violet)]' : 'text-[var(--color-blue)]';
+---
+<div class="p-3 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] not-prose">
+  <div class={`font-semibold text-xs font-mono ${termColor} mb-1`}>{term}</div>
+  <div class="text-xs text-[var(--color-ink-500)]"><slot /></div>
+</div>

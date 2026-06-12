@@ -5,6 +5,7 @@
 //   controls: ['fader','pan']      → pan 토픽
 //   controls: ['fader','eq']       → eq-masking 토픽
 //   controls: ['fader','comp']     → compressor 토픽 (마스터 컴프 패널)
+//   controls: ['fader','send']     → depth 토픽 (트랙별 리버브 센드)
 interface Props {
   config?: Record<string, any>;
 }
@@ -13,6 +14,7 @@ const controls: string[] = config.controls ?? ['fader'];
 const showPan = controls.includes('pan');
 const showEq = controls.includes('eq');
 const showComp = controls.includes('comp');
+const showSend = controls.includes('send');
 
 const TRACKS = [
   { id: 'drums', name: 'Drums', kr: '드럼', color: '#7c3aed' },
@@ -22,10 +24,11 @@ const TRACKS = [
 const trackCfg = (id: string) => config.tracks?.[id] ?? {};
 const initVol = (id: string): number => trackCfg(id).vol ?? 70;
 const initPan = (id: string): number => trackCfg(id).pan ?? 0;
+const initSend = (id: string): number => trackCfg(id).send ?? 0;
 
 const adv = (tier?: string) => (tier && tier !== 'easy' ? { 'data-adv': tier } : {});
 ---
-<div class="mixer-widget rounded-2xl border border-[var(--color-border)] bg-white overflow-hidden" data-show-pan={showPan ? '1' : ''} data-show-eq={showEq ? '1' : ''} data-show-comp={showComp ? '1' : ''}>
+<div class="mixer-widget rounded-2xl border border-[var(--color-border)] bg-white overflow-hidden" data-show-pan={showPan ? '1' : ''} data-show-eq={showEq ? '1' : ''} data-show-comp={showComp ? '1' : ''} data-show-send={showSend ? '1' : ''}>
 
   <div class="flex items-center justify-between px-5 py-4 border-b border-[var(--color-border)] bg-[var(--color-surface)]">
     <div class="flex items-center gap-3">
@@ -45,9 +48,9 @@ const adv = (tier?: string) => (tier && tier !== 'easy' ? { 'data-adv': tier } :
     <div class="flex items-center gap-1.5 text-[10px] font-mono text-[var(--color-ink-300)] flex-wrap">
       <span class="px-2 py-1 rounded-md bg-[var(--color-surface-2)]">3 TRACKS</span>
       <span>→</span>
-      <span class="px-2 py-1 rounded-md bg-[var(--color-violet-glow)] text-[var(--color-violet)]">FADER{showEq ? ' · EQ' : ''}{showPan ? ' · PAN' : ''}</span>
+      <span class="px-2 py-1 rounded-md bg-[var(--color-violet-glow)] text-[var(--color-violet)]">FADER{showEq ? ' · EQ' : ''}{showPan ? ' · PAN' : ''}{showSend ? ' · SEND' : ''}</span>
       <span>→</span>
-      <span class="px-2 py-1 rounded-md bg-[var(--color-surface-2)]">MASTER{showComp ? ' · COMP' : ''}</span>
+      <span class="px-2 py-1 rounded-md bg-[var(--color-surface-2)]">MASTER{showComp ? ' · COMP' : ''}{showSend ? ' ← VERB' : ''}</span>
       <span class="ml-1">세 악기가 한 스피커에서 만납니다 — 자리를 잡아주세요</span>
     </div>
 
@@ -67,7 +70,7 @@ const adv = (tier?: string) => (tier && tier !== 'easy' ? { 'data-adv': tier } :
     <!-- 채널 스트립 -->
     <div class="space-y-3">
       {TRACKS.map(t => (
-        <div class="track-strip rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3" data-track={t.id} data-vol={initVol(t.id)} data-pan={initPan(t.id)}>
+        <div class="track-strip rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3" data-track={t.id} data-vol={initVol(t.id)} data-pan={initPan(t.id)} data-send={initSend(t.id)}>
           <div class="flex items-center gap-3 flex-wrap">
             <div class="flex items-center gap-2 w-24 flex-none">
               <span class="w-2 h-2 rounded-full flex-none" style={`background:${t.color}`}></span>
@@ -93,6 +96,14 @@ const adv = (tier?: string) => (tier && tier !== 'easy' ? { 'data-adv': tier } :
                 <input type="range" class="sl-range trk-pan w-20" min="-50" max="50" step="1" value={initPan(t.id) * 50} aria-label={`${t.kr} 팬`} />
                 <span class="text-[10px] font-mono text-[var(--color-ink-300)]">R</span>
                 <span class="trk-pan-val text-[10px] font-mono text-[var(--color-ink-700)] w-7 text-right">C</span>
+              </div>
+            )}
+            <!-- Reverb Send (depth 토픽에서만) -->
+            {showSend && (
+              <div class="flex items-center gap-1.5 flex-none">
+                <span class="text-[10px] font-mono text-[var(--color-ink-300)]">SEND</span>
+                <input type="range" class="sl-range trk-send w-20" min="0" max="100" step="1" value={initSend(t.id)} aria-label={`${t.kr} 리버브 센드`} />
+                <span class="trk-send-val text-[10px] font-mono text-[var(--color-ink-700)] w-8 text-right">{initSend(t.id)}%</span>
               </div>
             )}
             <!-- Mute / Solo (normal↑) -->
@@ -206,11 +217,16 @@ function initMixer(root: HTMLElement) {
   const bus = new MixBus(core);
   bus.buildStandard();
 
+  // 리버브 센드 버스 (depth 토픽) — 초기 센드 적용 전에 활성화해야 sends 맵이 준비됨
+  const useSend = root.dataset.showSend === '1';
+  if (useSend) bus.enableReverb();
+
   // 초기 상태 적용 (과제형 "망가진 믹스" 포함)
   root.querySelectorAll<HTMLElement>('.track-strip').forEach(strip => {
     const id = strip.dataset.track!;
     bus.setVol(id, Number(strip.dataset.vol) || 70);
     bus.setPan(id, Number(strip.dataset.pan) || 0);
+    if (useSend) bus.setSend(id, (Number(strip.dataset.send) || 0) / 100);
   });
 
   const setPct = (el: HTMLInputElement) => el.style.setProperty('--sl-pct', ((+el.value - +el.min) / (+el.max - +el.min) * 100) + '%');
@@ -242,6 +258,18 @@ function initMixer(root: HTMLElement) {
         setPct(panR);
         showPan(+panR.value);
         bus.setPan(id, +panR.value / 50);
+      });
+    }
+
+    const sendR = strip.querySelector('.trk-send') as HTMLInputElement | null;
+    if (sendR) {
+      const sendVal = strip.querySelector('.trk-send-val') as HTMLElement;
+      setPct(sendR);
+      sendR.addEventListener('input', () => {
+        const v = +sendR.value;
+        setPct(sendR);
+        sendVal.textContent = v + '%';
+        bus.setSend(id, v / 100);
       });
     }
 

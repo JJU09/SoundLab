@@ -3,6 +3,7 @@
 //
 //   [트랙 보이스들] → fader → muteG → eq → pan → analyser(트랙 미터) → core.input → master
 //   compressor 토픽에선 core.input → comp → makeup → master 로 마스터 컴프를 끼워 넣음.
+//   depth 토픽에선 각 트랙이 send → 공유 convolver → return → core.input 로 리버브를 보냄.
 //
 // 루프는 16스텝 시퀀서. setInterval로 직접 발음하지 않고 lookahead 스케줄러
 // (25ms 폴링 + 0.1s 선행 예약)로 AudioContext 시계에 예약 → 백그라운드 탭에서도 박자 유지.
@@ -239,6 +240,34 @@ export class MixBus {
 
   // 현재 게인 리덕션 (dB, 0 또는 음수). 컴프 미적용 시 0.
   getGainReduction(): number { return this._comp ? this._comp.reduction : 0; }
+
+  // ── 리버브 센드/리턴 버스 (depth 토픽용) ──
+  // 트랙마다 인서트로 리버브를 거는 대신, 컨볼버 하나를 공유 버스로 두고 각 트랙이
+  // 센드 게인으로 보냄(post-fader). 한 공간을 함께 쓰니 "글루"가 생기고 CPU도 아낌.
+  //   tr.pan → send(게인) → conv → ret(게인) → core.input(=마스터 합류)
+  private _verb: { conv: ConvolverNode; ret: GainNode; sends: Map<string, GainNode> } | null = null;
+
+  enableReverb() {
+    if (this._verb) return;
+    const conv = this.core.ctx.createConvolver();
+    conv.buffer = this.core.impulse(2.4, 3); // 합성 IR (홀 크기)
+    const ret = this.core.gain(0.9);          // 리턴 레벨
+    conv.connect(ret); ret.connect(this.core.input);
+    const sends = new Map<string, GainNode>();
+    for (const tr of this.tracks) {
+      const s = this.core.gain(0);  // 기본 센드 0 = 완전 드라이
+      tr.pan.connect(s); s.connect(conv); // post-fader·post-pan 탭 (메인 경로는 그대로)
+      sends.set(tr.id, s);
+    }
+    this._verb = { conv, ret, sends };
+  }
+
+  // 트랙 리버브 센드량 (0..1). 0=드라이(가까움), 1=흠뻑(멀어짐).
+  setSend(id: string, amount: number) {
+    if (!this._verb) return;
+    const s = this._verb.sends.get(id);
+    if (s) this.core.smooth(s.gain, amount);
+  }
 
   // 트랙 미터용 피크 (0..1)
   getLevel(id: string): number {

@@ -5,6 +5,7 @@ import EffectPlayer from './EffectPlayer.astro';
 import SynthPlayer from './SynthPlayer.astro';
 import SubtractiveWidget from './SubtractiveWidget.astro';
 import AdditiveWidget from './AdditiveWidget.astro';
+import FmWidget from './FmWidget.astro';
 import PhaseWidget from './PhaseWidget.astro';
 import ToneWidget from './ToneWidget.astro';
 import CombWidget from './CombWidget.astro';
@@ -26,6 +27,7 @@ const effectModule = widget === 'effect' && moduleId ? MODULE_MAP[moduleId] : nu
 {widget === 'synth' && <SynthPlayer config={config} />}
 {widget === 'subtractive' && <SubtractiveWidget config={config} />}
 {widget === 'additive' && <AdditiveWidget config={config} />}
+{widget === 'fm' && <FmWidget config={config} />}
 {widget === 'phase' && <PhaseWidget config={config} />}
 {widget === 'tone' && <ToneWidget config={config} />}
 {widget === 'comb' && <CombWidget config={config} />}

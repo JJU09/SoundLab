@@ -102,10 +102,11 @@
   [data-level="easy"] .lvl[data-levels~="easy"],
   [data-level="normal"] .lvl[data-levels~="normal"],
   [data-level="hard"] .lvl[data-levels~="hard"] { display: block; }
-  /* 위젯 노브 tier — 현재 레벨에서 허용된 컨트롤만 표시 (data-adv 태그 기준) */
+  /* 위젯 노브 tier — 현재 레벨에서 허용된 컨트롤만 표시 (data-adv 태그 기준).
+     !important: 유틸리티 레이어의 display:flex 등이 레이어 순서로 이기는 것을 차단 */
   [data-level="easy"] [data-adv~="normal"],
   [data-level="easy"] [data-adv~="hard"],
-  [data-level="normal"] [data-adv~="hard"] { display: none; }
+  [data-level="normal"] [data-adv~="hard"] { display: none !important; }
 
   .callout-body ul { list-style: none; padding: 0; margin: 0; }
   .callout-body li { margin-bottom: 0.25rem; }

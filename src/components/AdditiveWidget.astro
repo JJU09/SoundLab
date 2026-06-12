@@ -1,0 +1,201 @@
+---
+// 가산합성 위젯 — 기음+배음(사인) N개를 쌓아 음색을 빚다. 감산합성의 정반대.
+// AudioCore 위 [osc_i(i·f0) → g_i] 합산 → master → core.input. 파형/스펙트럼 시각화.
+// widgetConfig: freq(기음 Hz), partials(배음 진폭 0..100 배열). 프리셋(Sine/Saw/Square)로 푸리에 합성 체험.
+interface Props {
+  config?: Record<string, any>;
+}
+const { config = {} } = Astro.props;
+const N = 8;
+const f0 = config.freq ?? 220;
+// 기본 시작 = 사인(기음만) → 학습자가 배음을 직접 쌓아 올림
+const initPartials: number[] = Array.isArray(config.partials)
+  ? Array.from({ length: N }, (_, i) => config.partials[i] ?? 0)
+  : [100, 0, 0, 0, 0, 0, 0, 0];
+const adv = (tier?: string) => (tier && tier !== 'easy' ? { 'data-adv': tier } : {});
+---
+<div class="additive-widget rounded-2xl border border-[var(--color-border)] bg-white overflow-hidden"
+  data-freq={f0} data-partials={initPartials.join(',')}>
+
+  <div class="flex items-center justify-between px-5 py-4 border-b border-[var(--color-border)] bg-[var(--color-surface)]">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg flex items-center justify-center gradient-brand">
+        <svg class="text-white" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M3 12h2l2-7 3 14 3-10 2 5h6"/></svg>
+      </div>
+      <div>
+        <span class="font-bold text-base" style="font-family:'Space Grotesk'">가산합성</span>
+        <span class="text-sm text-[var(--color-ink-300)] ml-2">Additive</span>
+      </div>
+    </div>
+    <button class="play-btn gradient-brand text-white text-sm font-semibold px-4 py-1.5 rounded-full transition hover:opacity-90" style="font-family:'Space Grotesk'">▶ 소리 켜기</button>
+  </div>
+
+  <div class="p-5 space-y-4">
+    <!-- 파형 -->
+    <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]">
+      <canvas class="scope-cv block w-full" style="height:104px"></canvas>
+      <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)] opacity-70">Waveform · 합성된 파형</span>
+    </div>
+    <!-- 스펙트럼 (배음 막대) -->
+    <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]">
+      <canvas class="spec-cv block w-full" style="height:84px"></canvas>
+      <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-blue)] opacity-70">Spectrum · 쌓은 배음</span>
+    </div>
+
+    <!-- 프리셋 -->
+    <div>
+      <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">Preset · 파형 만들기</div>
+      <div class="flex gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" role="group">
+        {[['sine','Sine'],['saw','Saw'],['square','Square']].map(([v, t]) => (
+          <button class="preset-btn flex-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-[var(--color-ink-500)]"
+            data-preset={v} style="font-family:'Space Grotesk'">{t}</button>
+        ))}
+      </div>
+    </div>
+
+    <!-- 배음 슬라이더 -->
+    <div>
+      <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">Harmonics · 배음 진폭</div>
+      <div class="space-y-1.5">
+        {initPartials.map((amp, i) => (
+          <div class="flex items-center gap-2" data-partial={i}>
+            <span class="w-12 flex-none text-[10px] font-mono text-[var(--color-ink-700)]">{i === 0 ? '기음' : 'H' + (i + 1)}</span>
+            <span class="hz-label w-12 flex-none text-[10px] font-mono text-[var(--color-ink-300)]">{(i + 1) * f0}Hz</span>
+            <input type="range" class="sl-range pt-range flex-1" min="0" max="100" step="1" value={amp} aria-label={`배음 ${i + 1} 진폭`} />
+            <span class="pt-val w-9 flex-none text-[10px] font-mono text-[var(--color-ink-700)] text-right">{amp}%</span>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <!-- 기음 주파수 (normal↑) -->
+    <div {...adv('normal')}>
+      <div class="flex items-center justify-between mb-1">
+        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Fundamental · 기음</span>
+        <span class="f0-val text-sm font-mono text-[var(--color-ink-700)]">{f0}Hz</span>
+      </div>
+      <input type="range" class="sl-range f0-range" min="80" max="330" step="1" value={f0} aria-label="기음 주파수" />
+    </div>
+  </div>
+</div>
+
+<script>
+import { AudioCore } from '../audio/core';
+
+const PRESETS: Record<string, (n: number) => number[]> = {
+  // 푸리에: 사인=기음만, 톱니=모든 배음 1/n, 사각=홀수 배음 1/n
+  sine: (n) => Array.from({ length: n }, (_, i) => (i === 0 ? 100 : 0)),
+  saw: (n) => Array.from({ length: n }, (_, i) => Math.round(100 / (i + 1))),
+  square: (n) => Array.from({ length: n }, (_, i) => ((i + 1) % 2 === 1 ? Math.round(100 / (i + 1)) : 0)),
+};
+
+function initAdditive(root: HTMLElement) {
+  const core = new AudioCore();
+  const N = 8;
+  let f0 = Number(root.dataset.freq) || 220;
+  const amps = (root.dataset.partials || '').split(',').map(Number);
+  let playing = false;
+
+  // 배음별 게인 노드 (합산 → master → core.input). 오실레이터는 재생 시 생성.
+  const master = core.gain(1); master.connect(core.input);
+  const gains: GainNode[] = [];
+  for (let i = 0; i < N; i++) {
+    const g = core.gain((amps[i] || 0) / 100 * 0.25); // 0.25 = 합산 헤드룸 확보
+    g.connect(master); gains.push(g);
+  }
+  let oscs: OscillatorNode[] = [];
+
+  async function start() {
+    await core.resume();
+    oscs = gains.map((g, i) => {
+      const o = core.ctx.createOscillator();
+      o.type = 'sine'; o.frequency.value = (i + 1) * f0;
+      o.connect(g); o.start();
+      return o;
+    });
+    playing = true;
+  }
+  function stop() {
+    oscs.forEach(o => { try { o.stop(); } catch (e) {} o.disconnect(); });
+    oscs = []; playing = false;
+  }
+
+  // ── 시각화 ──
+  const scope = root.querySelector('.scope-cv') as HTMLCanvasElement;
+  const spec = root.querySelector('.spec-cv') as HTMLCanvasElement;
+  const fit = (cv: HTMLCanvasElement) => { const r = cv.getBoundingClientRect(); cv.width = Math.max(1, r.width * devicePixelRatio); cv.height = Math.max(1, r.height * devicePixelRatio); };
+  fit(scope); fit(spec);
+  addEventListener('resize', () => { fit(scope); fit(spec); });
+
+  const td = new Uint8Array(core.analyser.fftSize);
+  const fd = new Uint8Array(core.analyser.frequencyBinCount);
+  function draw() {
+    requestAnimationFrame(draw);
+    let ctx = scope.getContext('2d')!; let W = scope.width, H = scope.height;
+    core.analyser.getByteTimeDomainData(td);
+    ctx.clearRect(0, 0, W, H); ctx.beginPath();
+    for (let i = 0; i < td.length; i++) { const x = (i / td.length) * W, y = (td[i] / 255) * H; i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+    ctx.strokeStyle = '#7c3aed'; ctx.lineWidth = 1.6 * devicePixelRatio; ctx.stroke();
+    // 스펙트럼 — 기음~8배음이 보이도록 저역 ~2.2kHz까지
+    ctx = spec.getContext('2d')!; W = spec.width; H = spec.height;
+    core.analyser.getByteFrequencyData(fd);
+    ctx.clearRect(0, 0, W, H);
+    const bins = 100, bw = W / bins;
+    for (let i = 0; i < bins; i++) {
+      const v = fd[i] / 255, bh = v * H;
+      ctx.fillStyle = `rgba(37,99,235,${0.35 + v * 0.5})`;
+      ctx.fillRect(i * bw, H - bh, bw * 0.8, bh);
+    }
+  }
+  draw();
+
+  // ── 컨트롤 ──
+  const setPct = (el: HTMLInputElement) => el.style.setProperty('--sl-pct', ((+el.value - +el.min) / (+el.max - +el.min) * 100) + '%');
+
+  const playBtn = root.querySelector('.play-btn') as HTMLButtonElement;
+  playBtn.addEventListener('click', async () => {
+    if (playing) { stop(); playBtn.textContent = '▶ 소리 켜기'; }
+    else { await start(); playBtn.textContent = '⏸ 소리 끄기'; }
+  });
+
+  // 배음 슬라이더
+  const rows = [...root.querySelectorAll<HTMLElement>('[data-partial]')];
+  rows.forEach((row, i) => {
+    const sl = row.querySelector('.pt-range') as HTMLInputElement;
+    const val = row.querySelector('.pt-val') as HTMLElement;
+    setPct(sl);
+    sl.addEventListener('input', () => {
+      setPct(sl); val.textContent = sl.value + '%';
+      core.smooth(gains[i].gain, +sl.value / 100 * 0.25);
+    });
+  });
+
+  // 프리셋 — 배음 진폭 일괄 세팅
+  root.querySelectorAll<HTMLButtonElement>('.preset-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const vals = PRESETS[btn.dataset.preset!](N);
+      rows.forEach((row, i) => {
+        const sl = row.querySelector('.pt-range') as HTMLInputElement;
+        const val = row.querySelector('.pt-val') as HTMLElement;
+        sl.value = String(vals[i]); setPct(sl); val.textContent = vals[i] + '%';
+        core.smooth(gains[i].gain, vals[i] / 100 * 0.25);
+      });
+      root.querySelectorAll('.preset-btn').forEach(b => { (b as HTMLElement).style.cssText = ''; });
+      btn.style.cssText = 'background:white;color:var(--color-violet);box-shadow:0 1px 4px rgba(0,0,0,0.08)';
+    });
+  });
+
+  // 기음 주파수
+  const f0Range = root.querySelector('.f0-range') as HTMLInputElement;
+  const f0Val = root.querySelector('.f0-val') as HTMLElement;
+  const hzLabels = [...root.querySelectorAll<HTMLElement>('.hz-label')];
+  setPct(f0Range);
+  f0Range.addEventListener('input', () => {
+    f0 = +f0Range.value; f0Val.textContent = f0 + 'Hz'; setPct(f0Range);
+    hzLabels.forEach((el, i) => el.textContent = (i + 1) * f0 + 'Hz');
+    oscs.forEach((o, i) => core.smooth(o.frequency, (i + 1) * f0));
+  });
+}
+
+document.querySelectorAll<HTMLElement>('.additive-widget').forEach(initAdditive);
+</script>

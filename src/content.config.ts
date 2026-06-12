@@ -15,7 +15,7 @@ export const HUB_META: Record<Hub, { kr: string; label: string; order: number; d
 };
 
 // 위젯 타입 — MDX가 어떤 인터랙티브 컴포넌트를 띄울지 결정
-export const WIDGETS = ['effect', 'synth', 'subtractive', 'phase', 'tone', 'comb', 'bitcrush', 'aliasing', 'mixer', 'none'] as const;
+export const WIDGETS = ['effect', 'synth', 'subtractive', 'additive', 'phase', 'tone', 'comb', 'bitcrush', 'aliasing', 'mixer', 'none'] as const;
 
 const topics = defineCollection({
   loader: glob({ pattern: '**/*.mdx', base: './src/content/topics' }),

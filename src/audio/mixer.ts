@@ -13,9 +13,11 @@ export interface MixTrack {
   kr: string;
   fader: GainNode;        // 페이더 (vol 보존용 — mute와 분리)
   muteG: GainNode;        // mute/solo 적용 지점
+  eq: BiquadFilterNode;   // 트랙별 1밴드 피킹 EQ (기본 gain 0 = 무색)
   pan: StereoPannerNode;
-  analyser: AnalyserNode; // 트랙 미터 (post-fader)
+  analyser: AnalyserNode; // 트랙 미터·스펙트럼 (post-fader·post-EQ)
   td: Uint8Array;
+  fd: Uint8Array;
   vol: number;            // 0..100
   panV: number;           // -1..1
   muted: boolean;
@@ -41,13 +43,17 @@ export class MixBus {
   private _addTrack(id: string, name: string, kr: string, trigger: MixTrack['trigger']): MixTrack {
     const fader = this.core.gain(0.7);
     const muteG = this.core.gain(1);
+    const eq = this.core.ctx.createBiquadFilter();
+    eq.type = 'peaking'; eq.frequency.value = 500; eq.Q.value = 1.2; eq.gain.value = 0;
     const pan = this.core.ctx.createStereoPanner();
     const analyser = this.core.ctx.createAnalyser();
-    analyser.fftSize = 512;
-    fader.connect(muteG); muteG.connect(pan); pan.connect(analyser); analyser.connect(this.core.input);
+    analyser.fftSize = 1024; // 스펙트럼 오버레이 해상도 (≈47Hz/빈) — EQ 노치가 보이는 수준
+    analyser.smoothingTimeConstant = 0.85; // 리듬 소스의 깜빡임 완화
+    fader.connect(muteG); muteG.connect(eq); eq.connect(pan); pan.connect(analyser); analyser.connect(this.core.input);
     const tr: MixTrack = {
-      id, name, kr, fader, muteG, pan, analyser,
+      id, name, kr, fader, muteG, eq, pan, analyser,
       td: new Uint8Array(analyser.fftSize),
+      fd: new Uint8Array(analyser.frequencyBinCount),
       vol: 70, panV: 0, muted: false, soloed: false, trigger,
     };
     this.tracks.push(tr);
@@ -138,6 +144,24 @@ export class MixBus {
     const tr = this.get(id); if (!tr) return;
     tr.panV = v;
     this.core.smooth(tr.pan.pan, v);
+  }
+
+  // 트랙 EQ (피킹 1밴드) — freq(Hz)·gain(dB)
+  setEqFreq(id: string, hz: number) {
+    const tr = this.get(id); if (!tr) return;
+    this.core.smooth(tr.eq.frequency, hz);
+  }
+
+  setEqGain(id: string, db: number) {
+    const tr = this.get(id); if (!tr) return;
+    this.core.smooth(tr.eq.gain, db);
+  }
+
+  // 트랙 스펙트럼 (오버레이용) — frequencyBinCount 길이의 0..255 배열
+  getTrackSpectrum(id: string): Uint8Array | null {
+    const tr = this.get(id); if (!tr) return null;
+    tr.analyser.getByteFrequencyData(tr.fd);
+    return tr.fd;
   }
 
   setMute(id: string, on: boolean) {

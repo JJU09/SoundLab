@@ -9,6 +9,7 @@ interface Props {
 const { config = {} } = Astro.props;
 const controls: string[] = config.controls ?? ['fader'];
 const showPan = controls.includes('pan');
+const showEq = controls.includes('eq');
 
 const TRACKS = [
   { id: 'drums', name: 'Drums', kr: '드럼', color: '#7c3aed' },
@@ -21,7 +22,7 @@ const initPan = (id: string): number => trackCfg(id).pan ?? 0;
 
 const adv = (tier?: string) => (tier && tier !== 'easy' ? { 'data-adv': tier } : {});
 ---
-<div class="mixer-widget rounded-2xl border border-[var(--color-border)] bg-white overflow-hidden" data-show-pan={showPan ? '1' : ''}>
+<div class="mixer-widget rounded-2xl border border-[var(--color-border)] bg-white overflow-hidden" data-show-pan={showPan ? '1' : ''} data-show-eq={showEq ? '1' : ''}>
 
   <div class="flex items-center justify-between px-5 py-4 border-b border-[var(--color-border)] bg-[var(--color-surface)]">
     <div class="flex items-center gap-3">
@@ -41,11 +42,24 @@ const adv = (tier?: string) => (tier && tier !== 'easy' ? { 'data-adv': tier } :
     <div class="flex items-center gap-1.5 text-[10px] font-mono text-[var(--color-ink-300)] flex-wrap">
       <span class="px-2 py-1 rounded-md bg-[var(--color-surface-2)]">3 TRACKS</span>
       <span>→</span>
-      <span class="px-2 py-1 rounded-md bg-[var(--color-violet-glow)] text-[var(--color-violet)]">FADER{showPan ? ' · PAN' : ''}</span>
+      <span class="px-2 py-1 rounded-md bg-[var(--color-violet-glow)] text-[var(--color-violet)]">FADER{showEq ? ' · EQ' : ''}{showPan ? ' · PAN' : ''}</span>
       <span>→</span>
       <span class="px-2 py-1 rounded-md bg-[var(--color-surface-2)]">MASTER</span>
       <span class="ml-1">세 악기가 한 스피커에서 만납니다 — 자리를 잡아주세요</span>
     </div>
+
+    {/* 트랙 스펙트럼 오버레이 (eq 토픽) — 마스킹을 눈으로 확인 */}
+    {showEq && (
+      <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]">
+        <canvas class="ovl-spec block w-full" style="height:130px"></canvas>
+        <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Spectrum · 트랙별 겹침</span>
+        <span class="absolute top-2 right-2.5 flex items-center gap-2 text-[9px] font-mono">
+          {TRACKS.map(t => (
+            <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full" style={`background:${t.color}`}></span><span class="text-[var(--color-ink-300)]">{t.name}</span></span>
+          ))}
+        </span>
+      </div>
+    )}
 
     <!-- 채널 스트립 -->
     <div class="space-y-3">
@@ -84,6 +98,21 @@ const adv = (tier?: string) => (tier && tier !== 'easy' ? { 'data-adv': tier } :
               <button class="trk-solo w-7 h-7 rounded-lg border border-[var(--color-border)] text-[10px] font-mono font-bold text-[var(--color-ink-300)] transition" aria-pressed="false" title="솔로">S</button>
             </div>
           </div>
+          {showEq && (
+            <div class="flex items-center gap-3 flex-wrap mt-2.5 pt-2.5 border-t border-[var(--color-border)]">
+              <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)] w-24 flex-none">EQ · 1밴드</span>
+              <div class="flex items-center gap-2 flex-none" {...adv('normal')}>
+                <span class="text-[10px] font-mono text-[var(--color-ink-300)]">FREQ</span>
+                <input type="range" class="sl-range eq-freq w-24" min="0" max="1000" step="1" value="368" aria-label={`${t.kr} EQ 주파수`} />
+                <span class="eq-freq-val text-[10px] font-mono text-[var(--color-ink-700)] w-12">500Hz</span>
+              </div>
+              <div class="flex items-center gap-2 flex-1 min-w-[140px]">
+                <span class="text-[10px] font-mono text-[var(--color-ink-300)]">GAIN</span>
+                <input type="range" class="sl-range eq-gain flex-1" min="-12" max="12" step="0.5" value="0" aria-label={`${t.kr} EQ 게인`} />
+                <span class="eq-gain-val text-[10px] font-mono text-[var(--color-ink-700)] w-14 text-right">0.0 dB</span>
+              </div>
+            </div>
+          )}
         </div>
       ))}
     </div>
@@ -163,6 +192,29 @@ function initMixer(root: HTMLElement) {
       });
     }
 
+    // EQ (eq 토픽에서만 렌더)
+    const eqFreq = strip.querySelector('.eq-freq') as HTMLInputElement | null;
+    const eqGain = strip.querySelector('.eq-gain') as HTMLInputElement | null;
+    if (eqFreq && eqGain) {
+      const freqVal = strip.querySelector('.eq-freq-val') as HTMLElement;
+      const gainVal = strip.querySelector('.eq-gain-val') as HTMLElement;
+      const toHz = (p: number) => Math.round(100 * Math.pow(80, p)); // log 100Hz–8kHz
+      const fmtHz = (v: number) => v >= 1000 ? (v / 1000).toFixed(1) + 'kHz' : v + 'Hz';
+      setPct(eqFreq); setPct(eqGain);
+      eqFreq.addEventListener('input', () => {
+        const hz = toHz(+eqFreq.value / 1000);
+        setPct(eqFreq);
+        freqVal.textContent = fmtHz(hz);
+        bus.setEqFreq(id, hz);
+      });
+      eqGain.addEventListener('input', () => {
+        const db = +eqGain.value;
+        setPct(eqGain);
+        gainVal.textContent = (db > 0 ? '+' : '') + db.toFixed(1) + ' dB';
+        bus.setEqGain(id, db);
+      });
+    }
+
     const muteBtn = strip.querySelector('.trk-mute') as HTMLButtonElement;
     const soloBtn = strip.querySelector('.trk-solo') as HTMLButtonElement;
     muteBtn.addEventListener('click', () => {
@@ -201,8 +253,48 @@ function initMixer(root: HTMLElement) {
   const lrL = root.querySelector('.lr-meter-l') as HTMLElement | null;
   const lrR = root.querySelector('.lr-meter-r') as HTMLElement | null;
   if (lrL) bus.enableStereoMeter();
+
+  // 트랙 스펙트럼 오버레이 (eq 토픽)
+  const TRACK_COLORS: Record<string, string> = { drums: '124,58,237', bass: '37,99,235', lead: '245,158,11' };
+  const ovl = root.querySelector('.ovl-spec') as HTMLCanvasElement | null;
+  let ovlCtx: CanvasRenderingContext2D | null = null;
+  if (ovl) {
+    ovlCtx = ovl.getContext('2d');
+    const fit = () => { const r = ovl.getBoundingClientRect(); ovl.width = Math.max(1, r.width * devicePixelRatio); ovl.height = Math.max(1, r.height * devicePixelRatio); };
+    fit(); addEventListener('resize', fit);
+  }
+  function drawOverlay() {
+    if (!ovl || !ovlCtx) return;
+    const W = ovl.width, H = ovl.height, ctx = ovlCtx;
+    ctx.clearRect(0, 0, W, H);
+    if (!bus.playing) return;
+    const bars = 56;
+    for (const id of ['drums', 'bass', 'lead']) {
+      const fd = bus.getTrackSpectrum(id);
+      if (!fd) continue;
+      const N = fd.length, rgb = TRACK_COLORS[id];
+      ctx.beginPath();
+      ctx.moveTo(0, H);
+      for (let i = 0; i < bars; i++) {
+        // 제곱 매핑으로 저역 해상도 확보 (sandbox drawSpec과 동일 컨벤션)
+        const f0 = Math.pow(i / bars, 2), f1 = Math.pow((i + 1) / bars, 2);
+        const lo = Math.floor(f0 * N), hi = Math.max(lo + 1, Math.floor(f1 * N));
+        let mx = 0; for (let j = lo; j < hi && j < N; j++) mx = Math.max(mx, fd[j]);
+        const x = (i + 0.5) / bars * W, y = H - (mx / 255) * (H - 8 * devicePixelRatio);
+        ctx.lineTo(x, y);
+      }
+      ctx.lineTo(W, H);
+      ctx.closePath();
+      ctx.fillStyle = `rgba(${rgb},0.28)`;
+      ctx.fill();
+      ctx.strokeStyle = `rgba(${rgb},0.85)`;
+      ctx.lineWidth = 1.4 * devicePixelRatio;
+      ctx.stroke();
+    }
+  }
   function drawMeters() {
     requestAnimationFrame(drawMeters);
+    drawOverlay();
     if (!bus.playing) {
       meters.forEach(m => m.bar.style.width = '0%');
       mstBar.style.width = '0%'; mstVal.textContent = '—';

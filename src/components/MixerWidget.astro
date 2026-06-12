@@ -97,6 +97,21 @@ const adv = (tier?: string) => (tier && tier !== 'easy' ? { 'data-adv': tier } :
       </div>
       <span class="mst-val text-[11px] font-mono text-[var(--color-ink-300)] w-10 text-right">—</span>
     </div>
+
+    {/* L/R 스테레오 미터 (pan 토픽) */}
+    {showPan && (
+      <div class="space-y-1">
+        {['L', 'R'].map(ch => (
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)] w-24 flex-none text-right pr-1">{ch}</span>
+            <div class="flex-1 h-1.5 rounded-full bg-[var(--color-surface-2)] border border-[var(--color-border)] overflow-hidden">
+              <div class={`lr-meter-${ch.toLowerCase()} h-full w-0 rounded-full bg-[var(--color-blue)]`}></div>
+            </div>
+            <span class="w-10 flex-none"></span>
+          </div>
+        ))}
+      </div>
+    )}
   </div>
 </div>
 
@@ -183,12 +198,21 @@ function initMixer(root: HTMLElement) {
   }));
   const mstBar = root.querySelector('.mst-meter') as HTMLElement;
   const mstVal = root.querySelector('.mst-val') as HTMLElement;
+  const lrL = root.querySelector('.lr-meter-l') as HTMLElement | null;
+  const lrR = root.querySelector('.lr-meter-r') as HTMLElement | null;
+  if (lrL) bus.enableStereoMeter();
   function drawMeters() {
     requestAnimationFrame(drawMeters);
     if (!bus.playing) {
       meters.forEach(m => m.bar.style.width = '0%');
       mstBar.style.width = '0%'; mstVal.textContent = '—';
+      if (lrL && lrR) { lrL.style.width = '0%'; lrR.style.width = '0%'; }
       return;
+    }
+    if (lrL && lrR) {
+      const [l, r] = bus.getStereoLevels();
+      lrL.style.width = Math.min(100, l * 130) + '%';
+      lrR.style.width = Math.min(100, r * 130) + '%';
     }
     for (const m of meters) m.bar.style.width = Math.min(100, bus.getLevel(m.id) * 130) + '%';
     const d = core.getScope();

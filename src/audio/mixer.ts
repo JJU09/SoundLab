@@ -161,6 +161,31 @@ export class MixBus {
     }
   }
 
+  // ── 마스터 L/R 스테레오 미터 (pan 토픽용) ──
+  private _lr: { l: AnalyserNode; r: AnalyserNode; tdL: Uint8Array; tdR: Uint8Array } | null = null;
+
+  enableStereoMeter() {
+    if (this._lr) return;
+    const sp = this.core.ctx.createChannelSplitter(2);
+    const mk = () => { const a = this.core.ctx.createAnalyser(); a.fftSize = 512; return a; };
+    const l = mk(), r = mk();
+    this.core.master.connect(sp); // 미터 탭만 — 본 신호 경로(master→analyser→dest)는 그대로
+    sp.connect(l, 0); sp.connect(r, 1);
+    this._lr = { l, r, tdL: new Uint8Array(l.fftSize), tdR: new Uint8Array(r.fftSize) };
+  }
+
+  // [L, R] 피크 (0..1). enableStereoMeter 전엔 [0,0].
+  getStereoLevels(): [number, number] {
+    if (!this._lr) return [0, 0];
+    const peak = (a: AnalyserNode, td: Uint8Array) => {
+      a.getByteTimeDomainData(td);
+      let p = 0;
+      for (let i = 0; i < td.length; i++) { const v = Math.abs(td[i] - 128) / 128; if (v > p) p = v; }
+      return p;
+    };
+    return [peak(this._lr.l, this._lr.tdL), peak(this._lr.r, this._lr.tdR)];
+  }
+
   // 트랙 미터용 피크 (0..1)
   getLevel(id: string): number {
     const tr = this.get(id); if (!tr) return 0;

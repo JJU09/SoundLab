@@ -1,7 +1,8 @@
 // 믹스버스 — 여러 트랙을 동시에 울려 밸런스·팬·다이내믹스를 가르치는 멀티트랙 토대.
 // AudioCore의 세 번째 소비자 (SignalSource·SynthVoice에 이어). 모든 음원은 합성(샘플 파일 없음).
 //
-//   [트랙 보이스들] → fader → muteG → pan → analyser(트랙 미터) → core.input → master
+//   [트랙 보이스들] → fader → muteG → eq → pan → analyser(트랙 미터) → core.input → master
+//   compressor 토픽에선 core.input → comp → makeup → master 로 마스터 컴프를 끼워 넣음.
 //
 // 루프는 16스텝 시퀀서. setInterval로 직접 발음하지 않고 lookahead 스케줄러
 // (25ms 폴링 + 0.1s 선행 예약)로 AudioContext 시계에 예약 → 백그라운드 탭에서도 박자 유지.
@@ -209,6 +210,35 @@ export class MixBus {
     };
     return [peak(this._lr.l, this._lr.tdL), peak(this._lr.r, this._lr.tdR)];
   }
+
+  // ── 마스터 컴프레서 (compressor 토픽용) ──
+  // input → comp → makeup → master 로 스플라이스. 트랙 합산 신호에 다이내믹스를 적용.
+  // 기본값은 사실상 무압축(threshold 0dB)이라, 학생이 임계점을 내려 피크를 조이는 과제형.
+  private _comp: DynamicsCompressorNode | null = null;
+  private _makeup: GainNode | null = null;
+
+  enableCompressor() {
+    if (this._comp) return;
+    const c = this.core.ctx.createDynamicsCompressor();
+    c.threshold.value = 0;   // dBFS — 0이면 풀스케일 근처만 건드림(=초기엔 무압축)
+    c.knee.value = 6;
+    c.ratio.value = 4;       // 4:1 — easy 티어 고정값
+    c.attack.value = 0.003;
+    c.release.value = 0.25;
+    const mk = this.core.gain(1); // 메이크업 게인 (DynamicsCompressorNode엔 없음 → 별도 노드)
+    this.core.input.disconnect();
+    this.core.input.connect(c); c.connect(mk); mk.connect(this.core.master);
+    this._comp = c; this._makeup = mk;
+  }
+
+  setCompThreshold(db: number) { if (this._comp) this.core.smooth(this._comp.threshold, db); }
+  setCompRatio(r: number) { if (this._comp) this.core.smooth(this._comp.ratio, r); }
+  setCompAttack(s: number) { if (this._comp) this.core.smooth(this._comp.attack, s); }
+  setCompRelease(s: number) { if (this._comp) this.core.smooth(this._comp.release, s); }
+  setCompMakeup(db: number) { if (this._makeup) this.core.smooth(this._makeup.gain, Math.pow(10, db / 20)); }
+
+  // 현재 게인 리덕션 (dB, 0 또는 음수). 컴프 미적용 시 0.
+  getGainReduction(): number { return this._comp ? this._comp.reduction : 0; }
 
   // 트랙 미터용 피크 (0..1)
   getLevel(id: string): number {

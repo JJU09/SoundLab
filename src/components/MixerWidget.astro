@@ -3,6 +3,8 @@
 // widgetConfig로 변주: controls(노출 컨트롤), tracks(초기 게인/팬 — "망가진 믹스"로 시작하는 과제형).
 //   controls: ['fader']            → balance 토픽 (M/S는 normal 티어부터)
 //   controls: ['fader','pan']      → pan 토픽
+//   controls: ['fader','eq']       → eq-masking 토픽
+//   controls: ['fader','comp']     → compressor 토픽 (마스터 컴프 패널)
 interface Props {
   config?: Record<string, any>;
 }
@@ -10,6 +12,7 @@ const { config = {} } = Astro.props;
 const controls: string[] = config.controls ?? ['fader'];
 const showPan = controls.includes('pan');
 const showEq = controls.includes('eq');
+const showComp = controls.includes('comp');
 
 const TRACKS = [
   { id: 'drums', name: 'Drums', kr: '드럼', color: '#7c3aed' },
@@ -22,7 +25,7 @@ const initPan = (id: string): number => trackCfg(id).pan ?? 0;
 
 const adv = (tier?: string) => (tier && tier !== 'easy' ? { 'data-adv': tier } : {});
 ---
-<div class="mixer-widget rounded-2xl border border-[var(--color-border)] bg-white overflow-hidden" data-show-pan={showPan ? '1' : ''} data-show-eq={showEq ? '1' : ''}>
+<div class="mixer-widget rounded-2xl border border-[var(--color-border)] bg-white overflow-hidden" data-show-pan={showPan ? '1' : ''} data-show-eq={showEq ? '1' : ''} data-show-comp={showComp ? '1' : ''}>
 
   <div class="flex items-center justify-between px-5 py-4 border-b border-[var(--color-border)] bg-[var(--color-surface)]">
     <div class="flex items-center gap-3">
@@ -44,7 +47,7 @@ const adv = (tier?: string) => (tier && tier !== 'easy' ? { 'data-adv': tier } :
       <span>→</span>
       <span class="px-2 py-1 rounded-md bg-[var(--color-violet-glow)] text-[var(--color-violet)]">FADER{showEq ? ' · EQ' : ''}{showPan ? ' · PAN' : ''}</span>
       <span>→</span>
-      <span class="px-2 py-1 rounded-md bg-[var(--color-surface-2)]">MASTER</span>
+      <span class="px-2 py-1 rounded-md bg-[var(--color-surface-2)]">MASTER{showComp ? ' · COMP' : ''}</span>
       <span class="ml-1">세 악기가 한 스피커에서 만납니다 — 자리를 잡아주세요</span>
     </div>
 
@@ -126,6 +129,56 @@ const adv = (tier?: string) => (tier && tier !== 'easy' ? { 'data-adv': tier } :
       </div>
       <span class="mst-val text-[11px] font-mono text-[var(--color-ink-300)] w-10 text-right">—</span>
     </div>
+
+    {/* 마스터 컴프레서 (compressor 토픽) */}
+    {showComp && (
+      <div class="comp-panel rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 space-y-2.5">
+        <div class="flex items-center justify-between">
+          <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)]">Compressor · 마스터 다이내믹스</span>
+          <span class="text-[10px] font-mono text-[var(--color-ink-300)]" {...adv('normal')}>4:1 · soft knee</span>
+        </div>
+
+        {/* 게인 리덕션 미터 (오른쪽→왼쪽으로 차오름) */}
+        <div class="flex items-center gap-2">
+          <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)] w-24 flex-none">GR · 리덕션</span>
+          <div class="flex-1 h-2.5 rounded-full bg-[var(--color-surface-2)] border border-[var(--color-border)] overflow-hidden flex justify-end">
+            <div class="gr-meter h-full w-0 rounded-full" style="background:linear-gradient(270deg,#ef4444 0%,#f59e0b 60%,#7c3aed 100%)"></div>
+          </div>
+          <span class="gr-val text-[11px] font-mono text-[var(--color-ink-300)] w-14 text-right">0.0 dB</span>
+        </div>
+
+        {/* THRESHOLD — 전 티어 (easy의 단일 손잡이) */}
+        <div class="flex items-center gap-2">
+          <span class="text-[10px] font-mono text-[var(--color-ink-300)] w-24 flex-none">THRESHOLD</span>
+          <input type="range" class="sl-range comp-thresh flex-1" min="-40" max="0" step="0.5" value="0" aria-label="컴프레서 임계점" />
+          <span class="comp-thresh-val text-[10px] font-mono text-[var(--color-ink-700)] w-14 text-right">0.0 dB</span>
+        </div>
+
+        {/* RATIO + MAKEUP — normal↑ */}
+        <div class="flex items-center gap-2" {...adv('normal')}>
+          <span class="text-[10px] font-mono text-[var(--color-ink-300)] w-24 flex-none">RATIO</span>
+          <input type="range" class="sl-range comp-ratio flex-1" min="1" max="12" step="0.5" value="4" aria-label="컴프레서 비율" />
+          <span class="comp-ratio-val text-[10px] font-mono text-[var(--color-ink-700)] w-14 text-right">4.0:1</span>
+        </div>
+        <div class="flex items-center gap-2" {...adv('normal')}>
+          <span class="text-[10px] font-mono text-[var(--color-ink-300)] w-24 flex-none">MAKEUP</span>
+          <input type="range" class="sl-range comp-makeup flex-1" min="0" max="12" step="0.5" value="0" aria-label="메이크업 게인" />
+          <span class="comp-makeup-val text-[10px] font-mono text-[var(--color-ink-700)] w-14 text-right">+0.0 dB</span>
+        </div>
+
+        {/* ATTACK + RELEASE — hard */}
+        <div class="flex items-center gap-2" {...adv('hard')}>
+          <span class="text-[10px] font-mono text-[var(--color-ink-300)] w-24 flex-none">ATTACK</span>
+          <input type="range" class="sl-range comp-attack flex-1" min="0" max="100" step="1" value="3" aria-label="어택" />
+          <span class="comp-attack-val text-[10px] font-mono text-[var(--color-ink-700)] w-14 text-right">3 ms</span>
+        </div>
+        <div class="flex items-center gap-2" {...adv('hard')}>
+          <span class="text-[10px] font-mono text-[var(--color-ink-300)] w-24 flex-none">RELEASE</span>
+          <input type="range" class="sl-range comp-release flex-1" min="10" max="500" step="5" value="250" aria-label="릴리즈" />
+          <span class="comp-release-val text-[10px] font-mono text-[var(--color-ink-700)] w-14 text-right">250 ms</span>
+        </div>
+      </div>
+    )}
 
     {/* L/R 스테레오 미터 (pan 토픽) */}
     {showPan && (
@@ -231,6 +284,31 @@ function initMixer(root: HTMLElement) {
     });
   });
 
+  // 마스터 컴프레서 (compressor 토픽)
+  const compPanel = root.querySelector('.comp-panel') as HTMLElement | null;
+  if (compPanel) {
+    bus.enableCompressor();
+    const bind = (sel: string, fmt: (v: number) => string, apply: (v: number) => void) => {
+      const sl = compPanel.querySelector(sel) as HTMLInputElement | null;
+      if (!sl) return;
+      const out = compPanel.querySelector(sel + '-val') as HTMLElement;
+      setPct(sl);
+      sl.addEventListener('input', () => {
+        const v = +sl.value;
+        setPct(sl);
+        out.textContent = fmt(v);
+        apply(v);
+      });
+    };
+    bind('.comp-thresh', v => v.toFixed(1) + ' dB', v => bus.setCompThreshold(v));
+    bind('.comp-ratio', v => v.toFixed(1) + ':1', v => bus.setCompRatio(v));
+    bind('.comp-makeup', v => '+' + v.toFixed(1) + ' dB', v => bus.setCompMakeup(v));
+    bind('.comp-attack', v => v + ' ms', v => bus.setCompAttack(v / 1000));
+    bind('.comp-release', v => v + ' ms', v => bus.setCompRelease(v / 1000));
+  }
+  const grMeter = root.querySelector('.gr-meter') as HTMLElement | null;
+  const grVal = root.querySelector('.gr-val') as HTMLElement | null;
+
   // 재생
   const playBtn = root.querySelector('.play-btn') as HTMLButtonElement;
   playBtn.addEventListener('click', async () => {
@@ -299,7 +377,13 @@ function initMixer(root: HTMLElement) {
       meters.forEach(m => m.bar.style.width = '0%');
       mstBar.style.width = '0%'; mstVal.textContent = '—';
       if (lrL && lrR) { lrL.style.width = '0%'; lrR.style.width = '0%'; }
+      if (grMeter && grVal) { grMeter.style.width = '0%'; grVal.textContent = '0.0 dB'; }
       return;
+    }
+    if (grMeter && grVal) {
+      const gr = bus.getGainReduction(); // 0 또는 음수 dB
+      grMeter.style.width = Math.min(100, (-gr / 20) * 100) + '%'; // 20dB 풀스케일
+      grVal.textContent = gr.toFixed(1) + ' dB';
     }
     if (lrL && lrR) {
       const [l, r] = bus.getStereoLevels();

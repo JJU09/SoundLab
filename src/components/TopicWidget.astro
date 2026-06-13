@@ -8,6 +8,7 @@ import AdditiveWidget from './AdditiveWidget.astro';
 import FmWidget from './FmWidget.astro';
 import ModulationWidget from './ModulationWidget.astro';
 import PhaseWidget from './PhaseWidget.astro';
+import BeatsWidget from './BeatsWidget.astro';
 import ToneWidget from './ToneWidget.astro';
 import CombWidget from './CombWidget.astro';
 import BitcrushWidget from './BitcrushWidget.astro';
@@ -33,6 +34,7 @@ const effectModule = widget === 'effect' && moduleId ? MODULE_MAP[moduleId] : nu
 {widget === 'fm' && <FmWidget config={config} />}
 {widget === 'modulation' && <ModulationWidget config={config} />}
 {widget === 'phase' && <PhaseWidget config={config} />}
+{widget === 'beats' && <BeatsWidget config={config} />}
 {widget === 'tone' && <ToneWidget config={config} />}
 {widget === 'comb' && <CombWidget config={config} />}
 {widget === 'bitcrush' && <BitcrushWidget config={config} />}

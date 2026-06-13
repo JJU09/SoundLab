@@ -1,0 +1,162 @@
+---
+// 맥놀이 위젯 — 두 근접 주파수 사인파를 합성하면 |f1−f2|Hz로 음량이 맥동한다.
+// osc(f) + osc(f+det) → core.input. 포락선 다이어그램으로 "우-웅 우-웅"을 눈으로,
+// 출력 스코프로 실제 합성음을 본다. 디튠=0이면 맥놀이 없음(조율 완료).
+interface Props {
+  config?: Record<string, any>;
+}
+const { config = {} } = Astro.props;
+const c = { freq: config.freq ?? 220, detune: config.detune ?? 4 };
+const adv = (tier?: string) => (tier && tier !== 'easy' ? { 'data-adv': tier } : {});
+---
+<div class="beats-widget rounded-2xl border border-[var(--color-border)] bg-white overflow-hidden"
+  data-freq={c.freq} data-detune={c.detune}>
+
+  <div class="flex items-center justify-between px-5 py-4 border-b border-[var(--color-border)] bg-[var(--color-surface)]">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg flex items-center justify-center gradient-brand">
+        <svg class="text-white" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M2 12c1.5 0 1.5-7 3-7s1.5 7 3 7M8 12c1.5 0 1.5-3 3-3s1.5 3 3 3M14 12c1.5 0 1.5-7 3-7s1.5 7 3 7"/></svg>
+      </div>
+      <div>
+        <span class="font-bold text-base" style="font-family:'Space Grotesk'">맥놀이</span>
+        <span class="text-sm text-[var(--color-ink-300)] ml-2">Beats</span>
+      </div>
+    </div>
+    <button class="play-btn gradient-brand text-white text-sm font-semibold px-4 py-1.5 rounded-full transition hover:opacity-90" style="font-family:'Space Grotesk'">▶ 소리 켜기</button>
+  </div>
+
+  <div class="p-5 space-y-4">
+    <!-- 포락선 다이어그램 -->
+    <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]">
+      <canvas class="env-cv block w-full" style="height:140px"></canvas>
+      <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)] opacity-70">Envelope · 음량의 맥동</span>
+    </div>
+    <!-- 맥놀이 판정 -->
+    <div class="beat-readout p-3 rounded-xl border text-sm font-mono"></div>
+    <!-- 실제 출력 스코프 -->
+    <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]">
+      <canvas class="scope-cv block w-full" style="height:70px"></canvas>
+      <span class="absolute top-1.5 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Output · 실제 합성음</span>
+    </div>
+
+    <!-- 디튠 (easy — 핵심) -->
+    <div>
+      <div class="flex items-center justify-between mb-1">
+        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Detune · 두 음의 주파수 차</span>
+        <span class="det-val text-sm font-mono text-[var(--color-ink-700)]">{c.detune}Hz</span>
+      </div>
+      <input type="range" class="sl-range det-range" min="0" max="20" step="0.5" value={c.detune} aria-label="디튠" />
+    </div>
+    <!-- 기준 주파수 (normal) -->
+    <div {...adv('normal')}>
+      <div class="flex items-center justify-between mb-1">
+        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Frequency · 기준 음</span>
+        <span class="freq-val text-sm font-mono text-[var(--color-ink-700)]">{c.freq}Hz</span>
+      </div>
+      <input type="range" class="sl-range freq-range" min="110" max="660" step="1" value={c.freq} aria-label="기준 주파수" />
+    </div>
+  </div>
+</div>
+
+<script>
+import { AudioCore } from '../audio/core';
+
+function initBeats(root: HTMLElement) {
+  const core = new AudioCore();
+  let freq = Number(root.dataset.freq) || 220;
+  let det = Number(root.dataset.detune) || 4;
+  let playing = false;
+
+  const gA = core.gain(0.4), gB = core.gain(0.4);
+  gA.connect(core.input); gB.connect(core.input);
+  let oscA: OscillatorNode | null = null, oscB: OscillatorNode | null = null;
+
+  function applyAudio() {
+    if (oscA) core.smooth(oscA.frequency, freq);
+    if (oscB) core.smooth(oscB.frequency, freq + det);
+  }
+  async function start() {
+    await core.resume();
+    oscA = core.ctx.createOscillator(); oscA.type = 'sine'; oscA.frequency.value = freq; oscA.connect(gA); oscA.start();
+    oscB = core.ctx.createOscillator(); oscB.type = 'sine'; oscB.frequency.value = freq + det; oscB.connect(gB); oscB.start();
+    playing = true;
+  }
+  function stop() {
+    [oscA, oscB].forEach(o => { if (o) { try { o.stop(); } catch (e) {} o.disconnect(); } });
+    oscA = oscB = null; playing = false;
+  }
+
+  const env = root.querySelector('.env-cv') as HTMLCanvasElement;
+  const scope = root.querySelector('.scope-cv') as HTMLCanvasElement;
+  const fit = (cv: HTMLCanvasElement) => { const r = cv.getBoundingClientRect(); cv.width = Math.max(1, r.width * devicePixelRatio); cv.height = Math.max(1, r.height * devicePixelRatio); };
+  fit(env); fit(scope);
+  addEventListener('resize', () => { fit(env); fit(scope); drawEnv(); });
+
+  // 포락선 다이어그램: 합성파 sin(2πf t)+sin(2π(f+det)t) 를 ~2 맥놀이 주기 그림.
+  // 포락선 E(t)=|cos(π·det·t)| 가 음량 맥동을 나타냄 (det=0이면 평탄).
+  function drawEnv() {
+    const ctx = env.getContext('2d')!, W = env.width, H = env.height, mid = H / 2, amp = H * 0.42;
+    ctx.clearRect(0, 0, W, H);
+    ctx.strokeStyle = 'rgba(160,160,192,0.2)'; ctx.lineWidth = devicePixelRatio; ctx.beginPath(); ctx.moveTo(0, mid); ctx.lineTo(W, mid); ctx.stroke();
+    const T = det > 0.1 ? 2 / det : 0.06; // 2 맥놀이 주기 (det=0이면 짧게)
+    // 포락선(상/하) 채움
+    const envAt = (t: number) => Math.abs(Math.cos(Math.PI * det * t));
+    ctx.beginPath();
+    for (let i = 0; i <= W; i++) { const t = (i / W) * T; ctx.lineTo(i, mid - envAt(t) * amp); }
+    for (let i = W; i >= 0; i--) { const t = (i / W) * T; ctx.lineTo(i, mid + envAt(t) * amp); }
+    ctx.closePath(); ctx.fillStyle = 'rgba(124,58,237,0.10)'; ctx.fill();
+    // 포락선 선
+    for (const sgn of [-1, 1]) {
+      ctx.beginPath();
+      for (let i = 0; i <= W; i++) { const t = (i / W) * T; const y = mid - sgn * envAt(t) * amp; i ? ctx.lineTo(i, y) : ctx.moveTo(i, y); }
+      ctx.strokeStyle = 'rgba(124,58,237,0.5)'; ctx.lineWidth = 1.4 * devicePixelRatio; ctx.stroke();
+    }
+    // 합성 반송파 (밀도 높게 — 포락선 안에서 진동)
+    const N = W * 4;
+    ctx.beginPath();
+    for (let i = 0; i <= N; i++) { const t = (i / N) * T; const y = (Math.sin(2 * Math.PI * freq * t) + Math.sin(2 * Math.PI * (freq + det) * t)) / 2; const px = (i / N) * W; const py = mid - y * amp; i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); }
+    ctx.strokeStyle = '#7c3aed'; ctx.lineWidth = 1 * devicePixelRatio; ctx.stroke();
+  }
+
+  const td = new Uint8Array(core.analyser.fftSize);
+  function drawScope() {
+    requestAnimationFrame(drawScope);
+    const ctx = scope.getContext('2d')!, W = scope.width, H = scope.height;
+    core.analyser.getByteTimeDomainData(td);
+    ctx.clearRect(0, 0, W, H); ctx.beginPath();
+    for (let i = 0; i < td.length; i++) { const x = (i / td.length) * W, y = (td[i] / 255) * H; i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+    ctx.strokeStyle = '#2563eb'; ctx.lineWidth = 1.4 * devicePixelRatio; ctx.stroke();
+  }
+
+  const readout = root.querySelector('.beat-readout') as HTMLElement;
+  function updateReadout() {
+    if (det < 0.25) {
+      readout.className = 'beat-readout p-3 rounded-xl border text-sm font-mono border-[#22c55e] bg-[rgba(34,197,94,0.07)] text-[#15803d]';
+      readout.innerHTML = '✓ 두 음이 거의 같음 — 맥놀이가 사라졌습니다 (조율 완료)';
+    } else {
+      const period = (1 / det);
+      readout.className = 'beat-readout p-3 rounded-xl border text-sm font-mono border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-ink-500)]';
+      readout.innerHTML = `맥놀이 <b>${det.toFixed(1)}Hz</b> — 1초에 ${det.toFixed(1)}번, 약 ${period.toFixed(2)}초마다 커졌다 작아집니다`;
+    }
+  }
+
+  function refresh() { drawEnv(); updateReadout(); applyAudio(); }
+  drawScope(); refresh();
+
+  // 컨트롤
+  const playBtn = root.querySelector('.play-btn') as HTMLButtonElement;
+  playBtn.addEventListener('click', async () => {
+    if (playing) { stop(); playBtn.textContent = '▶ 소리 켜기'; }
+    else { await start(); playBtn.textContent = '⏸ 소리 끄기'; }
+  });
+
+  const setPct = (el: HTMLInputElement) => el.style.setProperty('--sl-pct', ((+el.value - +el.min) / (+el.max - +el.min) * 100) + '%');
+  const detRange = root.querySelector('.det-range') as HTMLInputElement, detVal = root.querySelector('.det-val') as HTMLElement;
+  const fRange = root.querySelector('.freq-range') as HTMLInputElement, fVal = root.querySelector('.freq-val') as HTMLElement;
+  setPct(detRange); setPct(fRange);
+  detRange.addEventListener('input', () => { det = +detRange.value; detVal.textContent = det + 'Hz'; setPct(detRange); refresh(); });
+  fRange.addEventListener('input', () => { freq = +fRange.value; fVal.textContent = freq + 'Hz'; setPct(fRange); refresh(); });
+}
+
+document.querySelectorAll<HTMLElement>('.beats-widget').forEach(initBeats);
+</script>

@@ -1,0 +1,209 @@
+---
+import Base from '../../layouts/Base.astro';
+const base = import.meta.env.BASE_URL;
+const desc = '설치 없이 브라우저에서 바로 쓰는 무료 온라인 메트로놈. BPM 조절, 박자표(2/4·3/4·4/4·6/8), 탭 템포, 강박 액센트로 정확한 박자 연습.';
+const sigs: [string, number][] = [['2/4', 2], ['3/4', 3], ['4/4', 4], ['6/8', 6]];
+---
+<Base title="메트로놈" description={desc} type="website">
+
+<div class="max-w-xl mx-auto px-4 sm:px-6 py-12">
+  <nav class="flex items-center gap-2 text-xs font-mono text-[var(--color-ink-300)] mb-6">
+    <a href={base} class="hover:text-[var(--color-violet)] transition">홈</a><span>/</span>
+    <a href={`${base}tools/`} class="hover:text-[var(--color-violet)] transition">도구</a><span>/</span>
+    <span class="text-[var(--color-ink-700)]">메트로놈</span>
+  </nav>
+
+  <div class="mb-6">
+    <span class="text-xs font-mono px-2.5 py-1 rounded-full border border-[var(--color-violet-light)] text-[var(--color-violet)] bg-[var(--color-violet-glow)]">TOOLS</span>
+    <h1 class="text-3xl font-bold mt-3 mb-2" style="font-family:'Space Grotesk'">메트로놈</h1>
+    <p class="text-[var(--color-ink-500)]">정확한 박자 연습용 온라인 메트로놈. BPM·박자표를 맞추고 ▶로 시작하세요.</p>
+  </div>
+
+  <div class="metro rounded-2xl border border-[var(--color-border)] bg-white overflow-hidden">
+    <div class="p-6 sm:p-8 space-y-6">
+      <!-- 비트 표시등 -->
+      <div class="beat-dots flex items-center justify-center gap-2.5 h-6"></div>
+
+      <!-- BPM 대형 표시 -->
+      <div class="text-center">
+        <div class="flex items-end justify-center gap-2">
+          <span class="bpm-num text-6xl font-bold tabular-nums leading-none" style="font-family:'Space Grotesk'">120</span>
+          <span class="text-sm font-mono text-[var(--color-ink-300)] mb-1.5">BPM</span>
+        </div>
+        <div class="tempo-term text-xs font-mono text-[var(--color-violet)] mt-1.5">Moderato</div>
+      </div>
+
+      <!-- BPM 컨트롤 -->
+      <div class="flex items-center gap-3">
+        <button class="bpm-dec w-10 h-10 flex-none rounded-xl border border-[var(--color-border)] text-xl font-bold text-[var(--color-ink-500)] hover:border-[var(--color-violet)] hover:text-[var(--color-violet)] transition" aria-label="BPM 감소">−</button>
+        <input type="range" class="sl-range bpm-range flex-1" min="40" max="240" step="1" value="120" aria-label="BPM" />
+        <button class="bpm-inc w-10 h-10 flex-none rounded-xl border border-[var(--color-border)] text-xl font-bold text-[var(--color-ink-500)] hover:border-[var(--color-violet)] hover:text-[var(--color-violet)] transition" aria-label="BPM 증가">+</button>
+      </div>
+
+      <!-- 박자표 + 탭 템포 -->
+      <div class="flex items-center justify-between gap-3 flex-wrap">
+        <div class="flex gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" role="group" aria-label="박자표">
+          {sigs.map(([label, n]) => (
+            <button class="sig-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-[var(--color-ink-500)]"
+              data-beats={n} aria-pressed={n === 4 ? 'true' : 'false'} style="font-family:'Space Grotesk'">{label}</button>
+          ))}
+        </div>
+        <button class="tap-btn px-4 py-2 rounded-xl border border-[var(--color-border)] text-sm font-semibold text-[var(--color-ink-500)] hover:border-[var(--color-violet)] hover:text-[var(--color-violet)] transition" style="font-family:'Space Grotesk'">탭 템포</button>
+      </div>
+
+      <!-- 재생 -->
+      <button class="play-btn w-full gradient-brand text-white font-semibold py-3.5 rounded-xl text-base flex items-center justify-center gap-2 transition hover:opacity-90" style="font-family:'Space Grotesk'">
+        <span class="play-dot w-2 h-2 rounded-full bg-white"></span>
+        <span class="play-label">▶ 시작</span>
+      </button>
+    </div>
+  </div>
+
+  <p class="text-xs text-[var(--color-ink-300)] mt-4 text-center">
+    팁: <b class="text-[var(--color-ink-500)]">탭 템포</b>를 곡에 맞춰 4번 이상 두드리면 BPM이 자동으로 맞춰집니다 · 첫 박(강박)은 높은 소리로 강조됩니다
+  </p>
+
+  <div class="mt-8 p-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-sm text-[var(--color-ink-500)]">
+    박자와 음의 시간적 구조가 궁금하다면 <a href={`${base}learn/synthesis/adsr/`} class="text-[var(--color-violet)] font-medium hover:underline">엔벨로프</a>,
+    소리가 어떻게 만들어지는지는 <a href={`${base}learn/acoustics/tone/`} class="text-[var(--color-violet)] font-medium hover:underline">소리의 3요소</a>에서 이어서 배워보세요.
+  </div>
+</div>
+
+<script>
+import { AudioCore } from '../../audio/core';
+
+const TERMS: [number, string][] = [
+  [40,'Grave'],[60,'Largo'],[66,'Larghetto'],[76,'Adagio'],[108,'Andante'],
+  [120,'Moderato'],[156,'Allegro'],[176,'Vivace'],[200,'Presto'],[241,'Prestissimo'],
+];
+const termOf = (bpm: number) => TERMS.find(([t]) => bpm < t)?.[1] ?? 'Prestissimo';
+
+function initMetro(root: HTMLElement) {
+  const core = new AudioCore();
+  let bpm = 120, beats = 4, playing = false;
+
+  // lookahead 스케줄러 (Web Audio 시계 기준 — 탭 백그라운드에서도 박자 유지)
+  let nextTime = 0, beatCount = 0;
+  let timer: ReturnType<typeof setInterval> | null = null;
+  const queue: { idx: number; time: number }[] = [];
+
+  function click(time: number, accent: boolean) {
+    const o = core.ctx.createOscillator(); o.type = 'square';
+    o.frequency.value = accent ? 1760 : 1100;
+    const g = core.gain(0.0001);
+    g.gain.setValueAtTime(0.0001, time);
+    g.gain.exponentialRampToValueAtTime(accent ? 0.6 : 0.38, time + 0.001);
+    g.gain.exponentialRampToValueAtTime(0.0001, time + 0.045);
+    o.connect(g); g.connect(core.input);
+    o.start(time); o.stop(time + 0.06);
+    o.onended = () => { try { o.disconnect(); g.disconnect(); } catch (e) {} };
+  }
+  function schedule() {
+    const spb = 60 / bpm;
+    while (nextTime < core.ctx.currentTime + 0.1) {
+      const idx = beatCount % beats;
+      click(nextTime, idx === 0);
+      queue.push({ idx, time: nextTime });
+      nextTime += spb; beatCount++;
+    }
+  }
+  async function start() {
+    await core.resume();
+    beatCount = 0; nextTime = core.ctx.currentTime + 0.12;
+    timer = setInterval(schedule, 25); playing = true;
+    requestAnimationFrame(visual);
+  }
+  function stop() {
+    if (timer) clearInterval(timer); timer = null; playing = false; queue.length = 0;
+    dots.forEach(d => setActive(d, false));
+  }
+
+  // ── 비트 표시등 ──
+  const dotsWrap = root.querySelector('.beat-dots') as HTMLElement;
+  let dots: HTMLElement[] = [];
+  function buildDots() {
+    dotsWrap.innerHTML = '';
+    dots = Array.from({ length: beats }, (_, i) => {
+      const d = document.createElement('div');
+      d.className = 'rounded-full transition-all duration-75';
+      d.style.cssText = `width:${i === 0 ? 13 : 10}px;height:${i === 0 ? 13 : 10}px;background:var(--color-border)`;
+      dotsWrap.appendChild(d); return d;
+    });
+  }
+  function setActive(d: HTMLElement, on: boolean, accent = false) {
+    const sz = d === dots[0] ? 13 : 10;
+    if (on) d.style.cssText = `width:${sz}px;height:${sz}px;background:${accent ? 'var(--color-violet)' : 'var(--color-blue)'};box-shadow:0 0 10px ${accent ? 'rgba(124,58,237,0.8)' : 'rgba(37,99,235,0.7)'};transform:scale(1.25)`;
+    else d.style.cssText = `width:${sz}px;height:${sz}px;background:var(--color-border)`;
+  }
+  function visual() {
+    if (!playing) return;
+    requestAnimationFrame(visual);
+    const now = core.ctx.currentTime;
+    while (queue.length && queue[0].time <= now) {
+      const { idx } = queue.shift()!;
+      dots.forEach(d => setActive(d, false));
+      setActive(dots[idx], true, idx === 0);
+    }
+  }
+  buildDots();
+
+  // ── 컨트롤 ──
+  const bpmNum = root.querySelector('.bpm-num') as HTMLElement;
+  const term = root.querySelector('.tempo-term') as HTMLElement;
+  const range = root.querySelector('.bpm-range') as HTMLInputElement;
+  const setPct = (el: HTMLInputElement) => el.style.setProperty('--sl-pct', ((+el.value - +el.min) / (+el.max - +el.min) * 100) + '%');
+  function setBpm(v: number) {
+    bpm = Math.max(40, Math.min(240, Math.round(v)));
+    bpmNum.textContent = String(bpm); term.textContent = termOf(bpm);
+    range.value = String(bpm); setPct(range);
+  }
+  setBpm(120);
+  range.addEventListener('input', () => setBpm(+range.value));
+  root.querySelector('.bpm-dec')!.addEventListener('click', () => setBpm(bpm - 1));
+  root.querySelector('.bpm-inc')!.addEventListener('click', () => setBpm(bpm + 1));
+
+  // 박자표
+  const sigBtns = [...root.querySelectorAll<HTMLElement>('.sig-btn')];
+  sigBtns.forEach(btn => {
+    const sel = () => btn.style.cssText = 'background:white;color:var(--color-violet);box-shadow:0 1px 4px rgba(0,0,0,0.08)';
+    btn.addEventListener('click', () => {
+      sigBtns.forEach(b => { b.setAttribute('aria-pressed', 'false'); b.style.cssText = ''; });
+      btn.setAttribute('aria-pressed', 'true'); sel();
+      beats = Number(btn.dataset.beats); buildDots();
+    });
+    if (btn.getAttribute('aria-pressed') === 'true') sel();
+  });
+
+  // 탭 템포
+  let taps: number[] = [];
+  root.querySelector('.tap-btn')!.addEventListener('click', () => {
+    const now = performance.now();
+    taps = taps.filter(t => now - t < 2500); taps.push(now);
+    if (taps.length >= 2) {
+      const intervals = taps.slice(1).map((t, i) => t - taps[i]);
+      const avg = intervals.reduce((a, b) => a + b, 0) / intervals.length;
+      setBpm(60000 / avg);
+    }
+  });
+
+  // 재생
+  const playBtn = root.querySelector('.play-btn') as HTMLButtonElement;
+  const playDot = root.querySelector('.play-dot') as HTMLElement;
+  const playLabel = root.querySelector('.play-label') as HTMLElement;
+  playBtn.addEventListener('click', async () => {
+    if (playing) {
+      stop();
+      playBtn.style.cssText = ''; playDot.style.cssText = 'background:white'; playLabel.textContent = '▶ 시작';
+    } else {
+      await start();
+      playBtn.style.cssText = 'background:var(--color-surface-2);color:var(--color-ink-700)';
+      playDot.style.cssText = 'background:#ef4444;box-shadow:0 0 8px #ef4444';
+      playLabel.textContent = '■ 정지';
+    }
+  });
+}
+
+document.querySelectorAll<HTMLElement>('.metro').forEach(initMetro);
+</script>
+
+</Base>

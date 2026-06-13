@@ -50,6 +50,17 @@ const accent = data.color === 'violet'
     </nav>
 
     <div {...(data.scaffold ? { 'data-scaffold': '', 'data-level': 'normal' } : {})}>
+    {data.scaffold && (
+      // 페인트 전 저장된 난이도를 미리 적용해 normal 깜빡임(FOUC) 제거. 기본값은 normal 유지.
+      <script is:inline>
+        (function () {
+          try {
+            var L = localStorage.getItem('sl-level');
+            if (L === 'easy' || L === 'hard') document.currentScript.parentElement.setAttribute('data-level', L);
+          } catch (e) {}
+        })();
+      </script>
+    )}
     {data.scaffold && <ScaffoldBar />}
     <div class={`grid grid-cols-1 gap-10 ${hasWidget ? 'lg:grid-cols-[1fr_380px]' : ''}`}>
 

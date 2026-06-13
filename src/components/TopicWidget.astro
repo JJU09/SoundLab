@@ -13,6 +13,7 @@ import CombWidget from './CombWidget.astro';
 import BitcrushWidget from './BitcrushWidget.astro';
 import SampleRateWidget from './SampleRateWidget.astro';
 import AliasWidget from './AliasWidget.astro';
+import LevelWidget from './LevelWidget.astro';
 import MixerWidget from './MixerWidget.astro';
 import { MODULE_MAP, type ModuleId } from '../lib/modules';
 
@@ -37,4 +38,5 @@ const effectModule = widget === 'effect' && moduleId ? MODULE_MAP[moduleId] : nu
 {widget === 'bitcrush' && <BitcrushWidget config={config} />}
 {widget === 'samplerate' && <SampleRateWidget config={config} />}
 {widget === 'aliasing' && <AliasWidget config={config} />}
+{widget === 'level' && <LevelWidget config={config} />}
 {widget === 'mixer' && <MixerWidget config={config} />}

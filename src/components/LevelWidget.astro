@@ -1,0 +1,174 @@
+---
+// 레벨·헤드룸 위젯 — dBFS, 클리핑, 헤드룸을 디지털 관점에서.
+//   osc → level(입력 게인) → [preTap 측정] → clipper(WaveShaper 하드클립 ±1) → out → core.input
+// 입력 게인을 올려 피크가 0dBFS(=±1)를 넘으면 파형 꼭대기가 잘리고(클리핑) 미터가 빨개진다.
+// preTap은 클립 전 '진짜 레벨'(0dBFS 초과 가능)을 재고, 스코프는 클립 후 파형(평평한 꼭대기)을 그린다.
+interface Props {
+  config?: Record<string, any>;
+}
+const { config = {} } = Astro.props;
+const c = { gain: config.gain ?? 0 }; // dB
+const adv = (tier?: string) => (tier && tier !== 'easy' ? { 'data-adv': tier } : {});
+---
+<div class="lvl-widget rounded-2xl border border-[var(--color-border)] bg-white overflow-hidden" data-gain={c.gain}>
+
+  <div class="flex items-center justify-between px-5 py-4 border-b border-[var(--color-border)] bg-[var(--color-surface)]">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg flex items-center justify-center gradient-brand">
+        <svg class="text-white" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M4 20V10M9 20V4M14 20v-7M19 20V8"/></svg>
+      </div>
+      <div>
+        <span class="font-bold text-base" style="font-family:'Space Grotesk'">레벨 · 헤드룸</span>
+        <span class="text-sm text-[var(--color-ink-300)] ml-2">Levels / dBFS</span>
+      </div>
+    </div>
+    <button class="play-btn gradient-brand text-white text-sm font-semibold px-4 py-1.5 rounded-full transition hover:opacity-90" style="font-family:'Space Grotesk'">▶ 소리 켜기</button>
+  </div>
+
+  <div class="p-5 space-y-4">
+    <!-- 스코프 (클립 후 파형) -->
+    <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]">
+      <canvas class="scope-cv block w-full" style="height:120px"></canvas>
+      <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)] opacity-70">Waveform · 출력 파형</span>
+      <span class="clip-led absolute top-2 right-2.5 text-[10px] font-mono font-bold px-2 py-0.5 rounded text-white transition-opacity opacity-0" style="background:#ef4444">CLIP</span>
+    </div>
+
+    <!-- 피크 미터 -->
+    <div class="flex items-center gap-2">
+      <span class="w-16 flex-none text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Peak</span>
+      <div class="relative flex-1 h-3 rounded-full bg-[var(--color-surface-2)] border border-[var(--color-border)] overflow-hidden">
+        <div class="pk-meter h-full w-0" style="background:linear-gradient(90deg,#22c55e 0%,#22c55e 60%,#f59e0b 80%,#ef4444 100%)"></div>
+        <!-- 0dBFS 마커 (85.7% 지점: -36..+6 스케일의 0dB) -->
+        <div class="absolute top-0 bottom-0 w-px bg-[var(--color-ink-700)] opacity-50" style="left:85.7%"></div>
+      </div>
+      <span class="pk-val w-16 flex-none text-[11px] font-mono text-[var(--color-ink-700)] text-right">—</span>
+    </div>
+    <!-- RMS 미터 (normal↑) -->
+    <div class="flex items-center gap-2" {...adv('normal')}>
+      <span class="w-16 flex-none text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)]">RMS</span>
+      <div class="relative flex-1 h-3 rounded-full bg-[var(--color-surface-2)] border border-[var(--color-border)] overflow-hidden">
+        <div class="rms-meter h-full w-0 bg-[var(--color-blue)]"></div>
+        <div class="absolute top-0 bottom-0 w-px bg-[var(--color-ink-700)] opacity-50" style="left:85.7%"></div>
+      </div>
+      <span class="rms-val w-16 flex-none text-[11px] font-mono text-[var(--color-ink-700)] text-right">—</span>
+    </div>
+
+    <!-- 헤드룸 판정 -->
+    <div class="hr-readout p-3 rounded-xl border text-sm font-mono"></div>
+
+    <!-- 입력 게인 (easy — 핵심) -->
+    <div>
+      <div class="flex items-center justify-between mb-1">
+        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Input Gain · 입력 게인</span>
+        <span class="gain-val text-sm font-mono text-[var(--color-ink-700)]">{c.gain > 0 ? '+' : ''}{c.gain} dB</span>
+      </div>
+      <input type="range" class="sl-range gain-range" min="-24" max="12" step="0.5" value={c.gain} aria-label="입력 게인" />
+    </div>
+  </div>
+</div>
+
+<script>
+import { AudioCore } from '../audio/core';
+
+function initLevel(root: HTMLElement) {
+  const core = new AudioCore();
+  let gainDb = Number(root.dataset.gain) || 0;
+  let playing = false;
+  const BASE = 0.5; // 0dB 슬라이더에서 -6dBFS (여유 있는 기본 레벨)
+
+  // osc → level → clipper → out. preTap은 level 출력(클립 전)을 측정.
+  const level = core.gain(BASE * Math.pow(10, gainDb / 20));
+  const preTap = core.ctx.createAnalyser(); preTap.fftSize = 2048;
+  const clipper = core.ctx.createWaveShaper();
+  const n = 1024, curve = new Float32Array(n);
+  for (let i = 0; i < n; i++) curve[i] = (i / (n - 1)) * 2 - 1; // identity → |x|>1은 ±1로 클램프(하드클립)
+  clipper.curve = curve;
+  const out = core.gain(0.8);
+  level.connect(preTap); level.connect(clipper); clipper.connect(out); out.connect(core.input);
+  let osc: OscillatorNode | null = null;
+
+  async function start() {
+    await core.resume();
+    osc = core.ctx.createOscillator(); osc.type = 'sine'; osc.frequency.value = 220; osc.connect(level); osc.start();
+    playing = true;
+  }
+  function stop() { if (osc) { try { osc.stop(); } catch (e) {} osc.disconnect(); osc = null; } playing = false; }
+
+  // ── 측정/시각화 ──
+  const scope = root.querySelector('.scope-cv') as HTMLCanvasElement;
+  const fit = () => { const r = scope.getBoundingClientRect(); scope.width = Math.max(1, r.width * devicePixelRatio); scope.height = Math.max(1, r.height * devicePixelRatio); };
+  fit(); addEventListener('resize', fit);
+
+  const pkMeter = root.querySelector('.pk-meter') as HTMLElement;
+  const pkVal = root.querySelector('.pk-val') as HTMLElement;
+  const rmsMeter = root.querySelector('.rms-meter') as HTMLElement;
+  const rmsVal = root.querySelector('.rms-val') as HTMLElement;
+  const clipLed = root.querySelector('.clip-led') as HTMLElement;
+  const hr = root.querySelector('.hr-readout') as HTMLElement;
+
+  const preTd = new Uint8Array(preTap.fftSize);
+  const postTd = new Uint8Array(core.analyser.fftSize);
+  // dB(-36..+6) → 미터 위치% (0dBFS = 85.7%)
+  const dbToPct = (db: number) => Math.max(0, Math.min(100, (db + 36) / 42 * 100));
+  let clipHold = 0;
+
+  function frame() {
+    requestAnimationFrame(frame);
+    // 스코프 (클립 후, master analyser)
+    const ctx = scope.getContext('2d')!, W = scope.width, H = scope.height;
+    core.analyser.getByteTimeDomainData(postTd);
+    ctx.clearRect(0, 0, W, H);
+    // ±1(0dBFS) 한계선
+    ctx.strokeStyle = 'rgba(239,68,68,0.35)'; ctx.lineWidth = devicePixelRatio; ctx.setLineDash([4 * devicePixelRatio, 4 * devicePixelRatio]);
+    for (const fr of [0.06, 0.94]) { ctx.beginPath(); ctx.moveTo(0, H * fr); ctx.lineTo(W, H * fr); ctx.stroke(); }
+    ctx.setLineDash([]);
+    ctx.beginPath();
+    for (let i = 0; i < postTd.length; i++) { const x = (i / postTd.length) * W, y = (postTd[i] / 255) * H; i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+    ctx.strokeStyle = '#7c3aed'; ctx.lineWidth = 1.6 * devicePixelRatio; ctx.stroke();
+
+    if (!playing) { pkMeter.style.width = '0%'; rmsMeter.style.width = '0%'; pkVal.textContent = '—'; rmsVal.textContent = '—'; clipLed.style.opacity = '0'; setHeadroom(null); return; }
+    // 클립 전 레벨 측정 (피크 0dBFS 초과 가능)
+    preTap.getByteTimeDomainData(preTd);
+    let peak = 0, sumsq = 0;
+    for (let i = 0; i < preTd.length; i++) { const v = (preTd[i] - 128) / 128; peak = Math.max(peak, Math.abs(v)); sumsq += v * v; }
+    // 바이트 도메인은 ±1로 포화 → 실제 피크는 게인에서 직접 산출(초과분 표현)
+    const truePeak = BASE * Math.pow(10, gainDb / 20);
+    const peakDb = 20 * Math.log10(Math.max(1e-4, truePeak));
+    const rms = Math.sqrt(sumsq / preTd.length);
+    const rmsDb = 20 * Math.log10(Math.max(1e-4, Math.min(rms, truePeak)));
+    pkMeter.style.width = dbToPct(peakDb) + '%';
+    rmsMeter.style.width = dbToPct(rmsDb) + '%';
+    pkVal.textContent = (peakDb >= 0 ? '+' : '') + peakDb.toFixed(1);
+    rmsVal.textContent = (rmsDb >= 0 ? '+' : '') + rmsDb.toFixed(1);
+    if (peakDb >= 0) clipHold = 45; // ~0.75s 홀드
+    if (clipHold > 0) { clipLed.style.opacity = '1'; clipHold--; } else clipLed.style.opacity = '0';
+    setHeadroom(peakDb);
+  }
+  function setHeadroom(peakDb: number | null) {
+    if (peakDb === null) { hr.className = 'hr-readout p-3 rounded-xl border text-sm font-mono border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-ink-500)]'; hr.textContent = '재생을 눌러 입력 게인을 올려보세요'; return; }
+    const room = -peakDb;
+    if (peakDb >= 0) { hr.className = 'hr-readout p-3 rounded-xl border text-sm font-mono border-[#ef4444] bg-[rgba(239,68,68,0.07)] text-[#b91c1c]'; hr.innerHTML = `⚠ 클리핑 — 0dBFS를 <b>${peakDb.toFixed(1)}dB</b> 초과해 파형 꼭대기가 잘립니다`; }
+    else if (room < 6) { hr.className = 'hr-readout p-3 rounded-xl border text-sm font-mono border-[#f59e0b] bg-[rgba(245,158,11,0.08)] text-[#b45309]'; hr.innerHTML = `△ 헤드룸 <b>${room.toFixed(1)}dB</b> — 0dBFS에 근접, 여유가 적습니다`; }
+    else { hr.className = 'hr-readout p-3 rounded-xl border text-sm font-mono border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-ink-500)]'; hr.innerHTML = `✓ 헤드룸 <b>${room.toFixed(1)}dB</b> — 0dBFS까지 여유 있음`; }
+  }
+  frame();
+
+  // ── 컨트롤 ──
+  const playBtn = root.querySelector('.play-btn') as HTMLButtonElement;
+  playBtn.addEventListener('click', async () => {
+    if (playing) { stop(); playBtn.textContent = '▶ 소리 켜기'; }
+    else { await start(); playBtn.textContent = '⏸ 소리 끄기'; }
+  });
+
+  const gRange = root.querySelector('.gain-range') as HTMLInputElement;
+  const gVal = root.querySelector('.gain-val') as HTMLElement;
+  const setPct = (el: HTMLInputElement) => el.style.setProperty('--sl-pct', ((+el.value - +el.min) / (+el.max - +el.min) * 100) + '%');
+  setPct(gRange);
+  gRange.addEventListener('input', () => {
+    gainDb = +gRange.value; gVal.textContent = (gainDb > 0 ? '+' : '') + gainDb + ' dB'; setPct(gRange);
+    core.smooth(level.gain, BASE * Math.pow(10, gainDb / 20));
+  });
+}
+
+document.querySelectorAll<HTMLElement>('.lvl-widget').forEach(initLevel);
+</script>

@@ -6,6 +6,7 @@
 //   controls: ['fader','eq']       → eq-masking 토픽
 //   controls: ['fader','comp']     → compressor 토픽 (마스터 컴프 패널)
 //   controls: ['fader','send']     → depth 토픽 (트랙별 리버브 센드)
+//   controls: ['fader','limiter']  → loudness 토픽 (마스터 리미터 + 라우드니스 미터)
 interface Props {
   config?: Record<string, any>;
 }
@@ -15,6 +16,7 @@ const showPan = controls.includes('pan');
 const showEq = controls.includes('eq');
 const showComp = controls.includes('comp');
 const showSend = controls.includes('send');
+const showLimiter = controls.includes('limiter');
 
 const TRACKS = [
   { id: 'drums', name: 'Drums', kr: '드럼', color: '#7c3aed' },
@@ -28,7 +30,7 @@ const initSend = (id: string): number => trackCfg(id).send ?? 0;
 
 const adv = (tier?: string) => (tier && tier !== 'easy' ? { 'data-adv': tier } : {});
 ---
-<div class="mixer-widget rounded-2xl border border-[var(--color-border)] bg-white overflow-hidden" data-show-pan={showPan ? '1' : ''} data-show-eq={showEq ? '1' : ''} data-show-comp={showComp ? '1' : ''} data-show-send={showSend ? '1' : ''}>
+<div class="mixer-widget rounded-2xl border border-[var(--color-border)] bg-white overflow-hidden" data-show-pan={showPan ? '1' : ''} data-show-eq={showEq ? '1' : ''} data-show-comp={showComp ? '1' : ''} data-show-send={showSend ? '1' : ''} data-show-limiter={showLimiter ? '1' : ''}>
 
   <div class="flex items-center justify-between px-5 py-4 border-b border-[var(--color-border)] bg-[var(--color-surface)]">
     <div class="flex items-center gap-3">
@@ -50,7 +52,7 @@ const adv = (tier?: string) => (tier && tier !== 'easy' ? { 'data-adv': tier } :
       <span>→</span>
       <span class="px-2 py-1 rounded-md bg-[var(--color-violet-glow)] text-[var(--color-violet)]">FADER{showEq ? ' · EQ' : ''}{showPan ? ' · PAN' : ''}{showSend ? ' · SEND' : ''}</span>
       <span>→</span>
-      <span class="px-2 py-1 rounded-md bg-[var(--color-surface-2)]">MASTER{showComp ? ' · COMP' : ''}{showSend ? ' ← VERB' : ''}</span>
+      <span class="px-2 py-1 rounded-md bg-[var(--color-surface-2)]">MASTER{showComp ? ' · COMP' : ''}{showLimiter ? ' · LIMIT' : ''}{showSend ? ' ← VERB' : ''}</span>
       <span class="ml-1">세 악기가 한 스피커에서 만납니다 — 자리를 잡아주세요</span>
     </div>
 
@@ -188,6 +190,42 @@ const adv = (tier?: string) => (tier && tier !== 'easy' ? { 'data-adv': tier } :
           <input type="range" class="sl-range comp-release flex-1" min="10" max="500" step="5" value="250" aria-label="릴리즈" />
           <span class="comp-release-val text-[10px] font-mono text-[var(--color-ink-700)] w-14 text-right">250 ms</span>
         </div>
+      </div>
+    )}
+
+    {/* 마스터 리미터 + 라우드니스 (loudness 토픽) */}
+    {showLimiter && (
+      <div class="lim-panel rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 space-y-2.5">
+        <div class="flex items-center justify-between">
+          <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)]">Limiter · 마스터 (20:1)</span>
+          <span class="text-[10px] font-mono text-[var(--color-ink-300)]" {...adv('normal')}>천장 0dBFS · auto makeup</span>
+        </div>
+
+        {/* 라우드니스(LUFS 근사) 미터 */}
+        <div class="flex items-center gap-2">
+          <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)] w-24 flex-none">LUFS ≈ 라우드니스</span>
+          <div class="flex-1 h-2.5 rounded-full bg-[var(--color-surface-2)] border border-[var(--color-border)] overflow-hidden">
+            <div class="lufs-meter h-full w-0 rounded-full" style="background:linear-gradient(90deg,#22c55e 0%,#22c55e 55%,#f59e0b 80%,#ef4444 100%)"></div>
+          </div>
+          <span class="lufs-val text-[11px] font-mono text-[var(--color-ink-700)] w-14 text-right">—</span>
+        </div>
+
+        {/* 게인 리덕션 미터 (오른쪽→왼쪽) */}
+        <div class="flex items-center gap-2">
+          <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)] w-24 flex-none">GR · 리덕션</span>
+          <div class="flex-1 h-2.5 rounded-full bg-[var(--color-surface-2)] border border-[var(--color-border)] overflow-hidden flex justify-end">
+            <div class="gr-meter h-full w-0 rounded-full" style="background:linear-gradient(270deg,#ef4444 0%,#f59e0b 60%,#7c3aed 100%)"></div>
+          </div>
+          <span class="gr-val text-[11px] font-mono text-[var(--color-ink-300)] w-14 text-right">0.0 dB</span>
+        </div>
+
+        {/* LIMITING (amount) — 전 티어 (easy의 단일 손잡이) */}
+        <div class="flex items-center gap-2">
+          <span class="text-[10px] font-mono text-[var(--color-ink-300)] w-24 flex-none">LIMITING</span>
+          <input type="range" class="sl-range lim-amt flex-1" min="0" max="18" step="0.5" value="0" aria-label="리미팅 양" />
+          <span class="lim-amt-val text-[10px] font-mono text-[var(--color-ink-700)] w-14 text-right">0.0 dB</span>
+        </div>
+        <span class="block text-[10px] font-mono text-[var(--color-ink-300)]" {...adv('normal')}>신호를 천장(0dBFS) 안으로 밀어넣습니다 — 피크는 천장에 묶이고 평균(라우드니스)만 끌어올립니다</span>
       </div>
     )}
 
@@ -337,6 +375,28 @@ function initMixer(root: HTMLElement) {
   const grMeter = root.querySelector('.gr-meter') as HTMLElement | null;
   const grVal = root.querySelector('.gr-val') as HTMLElement | null;
 
+  // 마스터 리미터 (loudness 토픽) — 컴프 인프라 재사용, 20:1 고비율 + 빠른 어택
+  const limPanel = root.querySelector('.lim-panel') as HTMLElement | null;
+  if (limPanel) {
+    bus.enableCompressor();
+    // 브릭월 리미터 프리셋: 천장 고정(-1dBFS) + 고비율 + 빠른 어택. LIMITING은 드라이브.
+    bus.setCompRatio(20); bus.setCompKnee(0); bus.setCompAttack(0.002); bus.setCompRelease(0.1);
+    bus.setCompThreshold(-1); bus.setCompMakeup(0); bus.setCompDrive(0);
+    const amt = limPanel.querySelector('.lim-amt') as HTMLInputElement;
+    const amtVal = limPanel.querySelector('.lim-amt-val') as HTMLElement;
+    setPct(amt);
+    amt.addEventListener('input', () => {
+      const a = +amt.value;
+      setPct(amt);
+      amtVal.textContent = a.toFixed(1) + ' dB';
+      // 신호를 천장(-1dBFS) 안으로 밀어넣음 → 피크는 묶이고 평균(라우드니스)만 상승
+      bus.setCompDrive(a);
+    });
+  }
+  const lufsMeter = root.querySelector('.lufs-meter') as HTMLElement | null;
+  const lufsVal = root.querySelector('.lufs-val') as HTMLElement | null;
+  let lufsRms = 0; // 적분형(스무딩) RMS
+
   // 재생
   const playBtn = root.querySelector('.play-btn') as HTMLButtonElement;
   playBtn.addEventListener('click', async () => {
@@ -406,6 +466,7 @@ function initMixer(root: HTMLElement) {
       mstBar.style.width = '0%'; mstVal.textContent = '—';
       if (lrL && lrR) { lrL.style.width = '0%'; lrR.style.width = '0%'; }
       if (grMeter && grVal) { grMeter.style.width = '0%'; grVal.textContent = '0.0 dB'; }
+      if (lufsMeter && lufsVal) { lufsMeter.style.width = '0%'; lufsVal.textContent = '—'; lufsRms = 0; }
       return;
     }
     if (grMeter && grVal) {
@@ -420,11 +481,19 @@ function initMixer(root: HTMLElement) {
     }
     for (const m of meters) m.bar.style.width = Math.min(100, bus.getLevel(m.id) * 130) + '%';
     const d = core.getScope();
-    let peak = 0;
-    for (let i = 0; i < d.length; i++) { const v = Math.abs(d[i] - 128) / 128; if (v > peak) peak = v; }
+    let peak = 0, sumsq = 0;
+    for (let i = 0; i < d.length; i++) { const v = Math.abs(d[i] - 128) / 128; if (v > peak) peak = v; sumsq += v * v; }
     const pct = Math.min(100, peak * 130);
     mstBar.style.width = pct + '%';
     mstVal.textContent = peak > 0.98 ? 'CLIP' : Math.round(pct) + '%';
+    // 라우드니스(LUFS 근사) — 적분형 RMS를 dBFS로
+    if (lufsMeter && lufsVal) {
+      const rms = Math.sqrt(sumsq / d.length);
+      lufsRms = lufsRms * 0.9 + rms * 0.1; // 스무딩(적분형)
+      const db = 20 * Math.log10(Math.max(1e-4, lufsRms));
+      lufsMeter.style.width = Math.max(0, Math.min(100, (db + 36) / 36 * 100)) + '%'; // -36..0 dBFS
+      lufsVal.textContent = db.toFixed(1);
+    }
   }
   drawMeters();
 }

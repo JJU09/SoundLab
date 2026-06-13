@@ -212,14 +212,17 @@ export class MixBus {
     return [peak(this._lr.l, this._lr.tdL), peak(this._lr.r, this._lr.tdR)];
   }
 
-  // ── 마스터 컴프레서 (compressor 토픽용) ──
-  // input → comp → makeup → master 로 스플라이스. 트랙 합산 신호에 다이내믹스를 적용.
-  // 기본값은 사실상 무압축(threshold 0dB)이라, 학생이 임계점을 내려 피크를 조이는 과제형.
+  // ── 마스터 컴프레서/리미터 (compressor·loudness 토픽용) ──
+  // input → drive → comp → makeup → master 로 스플라이스. 트랙 합산 신호에 다이내믹스를 적용.
+  // compressor: 기본 무압축(threshold 0)에서 임계점을 내려 조이는 과제형.
+  // loudness(리미터): threshold를 천장(-1)에 고정하고 drive로 신호를 밀어넣어 평균만 끌어올림.
   private _comp: DynamicsCompressorNode | null = null;
   private _makeup: GainNode | null = null;
+  private _drive: GainNode | null = null;
 
   enableCompressor() {
     if (this._comp) return;
+    const drive = this.core.gain(1); // pre-comp 입력 드라이브 (리미터용, 기본 0dB)
     const c = this.core.ctx.createDynamicsCompressor();
     c.threshold.value = 0;   // dBFS — 0이면 풀스케일 근처만 건드림(=초기엔 무압축)
     c.knee.value = 6;
@@ -228,15 +231,17 @@ export class MixBus {
     c.release.value = 0.25;
     const mk = this.core.gain(1); // 메이크업 게인 (DynamicsCompressorNode엔 없음 → 별도 노드)
     this.core.input.disconnect();
-    this.core.input.connect(c); c.connect(mk); mk.connect(this.core.master);
-    this._comp = c; this._makeup = mk;
+    this.core.input.connect(drive); drive.connect(c); c.connect(mk); mk.connect(this.core.master);
+    this._comp = c; this._makeup = mk; this._drive = drive;
   }
 
   setCompThreshold(db: number) { if (this._comp) this.core.smooth(this._comp.threshold, db); }
   setCompRatio(r: number) { if (this._comp) this.core.smooth(this._comp.ratio, r); }
+  setCompKnee(db: number) { if (this._comp) this.core.smooth(this._comp.knee, db); }
   setCompAttack(s: number) { if (this._comp) this.core.smooth(this._comp.attack, s); }
   setCompRelease(s: number) { if (this._comp) this.core.smooth(this._comp.release, s); }
   setCompMakeup(db: number) { if (this._makeup) this.core.smooth(this._makeup.gain, Math.pow(10, db / 20)); }
+  setCompDrive(db: number) { if (this._drive) this.core.smooth(this._drive.gain, Math.pow(10, db / 20)); }
 
   // 현재 게인 리덕션 (dB, 0 또는 음수). 컴프 미적용 시 0.
   getGainReduction(): number { return this._comp ? this._comp.reduction : 0; }

@@ -33,11 +33,8 @@ const desc = '음정과 코드를 듣고 맞히는 무료 온라인 청음(이�
         </div>
       </div>
 
-      <!-- 재생 -->
-      <div class="flex gap-2">
-        <button class="play-btn flex-1 gradient-brand text-white font-semibold py-3.5 rounded-xl text-base flex items-center justify-center gap-2 transition hover:opacity-90" style="font-family:'Space Grotesk'">▶ 듣기</button>
-        <button class="replay-btn w-14 flex-none rounded-xl border border-[var(--color-border)] text-[var(--color-ink-500)] hover:border-[var(--color-violet)] hover:text-[var(--color-violet)] transition text-lg disabled:opacity-40" title="다시 듣기" disabled>🔊</button>
-      </div>
+      <!-- 재생 (듣기 → 다시 듣기 → 다음을 한 버튼으로) -->
+      <button class="play-btn w-full gradient-brand text-white font-semibold py-3.5 rounded-xl text-base flex items-center justify-center gap-2 transition hover:opacity-90" style="font-family:'Space Grotesk'">▶ 듣기</button>
 
       <!-- 보기 -->
       <div class="options grid grid-cols-2 gap-2"></div>
@@ -109,7 +106,6 @@ function initEar(root: HTMLElement) {
   const optsWrap = root.querySelector('.options') as HTMLElement;
   const feedback = root.querySelector('.feedback') as HTMLElement;
   const playBtn = root.querySelector('.play-btn') as HTMLButtonElement;
-  const replayBtn = root.querySelector('.replay-btn') as HTMLButtonElement;
   const streakEl = root.querySelector('.streak') as HTMLElement;
   const accEl = root.querySelector('.acc') as HTMLElement;
   const bestEl = root.querySelector('.best') as HTMLElement;
@@ -132,7 +128,6 @@ function initEar(root: HTMLElement) {
     answered = false; hasQ = true;
     feedback.textContent = '';
     [...optsWrap.children].forEach(b => { (b as HTMLButtonElement).disabled = false; (b as HTMLElement).style.cssText = ''; });
-    replayBtn.disabled = false;
     playBtn.textContent = '🔊 다시 듣기';
     play();
   }
@@ -168,13 +163,12 @@ function initEar(root: HTMLElement) {
       if (btn.getAttribute('aria-pressed') === 'true') on();
     });
   }
-  function reset() { hasQ = false; answered = false; buildOptions(); feedback.textContent=''; replayBtn.disabled = true; playBtn.textContent = '▶ 듣기'; }
+  function reset() { hasQ = false; answered = false; buildOptions(); feedback.textContent=''; playBtn.textContent = '▶ 듣기'; }
   bindGroup('.mode-btn', v => { mode = v; reset(); }, 'mode');
   bindGroup('.diff-btn', v => { diff = v; reset(); }, 'diff');
 
   buildOptions();
   playBtn.addEventListener('click', () => { if (!hasQ || answered) newQuestion(); else play(); });
-  replayBtn.addEventListener('click', () => { if (hasQ) play(); });
 }
 
 document.querySelectorAll<HTMLElement>('.ear').forEach(initEar);

@@ -5,8 +5,7 @@ import sitemap from '@astrojs/sitemap';
 import mdx from '@astrojs/mdx';
 
 export default defineConfig({
-  site: 'https://JJU09.github.io',
-  base: '/SoundLab',
+  site: 'https://soundlab.jjuapp.com',
   trailingSlash: 'always',
   vite: {
     plugins: [tailwindcss()]

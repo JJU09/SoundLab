@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://JJU09.github.io/SoundLab/sitemap-index.xml
+Sitemap: https://soundlab.jjuapp.com/sitemap-index.xml

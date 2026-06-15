@@ -1,0 +1,154 @@
+---
+import Base from '../../layouts/Base.astro';
+const base = import.meta.env.BASE_URL;
+const desc = '마이크로 음정을 실시간 잡아주는 무료 온라인 크로마틱 튜너. 기타·바이올린·관악 등 모든 악기. 음이름·주파수·센트 편차 표시.';
+---
+<Base title="크로마틱 튜너" description={desc} type="website">
+
+<div class="max-w-xl mx-auto px-4 sm:px-6 py-12">
+  <nav class="flex items-center gap-2 text-xs font-mono text-[var(--color-ink-300)] mb-6">
+    <a href={base} class="hover:text-[var(--color-violet)] transition">홈</a><span>/</span>
+    <a href={`${base}tools/`} class="hover:text-[var(--color-violet)] transition">도구</a><span>/</span>
+    <span class="text-[var(--color-ink-700)]">크로마틱 튜너</span>
+  </nav>
+
+  <div class="mb-6">
+    <span class="text-xs font-mono px-2.5 py-1 rounded-full border border-[var(--color-violet-light)] text-[var(--color-violet)] bg-[var(--color-violet-glow)]">TOOLS</span>
+    <h1 class="text-3xl font-bold mt-3 mb-2" style="font-family:'Space Grotesk'">크로마틱 튜너</h1>
+    <p class="text-[var(--color-ink-500)]">마이크에 소리를 내면 음이름·주파수·센트 편차를 실시간으로 잡아줍니다. 모든 악기·목소리.</p>
+  </div>
+
+  <div class="tuner rounded-2xl border border-[var(--color-border)] bg-white overflow-hidden">
+    <div class="p-6 sm:p-8 space-y-6">
+      <!-- 음이름 + 센트 -->
+      <div class="text-center">
+        <div class="note-name text-7xl font-bold leading-none tabular-nums" style="font-family:'Space Grotesk'">–</div>
+        <div class="note-freq text-sm font-mono text-[var(--color-ink-300)] mt-2">마이크를 켜고 소리를 내보세요</div>
+      </div>
+
+      <!-- 센트 미터 (-50 ~ +50) -->
+      <div>
+        <div class="relative h-14 rounded-xl bg-[var(--color-surface-2)] border border-[var(--color-border)] overflow-hidden">
+          <!-- 눈금 -->
+          <div class="absolute inset-y-0 left-1/2 w-0.5 -translate-x-1/2 bg-[var(--color-violet)] opacity-40"></div>
+          <div class="absolute inset-y-0 left-[10%] w-px bg-[var(--color-border)]"></div>
+          <div class="absolute inset-y-0 left-[30%] w-px bg-[var(--color-border)]"></div>
+          <div class="absolute inset-y-0 left-[70%] w-px bg-[var(--color-border)]"></div>
+          <div class="absolute inset-y-0 left-[90%] w-px bg-[var(--color-border)]"></div>
+          <!-- 바늘 -->
+          <div class="needle absolute top-1.5 bottom-1.5 w-1 rounded-full bg-[var(--color-ink-300)] left-1/2 -translate-x-1/2 transition-[left,background-color] duration-75" style="left:50%"></div>
+        </div>
+        <div class="flex justify-between text-[10px] font-mono text-[var(--color-ink-300)] mt-1 px-0.5">
+          <span>-50</span><span>낮음 ♭</span><span class="cents-val text-[var(--color-ink-700)]">— cent</span><span>높음 ♯</span><span>+50</span>
+        </div>
+      </div>
+
+      <!-- 마이크 토글 -->
+      <button class="mic-btn w-full gradient-brand text-white font-semibold py-3.5 rounded-xl text-base flex items-center justify-center gap-2 transition hover:opacity-90" style="font-family:'Space Grotesk'">
+        🎤 마이크 켜기
+      </button>
+      <div class="mic-err hidden text-center text-sm text-[#b91c1c] font-medium"></div>
+    </div>
+  </div>
+
+  <p class="text-xs text-[var(--color-ink-300)] mt-4 text-center">
+    기준음 A4 = 440Hz · 초록이 되면 음이 맞은 것 · 권한 요청 시 <b class="text-[var(--color-ink-500)]">허용</b>을 눌러야 마이크가 켜집니다
+  </p>
+
+  <div class="mt-8 p-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-sm text-[var(--color-ink-500)]">
+    두 음을 맞출 때 들리는 맥놀이로 귀로 튜닝하는 원리는 <a href={`${base}learn/acoustics/beats/`} class="text-[var(--color-violet)] font-medium hover:underline">맥놀이</a>,
+    음높이·주파수 관계는 <a href={`${base}learn/acoustics/tone/`} class="text-[var(--color-violet)] font-medium hover:underline">소리의 3요소</a>에서.
+  </div>
+</div>
+
+<script>
+const NOTES = ['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
+
+// autocorrelation 피치 검출 (Float32 시간축 → 기본 주파수 Hz, 무음/불명확이면 -1)
+function detectPitch(buf: Float32Array, sr: number): number {
+  const SIZE = buf.length;
+  let rms = 0;
+  for (let i = 0; i < SIZE; i++) rms += buf[i] * buf[i];
+  rms = Math.sqrt(rms / SIZE);
+  if (rms < 0.01) return -1; // 너무 조용함
+  let r1 = 0, r2 = SIZE - 1, thres = 0.2;
+  for (let i = 0; i < SIZE / 2; i++) if (Math.abs(buf[i]) < thres) { r1 = i; break; }
+  for (let i = 1; i < SIZE / 2; i++) if (Math.abs(buf[SIZE - i]) < thres) { r2 = SIZE - i; break; }
+  const b = buf.slice(r1, r2), N = b.length;
+  const c = new Array(N).fill(0);
+  for (let lag = 0; lag < N; lag++) { let sum = 0; for (let i = 0; i < N - lag; i++) sum += b[i] * b[i + lag]; c[lag] = sum; }
+  let d = 0; while (d < N - 1 && c[d] > c[d + 1]) d++;
+  let maxval = -1, maxpos = -1;
+  for (let i = d; i < N; i++) if (c[i] > maxval) { maxval = c[i]; maxpos = i; }
+  let T0 = maxpos;
+  if (T0 <= 0) return -1;
+  const x1 = c[T0 - 1] || 0, x2 = c[T0], x3 = c[T0 + 1] || 0;
+  const a = (x1 + x3 - 2 * x2) / 2, bb = (x3 - x1) / 2;
+  if (a) T0 = T0 - bb / (2 * a);
+  return sr / T0;
+}
+
+function initTuner(root: HTMLElement) {
+  const nameEl = root.querySelector('.note-name') as HTMLElement;
+  const freqEl = root.querySelector('.note-freq') as HTMLElement;
+  const needle = root.querySelector('.needle') as HTMLElement;
+  const centsEl = root.querySelector('.cents-val') as HTMLElement;
+  const micBtn = root.querySelector('.mic-btn') as HTMLButtonElement;
+  const errEl = root.querySelector('.mic-err') as HTMLElement;
+
+  let ctx: AudioContext | null = null, stream: MediaStream | null = null, raf = 0, running = false;
+  let buf: Float32Array, analyser: AnalyserNode;
+  let smoothFreq = 0;
+
+  async function startMic() {
+    try {
+      ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
+      const src = ctx.createMediaStreamSource(stream);
+      analyser = ctx.createAnalyser(); analyser.fftSize = 2048;
+      buf = new Float32Array(analyser.fftSize);
+      src.connect(analyser); // destination에 연결 안 함(피드백 방지)
+      running = true; errEl.classList.add('hidden');
+      micBtn.textContent = '⏹ 마이크 끄기';
+      loop();
+    } catch (e: any) {
+      errEl.textContent = e?.name === 'NotAllowedError' ? '마이크 권한이 거부됐어요. 브라우저 주소창의 권한을 허용으로 바꿔주세요.' : '마이크를 열 수 없습니다: ' + (e?.message || e);
+      errEl.classList.remove('hidden');
+    }
+  }
+  function stopMic() {
+    running = false; cancelAnimationFrame(raf);
+    stream?.getTracks().forEach(t => t.stop()); ctx?.close();
+    ctx = null; stream = null; smoothFreq = 0;
+    micBtn.textContent = '🎤 마이크 켜기';
+    nameEl.textContent = '–'; freqEl.textContent = '마이크를 켜고 소리를 내보세요';
+    centsEl.textContent = '— cent'; needle.style.left = '50%'; needle.style.background = 'var(--color-ink-300)';
+  }
+
+  function loop() {
+    if (!running) return;
+    raf = requestAnimationFrame(loop);
+    analyser.getFloatTimeDomainData(buf);
+    const f = detectPitch(buf, ctx!.sampleRate);
+    if (f < 0 || f < 30 || f > 5000) return; // 무음/범위 밖 → 직전 표시 유지
+    smoothFreq = smoothFreq ? smoothFreq * 0.8 + f * 0.2 : f; // 떨림 완화
+    const midi = Math.round(12 * Math.log2(smoothFreq / 440) + 69);
+    const target = 440 * Math.pow(2, (midi - 69) / 12);
+    const cents = Math.round(1200 * Math.log2(smoothFreq / target));
+    nameEl.textContent = NOTES[((midi % 12) + 12) % 12] + (Math.floor(midi / 12) - 1);
+    freqEl.textContent = smoothFreq.toFixed(1) + ' Hz  ·  목표 ' + target.toFixed(1) + ' Hz';
+    centsEl.textContent = (cents > 0 ? '+' : '') + cents + ' cent';
+    const clamped = Math.max(-50, Math.min(50, cents));
+    needle.style.left = ((clamped + 50) / 100 * 100) + '%';
+    const inTune = Math.abs(cents) <= 5;
+    needle.style.background = inTune ? '#22c55e' : Math.abs(cents) <= 15 ? '#f59e0b' : '#ef4444';
+    nameEl.style.color = inTune ? '#22c55e' : 'var(--color-ink-700)';
+  }
+
+  micBtn.addEventListener('click', () => running ? stopMic() : startMic());
+}
+
+document.querySelectorAll<HTMLElement>('.tuner').forEach(initTuner);
+</script>
+
+</Base>

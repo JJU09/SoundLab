@@ -1,0 +1,178 @@
+---
+import Base from '../../layouts/Base.astro';
+const base = import.meta.env.BASE_URL;
+const desc = '핑크노이즈에서 어느 주파수 대역이 부스트됐는지 맞히는 무료 EQ 청음(이어 트레이닝). 믹싱·마스터링용 주파수 감각을 키웁니다. 난이도별·연속 기록.';
+---
+<Base title="EQ 주파수 청음" description={desc} type="website">
+
+<div class="max-w-xl mx-auto px-4 sm:px-6 py-12">
+  <nav class="flex items-center gap-2 text-xs font-mono text-[var(--color-ink-300)] mb-6">
+    <a href={base} class="hover:text-[var(--color-violet)] transition">홈</a><span>/</span>
+    <a href={`${base}tools/`} class="hover:text-[var(--color-violet)] transition">도구</a><span>/</span>
+    <span class="text-[var(--color-ink-700)]">EQ 주파수 청음</span>
+  </nav>
+
+  <div class="mb-6">
+    <span class="text-xs font-mono px-2.5 py-1 rounded-full border border-[var(--color-violet-light)] text-[var(--color-violet)] bg-[var(--color-violet-glow)]">TOOLS</span>
+    <h1 class="text-3xl font-bold mt-3 mb-2" style="font-family:'Space Grotesk'">EQ 주파수 청음</h1>
+    <p class="text-[var(--color-ink-500)]">한 대역이 부스트된 소리를 듣고 그 주파수를 맞혀보세요. 믹싱 엔지니어의 핵심 감각입니다.</p>
+  </div>
+
+  <div class="eqear rounded-2xl border border-[var(--color-border)] bg-white overflow-hidden">
+    <div class="p-6 sm:p-7 space-y-5">
+      <!-- 난이도 -->
+      <div class="flex items-center justify-between gap-3 flex-wrap">
+        <span class="text-xs font-mono text-[var(--color-ink-300)]">부스트된 주파수를 찾으세요</span>
+        <div class="flex gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" role="group" aria-label="난이도">
+          {[['easy','쉬움 +12dB'],['normal','보통 +9dB'],['hard','어려움 +6dB']].map(([v,t]) => (
+            <button class="diff-btn px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all text-[var(--color-ink-500)]" data-diff={v} aria-pressed={v==='easy'?'true':'false'} style="font-family:'Space Grotesk'">{t}</button>
+          ))}
+        </div>
+      </div>
+
+      <!-- 재생 + 원음 비교 -->
+      <div class="flex gap-2">
+        <button class="play-btn flex-1 gradient-brand text-white font-semibold py-3.5 rounded-xl text-base flex items-center justify-center gap-2 transition hover:opacity-90" style="font-family:'Space Grotesk'">▶ 듣기</button>
+        <button class="bypass-btn px-4 flex-none rounded-xl border border-[var(--color-border)] text-sm font-semibold text-[var(--color-ink-500)] hover:border-[var(--color-violet)] hover:text-[var(--color-violet)] transition disabled:opacity-40 whitespace-nowrap" title="원음(EQ 없음)과 비교" disabled>원음 비교</button>
+      </div>
+
+      <!-- 보기 -->
+      <div class="options grid grid-cols-4 gap-2"></div>
+
+      <!-- 피드백 -->
+      <div class="feedback h-6 text-center text-sm font-semibold"></div>
+
+      <!-- 점수 -->
+      <div class="flex items-center justify-center gap-6 pt-1 text-center">
+        <div><div class="streak text-2xl font-bold tabular-nums" style="font-family:'Space Grotesk'">0</div><div class="text-[10px] font-mono text-[var(--color-ink-300)]">연속</div></div>
+        <div><div class="acc text-2xl font-bold tabular-nums" style="font-family:'Space Grotesk'">—</div><div class="text-[10px] font-mono text-[var(--color-ink-300)]">정답률</div></div>
+        <div><div class="best text-2xl font-bold tabular-nums text-[var(--color-violet)]" style="font-family:'Space Grotesk'">0</div><div class="text-[10px] font-mono text-[var(--color-ink-300)]">최고 연속</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-8 p-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-sm text-[var(--color-ink-500)]">
+    주파수 마스킹과 EQ로 자리를 만드는 원리는 <a href={`${base}learn/mixing/eq-masking/`} class="text-[var(--color-violet)] font-medium hover:underline">주파수 마스킹과 EQ</a>,
+    필터가 음색을 깎는 법은 <a href={`${base}learn/effects/filter/`} class="text-[var(--color-violet)] font-medium hover:underline">필터</a>에서.
+  </div>
+</div>
+
+<script>
+import { AudioCore } from '../../audio/core';
+
+const BANDS_EASY = [125, 500, 2000, 8000];
+const BANDS_FULL = [63, 125, 250, 500, 1000, 2000, 4000, 8000];
+const GAIN: Record<string, number> = { easy: 12, normal: 9, hard: 6 };
+const fmtHz = (f: number) => f >= 1000 ? (f / 1000) + 'kHz' : f + 'Hz';
+
+function initEqEar(root: HTMLElement) {
+  const core = new AudioCore();
+  let diff = 'easy', curBand = 0, answered = false, hasQ = false, bypassed = false;
+  let answeredN = 0, correctN = 0, streak = 0;
+  let best = Number(localStorage.getItem('sl-eqear-best') || 0);
+
+  // 핑크노이즈 (Paul Kellet) 1초 루프
+  let pink: AudioBuffer | null = null;
+  function pinkBuf(): AudioBuffer {
+    if (pink) return pink;
+    const len = core.ctx.sampleRate, b = core.ctx.createBuffer(1, len, core.ctx.sampleRate), d = b.getChannelData(0);
+    let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0;
+    for (let i=0;i<len;i++){ const w=Math.random()*2-1;
+      b0=0.99886*b0+w*0.0555179; b1=0.99332*b1+w*0.0750759; b2=0.96900*b2+w*0.1538520;
+      b3=0.86650*b3+w*0.3104856; b4=0.55000*b4+w*0.5329522; b5=-0.7616*b5-w*0.0168980;
+      d[i]=(b0+b1+b2+b3+b4+b5+b6+w*0.5362)*0.11; b6=w*0.115926; }
+    pink = b; return b;
+  }
+  const eq = core.ctx.createBiquadFilter(); eq.type = 'peaking'; eq.Q.value = 2.2; eq.frequency.value = 1000; eq.gain.value = 0;
+  const out = core.gain(0.5); eq.connect(out); out.connect(core.input);
+  let src: AudioBufferSourceNode | null = null;
+  async function ensureNoise() {
+    await core.resume();
+    if (src) return;
+    src = core.ctx.createBufferSource(); src.buffer = pinkBuf(); src.loop = true; src.connect(eq); src.start();
+  }
+  const applyGain = () => core.smooth(eq.gain, bypassed ? 0 : GAIN[diff]);
+
+  const bands = () => diff === 'easy' ? BANDS_EASY : BANDS_FULL;
+
+  // ── DOM ──
+  const optsWrap = root.querySelector('.options') as HTMLElement;
+  const feedback = root.querySelector('.feedback') as HTMLElement;
+  const playBtn = root.querySelector('.play-btn') as HTMLButtonElement;
+  const bypassBtn = root.querySelector('.bypass-btn') as HTMLButtonElement;
+  const streakEl = root.querySelector('.streak') as HTMLElement;
+  const accEl = root.querySelector('.acc') as HTMLElement;
+  const bestEl = root.querySelector('.best') as HTMLElement;
+  bestEl.textContent = String(best);
+  optsWrap.classList.toggle('grid-cols-4', true);
+
+  function buildOptions() {
+    const bs = bands();
+    optsWrap.className = 'options grid gap-2 ' + (bs.length <= 4 ? 'grid-cols-2' : 'grid-cols-4');
+    optsWrap.innerHTML = '';
+    for (const f of bs) {
+      const b = document.createElement('button');
+      b.className = 'opt-btn px-2 py-3 rounded-xl border border-[var(--color-border)] bg-white text-sm font-semibold text-[var(--color-ink-700)] hover:border-[var(--color-violet)] transition disabled:cursor-default';
+      b.dataset.f = String(f); b.textContent = fmtHz(f);
+      b.addEventListener('click', () => answer(f));
+      optsWrap.appendChild(b);
+    }
+  }
+  function newQuestion() {
+    const bs = bands();
+    curBand = bs[Math.floor(Math.random() * bs.length)];
+    answered = false; hasQ = true; bypassed = false;
+    feedback.textContent = '';
+    [...optsWrap.children].forEach(b => { (b as HTMLButtonElement).disabled = false; (b as HTMLElement).style.cssText = ''; });
+    bypassBtn.disabled = false; bypassBtn.textContent = '원음 비교';
+    eq.frequency.value = curBand;
+    playBtn.textContent = '🔊 다시 듣기';
+    ensureNoise().then(applyGain); // 오디오는 제스처 후 시작 — 문제 설정은 즉시
+  }
+  function answer(f: number) {
+    if (answered || !hasQ) return;
+    answered = true; answeredN++;
+    const correct = f === curBand;
+    if (correct) { correctN++; streak++; if (streak > best) { best = streak; localStorage.setItem('sl-eqear-best', String(best)); bestEl.textContent = String(best); } }
+    else streak = 0;
+    streakEl.textContent = String(streak);
+    accEl.textContent = Math.round(correctN / answeredN * 100) + '%';
+    feedback.textContent = correct ? '정답! 🎉' : `오답 — 정답은 ${fmtHz(curBand)}`;
+    feedback.style.color = correct ? '#22c55e' : '#ef4444';
+    [...optsWrap.children].forEach(b => {
+      const btn = b as HTMLButtonElement; btn.disabled = true;
+      if (Number(btn.dataset.f) === curBand) btn.style.cssText = 'background:rgba(34,197,94,0.12);border-color:#22c55e;color:#15803d';
+      else if (Number(btn.dataset.f) === f) btn.style.cssText = 'background:rgba(239,68,68,0.1);border-color:#ef4444;color:#b91c1c';
+    });
+    bypassed = false; applyGain();
+    playBtn.textContent = '다음 ▶';
+  }
+
+  // 난이도
+  const diffBtns = [...root.querySelectorAll<HTMLElement>('.diff-btn')];
+  diffBtns.forEach(btn => {
+    const on = () => btn.style.cssText = 'background:white;color:var(--color-violet);box-shadow:0 1px 4px rgba(0,0,0,0.08)';
+    btn.addEventListener('click', () => {
+      diffBtns.forEach(b => { b.setAttribute('aria-pressed','false'); b.style.cssText=''; });
+      btn.setAttribute('aria-pressed','true'); on();
+      diff = btn.dataset.diff!; hasQ = false; answered = false; buildOptions();
+      feedback.textContent=''; bypassBtn.disabled = true; playBtn.textContent = '▶ 듣기';
+      bypassed = false; applyGain();
+    });
+    if (btn.getAttribute('aria-pressed') === 'true') on();
+  });
+
+  buildOptions();
+  playBtn.addEventListener('click', () => { if (!hasQ || answered) newQuestion(); else ensureNoise(); });
+  bypassBtn.addEventListener('click', () => {
+    if (!hasQ) return;
+    bypassed = !bypassed; applyGain();
+    bypassBtn.textContent = bypassed ? 'EQ 적용' : '원음 비교';
+    bypassBtn.style.cssText = bypassed ? 'background:var(--color-ink-700);color:white;border-color:var(--color-ink-700)' : '';
+  });
+}
+
+document.querySelectorAll<HTMLElement>('.eqear').forEach(initEqEar);
+</script>
+
+</Base>

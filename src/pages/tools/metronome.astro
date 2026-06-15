@@ -15,7 +15,7 @@ const sigs: [string, number][] = [['2/4', 2], ['3/4', 3], ['4/4', 4], ['6/8', 6]
 
   <div class="mb-6">
     <span class="text-xs font-mono px-2.5 py-1 rounded-full border border-[var(--color-violet-light)] text-[var(--color-violet)] bg-[var(--color-violet-glow)]">TOOLS</span>
-    <h1 class="text-3xl font-bold mt-3 mb-2" style="font-family:'Space Grotesk'">메트로놈</h1>
+    <h1 class="text-3xl font-bold mt-3 mb-2" style="font-family:'Space Grotesk','Pretendard',sans-serif">메트로놈</h1>
     <p class="text-[var(--color-ink-500)]">정확한 박자 연습용 온라인 메트로놈. BPM·박자표를 맞추고 ▶로 시작하세요.</p>
   </div>
 
@@ -27,7 +27,7 @@ const sigs: [string, number][] = [['2/4', 2], ['3/4', 3], ['4/4', 4], ['6/8', 6]
       <!-- BPM 대형 표시 -->
       <div class="text-center">
         <div class="flex items-end justify-center gap-2">
-          <span class="bpm-num text-6xl font-bold tabular-nums leading-none" style="font-family:'Space Grotesk'">120</span>
+          <span class="bpm-num text-6xl font-bold tabular-nums leading-none" style="font-family:'Space Grotesk','Pretendard',sans-serif">120</span>
           <span class="text-sm font-mono text-[var(--color-ink-300)] mb-1.5">BPM</span>
         </div>
         <div class="tempo-term text-xs font-mono text-[var(--color-violet)] mt-1.5">Moderato</div>
@@ -45,14 +45,14 @@ const sigs: [string, number][] = [['2/4', 2], ['3/4', 3], ['4/4', 4], ['6/8', 6]
         <div class="flex gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" role="group" aria-label="박자표">
           {sigs.map(([label, n]) => (
             <button class="sig-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-[var(--color-ink-500)]"
-              data-beats={n} aria-pressed={n === 4 ? 'true' : 'false'} style="font-family:'Space Grotesk'">{label}</button>
+              data-beats={n} aria-pressed={n === 4 ? 'true' : 'false'} style="font-family:'Space Grotesk','Pretendard',sans-serif">{label}</button>
           ))}
         </div>
-        <button class="tap-btn px-4 py-2 rounded-xl border border-[var(--color-border)] text-sm font-semibold text-[var(--color-ink-500)] hover:border-[var(--color-violet)] hover:text-[var(--color-violet)] transition" style="font-family:'Space Grotesk'">탭 템포</button>
+        <button class="tap-btn px-4 py-2 rounded-xl border border-[var(--color-border)] text-sm font-semibold text-[var(--color-ink-500)] hover:border-[var(--color-violet)] hover:text-[var(--color-violet)] transition" style="font-family:'Space Grotesk','Pretendard',sans-serif">탭 템포</button>
       </div>
 
       <!-- 재생 -->
-      <button class="play-btn w-full gradient-brand text-white font-semibold py-3.5 rounded-xl text-base flex items-center justify-center gap-2 transition hover:opacity-90" style="font-family:'Space Grotesk'">
+      <button class="play-btn w-full gradient-brand text-white font-semibold py-3.5 rounded-xl text-base flex items-center justify-center gap-2 transition hover:opacity-90" style="font-family:'Space Grotesk','Pretendard',sans-serif">
         <span class="play-dot w-2 h-2 rounded-full bg-white"></span>
         <span class="play-label">▶ 시작</span>
       </button>

@@ -14,7 +14,7 @@ const desc = '음정과 코드를 듣고 맞히는 무료 온라인 청음(이�
 
   <div class="mb-6">
     <span class="text-xs font-mono px-2.5 py-1 rounded-full border border-[var(--color-violet-light)] text-[var(--color-violet)] bg-[var(--color-violet-glow)]">TOOLS</span>
-    <h1 class="text-3xl font-bold mt-3 mb-2" style="font-family:'Space Grotesk'">음정·코드 청음</h1>
+    <h1 class="text-3xl font-bold mt-3 mb-2" style="font-family:'Space Grotesk','Pretendard',sans-serif">음정·코드 청음</h1>
     <p class="text-[var(--color-ink-500)]">소리를 듣고 어떤 음정/코드인지 맞혀보세요. 매일 조금씩 하면 귀가 빠르게 트입니다.</p>
   </div>
 
@@ -23,18 +23,18 @@ const desc = '음정과 코드를 듣고 맞히는 무료 온라인 청음(이�
       <!-- 모드 + 난이도 -->
       <div class="flex items-center justify-between gap-3 flex-wrap">
         <div class="flex gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" role="group" aria-label="모드">
-          <button class="mode-btn px-6 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all text-[var(--color-ink-500)]" data-mode="interval" aria-pressed="true" style="font-family:'Space Grotesk'">음정</button>
-          <button class="mode-btn px-6 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all text-[var(--color-ink-500)]" data-mode="chord" aria-pressed="false" style="font-family:'Space Grotesk'">코드</button>
+          <button class="mode-btn px-6 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all text-[var(--color-ink-500)]" data-mode="interval" aria-pressed="true" style="font-family:'Space Grotesk','Pretendard',sans-serif">음정</button>
+          <button class="mode-btn px-6 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all text-[var(--color-ink-500)]" data-mode="chord" aria-pressed="false" style="font-family:'Space Grotesk','Pretendard',sans-serif">코드</button>
         </div>
         <div class="flex gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" role="group" aria-label="난이도">
           {[['easy','쉬움'],['normal','보통'],['hard','어려움']].map(([v,t]) => (
-            <button class="diff-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all text-[var(--color-ink-500)]" data-diff={v} aria-pressed={v==='easy'?'true':'false'} style="font-family:'Space Grotesk'">{t}</button>
+            <button class="diff-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all text-[var(--color-ink-500)]" data-diff={v} aria-pressed={v==='easy'?'true':'false'} style="font-family:'Space Grotesk','Pretendard',sans-serif">{t}</button>
           ))}
         </div>
       </div>
 
       <!-- 재생 (듣기 → 다시 듣기 → 다음을 한 버튼으로) -->
-      <button class="play-btn w-full gradient-brand text-white font-semibold py-3.5 rounded-xl text-base flex items-center justify-center gap-2 transition hover:opacity-90" style="font-family:'Space Grotesk'">▶ 듣기</button>
+      <button class="play-btn w-full gradient-brand text-white font-semibold py-3.5 rounded-xl text-base flex items-center justify-center gap-2 transition hover:opacity-90" style="font-family:'Space Grotesk','Pretendard',sans-serif">▶ 듣기</button>
 
       <!-- 보기 -->
       <div class="options grid grid-cols-2 gap-2"></div>
@@ -44,9 +44,9 @@ const desc = '음정과 코드를 듣고 맞히는 무료 온라인 청음(이�
 
       <!-- 점수 -->
       <div class="flex items-center justify-center gap-6 pt-1 text-center">
-        <div><div class="streak text-2xl font-bold tabular-nums" style="font-family:'Space Grotesk'">0</div><div class="text-[10px] font-mono text-[var(--color-ink-300)]">연속</div></div>
-        <div><div class="acc text-2xl font-bold tabular-nums" style="font-family:'Space Grotesk'">—</div><div class="text-[10px] font-mono text-[var(--color-ink-300)]">정답률</div></div>
-        <div><div class="best text-2xl font-bold tabular-nums text-[var(--color-violet)]" style="font-family:'Space Grotesk'">0</div><div class="text-[10px] font-mono text-[var(--color-ink-300)]">최고 연속</div></div>
+        <div><div class="streak text-2xl font-bold tabular-nums" style="font-family:'Space Grotesk','Pretendard',sans-serif">0</div><div class="text-[10px] font-mono text-[var(--color-ink-300)]">연속</div></div>
+        <div><div class="acc text-2xl font-bold tabular-nums" style="font-family:'Space Grotesk','Pretendard',sans-serif">—</div><div class="text-[10px] font-mono text-[var(--color-ink-300)]">정답률</div></div>
+        <div><div class="best text-2xl font-bold tabular-nums text-[var(--color-violet)]" style="font-family:'Space Grotesk','Pretendard',sans-serif">0</div><div class="text-[10px] font-mono text-[var(--color-ink-300)]">최고 연속</div></div>
       </div>
     </div>
   </div>

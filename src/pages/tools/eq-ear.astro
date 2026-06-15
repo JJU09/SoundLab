@@ -14,7 +14,7 @@ const desc = '핑크노이즈에서 어느 주파수 대역이 부스트됐는�
 
   <div class="mb-6">
     <span class="text-xs font-mono px-2.5 py-1 rounded-full border border-[var(--color-violet-light)] text-[var(--color-violet)] bg-[var(--color-violet-glow)]">TOOLS</span>
-    <h1 class="text-3xl font-bold mt-3 mb-2" style="font-family:'Space Grotesk'">EQ 주파수 청음</h1>
+    <h1 class="text-3xl font-bold mt-3 mb-2" style="font-family:'Space Grotesk','Pretendard',sans-serif">EQ 주파수 청음</h1>
     <p class="text-[var(--color-ink-500)]">한 대역이 부스트된 소리를 듣고 그 주파수를 맞혀보세요. 믹싱 엔지니어의 핵심 감각입니다.</p>
   </div>
 
@@ -25,14 +25,14 @@ const desc = '핑크노이즈에서 어느 주파수 대역이 부스트됐는�
         <span class="text-xs font-mono text-[var(--color-ink-300)]">부스트된 주파수를 찾으세요</span>
         <div class="flex gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" role="group" aria-label="난이도">
           {[['easy','쉬움 +12dB'],['normal','보통 +9dB'],['hard','어려움 +6dB']].map(([v,t]) => (
-            <button class="diff-btn px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all text-[var(--color-ink-500)]" data-diff={v} aria-pressed={v==='easy'?'true':'false'} style="font-family:'Space Grotesk'">{t}</button>
+            <button class="diff-btn px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all text-[var(--color-ink-500)]" data-diff={v} aria-pressed={v==='easy'?'true':'false'} style="font-family:'Space Grotesk','Pretendard',sans-serif">{t}</button>
           ))}
         </div>
       </div>
 
       <!-- 재생 + 원음 비교 -->
       <div class="flex gap-2">
-        <button class="play-btn flex-1 gradient-brand text-white font-semibold py-3.5 rounded-xl text-base flex items-center justify-center gap-2 transition hover:opacity-90" style="font-family:'Space Grotesk'">▶ 듣기</button>
+        <button class="play-btn flex-1 gradient-brand text-white font-semibold py-3.5 rounded-xl text-base flex items-center justify-center gap-2 transition hover:opacity-90" style="font-family:'Space Grotesk','Pretendard',sans-serif">▶ 듣기</button>
         <button class="bypass-btn px-4 flex-none rounded-xl border border-[var(--color-border)] text-sm font-semibold text-[var(--color-ink-500)] hover:border-[var(--color-violet)] hover:text-[var(--color-violet)] transition disabled:opacity-40 whitespace-nowrap" title="원음(EQ 없음)과 비교" disabled>원음 비교</button>
       </div>
 
@@ -44,9 +44,9 @@ const desc = '핑크노이즈에서 어느 주파수 대역이 부스트됐는�
 
       <!-- 점수 -->
       <div class="flex items-center justify-center gap-6 pt-1 text-center">
-        <div><div class="streak text-2xl font-bold tabular-nums" style="font-family:'Space Grotesk'">0</div><div class="text-[10px] font-mono text-[var(--color-ink-300)]">연속</div></div>
-        <div><div class="acc text-2xl font-bold tabular-nums" style="font-family:'Space Grotesk'">—</div><div class="text-[10px] font-mono text-[var(--color-ink-300)]">정답률</div></div>
-        <div><div class="best text-2xl font-bold tabular-nums text-[var(--color-violet)]" style="font-family:'Space Grotesk'">0</div><div class="text-[10px] font-mono text-[var(--color-ink-300)]">최고 연속</div></div>
+        <div><div class="streak text-2xl font-bold tabular-nums" style="font-family:'Space Grotesk','Pretendard',sans-serif">0</div><div class="text-[10px] font-mono text-[var(--color-ink-300)]">연속</div></div>
+        <div><div class="acc text-2xl font-bold tabular-nums" style="font-family:'Space Grotesk','Pretendard',sans-serif">—</div><div class="text-[10px] font-mono text-[var(--color-ink-300)]">정답률</div></div>
+        <div><div class="best text-2xl font-bold tabular-nums text-[var(--color-violet)]" style="font-family:'Space Grotesk','Pretendard',sans-serif">0</div><div class="text-[10px] font-mono text-[var(--color-ink-300)]">최고 연속</div></div>
       </div>
     </div>
   </div>

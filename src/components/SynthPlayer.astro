@@ -29,11 +29,11 @@ const adv = (tier?: string) => (tier && tier !== 'easy' ? { 'data-adv': tier } :
     <div class="flex items-center gap-3">
       <div class="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-mono font-bold text-white gradient-brand">EN</div>
       <div>
-        <span class="font-bold text-base" style="font-family:'Space Grotesk'">ADSR Envelope</span>
+        <span class="font-bold text-base" style="font-family:'Space Grotesk','Pretendard',sans-serif">ADSR Envelope</span>
         <span class="text-sm text-[var(--color-ink-300)] ml-2">엔벨로프</span>
       </div>
     </div>
-    <button class="trig-btn gradient-brand text-white text-sm font-semibold px-4 py-1.5 rounded-full transition hover:opacity-90" style="font-family:'Space Grotesk'">
+    <button class="trig-btn gradient-brand text-white text-sm font-semibold px-4 py-1.5 rounded-full transition hover:opacity-90" style="font-family:'Space Grotesk','Pretendard',sans-serif">
       ▶ 트리거
     </button>
   </div>
@@ -56,7 +56,7 @@ const adv = (tier?: string) => (tier && tier !== 'easy' ? { 'data-adv': tier } :
       <div class="flex gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" role="group">
         {waves.map(([v, t]) => (
           <button class="wave-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-[var(--color-ink-500)]"
-            data-wave={v} aria-pressed={v === c.wave ? 'true' : 'false'} style="font-family:'Space Grotesk'">{t}</button>
+            data-wave={v} aria-pressed={v === c.wave ? 'true' : 'false'} style="font-family:'Space Grotesk','Pretendard',sans-serif">{t}</button>
         ))}
       </div>
     </div>

@@ -71,7 +71,7 @@ function initAlias(root: HTMLElement) {
   let sr = Number(root.dataset.sr) || 3000; // 가상 샘플레이트
   let playing = false;
   let src: AudioBufferSourceNode | null = null;
-  const out = core.gain(0.5); out.connect(core.input);
+  const out = core.gain(0.22); out.connect(core.input); // ZOH 계단파는 고조파가 많아 사인보다 체감이 큼 → 게인 낮춤
 
   const R = core.ctx.sampleRate; // 실제 출력 레이트
 

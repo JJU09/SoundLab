@@ -1,0 +1,352 @@
+---
+import Base from '../../../layouts/Base.astro';
+import SandboxShell from '../../../components/sandbox/SandboxShell.astro';
+const base = import.meta.env.BASE_URL;
+const desc = '오실레이터·필터·ADSR·LFO를 조합하고 건반으로 직접 연주하는 인터랙티브 가상 신디사이저. 신스가 어떻게 소리를 만드는지 귀와 손으로 익히세요.';
+
+// 건반 — C4(60)~F5(77), 1.5옥타브. 흰/검은 건반 분리 + 컴퓨터 키보드 매핑.
+const M0 = 60, M1 = 77;
+const NOTE = ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B'];
+const isBlack = (m: number) => [1, 3, 6, 8, 10].includes(m % 12);
+const KEY_LETTER: Record<number, string> = { 60:'A',61:'W',62:'S',63:'E',64:'D',65:'F',66:'T',67:'G',68:'Y',69:'H',70:'U',71:'J',72:'K',73:'O',74:'L',75:'P',76:';' };
+const all = Array.from({ length: M1 - M0 + 1 }, (_, i) => M0 + i);
+const whites = all.filter(m => !isBlack(m));
+const blacks = all.filter(isBlack).map(m => {
+  const leftWhiteIdx = whites.indexOf(m - 1); // 바로 아래 흰건반 위치
+  return { m, leftPct: (leftWhiteIdx + 1) / whites.length * 100 };
+});
+const noteName = (m: number) => NOTE[m % 12] + (Math.floor(m / 12) - 1);
+
+const related = [
+  { href: `${base}learn/synthesis/subtractive/`, label: '감산 합성' },
+  { href: `${base}learn/synthesis/additive/`, label: '가산 합성' },
+  { href: `${base}learn/synthesis/fm/`, label: 'FM 합성' },
+  { href: `${base}learn/synthesis/modulation/`, label: 'LFO 모듈레이션' },
+  { href: `${base}learn/synthesis/adsr/`, label: 'ADSR 엔벨로프' },
+];
+---
+<Base title="신디사이저" description={desc} type="website">
+<SandboxShell
+  title="신디사이저" en="Synthesis"
+  desc="파형을 고르고 필터·엔벨로프·LFO로 다듬어 나만의 소리를 만들고, 건반으로 연주하세요. 난이도를 올리면 2nd 오실레이터·모듈레이션이 열립니다."
+  related={related}
+  relatedNote="여기서 다루는 원리는 신디시스 허브에서 더 깊이:">
+
+  <div class="synth rounded-2xl border border-[var(--color-border)] bg-white overflow-hidden">
+    <!-- 상단: 마스터 + 비주얼라이저 -->
+    <div class="px-5 py-4 border-b border-[var(--color-border)] bg-[var(--color-surface)] space-y-3">
+      <div class="flex items-center gap-4 flex-wrap">
+        <span class="text-sm font-bold text-[var(--color-ink-700)]" style="font-family:'Space Grotesk','Pretendard',sans-serif">건반을 누르거나 클릭해 연주하세요</span>
+        <div class="flex items-center gap-2 flex-1 min-w-[160px] justify-end">
+          <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Master</span>
+          <input type="range" class="sl-range master-range w-40" min="0" max="100" step="1" value="70" aria-label="마스터 볼륨" />
+          <span class="master-range-val text-xs font-mono text-[var(--color-ink-700)] w-9 text-right">70%</span>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3" data-adv="normal">
+        <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]">
+          <canvas class="scope-cv block w-full" style="height:72px"></canvas>
+          <span class="absolute top-1.5 left-2 text-[9px] font-mono uppercase tracking-wider text-[var(--color-violet)] opacity-70">Waveform</span>
+        </div>
+        <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]">
+          <canvas class="spec-cv block w-full" style="height:72px"></canvas>
+          <span class="absolute top-1.5 left-2 text-[9px] font-mono uppercase tracking-wider text-[var(--color-blue)] opacity-70">Spectrum</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="p-5 space-y-4">
+      <!-- 프리셋 -->
+      <div class="flex items-center gap-2 flex-wrap">
+        <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)] mr-1">프리셋</span>
+        {[['bass','두꺼운 베이스'],['pluck','플럭'],['pad','패드'],['lead','리드'],['reset','초기화']].map(([k,t]) => (
+          <button class="preset-btn text-xs font-semibold px-3 py-1.5 rounded-lg border border-[var(--color-border)] text-[var(--color-ink-500)] hover:border-[var(--color-violet)] hover:text-[var(--color-violet)] transition" data-preset={k} style="font-family:'Space Grotesk','Pretendard',sans-serif">{t}</button>
+        ))}
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- OSC -->
+        <div class="panel rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 space-y-2.5">
+          <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)]">Oscillator</span>
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] font-mono text-[var(--color-ink-300)] w-16 flex-none">WAVE A</span>
+            <div class="wave-a flex gap-1 flex-1">
+              {[['sine','∿'],['sawtooth','◺'],['square','⊓'],['triangle','△']].map(([w,sym]) => (
+                <button class="wv-btn flex-1 py-1 rounded-md border border-[var(--color-border)] text-xs text-[var(--color-ink-500)] transition" data-wave={w} title={w}>{sym}</button>
+              ))}
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] font-mono text-[var(--color-ink-300)] w-16 flex-none">OCTAVE</span>
+            <input type="range" class="sl-range octave flex-1" min="-2" max="2" step="1" value="0" aria-label="옥타브" />
+            <span class="octave-val text-[10px] font-mono text-[var(--color-ink-700)] w-8 text-right">0</span>
+          </div>
+          <!-- OSC B (hard) -->
+          <div class="space-y-2.5 pt-2.5 border-t border-[var(--color-border)]" data-adv="hard">
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] font-mono text-[var(--color-ink-300)] w-16 flex-none">WAVE B</span>
+              <div class="wave-b flex gap-1 flex-1">
+                {[['sine','∿'],['sawtooth','◺'],['square','⊓'],['triangle','△']].map(([w,sym]) => (
+                  <button class="wv-btn flex-1 py-1 rounded-md border border-[var(--color-border)] text-xs text-[var(--color-ink-500)] transition" data-wave={w} title={w}>{sym}</button>
+                ))}
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] font-mono text-[var(--color-ink-300)] w-16 flex-none">DETUNE</span>
+              <input type="range" class="sl-range detune flex-1" min="-50" max="50" step="1" value="0" aria-label="디튠" />
+              <span class="detune-val text-[10px] font-mono text-[var(--color-ink-700)] w-12 text-right">0 ¢</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] font-mono text-[var(--color-ink-300)] w-16 flex-none">A / B MIX</span>
+              <input type="range" class="sl-range oscmix flex-1" min="0" max="100" step="1" value="35" aria-label="OSC 믹스" />
+              <span class="oscmix-val text-[10px] font-mono text-[var(--color-ink-700)] w-12 text-right">35%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- FILTER -->
+        <div class="panel rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 space-y-2.5">
+          <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)]">Filter · Low Pass</span>
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] font-mono text-[var(--color-ink-300)] w-16 flex-none">CUTOFF</span>
+            <input type="range" class="sl-range cutoff flex-1" min="0" max="1000" step="1" value="640" aria-label="컷오프" />
+            <span class="cutoff-val text-[10px] font-mono text-[var(--color-ink-700)] w-14 text-right">3.0kHz</span>
+          </div>
+          <div class="flex items-center gap-2" data-adv="normal">
+            <span class="text-[10px] font-mono text-[var(--color-ink-300)] w-16 flex-none">RESO (Q)</span>
+            <input type="range" class="sl-range reso flex-1" min="0" max="1000" step="1" value="640" aria-label="레조넌스" />
+            <span class="reso-val text-[10px] font-mono text-[var(--color-ink-700)] w-14 text-right">3.0</span>
+          </div>
+          <div class="flex items-center gap-2" data-adv="normal">
+            <span class="text-[10px] font-mono text-[var(--color-ink-300)] w-16 flex-none">ENV AMT</span>
+            <input type="range" class="sl-range fenv flex-1" min="0" max="100" step="1" value="0" aria-label="필터 엔벨로프 양" />
+            <span class="fenv-val text-[10px] font-mono text-[var(--color-ink-700)] w-14 text-right">0%</span>
+          </div>
+        </div>
+
+        <!-- AMP / ADSR -->
+        <div class="panel rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 space-y-2.5">
+          <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)]">Amp Envelope · ADSR</span>
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] font-mono text-[var(--color-ink-300)] w-16 flex-none">ATTACK</span>
+            <input type="range" class="sl-range attack flex-1" min="1" max="2000" step="1" value="10" aria-label="어택" />
+            <span class="attack-val text-[10px] font-mono text-[var(--color-ink-700)] w-14 text-right">10 ms</span>
+          </div>
+          <div class="flex items-center gap-2" data-adv="normal">
+            <span class="text-[10px] font-mono text-[var(--color-ink-300)] w-16 flex-none">DECAY</span>
+            <input type="range" class="sl-range decay flex-1" min="1" max="2000" step="1" value="250" aria-label="디케이" />
+            <span class="decay-val text-[10px] font-mono text-[var(--color-ink-700)] w-14 text-right">250 ms</span>
+          </div>
+          <div class="flex items-center gap-2" data-adv="normal">
+            <span class="text-[10px] font-mono text-[var(--color-ink-300)] w-16 flex-none">SUSTAIN</span>
+            <input type="range" class="sl-range sustain flex-1" min="0" max="100" step="1" value="70" aria-label="서스테인" />
+            <span class="sustain-val text-[10px] font-mono text-[var(--color-ink-700)] w-14 text-right">70%</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] font-mono text-[var(--color-ink-300)] w-16 flex-none">RELEASE</span>
+            <input type="range" class="sl-range release flex-1" min="1" max="2000" step="1" value="350" aria-label="릴리즈" />
+            <span class="release-val text-[10px] font-mono text-[var(--color-ink-700)] w-14 text-right">350 ms</span>
+          </div>
+        </div>
+
+        <!-- LFO (normal) -->
+        <div class="panel rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 space-y-2.5" data-adv="normal">
+          <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)]">LFO · 모듈레이션</span>
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] font-mono text-[var(--color-ink-300)] w-16 flex-none">TARGET</span>
+            <div class="lfo-target flex gap-1 flex-1">
+              {[['off','OFF'],['filter','필터'],['amp','음량'],['pitch','피치']].map(([t,l]) => (
+                <button class="lt-btn flex-1 py-1 rounded-md border border-[var(--color-border)] text-[10px] font-semibold text-[var(--color-ink-500)] transition" data-target={t}>{l}</button>
+              ))}
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] font-mono text-[var(--color-ink-300)] w-16 flex-none">RATE</span>
+            <input type="range" class="sl-range lforate flex-1" min="0" max="1000" step="1" value="565" aria-label="LFO 속도" />
+            <span class="lforate-val text-[10px] font-mono text-[var(--color-ink-700)] w-14 text-right">5.0Hz</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] font-mono text-[var(--color-ink-300)] w-16 flex-none">DEPTH</span>
+            <input type="range" class="sl-range lfodepth flex-1" min="0" max="100" step="1" value="0" aria-label="LFO 깊이" />
+            <span class="lfodepth-val text-[10px] font-mono text-[var(--color-ink-700)] w-14 text-right">0%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 건반 -->
+      <div class="keyboard relative select-none" style="height:140px" tabindex="0" role="group" aria-label="건반">
+        <div class="flex h-full gap-[3px]">
+          {whites.map(m => (
+            <button class="key-w flex-1 rounded-b-md bg-white border border-[var(--color-border)] flex items-end justify-center pb-1.5 transition" data-midi={m} aria-label={noteName(m)}>
+              <span class="text-[8px] font-mono text-[var(--color-ink-300)] leading-none text-center">
+                {KEY_LETTER[m] && <span class="block font-bold text-[var(--color-ink-500)]">{KEY_LETTER[m]}</span>}
+                {noteName(m)}
+              </span>
+            </button>
+          ))}
+        </div>
+        {blacks.map(b => (
+          <button class="key-b absolute top-0 rounded-b-md bg-[var(--color-ink-700)] border border-[var(--color-ink-900)] flex items-end justify-center pb-1 z-10 transition"
+            style={`left:${b.leftPct}%; transform:translateX(-50%); width:6%; height:62%`} data-midi={b.m} aria-label={noteName(b.m)}>
+            {KEY_LETTER[b.m] && <span class="text-[8px] font-mono font-bold text-white/70 leading-none">{KEY_LETTER[b.m]}</span>}
+          </button>
+        ))}
+      </div>
+      <p class="text-[10px] font-mono text-[var(--color-ink-300)] text-center">컴퓨터 키보드 <b class="text-[var(--color-ink-500)]">A·S·D·F…</b> 로도 연주 · 헤드폰 권장</p>
+    </div>
+  </div>
+</SandboxShell>
+
+<script>
+import { AudioCore } from '../../../audio/core';
+import { SynthEngine, type LfoTarget } from '../../../audio/synthengine';
+
+function initSynth(root: HTMLElement) {
+  const core = new AudioCore();
+  const synth = new SynthEngine(core);
+
+  const $ = <T extends HTMLElement>(s: string) => root.querySelector(s) as T;
+  const setPct = (el: HTMLInputElement) => el.style.setProperty('--sl-pct', ((+el.value - +el.min) / (+el.max - +el.min) * 100) + '%');
+
+  // ── 매핑 (슬라이더 0..1000 ↔ 로그 스케일) ──
+  const cutoffVal = (p: number) => Math.round(80 * Math.pow(225, p / 1000));
+  const cutoffPos = (hz: number) => Math.log(hz / 80) / Math.log(225) * 1000;
+  const resoVal = (p: number) => +(0.1 * Math.pow(200, p / 1000)).toFixed(2);
+  const resoPos = (q: number) => Math.log(q / 0.1) / Math.log(200) * 1000;
+  const rateVal = (p: number) => +(0.1 * Math.pow(120, p / 1000)).toFixed(2);
+  const ratePos = (hz: number) => Math.log(hz / 0.1) / Math.log(120) * 1000;
+  const fmtHz = (v: number) => v >= 1000 ? (v / 1000).toFixed(1) + 'kHz' : v + 'Hz';
+  const fmtMs = (v: number) => v >= 1000 ? (v / 1000).toFixed(2) + 's' : v + ' ms';
+
+  // 슬라이더 헬퍼: 양방향(입력 바인딩 + 프로그램 set)
+  function mkSlider(sel: string, opt: { toVal: (p: number) => number; toPos: (v: number) => number; fmt: (v: number) => string; apply: (v: number) => void }) {
+    const el = $<HTMLInputElement>(sel);
+    const out = $<HTMLElement>(sel + '-val');
+    const update = () => { const v = opt.toVal(+el.value); setPct(el); out.textContent = opt.fmt(v); opt.apply(v); };
+    el.addEventListener('input', update);
+    update(); // 초기 동기화 — 슬라이더 위치·라벨·엔진 값 일치
+    return { set: (v: number) => { el.value = String(opt.toPos(v)); update(); }, el };
+  }
+  const id = (p: number) => p; // 선형 패스스루
+
+  const cMaster = mkSlider('.master-range', { toVal: id, toPos: id, fmt: v => v + '%', apply: v => core.setMaster(v) });
+  const cOct = mkSlider('.octave', { toVal: id, toPos: id, fmt: v => (v > 0 ? '+' : '') + v, apply: v => synth.octave = v });
+  const cCut = mkSlider('.cutoff', { toVal: cutoffVal, toPos: cutoffPos, fmt: fmtHz, apply: v => synth.setCutoff(v) });
+  const cReso = mkSlider('.reso', { toVal: resoVal, toPos: resoPos, fmt: v => v.toFixed(1), apply: v => synth.setResonance(v) });
+  const cFenv = mkSlider('.fenv', { toVal: id, toPos: id, fmt: v => v + '%', apply: v => synth.filterEnv = v / 100 });
+  const cDet = mkSlider('.detune', { toVal: id, toPos: id, fmt: v => v + ' ¢', apply: v => synth.setDetune(v) });
+  const cMix = mkSlider('.oscmix', { toVal: id, toPos: id, fmt: v => v + '%', apply: v => synth.setOscMix(v / 100) });
+  const cAtt = mkSlider('.attack', { toVal: id, toPos: id, fmt: fmtMs, apply: v => synth.attack = v / 1000 });
+  const cDec = mkSlider('.decay', { toVal: id, toPos: id, fmt: fmtMs, apply: v => synth.decay = v / 1000 });
+  const cSus = mkSlider('.sustain', { toVal: id, toPos: id, fmt: v => v + '%', apply: v => synth.sustain = v / 100 });
+  const cRel = mkSlider('.release', { toVal: id, toPos: id, fmt: fmtMs, apply: v => synth.release = v / 1000 });
+  const cRate = mkSlider('.lforate', { toVal: rateVal, toPos: ratePos, fmt: fmtHz, apply: v => synth.setLfoRate(v) });
+  const cDepth = mkSlider('.lfodepth', { toVal: id, toPos: id, fmt: v => v + '%', apply: v => synth.setLfoDepth(v / 100) });
+
+  // 버튼 그룹 헬퍼 (파형·LFO 타겟)
+  function mkBtnGroup(containerSel: string, attr: string, apply: (v: string) => void, init: string) {
+    const btns = [...root.querySelectorAll<HTMLElement>(containerSel + ' [data-' + attr + ']')];
+    const select = (v: string, fire = true) => {
+      btns.forEach(b => {
+        const on = b.dataset[attr] === v;
+        b.style.cssText = on ? 'border-color:var(--color-violet);background:var(--color-violet-glow);color:var(--color-violet)' : '';
+        b.setAttribute('aria-pressed', String(on));
+      });
+      if (fire) apply(v);
+    };
+    btns.forEach(b => b.addEventListener('click', () => select(b.dataset[attr]!)));
+    select(init, false);
+    return { set: (v: string) => select(v) };
+  }
+  const gWaveA = mkBtnGroup('.wave-a', 'wave', v => synth.setWaveA(v as OscillatorType), 'sawtooth');
+  const gWaveB = mkBtnGroup('.wave-b', 'wave', v => synth.setWaveB(v as OscillatorType), 'sawtooth');
+  const gLfo = mkBtnGroup('.lfo-target', 'target', v => synth.setLfoTarget(v as LfoTarget), 'off');
+
+  // ── 프리셋 ──
+  type State = Partial<{ waveA: string; waveB: string; octave: number; cutoff: number; reso: number; fenv: number; detune: number; mix: number; attack: number; decay: number; sustain: number; release: number; lfoTarget: string; lfoRate: number; lfoDepth: number }>;
+  const PRESETS: Record<string, State> = {
+    bass:  { waveA: 'sawtooth', waveB: 'sawtooth', octave: -1, cutoff: 700, reso: 6, fenv: 45, detune: 10, mix: 40, attack: 5, decay: 200, sustain: 55, release: 200, lfoTarget: 'off', lfoDepth: 0 },
+    pluck: { waveA: 'sawtooth', octave: 0, cutoff: 5000, reso: 4, fenv: 60, detune: 0, mix: 0, attack: 2, decay: 180, sustain: 0, release: 160, lfoTarget: 'off', lfoDepth: 0 },
+    pad:   { waveA: 'sawtooth', waveB: 'sawtooth', octave: 0, cutoff: 1800, reso: 1, fenv: 10, detune: 8, mix: 50, attack: 600, decay: 400, sustain: 80, release: 800, lfoTarget: 'filter', lfoRate: 0.5, lfoDepth: 35 },
+    lead:  { waveA: 'square', octave: 0, cutoff: 5000, reso: 3, fenv: 0, detune: 0, mix: 0, attack: 10, decay: 200, sustain: 70, release: 200, lfoTarget: 'pitch', lfoRate: 5, lfoDepth: 18 },
+    reset: { waveA: 'sawtooth', waveB: 'sawtooth', octave: 0, cutoff: 3000, reso: 3, fenv: 0, detune: 0, mix: 35, attack: 10, decay: 250, sustain: 70, release: 350, lfoTarget: 'off', lfoRate: 5, lfoDepth: 0 },
+  };
+  function applyState(s: State) {
+    if (s.waveA) gWaveA.set(s.waveA);
+    if (s.waveB) gWaveB.set(s.waveB);
+    if (s.octave != null) cOct.set(s.octave);
+    if (s.cutoff != null) cCut.set(s.cutoff);
+    if (s.reso != null) cReso.set(s.reso);
+    if (s.fenv != null) cFenv.set(s.fenv);
+    if (s.detune != null) cDet.set(s.detune);
+    if (s.mix != null) cMix.set(s.mix);
+    if (s.attack != null) cAtt.set(s.attack);
+    if (s.decay != null) cDec.set(s.decay);
+    if (s.sustain != null) cSus.set(s.sustain);
+    if (s.release != null) cRel.set(s.release);
+    if (s.lfoRate != null) cRate.set(s.lfoRate);
+    if (s.lfoDepth != null) cDepth.set(s.lfoDepth);
+    if (s.lfoTarget) gLfo.set(s.lfoTarget); // depth/rate 적용 후 라우팅
+  }
+  root.querySelectorAll<HTMLElement>('.preset-btn').forEach(btn =>
+    btn.addEventListener('click', () => applyState(PRESETS[btn.dataset.preset!])));
+
+  // ── 건반 ──
+  const held = new Set<number>();
+  const keyEls = new Map<number, HTMLElement>();
+  root.querySelectorAll<HTMLElement>('[data-midi]').forEach(el => keyEls.set(Number(el.dataset.midi), el));
+  const press = (m: number) => {
+    if (held.has(m)) return;
+    held.add(m); synth.noteOn(m);
+    const el = keyEls.get(m); if (el) el.style.filter = 'brightness(0.82)';
+  };
+  const release = (m: number) => {
+    if (!held.has(m)) return;
+    held.delete(m); synth.noteOff(m);
+    const el = keyEls.get(m); if (el) el.style.filter = '';
+  };
+
+  // 포인터 (클릭·드래그 글리산도)
+  let pointerDown = false;
+  keyEls.forEach((el, m) => {
+    el.addEventListener('pointerdown', e => { e.preventDefault(); pointerDown = true; press(m); });
+    el.addEventListener('pointerenter', () => { if (pointerDown) press(m); });
+    el.addEventListener('pointerleave', () => { if (pointerDown) release(m); });
+    el.addEventListener('pointerup', () => release(m));
+  });
+  addEventListener('pointerup', () => { pointerDown = false; held.forEach(release); });
+
+  // 컴퓨터 키보드
+  const KEYMAP: Record<string, number> = { a:60,w:61,s:62,e:63,d:64,f:65,t:66,g:67,y:68,h:69,u:70,j:71,k:72,o:73,l:74,p:75,';':76 };
+  addEventListener('keydown', e => {
+    if (e.repeat || e.metaKey || e.ctrlKey || e.altKey) return;
+    const m = KEYMAP[e.key.toLowerCase()];
+    if (m != null) { e.preventDefault(); press(m); }
+  });
+  addEventListener('keyup', e => { const m = KEYMAP[e.key.toLowerCase()]; if (m != null) release(m); });
+
+  // ── 비주얼라이저 ──
+  const scope = $<HTMLCanvasElement>('.scope-cv'), spec = $<HTMLCanvasElement>('.spec-cv');
+  const sCtx = scope.getContext('2d')!, fCtx = spec.getContext('2d')!;
+  const fit = (cv: HTMLCanvasElement) => { const r = cv.getBoundingClientRect(); cv.width = Math.max(1, r.width * devicePixelRatio); cv.height = Math.max(1, r.height * devicePixelRatio); };
+  const fitAll = () => { fit(scope); fit(spec); };
+  fitAll(); addEventListener('resize', fitAll);
+  function draw() {
+    requestAnimationFrame(draw);
+    // 오실로스코프
+    const td = core.getScope(), W = scope.width, H = scope.height;
+    sCtx.clearRect(0, 0, W, H);
+    sCtx.beginPath();
+    for (let i = 0; i < td.length; i++) { const x = i / td.length * W, y = (1 - (td[i] - 128) / 128) * H / 2; i ? sCtx.lineTo(x, y) : sCtx.moveTo(x, y); }
+    sCtx.strokeStyle = '#7c3aed'; sCtx.lineWidth = 1.4 * devicePixelRatio; sCtx.stroke();
+    // 스펙트럼
+    const fd = core.getSpectrum(), W2 = spec.width, H2 = spec.height, bins = 96;
+    fCtx.clearRect(0, 0, W2, H2);
+    for (let i = 0; i < bins; i++) { const v = fd[i] / 255; fCtx.fillStyle = `rgba(37,99,235,${0.3 + v * 0.5})`; fCtx.fillRect(i / bins * W2, H2 - v * H2, W2 / bins * 0.8, v * H2); }
+  }
+  draw();
+}
+
+document.querySelectorAll<HTMLElement>('.synth').forEach(initSynth);
+</script>
+</Base>

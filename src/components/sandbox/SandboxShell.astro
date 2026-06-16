@@ -1,8 +1,8 @@
 ---
 // 샌드박스 공통 셸 — 허브별 샌드박스가 공유하는 크롬.
-// SANDBOX 뱃지 + 브레드크럼 + 제목/설명 + (선택)난이도 바 + 본문 슬롯 + 관련 토픽 푸터.
-// 본문은 [data-scaffold][data-level] 래퍼 안에 들어가므로, data-adv 컨트롤이 난이도로 게이팅된다.
-import ScaffoldBar from '../ScaffoldBar.astro';
+// SANDBOX 뱃지 + 브레드크럼 + 제목/설명 + 본문 슬롯 + 관련 토픽 푸터.
+// 난이도 스캐폴딩 없음(의도) — 샌드박스는 자유 실험 공간이라 모든 컨트롤을 항상 노출한다.
+// (원조 effects 샌드박스와 동일한 방침.)
 const base = import.meta.env.BASE_URL;
 
 interface RelatedLink { href: string; label: string; }
@@ -10,11 +10,10 @@ interface Props {
   title: string;        // 한글 제목
   en: string;           // 영문 부제
   desc: string;         // 한 줄 설명
-  scaffold?: boolean;   // 난이도 바 노출 (기본 true)
   related?: RelatedLink[]; // 관련 토픽 크로스링크
   relatedNote?: string;    // 푸터 안내 문구
 }
-const { title, en, desc, scaffold = true, related = [], relatedNote } = Astro.props;
+const { title, en, desc, related = [], relatedNote } = Astro.props;
 ---
 <div class="max-w-5xl mx-auto px-4 sm:px-6 py-10">
   <nav class="flex items-center gap-2 text-xs font-mono text-[var(--color-ink-300)] mb-6">
@@ -29,15 +28,7 @@ const { title, en, desc, scaffold = true, related = [], relatedNote } = Astro.pr
     <p class="text-[var(--color-ink-500)]">{desc}</p>
   </div>
 
-  <div {...(scaffold ? { 'data-scaffold': '', 'data-level': 'normal' } : {})}>
-    {scaffold && (
-      <script is:inline>
-        (function () { try { var L = localStorage.getItem('sl-level'); if (L === 'easy' || L === 'hard') document.currentScript.parentElement.setAttribute('data-level', L); } catch (e) {} })();
-      </script>
-    )}
-    {scaffold && <ScaffoldBar />}
-    <slot />
-  </div>
+  <slot />
 
   {related.length > 0 && (
     <div class="mt-8 p-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-sm text-[var(--color-ink-500)]">

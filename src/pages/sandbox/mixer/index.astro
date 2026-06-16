@@ -21,7 +21,7 @@ const related = [
 <Base title="미니 믹서" description={desc} type="website">
 <SandboxShell
   title="미니 믹서" en="Mixing"
-  desc="세 트랙을 한 스피커에서 만나게 하고, 각 악기에 자리를 만들어 주세요. 난이도를 올리면 EQ·컴프레서 같은 고급 컨트롤이 열립니다."
+  desc="세 트랙을 한 스피커에서 만나게 하고, 페이더·팬·EQ·컴프레서로 각 악기에 자리를 만들어 주세요."
   related={related}
   relatedNote="여기서 다루는 원리는 믹싱 허브에서 더 깊이:">
 
@@ -53,7 +53,7 @@ const related = [
       </div>
 
       <!-- 트랙별 스펙트럼 오버레이 (normal↑) -->
-      <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]" data-adv="normal">
+      <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]">
         <canvas class="ovl-spec block w-full" style="height:120px"></canvas>
         <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Spectrum · 트랙별 겹침</span>
         <span class="absolute top-2 right-2.5 flex items-center gap-2 text-[9px] font-mono">
@@ -81,25 +81,25 @@ const related = [
               <div class="flex items-center gap-2 flex-1 min-w-[140px]">
                 <input type="range" class="sl-range trk-fader flex-1" min="0" max="100" step="1" value="70" aria-label={`${t.kr} 볼륨`} />
                 <span class="trk-vol text-[11px] font-mono text-[var(--color-ink-700)] w-9 text-right">70%</span>
-                <span class="trk-db text-[10px] font-mono text-[var(--color-ink-300)] w-14 text-right" data-adv="normal">-3.1 dB</span>
+                <span class="trk-db text-[10px] font-mono text-[var(--color-ink-300)] w-14 text-right">-3.1 dB</span>
               </div>
-              <div class="flex items-center gap-1.5 flex-none" data-adv="normal">
+              <div class="flex items-center gap-1.5 flex-none">
                 <span class="text-[10px] font-mono text-[var(--color-ink-300)]">L</span>
                 <input type="range" class="sl-range trk-pan w-20" min="-50" max="50" step="1" value="0" aria-label={`${t.kr} 팬`} />
                 <span class="text-[10px] font-mono text-[var(--color-ink-300)]">R</span>
                 <span class="trk-pan-val text-[10px] font-mono text-[var(--color-ink-700)] w-7 text-right">C</span>
               </div>
-              <div class="flex items-center gap-1.5 flex-none" data-adv="normal">
+              <div class="flex items-center gap-1.5 flex-none">
                 <span class="text-[10px] font-mono text-[var(--color-ink-300)]">SEND</span>
                 <input type="range" class="sl-range trk-send w-20" min="0" max="100" step="1" value="0" aria-label={`${t.kr} 리버브 센드`} />
                 <span class="trk-send-val text-[10px] font-mono text-[var(--color-ink-700)] w-8 text-right">0%</span>
               </div>
               <div class="flex items-center gap-1 flex-none">
                 <button class="trk-mute w-7 h-7 rounded-lg border border-[var(--color-border)] text-[10px] font-mono font-bold text-[var(--color-ink-300)] transition" aria-pressed="false" title="뮤트">M</button>
-                <button class="trk-solo w-7 h-7 rounded-lg border border-[var(--color-border)] text-[10px] font-mono font-bold text-[var(--color-ink-300)] transition" aria-pressed="false" title="솔로" data-adv="normal">S</button>
+                <button class="trk-solo w-7 h-7 rounded-lg border border-[var(--color-border)] text-[10px] font-mono font-bold text-[var(--color-ink-300)] transition" aria-pressed="false" title="솔로">S</button>
               </div>
             </div>
-            <div class="flex items-center gap-3 flex-wrap mt-2.5 pt-2.5 border-t border-[var(--color-border)]" data-adv="normal">
+            <div class="flex items-center gap-3 flex-wrap mt-2.5 pt-2.5 border-t border-[var(--color-border)]">
               <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)] w-24 flex-none">EQ · 1밴드</span>
               <div class="flex items-center gap-2 flex-none">
                 <span class="text-[10px] font-mono text-[var(--color-ink-300)]">FREQ</span>
@@ -126,7 +126,7 @@ const related = [
       </div>
 
       <!-- 마스터 컴프레서 (normal↑) -->
-      <div class="comp-panel rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 space-y-2.5" data-adv="normal">
+      <div class="comp-panel rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 space-y-2.5">
         <div class="flex items-center justify-between">
           <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)]">Compressor · 마스터 다이내믹스</span>
           <span class="text-[10px] font-mono text-[var(--color-ink-300)]">soft knee</span>
@@ -153,12 +153,12 @@ const related = [
           <input type="range" class="sl-range comp-makeup flex-1" min="0" max="12" step="0.5" value="0" aria-label="메이크업 게인" />
           <span class="comp-makeup-val text-[10px] font-mono text-[var(--color-ink-700)] w-14 text-right">+0.0 dB</span>
         </div>
-        <div class="flex items-center gap-2" data-adv="hard">
+        <div class="flex items-center gap-2">
           <span class="text-[10px] font-mono text-[var(--color-ink-300)] w-24 flex-none">ATTACK</span>
           <input type="range" class="sl-range comp-attack flex-1" min="0" max="100" step="1" value="3" aria-label="어택" />
           <span class="comp-attack-val text-[10px] font-mono text-[var(--color-ink-700)] w-14 text-right">3 ms</span>
         </div>
-        <div class="flex items-center gap-2" data-adv="hard">
+        <div class="flex items-center gap-2">
           <span class="text-[10px] font-mono text-[var(--color-ink-300)] w-24 flex-none">RELEASE</span>
           <input type="range" class="sl-range comp-release flex-1" min="10" max="500" step="5" value="250" aria-label="릴리즈" />
           <span class="comp-release-val text-[10px] font-mono text-[var(--color-ink-700)] w-14 text-right">250 ms</span>

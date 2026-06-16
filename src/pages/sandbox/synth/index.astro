@@ -28,7 +28,7 @@ const related = [
 <Base title="신디사이저" description={desc} type="website">
 <SandboxShell
   title="신디사이저" en="Synthesis"
-  desc="파형을 고르고 필터·엔벨로프·LFO로 다듬어 나만의 소리를 만들고, 건반으로 연주하세요. 난이도를 올리면 2nd 오실레이터·모듈레이션이 열립니다."
+  desc="파형을 고르고 필터·엔벨로프·LFO로 다듬어 나만의 소리를 만들고, 건반으로 연주하세요. 2nd 오실레이터·모듈레이션까지 모든 컨트롤이 열려 있습니다."
   related={related}
   relatedNote="여기서 다루는 원리는 신디시스 허브에서 더 깊이:">
 
@@ -43,7 +43,7 @@ const related = [
           <span class="master-range-val text-xs font-mono text-[var(--color-ink-700)] w-9 text-right">70%</span>
         </div>
       </div>
-      <div class="grid grid-cols-2 gap-3" data-adv="normal">
+      <div class="grid grid-cols-2 gap-3">
         <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]">
           <canvas class="scope-cv block w-full" style="height:72px"></canvas>
           <span class="absolute top-1.5 left-2 text-[9px] font-mono uppercase tracking-wider text-[var(--color-violet)] opacity-70">Waveform</span>
@@ -82,7 +82,7 @@ const related = [
             <span class="octave-val text-[10px] font-mono text-[var(--color-ink-700)] w-8 text-right">0</span>
           </div>
           <!-- OSC B (hard) -->
-          <div class="space-y-2.5 pt-2.5 border-t border-[var(--color-border)]" data-adv="hard">
+          <div class="space-y-2.5 pt-2.5 border-t border-[var(--color-border)]">
             <div class="flex items-center gap-2">
               <span class="text-[10px] font-mono text-[var(--color-ink-300)] w-16 flex-none">WAVE B</span>
               <div class="wave-b flex gap-1 flex-1">
@@ -112,12 +112,12 @@ const related = [
             <input type="range" class="sl-range cutoff flex-1" min="0" max="1000" step="1" value="640" aria-label="컷오프" />
             <span class="cutoff-val text-[10px] font-mono text-[var(--color-ink-700)] w-14 text-right">3.0kHz</span>
           </div>
-          <div class="flex items-center gap-2" data-adv="normal">
+          <div class="flex items-center gap-2">
             <span class="text-[10px] font-mono text-[var(--color-ink-300)] w-16 flex-none">RESO (Q)</span>
             <input type="range" class="sl-range reso flex-1" min="0" max="1000" step="1" value="640" aria-label="레조넌스" />
             <span class="reso-val text-[10px] font-mono text-[var(--color-ink-700)] w-14 text-right">3.0</span>
           </div>
-          <div class="flex items-center gap-2" data-adv="normal">
+          <div class="flex items-center gap-2">
             <span class="text-[10px] font-mono text-[var(--color-ink-300)] w-16 flex-none">ENV AMT</span>
             <input type="range" class="sl-range fenv flex-1" min="0" max="100" step="1" value="0" aria-label="필터 엔벨로프 양" />
             <span class="fenv-val text-[10px] font-mono text-[var(--color-ink-700)] w-14 text-right">0%</span>
@@ -132,12 +132,12 @@ const related = [
             <input type="range" class="sl-range attack flex-1" min="1" max="2000" step="1" value="10" aria-label="어택" />
             <span class="attack-val text-[10px] font-mono text-[var(--color-ink-700)] w-14 text-right">10 ms</span>
           </div>
-          <div class="flex items-center gap-2" data-adv="normal">
+          <div class="flex items-center gap-2">
             <span class="text-[10px] font-mono text-[var(--color-ink-300)] w-16 flex-none">DECAY</span>
             <input type="range" class="sl-range decay flex-1" min="1" max="2000" step="1" value="250" aria-label="디케이" />
             <span class="decay-val text-[10px] font-mono text-[var(--color-ink-700)] w-14 text-right">250 ms</span>
           </div>
-          <div class="flex items-center gap-2" data-adv="normal">
+          <div class="flex items-center gap-2">
             <span class="text-[10px] font-mono text-[var(--color-ink-300)] w-16 flex-none">SUSTAIN</span>
             <input type="range" class="sl-range sustain flex-1" min="0" max="100" step="1" value="70" aria-label="서스테인" />
             <span class="sustain-val text-[10px] font-mono text-[var(--color-ink-700)] w-14 text-right">70%</span>
@@ -150,7 +150,7 @@ const related = [
         </div>
 
         <!-- LFO (normal) -->
-        <div class="panel rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 space-y-2.5" data-adv="normal">
+        <div class="panel rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 space-y-2.5">
           <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)]">LFO · 모듈레이션</span>
           <div class="flex items-center gap-2">
             <span class="text-[10px] font-mono text-[var(--color-ink-300)] w-16 flex-none">TARGET</span>

@@ -40,7 +40,7 @@ const related = [
         <canvas class="scope-cv block w-full" style="height:110px"></canvas>
         <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)] opacity-70">Waveform · 합성된 파형</span>
       </div>
-      <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]" data-adv="normal">
+      <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]">
         <canvas class="spec-cv block w-full" style="height:80px"></canvas>
         <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-blue)] opacity-70">Spectrum · 주파수 성분</span>
       </div>
@@ -65,7 +65,7 @@ const related = [
             ))}
           </div>
         </div>
-        <div data-adv="normal">
+        <div>
           <div class="flex items-center justify-between mb-1">
             <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Fundamental · 기음</span>
             <span class="hf0-val text-sm font-mono text-[var(--color-ink-700)]">{f0}Hz</span>
@@ -84,7 +84,7 @@ const related = [
           </div>
           <input type="range" class="sl-range bdet-range w-full" min="0" max="20" step="0.5" value="4" aria-label="디튠" />
         </div>
-        <div data-adv="normal">
+        <div>
           <div class="flex items-center justify-between mb-1">
             <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Frequency · 기준 주파수</span>
             <span class="bf-val text-sm font-mono text-[var(--color-ink-700)]">220Hz</span>
@@ -109,7 +109,7 @@ const related = [
           </div>
           <input type="range" class="sl-range ph-range w-full" min="0" max="360" step="1" value="0" aria-label="위상차" />
         </div>
-        <div data-adv="normal">
+        <div>
           <div class="flex items-center justify-between mb-1">
             <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Frequency · 주파수</span>
             <span class="pf-val text-sm font-mono text-[var(--color-ink-700)]">220Hz</span>

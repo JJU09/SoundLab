@@ -43,7 +43,7 @@ const related = [
         <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)] opacity-70">Waveform · 계단·양자화</span>
         <span class="clip-led absolute top-2 right-2.5 text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-[var(--color-surface)] text-[var(--color-ink-300)] border border-[var(--color-border)]">CLIP</span>
       </div>
-      <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]" data-adv="normal">
+      <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]">
         <canvas class="spec-cv block w-full" style="height:78px"></canvas>
         <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-blue)] opacity-70">Spectrum · 에일리어스·노이즈</span>
       </div>
@@ -68,13 +68,13 @@ const related = [
           <input type="range" class="sl-range bits-range flex-1" min="1" max="16" step="1" value="16" aria-label="비트뎁스" />
           <span class="bits-val text-[11px] font-mono text-[var(--color-ink-700)] w-16 text-right">16-bit</span>
         </div>
-        <div class="flex items-center gap-2" data-adv="normal">
+        <div class="flex items-center gap-2">
           <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)] w-24 flex-none">Drive · 입력</span>
           <input type="range" class="sl-range drive-range flex-1" min="0" max="24" step="0.5" value="0" aria-label="드라이브" />
           <span class="drive-val text-[11px] font-mono text-[var(--color-ink-700)] w-16 text-right">0.0 dB</span>
         </div>
         <!-- 톤 주파수 (톤 소스 + normal) -->
-        <div class="tone-freq flex items-center gap-2 hidden" data-adv="normal">
+        <div class="tone-freq flex items-center gap-2 hidden">
           <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)] w-24 flex-none">Tone · 주파수</span>
           <input type="range" class="sl-range tf-range flex-1" min="200" max="4000" step="10" value="600" aria-label="톤 주파수" />
           <span class="tf-val text-[11px] font-mono text-[var(--color-ink-700)] w-16 text-right">600Hz</span>

@@ -1,0 +1,302 @@
+---
+import Base from '../../../layouts/Base.astro';
+import SandboxShell from '../../../components/sandbox/SandboxShell.astro';
+const base = import.meta.env.BASE_URL;
+const desc = '부분음을 쌓아 음색을 빚고, 두 음의 맥놀이와 위상 간섭을 파형·스펙트럼으로 직접 관찰하는 인터랙티브 파동 실험실. 소리가 파동으로 어떻게 합쳐지는지 눈과 귀로 익히세요.';
+
+const N = 8;
+const f0 = 220;
+const related = [
+  { href: `${base}learn/acoustics/tone/`, label: '소리의 3요소' },
+  { href: `${base}learn/acoustics/beats/`, label: '맥놀이' },
+  { href: `${base}learn/acoustics/phase/`, label: '위상' },
+  { href: `${base}learn/acoustics/comb/`, label: '콤 필터' },
+  { href: `${base}learn/synthesis/additive/`, label: '가산 합성' },
+];
+---
+<Base title="파동 실험실" description={desc} type="website">
+<SandboxShell
+  title="파동 실험실" en="Acoustics"
+  desc="배음을 쌓아 음색을 만들고, 두 음을 겹쳐 맥놀이·위상 간섭을 관찰하세요. 파형과 스펙트럼이 실시간으로 바뀝니다."
+  related={related}
+  relatedNote="여기서 다루는 원리는 소리와 파동 허브에서 더 깊이:">
+
+  <div class="waves rounded-2xl border border-[var(--color-border)] bg-white overflow-hidden">
+    <!-- 트랜스포트 + 모드 -->
+    <div class="flex items-center gap-4 flex-wrap px-5 py-4 border-b border-[var(--color-border)] bg-[var(--color-surface)]">
+      <button class="play-btn gradient-brand text-white text-sm font-semibold px-5 py-2 rounded-full transition hover:opacity-90 flex items-center gap-2" style="font-family:'Space Grotesk','Pretendard',sans-serif">
+        <span class="play-dot w-2 h-2 rounded-full bg-white"></span><span class="play-label">재생</span>
+      </button>
+      <div class="mode-tabs flex gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" role="group" aria-label="모드">
+        {[['harmonic','배음 합성'],['beats','맥놀이'],['phase','위상 간섭']].map(([m,t]) => (
+          <button class="mode-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all text-[var(--color-ink-500)]" data-mode={m} style="font-family:'Space Grotesk','Pretendard',sans-serif">{t}</button>
+        ))}
+      </div>
+    </div>
+
+    <div class="p-5 space-y-4">
+      <!-- 비주얼라이저 -->
+      <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]">
+        <canvas class="scope-cv block w-full" style="height:110px"></canvas>
+        <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)] opacity-70">Waveform · 합성된 파형</span>
+      </div>
+      <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]" data-adv="normal">
+        <canvas class="spec-cv block w-full" style="height:80px"></canvas>
+        <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-blue)] opacity-70">Spectrum · 주파수 성분</span>
+      </div>
+
+      <!-- ── 모드: 배음 합성 ── -->
+      <div class="panel-harmonic space-y-3">
+        <div class="flex gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" role="group" aria-label="파형 프리셋">
+          {[['sine','사인'],['saw','톱니'],['square','사각']].map(([v,t]) => (
+            <button class="hpreset-btn flex-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-[var(--color-ink-500)]" data-preset={v} style="font-family:'Space Grotesk','Pretendard',sans-serif">{t}</button>
+          ))}
+        </div>
+        <div>
+          <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">Harmonics · 배음 진폭</div>
+          <div class="space-y-1.5">
+            {Array.from({ length: N }, (_, i) => (
+              <div class="flex items-center gap-2" data-partial={i}>
+                <span class="w-12 flex-none text-[10px] font-mono text-[var(--color-ink-700)]">{i === 0 ? '기음' : 'H' + (i + 1)}</span>
+                <span class="hz-label w-14 flex-none text-[10px] font-mono text-[var(--color-ink-300)]">{(i + 1) * f0}Hz</span>
+                <input type="range" class="sl-range pt-range flex-1" min="0" max="100" step="1" value={i === 0 ? 100 : 0} aria-label={`배음 ${i + 1} 진폭`} />
+                <span class="pt-val w-9 flex-none text-[10px] font-mono text-[var(--color-ink-700)] text-right">{i === 0 ? 100 : 0}%</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div data-adv="normal">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Fundamental · 기음</span>
+            <span class="hf0-val text-sm font-mono text-[var(--color-ink-700)]">{f0}Hz</span>
+          </div>
+          <input type="range" class="sl-range hf0-range w-full" min="80" max="330" step="1" value={f0} aria-label="기음 주파수" />
+        </div>
+      </div>
+
+      <!-- ── 모드: 맥놀이 ── -->
+      <div class="panel-beats space-y-3 hidden">
+        <div class="beat-readout p-3 rounded-xl border text-sm font-mono"></div>
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Detune · 두 음의 차이</span>
+            <span class="bdet-val text-sm font-mono text-[var(--color-ink-700)]">4Hz</span>
+          </div>
+          <input type="range" class="sl-range bdet-range w-full" min="0" max="20" step="0.5" value="4" aria-label="디튠" />
+        </div>
+        <div data-adv="normal">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Frequency · 기준 주파수</span>
+            <span class="bf-val text-sm font-mono text-[var(--color-ink-700)]">220Hz</span>
+          </div>
+          <input type="range" class="sl-range bf-range w-full" min="110" max="660" step="1" value="220" aria-label="기준 주파수" />
+        </div>
+      </div>
+
+      <!-- ── 모드: 위상 간섭 ── -->
+      <div class="panel-phase space-y-3 hidden">
+        <div class="flex items-center gap-2">
+          <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)] w-28 flex-none">합성 진폭</span>
+          <div class="flex-1 h-2.5 rounded-full bg-[var(--color-surface-2)] border border-[var(--color-border)] overflow-hidden">
+            <div class="amp-fill h-full w-full rounded-full" style="background:linear-gradient(90deg,#7c3aed,#2563eb)"></div>
+          </div>
+          <span class="amp-val text-[11px] font-mono text-[var(--color-ink-700)] w-10 text-right">100%</span>
+        </div>
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Phase · 위상차</span>
+            <span class="ph-val text-sm font-mono text-[var(--color-ink-700)]">0°</span>
+          </div>
+          <input type="range" class="sl-range ph-range w-full" min="0" max="360" step="1" value="0" aria-label="위상차" />
+        </div>
+        <div data-adv="normal">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Frequency · 주파수</span>
+            <span class="pf-val text-sm font-mono text-[var(--color-ink-700)]">220Hz</span>
+          </div>
+          <input type="range" class="sl-range pf-range w-full" min="110" max="440" step="1" value="220" aria-label="주파수" />
+        </div>
+        <p class="text-[10px] font-mono text-[var(--color-ink-300)]">같은 음 두 개의 위상차 — 0°는 보강(2배), 180°는 완전 상쇄(무음)</p>
+      </div>
+    </div>
+  </div>
+</SandboxShell>
+
+<script>
+import { AudioCore } from '../../../audio/core';
+
+const N = 8;
+const HPRESETS: Record<string, (n: number) => number[]> = {
+  sine: n => Array.from({ length: n }, (_, i) => (i === 0 ? 100 : 0)),
+  saw: n => Array.from({ length: n }, (_, i) => Math.round(100 / (i + 1))),
+  square: n => Array.from({ length: n }, (_, i) => ((i + 1) % 2 === 1 ? Math.round(100 / (i + 1)) : 0)),
+};
+
+function initWaves(root: HTMLElement) {
+  const core = new AudioCore();
+  let mode: 'harmonic' | 'beats' | 'phase' = 'harmonic';
+  let playing = false;
+
+  // 파라미터
+  let f0 = 220;
+  const partials = [100, 0, 0, 0, 0, 0, 0, 0];
+  let bFreq = 220, bDet = 4;
+  let pFreq = 220, pPhase = 0;
+
+  const setPct = (el: HTMLInputElement) => el.style.setProperty('--sl-pct', ((+el.value - +el.min) / (+el.max - +el.min) * 100) + '%');
+  const $ = <T extends HTMLElement>(s: string) => root.querySelector(s) as T;
+
+  // ── 오디오 그래프 (모드별 빌드/해제) ──
+  let nodes: { oscs: OscillatorNode[]; gains: GainNode[]; extra: AudioNode[] } = { oscs: [], gains: [], extra: [] };
+  function teardown() {
+    nodes.oscs.forEach(o => { try { o.stop(); } catch (e) {} try { o.disconnect(); } catch (e) {} });
+    nodes.gains.forEach(g => { try { g.disconnect(); } catch (e) {} });
+    nodes.extra.forEach(n => { try { n.disconnect(); } catch (e) {} });
+    nodes = { oscs: [], gains: [], extra: [] };
+  }
+  function build() {
+    const ctx = core.ctx;
+    if (mode === 'harmonic') {
+      const master = core.gain(1); master.connect(core.input);
+      const gains: GainNode[] = [], oscs: OscillatorNode[] = [];
+      for (let i = 0; i < N; i++) {
+        const g = core.gain(partials[i] / 100 * 0.25); g.connect(master);
+        const o = ctx.createOscillator(); o.type = 'sine'; o.frequency.value = (i + 1) * f0; o.connect(g); o.start();
+        gains.push(g); oscs.push(o);
+      }
+      nodes = { oscs, gains, extra: [master] };
+    } else if (mode === 'beats') {
+      const gA = core.gain(0.4), gB = core.gain(0.4); gA.connect(core.input); gB.connect(core.input);
+      const oA = ctx.createOscillator(); oA.type = 'sine'; oA.frequency.value = bFreq; oA.connect(gA); oA.start();
+      const oB = ctx.createOscillator(); oB.type = 'sine'; oB.frequency.value = bFreq + bDet; oB.connect(gB); oB.start();
+      nodes = { oscs: [oA, oB], gains: [gA, gB], extra: [] };
+    } else {
+      const gA = core.gain(0.4), gB = core.gain(0.4), delay = ctx.createDelay(0.05);
+      gA.connect(core.input); delay.connect(gB); gB.connect(core.input);
+      delay.delayTime.value = (pPhase / 360) / pFreq;
+      const oA = ctx.createOscillator(); oA.type = 'sine'; oA.frequency.value = pFreq; oA.connect(gA); oA.start();
+      const oB = ctx.createOscillator(); oB.type = 'sine'; oB.frequency.value = pFreq; oB.connect(delay); oB.start();
+      nodes = { oscs: [oA, oB], gains: [gA, gB], extra: [delay] };
+    }
+  }
+  async function start() { await core.resume(); build(); playing = true; }
+  function stop() { teardown(); playing = false; }
+
+  // ── 모드별 라이브 반영 ──
+  function liveHarmonic(i: number) { if (playing && mode === 'harmonic' && nodes.gains[i]) core.smooth(nodes.gains[i].gain, partials[i] / 100 * 0.25); }
+  function liveHarmonicFreq() { if (playing && mode === 'harmonic') nodes.oscs.forEach((o, i) => core.smooth(o.frequency, (i + 1) * f0)); }
+  function liveBeats() { if (playing && mode === 'beats') { core.smooth(nodes.oscs[0].frequency, bFreq); core.smooth(nodes.oscs[1].frequency, bFreq + bDet); } }
+  function livePhase() { if (playing && mode === 'phase') { (nodes.extra[0] as DelayNode).delayTime.value = (pPhase / 360) / pFreq; nodes.oscs.forEach(o => core.smooth(o.frequency, pFreq)); } }
+
+  // ── 모드 전환 ──
+  const panels = { harmonic: $('.panel-harmonic'), beats: $('.panel-beats'), phase: $('.panel-phase') };
+  const modeBtns = [...root.querySelectorAll<HTMLElement>('.mode-btn')];
+  function setMode(m: typeof mode) {
+    mode = m;
+    (Object.keys(panels) as (keyof typeof panels)[]).forEach(k => panels[k].classList.toggle('hidden', k !== m));
+    modeBtns.forEach(b => {
+      const on = b.dataset.mode === m;
+      b.style.cssText = on ? 'background:white;color:var(--color-violet);box-shadow:0 1px 4px rgba(0,0,0,0.08)' : '';
+      b.setAttribute('aria-pressed', String(on));
+    });
+    if (playing) { teardown(); build(); }
+    refreshReadouts();
+  }
+  modeBtns.forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode as typeof mode)));
+
+  // ── 읽기값(맥놀이/위상) ──
+  const beatReadout = $('.beat-readout');
+  const ampFill = $('.amp-fill'), ampVal = $('.amp-val');
+  function refreshReadouts() {
+    if (bDet < 0.25) {
+      beatReadout.className = 'beat-readout p-3 rounded-xl border text-sm font-mono border-[#22c55e] bg-[rgba(34,197,94,0.07)] text-[#15803d]';
+      beatReadout.innerHTML = '✓ 두 음이 거의 같음 — 맥놀이가 사라졌습니다';
+    } else {
+      beatReadout.className = 'beat-readout p-3 rounded-xl border text-sm font-mono border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-ink-500)]';
+      beatReadout.innerHTML = `맥놀이 <b>${bDet.toFixed(1)}Hz</b> — 약 ${(1 / bDet).toFixed(2)}초마다 커졌다 작아집니다`;
+    }
+    const a = Math.abs(Math.cos(pPhase * Math.PI / 360));
+    ampFill.style.width = (a * 100) + '%';
+    ampVal.textContent = Math.round(a * 100) + '%';
+  }
+
+  // ── 트랜스포트 ──
+  const playBtn = $('.play-btn'), playDot = $('.play-dot'), playLabel = $('.play-label');
+  playBtn.addEventListener('click', async () => {
+    if (playing) {
+      stop(); playBtn.classList.add('gradient-brand'); playBtn.style.cssText = '';
+      playDot.style.cssText = 'background:white'; playLabel.textContent = '재생';
+    } else {
+      await start(); playBtn.classList.remove('gradient-brand');
+      playBtn.style.cssText = 'background:var(--color-surface-2);color:var(--color-ink-700)';
+      playDot.style.cssText = 'background:#ef4444;box-shadow:0 0 8px #ef4444'; playLabel.textContent = '정지';
+    }
+  });
+
+  // ── 배음 슬라이더·프리셋·기음 ──
+  const rows = [...root.querySelectorAll<HTMLElement>('[data-partial]')];
+  rows.forEach((row, i) => {
+    const sl = row.querySelector('.pt-range') as HTMLInputElement;
+    const val = row.querySelector('.pt-val') as HTMLElement;
+    setPct(sl);
+    sl.addEventListener('input', () => { partials[i] = +sl.value; setPct(sl); val.textContent = sl.value + '%'; liveHarmonic(i); });
+  });
+  root.querySelectorAll<HTMLElement>('.hpreset-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const vals = HPRESETS[btn.dataset.preset!](N);
+      rows.forEach((row, i) => {
+        const sl = row.querySelector('.pt-range') as HTMLInputElement;
+        const val = row.querySelector('.pt-val') as HTMLElement;
+        partials[i] = vals[i]; sl.value = String(vals[i]); setPct(sl); val.textContent = vals[i] + '%'; liveHarmonic(i);
+      });
+      root.querySelectorAll('.hpreset-btn').forEach(b => (b as HTMLElement).style.cssText = '');
+      btn.style.cssText = 'background:white;color:var(--color-violet);box-shadow:0 1px 4px rgba(0,0,0,0.08)';
+    });
+  });
+  const hf0 = $<HTMLInputElement>('.hf0-range'), hf0Val = $('.hf0-val');
+  const hzLabels = [...root.querySelectorAll<HTMLElement>('.hz-label')];
+  setPct(hf0);
+  hf0.addEventListener('input', () => { f0 = +hf0.value; hf0Val.textContent = f0 + 'Hz'; setPct(hf0); hzLabels.forEach((el, i) => el.textContent = (i + 1) * f0 + 'Hz'); liveHarmonicFreq(); });
+
+  // ── 맥놀이 컨트롤 ──
+  const bdet = $<HTMLInputElement>('.bdet-range'), bdetVal = $('.bdet-val');
+  const bf = $<HTMLInputElement>('.bf-range'), bfVal = $('.bf-val');
+  setPct(bdet); setPct(bf);
+  bdet.addEventListener('input', () => { bDet = +bdet.value; bdetVal.textContent = bDet + 'Hz'; setPct(bdet); liveBeats(); refreshReadouts(); });
+  bf.addEventListener('input', () => { bFreq = +bf.value; bfVal.textContent = bFreq + 'Hz'; setPct(bf); liveBeats(); });
+
+  // ── 위상 컨트롤 ──
+  const ph = $<HTMLInputElement>('.ph-range'), phVal = $('.ph-val');
+  const pf = $<HTMLInputElement>('.pf-range'), pfVal = $('.pf-val');
+  setPct(ph); setPct(pf);
+  ph.addEventListener('input', () => { pPhase = +ph.value; phVal.textContent = pPhase + '°'; setPct(ph); livePhase(); refreshReadouts(); });
+  pf.addEventListener('input', () => { pFreq = +pf.value; pfVal.textContent = pFreq + 'Hz'; setPct(pf); livePhase(); });
+
+  // ── 비주얼라이저 (라이브 애널라이저) ──
+  const scope = $<HTMLCanvasElement>('.scope-cv'), spec = $<HTMLCanvasElement>('.spec-cv');
+  const sCtx = scope.getContext('2d')!, fCtx = spec.getContext('2d')!;
+  const td = new Uint8Array(core.analyser.fftSize), fd = new Uint8Array(core.analyser.frequencyBinCount);
+  const fit = (cv: HTMLCanvasElement) => { const r = cv.getBoundingClientRect(); cv.width = Math.max(1, r.width * devicePixelRatio); cv.height = Math.max(1, r.height * devicePixelRatio); };
+  const fitAll = () => { fit(scope); fit(spec); };
+  fitAll(); addEventListener('resize', fitAll);
+  function draw() {
+    requestAnimationFrame(draw);
+    const W = scope.width, H = scope.height;
+    core.analyser.getByteTimeDomainData(td);
+    sCtx.clearRect(0, 0, W, H); sCtx.beginPath();
+    for (let i = 0; i < td.length; i++) { const x = i / td.length * W, y = td[i] / 255 * H; i ? sCtx.lineTo(x, y) : sCtx.moveTo(x, y); }
+    sCtx.strokeStyle = '#7c3aed'; sCtx.lineWidth = 1.6 * devicePixelRatio; sCtx.stroke();
+    const W2 = spec.width, H2 = spec.height, bins = 100, bw = W2 / bins;
+    core.analyser.getByteFrequencyData(fd);
+    fCtx.clearRect(0, 0, W2, H2);
+    for (let i = 0; i < bins; i++) { const v = fd[i] / 255; fCtx.fillStyle = `rgba(37,99,235,${0.35 + v * 0.5})`; fCtx.fillRect(i * bw, H2 - v * H2, bw * 0.8, v * H2); }
+  }
+  draw();
+
+  setMode('harmonic');
+  refreshReadouts();
+}
+
+document.querySelectorAll<HTMLElement>('.waves').forEach(initWaves);
+</script>
+</Base>

@@ -8,6 +8,22 @@ const all = (await getCollection('topics')).filter(t => !t.data.draft);
 const hubs = [...HUBS]
   .sort((a, b) => HUB_META[a].order - HUB_META[b].order)
   .map(h => ({ id: h, ...HUB_META[h], count: all.filter(t => t.data.hub === h).length }));
+
+// 홈 쇼케이스 — 샌드박스/도구 (각 섹션 전체 보기로 연결)
+const sandboxes = [
+  { name: '모듈러 페달보드', hub: '이펙트', path: 'sandbox/effects/', desc: '이펙터를 쌓고 순서 바꾸기', icon: 'M5 8h2.5l2 8 2.5-12 2 8 2-4H19' },
+  { name: '미니 믹서', hub: '믹싱', path: 'sandbox/mixer/', desc: '트랙 밸런스·EQ·컴프', icon: 'M6 4v16 M12 4v16 M18 4v16 M3.5 9h5 M9.5 14h5 M15.5 7h5' },
+  { name: '신디사이저', hub: '신디시스', path: 'sandbox/synth/', desc: '건반으로 연주하는 신스', icon: 'M4 14a8 8 0 0 1 16 0 M8 14v4 M11 14v4 M14 14v4 M17 14v4' },
+  { name: '파동 실험실', hub: '소리와 파동', path: 'sandbox/waves/', desc: '배음·맥놀이·위상 간섭', icon: 'M3 12c2-6 4-6 6 0s4 6 6 0 4-6 6 0' },
+  { name: '로파이 실험실', hub: '디지털', path: 'sandbox/lofi/', desc: '샘플레이트·비트 열화', icon: 'M4 16h3v-4h3v6h3V8h3v8h3' },
+];
+const tools = [
+  { name: '메트로놈', path: 'tools/metronome/', desc: 'BPM·박자표·탭템포', icon: 'M9 3h6l4 18H5z M12 18l1.8-9' },
+  { name: '음정·코드 청음', path: 'tools/ear-training/', desc: '청음 훈련·기록', icon: 'M9 18V5l12-2v13 M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0z M21 16a3 3 0 1 1-6 0 3 3 0 0 1 6 0z' },
+  { name: 'EQ 주파수 청음', path: 'tools/eq-ear/', desc: '믹싱 귀 훈련', icon: 'M6 4v16 M12 4v16 M18 4v16 M3.5 9h5 M9.5 13h5 M15.5 8h5' },
+  { name: '크로마틱 튜너', path: 'tools/tuner/', desc: '마이크 실시간 튜닝', icon: 'M9 3v7a3 3 0 0 0 6 0V3 M12 13v8' },
+  { name: '노이즈 제너레이터', path: 'tools/noise/', desc: '집중·수면·이명 완화', icon: 'M4 10v4 M8 6v12 M12 3v18 M16 6v12 M20 10v4' },
+];
 ---
 <Base title="홈" description="음향 물리부터 신디시스·이펙트·믹싱까지, Web Audio API로 듣고 만지며 배우는 인터랙티브 사운드 백과사전.">
 
@@ -87,6 +103,51 @@ const hubs = [...HUBS]
           <div class="p-5 rounded-2xl border border-dashed border-[var(--color-border)] bg-[var(--color-surface)] opacity-70">{inner}</div>
         );
       })}
+    </div>
+  </section>
+
+  <!-- 샌드박스 쇼케이스 -->
+  <section class="max-w-6xl mx-auto px-4 sm:px-6 pb-20">
+    <div class="flex items-baseline justify-between gap-3 mb-8 flex-wrap">
+      <div class="flex items-baseline gap-3 flex-wrap">
+        <h2 class="text-xl font-bold" style="font-family:'Space Grotesk','Pretendard',sans-serif">직접 만지는 샌드박스</h2>
+        <span class="text-sm text-[var(--color-ink-300)] font-mono">배운 걸 자유롭게 실험하는 5개 공간</span>
+      </div>
+      <a href={`${base}sandbox/`} class="text-sm font-medium text-[var(--color-violet)] hover:underline whitespace-nowrap" style="font-family:'Space Grotesk','Pretendard',sans-serif">전체 보기 →</a>
+    </div>
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+      {sandboxes.map(s => (
+        <a href={`${base}${s.path}`} class="group p-4 rounded-2xl border border-[var(--color-border)] bg-white hover:border-[var(--color-violet)] hover:shadow-lg transition-all">
+          <div class="w-10 h-10 rounded-xl gradient-brand flex items-center justify-center mb-3">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d={s.icon}/></svg>
+          </div>
+          <div class="font-bold text-sm text-[var(--color-ink-700)] group-hover:text-[var(--color-violet)] transition leading-tight" style="font-family:'Space Grotesk','Pretendard',sans-serif">{s.name}</div>
+          <div class="text-[10px] font-mono text-[var(--color-ink-300)] mt-0.5">{s.hub}</div>
+          <p class="text-xs text-[var(--color-ink-500)] mt-1 leading-snug">{s.desc}</p>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <!-- 도구 쇼케이스 -->
+  <section class="max-w-6xl mx-auto px-4 sm:px-6 pb-20">
+    <div class="flex items-baseline justify-between gap-3 mb-8 flex-wrap">
+      <div class="flex items-baseline gap-3 flex-wrap">
+        <h2 class="text-xl font-bold" style="font-family:'Space Grotesk','Pretendard',sans-serif">음악 연습 도구</h2>
+        <span class="text-sm text-[var(--color-ink-300)] font-mono">설치 없이 바로 쓰는 무료 도구</span>
+      </div>
+      <a href={`${base}tools/`} class="text-sm font-medium text-[var(--color-violet)] hover:underline whitespace-nowrap" style="font-family:'Space Grotesk','Pretendard',sans-serif">전체 보기 →</a>
+    </div>
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+      {tools.map(t => (
+        <a href={`${base}${t.path}`} class="group p-4 rounded-2xl border border-[var(--color-border)] bg-white hover:border-[var(--color-violet)] hover:shadow-lg transition-all">
+          <div class="w-10 h-10 rounded-xl gradient-brand flex items-center justify-center mb-3">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d={t.icon}/></svg>
+          </div>
+          <div class="font-bold text-sm text-[var(--color-ink-700)] group-hover:text-[var(--color-violet)] transition leading-tight" style="font-family:'Space Grotesk','Pretendard',sans-serif">{t.name}</div>
+          <p class="text-xs text-[var(--color-ink-500)] mt-1 leading-snug">{t.desc}</p>
+        </a>
+      ))}
     </div>
   </section>
 

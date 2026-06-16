@@ -1,0 +1,52 @@
+---
+// 샌드박스 공통 셸 — 허브별 샌드박스가 공유하는 크롬.
+// SANDBOX 뱃지 + 브레드크럼 + 제목/설명 + (선택)난이도 바 + 본문 슬롯 + 관련 토픽 푸터.
+// 본문은 [data-scaffold][data-level] 래퍼 안에 들어가므로, data-adv 컨트롤이 난이도로 게이팅된다.
+import ScaffoldBar from '../ScaffoldBar.astro';
+const base = import.meta.env.BASE_URL;
+
+interface RelatedLink { href: string; label: string; }
+interface Props {
+  title: string;        // 한글 제목
+  en: string;           // 영문 부제
+  desc: string;         // 한 줄 설명
+  scaffold?: boolean;   // 난이도 바 노출 (기본 true)
+  related?: RelatedLink[]; // 관련 토픽 크로스링크
+  relatedNote?: string;    // 푸터 안내 문구
+}
+const { title, en, desc, scaffold = true, related = [], relatedNote } = Astro.props;
+---
+<div class="max-w-5xl mx-auto px-4 sm:px-6 py-10">
+  <nav class="flex items-center gap-2 text-xs font-mono text-[var(--color-ink-300)] mb-6">
+    <a href={base} class="hover:text-[var(--color-violet)] transition">홈</a><span>/</span>
+    <a href={`${base}sandbox/`} class="hover:text-[var(--color-violet)] transition">샌드박스</a><span>/</span>
+    <span class="text-[var(--color-ink-700)]">{title}</span>
+  </nav>
+
+  <div class="mb-6">
+    <span class="text-xs font-mono px-2.5 py-1 rounded-full border border-[var(--color-violet-light)] text-[var(--color-violet)] bg-[var(--color-violet-glow)]">SANDBOX</span>
+    <h1 class="text-3xl font-bold mt-3 mb-2" style="font-family:'Space Grotesk','Pretendard',sans-serif">{title} <span class="text-base font-normal text-[var(--color-ink-300)] ml-1">{en}</span></h1>
+    <p class="text-[var(--color-ink-500)]">{desc}</p>
+  </div>
+
+  <div {...(scaffold ? { 'data-scaffold': '', 'data-level': 'normal' } : {})}>
+    {scaffold && (
+      <script is:inline>
+        (function () { try { var L = localStorage.getItem('sl-level'); if (L === 'easy' || L === 'hard') document.currentScript.parentElement.setAttribute('data-level', L); } catch (e) {} })();
+      </script>
+    )}
+    {scaffold && <ScaffoldBar />}
+    <slot />
+  </div>
+
+  {related.length > 0 && (
+    <div class="mt-8 p-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-sm text-[var(--color-ink-500)]">
+      {relatedNote && <p class="mb-2">{relatedNote}</p>}
+      <div class="flex flex-wrap gap-x-4 gap-y-1">
+        {related.map(r => (
+          <a href={r.href} class="text-[var(--color-violet)] font-medium hover:underline">{r.label}</a>
+        ))}
+      </div>
+    </div>
+  )}
+</div>

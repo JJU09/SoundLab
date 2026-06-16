@@ -23,7 +23,7 @@ const siteUrl = new URL(base, Astro.site).href;
 const topics = (await getCollection('topics')).filter(t => !t.data.draft);
 const hubsSorted = [...HUBS].sort((a, b) => HUB_META[a].order - HUB_META[b].order);
 // 허브별 샌드박스 경로 (현재 이펙트만). 향후 허브별 샌드박스 완성 시 여기에 등록.
-const SANDBOX_OF: Partial<Record<typeof HUBS[number], string>> = { effects: `${base}sandbox/effects/` };
+const SANDBOX_OF: Partial<Record<typeof HUBS[number], string>> = { effects: `${base}sandbox/effects/`, mixing: `${base}sandbox/mixer/` };
 
 const hubNav = hubsSorted.map(h => ({
   id: h, kr: HUB_META[h].kr, label: HUB_META[h].label,

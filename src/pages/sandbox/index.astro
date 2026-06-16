@@ -1,0 +1,66 @@
+---
+import Base from '../../layouts/Base.astro';
+const base = import.meta.env.BASE_URL;
+
+// 허브별 샌드박스 — ready=false는 "준비 중". 새 샌드박스 완성 시 ready 토글 + Base.astro SANDBOX_OF 갱신.
+const boards = [
+  { slug: 'effects', name: '모듈러 페달보드', en: 'Effects', hub: '이펙트',
+    desc: '이펙터를 끌어다 랙에 쌓고 순서를 바꾸며 사운드를 디자인. 같은 이펙터를 여러 개 배치 가능.',
+    ready: true, icon: 'M5 8h2.5l2 8 2.5-12 2 8 2-4H19' },
+  { slug: 'mixer', name: '미니 믹서', en: 'Mixing', hub: '믹싱',
+    desc: '여러 트랙을 페이더·팬·EQ로 균형 잡고, 마스터 컴프레서·리버브로 마무리.',
+    ready: false, icon: 'M6 4v16 M12 4v16 M18 4v16 M3.5 9h5 M9.5 14h5 M15.5 7h5' },
+  { slug: 'synth', name: '신디사이저', en: 'Synthesis', hub: '신디시스',
+    desc: '오실레이터·필터·ADSR·LFO를 조합하고 건반으로 연주하는 가상 신스.',
+    ready: false, icon: 'M4 14a8 8 0 0 1 16 0 M8 14v4 M11 14v4 M14 14v4 M17 14v4' },
+  { slug: 'waves', name: '파동 실험실', en: 'Acoustics', hub: '소리와 파동',
+    desc: '부분음을 쌓아 음색을 빚고, 맥놀이·위상 간섭을 파형과 스펙트럼으로 관찰.',
+    ready: false, icon: 'M3 12c2-6 4-6 6 0s4 6 6 0 4-6 6 0' },
+  { slug: 'lofi', name: '로파이 실험실', en: 'Digital', hub: '디지털 오디오',
+    desc: '샘플레이트·비트뎁스를 떨어뜨리고 클리핑을 걸어 에일리어싱·양자화 노이즈를 듣기.',
+    ready: false, icon: 'M4 16h3v-4h3v6h3V8h3v8h3' },
+];
+---
+<Base title="샌드박스" description="이펙터·신스·믹서·파동을 자유롭게 조립하고 연주하는 인터랙티브 사운드 샌드박스. 설치 없이 브라우저에서.">
+
+<div class="max-w-4xl mx-auto px-4 sm:px-6 py-12">
+  <div class="mb-8">
+    <span class="text-xs font-mono px-2.5 py-1 rounded-full border border-[var(--color-violet-light)] text-[var(--color-violet)] bg-[var(--color-violet-glow)]">SANDBOX</span>
+    <h1 class="text-3xl font-bold mt-3 mb-2" style="font-family:'Space Grotesk','Pretendard',sans-serif">사운드 샌드박스</h1>
+    <p class="text-[var(--color-ink-500)]">배운 걸 자유롭게 실험하는 공간. 요소를 직접 조립하고 연주하며 소리가 어떻게 변하는지 귀로 확인하세요.</p>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    {boards.map(b => (
+      b.ready ? (
+        <a href={`${base}sandbox/${b.slug}/`} class="group flex items-start gap-4 p-5 rounded-2xl border border-[var(--color-border)] bg-white hover:border-[var(--color-violet)] hover:shadow-lg transition-all">
+          <div class="w-11 h-11 flex-none rounded-xl gradient-brand flex items-center justify-center">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d={b.icon}/></svg>
+          </div>
+          <div class="min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="font-bold text-[var(--color-ink-700)] group-hover:text-[var(--color-violet)] transition" style="font-family:'Space Grotesk','Pretendard',sans-serif">{b.name}</span>
+              <span class="text-[10px] font-mono text-[var(--color-ink-300)]">{b.hub}</span>
+            </div>
+            <p class="text-sm text-[var(--color-ink-500)] mt-1">{b.desc}</p>
+          </div>
+        </a>
+      ) : (
+        <div class="flex items-start gap-4 p-5 rounded-2xl border border-dashed border-[var(--color-border)] bg-[var(--color-surface)] opacity-70">
+          <div class="w-11 h-11 flex-none rounded-xl bg-[var(--color-surface-2)] flex items-center justify-center">
+            <svg class="w-5 h-5 text-[var(--color-ink-300)]" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d={b.icon}/></svg>
+          </div>
+          <div class="min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="font-bold text-[var(--color-ink-600)]" style="font-family:'Space Grotesk','Pretendard',sans-serif">{b.name}</span>
+              <span class="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-[var(--color-surface-2)] text-[var(--color-ink-300)]">준비 중</span>
+            </div>
+            <p class="text-sm text-[var(--color-ink-500)] mt-1">{b.desc}</p>
+          </div>
+        </div>
+      )
+    ))}
+  </div>
+</div>
+
+</Base>

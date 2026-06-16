@@ -1,7 +1,7 @@
 ---
-import Base from '../layouts/Base.astro';
-import { MODULES } from '../lib/modules';
-import { PRESETS } from '../lib/presets';
+import Base from '../../../layouts/Base.astro';
+import { MODULES } from '../../../lib/modules';
+import { PRESETS } from '../../../lib/presets';
 const typeShort: Record<string, string> = {
   filter: 'FLT', drive: 'DRV', tremolo: 'TRM',
   chorus: 'CHO', delay: 'DLY', reverb: 'RVB',
@@ -228,9 +228,9 @@ const presetRow2 = starterPresets.slice(3);
 ))}
 
 <script>
-import { Engine, DEFAULT_CHAIN, type EngineState } from '../lib/engine';
-import { MODULE_MAP } from '../lib/modules';
-import { PRESETS } from '../lib/presets';
+import { Engine, DEFAULT_CHAIN, type EngineState } from '../../../lib/engine';
+import { MODULE_MAP } from '../../../lib/modules';
+import { PRESETS } from '../../../lib/presets';
 
 let engine: Engine | null = null;
 

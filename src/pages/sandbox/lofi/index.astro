@@ -1,0 +1,243 @@
+---
+import Base from '../../../layouts/Base.astro';
+import SandboxShell from '../../../components/sandbox/SandboxShell.astro';
+const base = import.meta.env.BASE_URL;
+const desc = '샘플레이트와 비트뎁스를 떨어뜨리고 클리핑을 걸어 에일리어싱·양자화 노이즈를 직접 듣는 로파이 실험실. 디지털 오디오가 어떻게 열화되는지 파형과 스펙트럼으로 확인하세요.';
+
+const related = [
+  { href: `${base}learn/digital/samplerate/`, label: '샘플레이트' },
+  { href: `${base}learn/digital/bitdepth/`, label: '비트 뎁스' },
+  { href: `${base}learn/digital/aliasing/`, label: '에일리어싱' },
+  { href: `${base}learn/digital/levels/`, label: '레벨·헤드룸' },
+];
+---
+<Base title="로파이 실험실" description={desc} type="website">
+<SandboxShell
+  title="로파이 실험실" en="Digital"
+  desc="소리를 고르고 샘플레이트·비트뎁스를 낮춰 보세요. 디지털 열화가 어떤 소리·파형·스펙트럼을 만드는지 실시간으로 들립니다."
+  related={related}
+  relatedNote="여기서 다루는 원리는 디지털 오디오 허브에서 더 깊이:">
+
+  <div class="lofi rounded-2xl border border-[var(--color-border)] bg-white overflow-hidden">
+    <!-- 트랜스포트 + 소스 -->
+    <div class="flex items-center gap-4 flex-wrap px-5 py-4 border-b border-[var(--color-border)] bg-[var(--color-surface)]">
+      <button class="play-btn gradient-brand text-white text-sm font-semibold px-5 py-2 rounded-full transition hover:opacity-90 flex items-center gap-2" style="font-family:'Space Grotesk','Pretendard',sans-serif">
+        <span class="play-dot w-2 h-2 rounded-full bg-white"></span><span class="play-label">재생</span>
+      </button>
+      <div class="src-tabs flex gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" role="group" aria-label="소스">
+        {[['pluck','멜로디'],['tone','톤'],['noise','노이즈']].map(([m,t]) => (
+          <button class="src-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all text-[var(--color-ink-500)]" data-src={m} style="font-family:'Space Grotesk','Pretendard',sans-serif">{t}</button>
+        ))}
+      </div>
+      <div class="flex items-center gap-2 flex-1 min-w-[150px] justify-end">
+        <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Master</span>
+        <input type="range" class="sl-range master-range w-32" min="0" max="100" step="1" value="70" aria-label="마스터 볼륨" />
+        <span class="master-range-val text-xs font-mono text-[var(--color-ink-700)] w-9 text-right">70%</span>
+      </div>
+    </div>
+
+    <div class="p-5 space-y-4">
+      <!-- 비주얼라이저 -->
+      <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]">
+        <canvas class="scope-cv block w-full" style="height:104px"></canvas>
+        <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)] opacity-70">Waveform · 계단·양자화</span>
+        <span class="clip-led absolute top-2 right-2.5 text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-[var(--color-surface)] text-[var(--color-ink-300)] border border-[var(--color-border)]">CLIP</span>
+      </div>
+      <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]" data-adv="normal">
+        <canvas class="spec-cv block w-full" style="height:78px"></canvas>
+        <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-blue)] opacity-70">Spectrum · 에일리어스·노이즈</span>
+      </div>
+
+      <!-- 프리셋 -->
+      <div class="flex items-center gap-2 flex-wrap">
+        <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)] mr-1">프리셋</span>
+        {[['clean','깨끗'],['vintage','8비트'],['phone','전화 음질'],['tape','테이프']].map(([k,t]) => (
+          <button class="preset-btn text-xs font-semibold px-3 py-1.5 rounded-lg border border-[var(--color-border)] text-[var(--color-ink-500)] hover:border-[var(--color-violet)] hover:text-[var(--color-violet)] transition" data-preset={k} style="font-family:'Space Grotesk','Pretendard',sans-serif">{t}</button>
+        ))}
+      </div>
+
+      <!-- 컨트롤 -->
+      <div class="space-y-3">
+        <div class="flex items-center gap-2">
+          <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)] w-24 flex-none">Sample Rate</span>
+          <input type="range" class="sl-range rate-range flex-1" min="0" max="1000" step="1" value="1000" aria-label="샘플레이트" />
+          <span class="rate-val text-[11px] font-mono text-[var(--color-ink-700)] w-16 text-right">48kHz</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)] w-24 flex-none">Bit Depth</span>
+          <input type="range" class="sl-range bits-range flex-1" min="1" max="16" step="1" value="16" aria-label="비트뎁스" />
+          <span class="bits-val text-[11px] font-mono text-[var(--color-ink-700)] w-16 text-right">16-bit</span>
+        </div>
+        <div class="flex items-center gap-2" data-adv="normal">
+          <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)] w-24 flex-none">Drive · 입력</span>
+          <input type="range" class="sl-range drive-range flex-1" min="0" max="24" step="0.5" value="0" aria-label="드라이브" />
+          <span class="drive-val text-[11px] font-mono text-[var(--color-ink-700)] w-16 text-right">0.0 dB</span>
+        </div>
+        <!-- 톤 주파수 (톤 소스 + normal) -->
+        <div class="tone-freq flex items-center gap-2 hidden" data-adv="normal">
+          <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)] w-24 flex-none">Tone · 주파수</span>
+          <input type="range" class="sl-range tf-range flex-1" min="200" max="4000" step="10" value="600" aria-label="톤 주파수" />
+          <span class="tf-val text-[11px] font-mono text-[var(--color-ink-700)] w-16 text-right">600Hz</span>
+        </div>
+      </div>
+
+      <div class="lofi-readout p-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[11px] font-mono text-[var(--color-ink-500)]"></div>
+    </div>
+  </div>
+</SandboxShell>
+
+<script>
+import { AudioCore } from '../../../audio/core';
+import { SignalSource } from '../../../audio/source';
+import type { SrcMode } from '../../../audio/types';
+
+function initLofi(root: HTMLElement) {
+  const core = new AudioCore();
+  const src = new SignalSource(core);
+  src.wave = 'sawtooth'; // 톤 소스는 톱니(에일리어싱 잘 보임)
+  let srcMode: SrcMode = 'pluck';
+  let playing = false;
+
+  const R = core.ctx.sampleRate; // 실제 출력 레이트
+
+  // 로파이 처리 노드: 샘플-앤-홀드 다운샘플 + 비트 양자화 + 드라이브/하드클립
+  const proc = core.ctx.createScriptProcessor(1024, 1, 1);
+  const outGain = core.gain(0.7);
+  proc.connect(outGain); outGain.connect(core.input);
+  src.outNode = proc; // 소스 → proc → outGain → core.input
+
+  let holdSamples = 1, holdCounter = 0, lastSample = 0;
+  let bitHalf = 32767.5; // (2^bits - 1)/2
+  let driveLin = 1;
+  proc.onaudioprocess = (e) => {
+    const inp = e.inputBuffer.getChannelData(0);
+    const out = e.outputBuffer.getChannelData(0);
+    for (let i = 0; i < inp.length; i++) {
+      if (holdCounter <= 0) { lastSample = inp[i]; holdCounter = holdSamples; } // 샘플-앤-홀드
+      holdCounter--;
+      let s = lastSample;
+      s = Math.round(s * bitHalf) / bitHalf;     // 비트 양자화
+      s = s * driveLin;                          // 드라이브
+      out[i] = s > 1 ? 1 : s < -1 ? -1 : s;      // 하드클립(천장 0dBFS)
+    }
+  };
+
+  // ── 파라미터 적용 ──
+  const setPct = (el: HTMLInputElement) => el.style.setProperty('--sl-pct', ((+el.value - +el.min) / (+el.max - +el.min) * 100) + '%');
+  const $ = <T extends HTMLElement>(s: string) => root.querySelector(s) as T;
+  const rateVal = (p: number) => Math.round(1000 * Math.pow(48, p / 1000)); // 1kHz–48kHz log
+  const ratePos = (hz: number) => Math.log(hz / 1000) / Math.log(48) * 1000;
+  const fmtRate = (hz: number) => hz >= 1000 ? (hz / 1000).toFixed(hz >= 10000 ? 0 : 1) + 'kHz' : hz + 'Hz';
+
+  let targetRate = R, bits = 16;
+  function applyRate() { holdSamples = Math.max(1, Math.round(R / targetRate)); refreshReadout(); }
+  function applyBits() { bitHalf = (Math.pow(2, bits) - 1) / 2; refreshReadout(); }
+
+  const readout = $('.lofi-readout');
+  function refreshReadout() {
+    const nyq = Math.round(targetRate / 2);
+    const levels = Math.pow(2, bits);
+    readout.innerHTML = `유효 샘플레이트 <b>${fmtRate(targetRate)}</b> (나이퀴스트 ${fmtRate(nyq)} — 이 위 주파수는 접힘) · 비트뎁스 <b>${bits}-bit</b> (${levels.toLocaleString()}단계)`;
+  }
+
+  // ── 슬라이더 ──
+  const rate = $<HTMLInputElement>('.rate-range'), rateValEl = $('.rate-val');
+  setPct(rate);
+  rate.addEventListener('input', () => { targetRate = rateVal(+rate.value); rateValEl.textContent = fmtRate(targetRate); setPct(rate); applyRate(); });
+
+  const bitsEl = $<HTMLInputElement>('.bits-range'), bitsValEl = $('.bits-val');
+  setPct(bitsEl);
+  bitsEl.addEventListener('input', () => { bits = +bitsEl.value; bitsValEl.textContent = bits + '-bit'; setPct(bitsEl); applyBits(); });
+
+  const drive = $<HTMLInputElement>('.drive-range'), driveValEl = $('.drive-val');
+  setPct(drive);
+  drive.addEventListener('input', () => { const db = +drive.value; driveLin = Math.pow(10, db / 20); driveValEl.textContent = db.toFixed(1) + ' dB'; setPct(drive); });
+
+  const tf = $<HTMLInputElement>('.tf-range'), tfValEl = $('.tf-val');
+  setPct(tf);
+  tf.addEventListener('input', () => { src.setFreq(+tf.value); tfValEl.textContent = tf.value + 'Hz'; setPct(tf); });
+  src.setFreq(600);
+
+  const master = $<HTMLInputElement>('.master-range'), masterVal = $('.master-range-val');
+  setPct(master);
+  master.addEventListener('input', () => { core.setMaster(+master.value); masterVal.textContent = master.value + '%'; setPct(master); });
+
+  // ── 소스 전환 ──
+  const toneFreq = $('.tone-freq');
+  const srcBtns = [...root.querySelectorAll<HTMLElement>('.src-btn')];
+  function setSrc(m: SrcMode) {
+    srcMode = m;
+    toneFreq.classList.toggle('hidden', m !== 'tone');
+    srcBtns.forEach(b => {
+      const on = b.dataset.src === m;
+      b.style.cssText = on ? 'background:white;color:var(--color-violet);box-shadow:0 1px 4px rgba(0,0,0,0.08)' : '';
+      b.setAttribute('aria-pressed', String(on));
+    });
+    src.setMode(m); // 재생 중이면 즉시 새 소스로 (outNode 경유)
+  }
+  srcBtns.forEach(b => b.addEventListener('click', () => setSrc(b.dataset.src as SrcMode)));
+
+  // ── 프리셋 ──
+  const PRESETS: Record<string, { rate: number; bits: number; drive: number }> = {
+    clean:   { rate: 48000, bits: 16, drive: 0 },
+    vintage: { rate: 11000, bits: 8, drive: 3 },
+    phone:   { rate: 8000, bits: 8, drive: 0 },
+    tape:    { rate: 24000, bits: 12, drive: 8 },
+  };
+  root.querySelectorAll<HTMLElement>('.preset-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const p = PRESETS[btn.dataset.preset!]; if (!p) return;
+      rate.value = String(ratePos(p.rate)); rate.dispatchEvent(new Event('input'));
+      bitsEl.value = String(p.bits); bitsEl.dispatchEvent(new Event('input'));
+      drive.value = String(p.drive); drive.dispatchEvent(new Event('input'));
+    });
+  });
+
+  // ── 트랜스포트 ──
+  const playBtn = $('.play-btn'), playDot = $('.play-dot'), playLabel = $('.play-label');
+  playBtn.addEventListener('click', async () => {
+    if (playing) {
+      src.stop(); playing = false;
+      playBtn.classList.add('gradient-brand'); playBtn.style.cssText = '';
+      playDot.style.cssText = 'background:white'; playLabel.textContent = '재생';
+    } else {
+      await core.resume(); src.start(); playing = true;
+      playBtn.classList.remove('gradient-brand');
+      playBtn.style.cssText = 'background:var(--color-surface-2);color:var(--color-ink-700)';
+      playDot.style.cssText = 'background:#ef4444;box-shadow:0 0 8px #ef4444'; playLabel.textContent = '정지';
+    }
+  });
+
+  // ── 비주얼라이저 + CLIP/dBFS ──
+  const scope = $<HTMLCanvasElement>('.scope-cv'), spec = $<HTMLCanvasElement>('.spec-cv'), clipLed = $('.clip-led');
+  const sCtx = scope.getContext('2d')!, fCtx = spec.getContext('2d')!;
+  const td = new Uint8Array(core.analyser.fftSize), fd = new Uint8Array(core.analyser.frequencyBinCount);
+  const fit = (cv: HTMLCanvasElement) => { const r = cv.getBoundingClientRect(); cv.width = Math.max(1, r.width * devicePixelRatio); cv.height = Math.max(1, r.height * devicePixelRatio); };
+  const fitAll = () => { fit(scope); fit(spec); };
+  fitAll(); addEventListener('resize', fitAll);
+  let clipHold = 0;
+  function draw() {
+    requestAnimationFrame(draw);
+    const W = scope.width, H = scope.height;
+    core.analyser.getByteTimeDomainData(td);
+    sCtx.clearRect(0, 0, W, H); sCtx.beginPath();
+    let peak = 0;
+    for (let i = 0; i < td.length; i++) { const x = i / td.length * W, y = td[i] / 255 * H; i ? sCtx.lineTo(x, y) : sCtx.moveTo(x, y); const v = Math.abs(td[i] - 128) / 128; if (v > peak) peak = v; }
+    sCtx.strokeStyle = '#7c3aed'; sCtx.lineWidth = 1.6 * devicePixelRatio; sCtx.stroke();
+    if (peak > 0.985) clipHold = 30;
+    if (clipHold > 0) { clipHold--; clipLed.style.cssText = 'background:#ef4444;color:white;border-color:#ef4444'; }
+    else clipLed.style.cssText = '';
+    const W2 = spec.width, H2 = spec.height, bins = 110, bw = W2 / bins;
+    core.analyser.getByteFrequencyData(fd);
+    fCtx.clearRect(0, 0, W2, H2);
+    for (let i = 0; i < bins; i++) { const v = fd[i] / 255; fCtx.fillStyle = `rgba(37,99,235,${0.3 + v * 0.5})`; fCtx.fillRect(i * bw, H2 - v * H2, bw * 0.8, v * H2); }
+  }
+  draw();
+
+  setSrc('pluck');
+  refreshReadout();
+}
+
+document.querySelectorAll<HTMLElement>('.lofi').forEach(initLofi);
+</script>
+</Base>

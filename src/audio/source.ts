@@ -9,6 +9,7 @@ export class SignalSource {
   freq = 220;
   tempo = 110;
   active = false; // 현재 소스가 울리는 중인지 (재생 상태)
+  outNode: AudioNode | null = null; // 출력 대상 (기본 core.input). 로파이 샌드박스 등에서 처리 노드로 우회.
 
   private _osc: OscillatorNode | null = null;
   private _noise: AudioBufferSourceNode | null = null;
@@ -32,7 +33,7 @@ export class SignalSource {
 
   private _start() {
     this._stop();
-    const ctx = this.core.ctx, dest = this.core.input;
+    const ctx = this.core.ctx, dest = this.outNode ?? this.core.input;
     if (this.mode === 'tone') {
       const o = ctx.createOscillator(); o.type = this.wave; o.frequency.value = this.freq;
       const g = this.core.gain(0.35); o.connect(g); g.connect(dest); o.start();

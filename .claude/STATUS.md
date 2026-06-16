@@ -9,7 +9,7 @@
 |------|------|
 | 지식 허브 | 5개 / 토픽 **25개** |
 | 유틸 도구 | **5개** (`/tools/`) |
-| 샌드박스 | **4개** 가동 (effects·mixing·synthesis·acoustics) / 5개 목표 (`/sandbox/`) |
+| 샌드박스 | **5개** 전부 가동 (effects·mixing·synthesis·acoustics·digital) (`/sandbox/`) |
 | 인프라 | 커스텀 도메인 · GA4 · SEO · Search Console **완료** |
 | 수익화 | AdSense **미신청**(트래픽 확보 후) |
 

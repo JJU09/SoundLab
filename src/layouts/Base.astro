@@ -1,7 +1,7 @@
 ---
 import '../styles/global.css';
 import { getCollection } from 'astro:content';
-import { HUB_META, HUBS } from '../content.config';
+import { HUB_META, HUBS, SANDBOX_OF } from '../content.config';
 
 interface Props {
   title: string;
@@ -22,9 +22,6 @@ const siteUrl = new URL(base, Astro.site).href;
 // 내비 드롭다운 데이터 — 허브별 콘텐츠/샌드박스 보유 여부
 const topics = (await getCollection('topics')).filter(t => !t.data.draft);
 const hubsSorted = [...HUBS].sort((a, b) => HUB_META[a].order - HUB_META[b].order);
-// 허브별 샌드박스 경로 (현재 이펙트만). 향후 허브별 샌드박스 완성 시 여기에 등록.
-const SANDBOX_OF: Partial<Record<typeof HUBS[number], string>> = { effects: `${base}sandbox/effects/`, mixing: `${base}sandbox/mixer/`, synthesis: `${base}sandbox/synth/`, acoustics: `${base}sandbox/waves/`, digital: `${base}sandbox/lofi/` };
-
 const hubNav = hubsSorted.map(h => ({
   id: h, kr: HUB_META[h].kr, label: HUB_META[h].label,
   ready: topics.some(t => t.data.hub === h),
@@ -32,7 +29,8 @@ const hubNav = hubsSorted.map(h => ({
 }));
 const sandboxNav = hubsSorted.map(h => ({
   id: h, kr: HUB_META[h].kr, label: HUB_META[h].label,
-  href: SANDBOX_OF[h], ready: !!SANDBOX_OF[h],
+  href: SANDBOX_OF[h] ? `${base}${SANDBOX_OF[h]!.path}` : undefined,
+  ready: !!SANDBOX_OF[h],
 }));
 ---
 <!doctype html>

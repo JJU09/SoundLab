@@ -3,7 +3,7 @@ import Base from './Base.astro';
 import TopicWidget from '../components/TopicWidget.astro';
 import Quiz from '../components/Quiz.astro';
 import ScaffoldBar from '../components/ScaffoldBar.astro';
-import { HUB_META } from '../content.config';
+import { HUB_META, SANDBOX_OF } from '../content.config';
 import { QUIZZES } from '../lib/quizzes';
 
 interface TopicData {
@@ -29,6 +29,7 @@ interface Props {
 const { data, prev, next } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const hub = HUB_META[data.hub];
+const sandbox = SANDBOX_OF[data.hub]; // 허브 샌드박스 크로스링크 (학습→자유 실험 동선)
 const hasWidget = data.widget && data.widget !== 'none';
 const quiz = data.quiz ? QUIZZES[data.quiz] : null;
 const num = String(data.order).padStart(2, '0');
@@ -90,6 +91,22 @@ const accent = data.color === 'violet'
 
         <!-- 객관식 퀴즈 -->
         {quiz && <Quiz questions={quiz} color={data.color} />}
+
+        <!-- 샌드박스 크로스링크 — 배운 개념을 자유롭게 실험 -->
+        {sandbox && (
+          <a href={`${base}${sandbox.path}`}
+            class="group flex items-center gap-4 mt-10 p-5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-violet)] hover:shadow-lg transition-all">
+            <div class="w-11 h-11 flex-none rounded-xl gradient-brand flex items-center justify-center">
+              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M5 3v18M5 12h14M19 3v18M9 7h.01M15 17h.01"/></svg>
+            </div>
+            <div class="min-w-0 flex-1">
+              <div class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)]">Sandbox · 직접 실험</div>
+              <div class="font-bold text-[var(--color-ink-700)] group-hover:text-[var(--color-violet)] transition" style="font-family:'Space Grotesk','Pretendard',sans-serif">{sandbox.name}에서 자유롭게 실험해보기</div>
+              <p class="text-sm text-[var(--color-ink-500)] mt-0.5">{hub.kr} 허브의 요소를 직접 조합하며 소리를 만들어 보세요.</p>
+            </div>
+            <svg class="w-5 h-5 flex-none text-[var(--color-ink-300)] group-hover:text-[var(--color-violet)] group-hover:translate-x-0.5 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+          </a>
+        )}
 
         <!-- 이전/다음 -->
         <div class="flex items-center justify-between mt-12 pt-8 border-t border-[var(--color-border)]">

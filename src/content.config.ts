@@ -14,6 +14,16 @@ export const HUB_META: Record<Hub, { kr: string; label: string; order: number; d
   mixing:    { kr: '믹싱', label: 'Mixing', order: 5, desc: '여러 소리를 조화롭게 섞다' },
 };
 
+// 허브별 샌드박스 (경로는 base 제외 슬러그, name은 표시용). 샌드박스 완성 시 등록.
+// Base.astro 내비와 TopicLayout 크로스링크가 공유하는 단일 소스.
+export const SANDBOX_OF: Partial<Record<Hub, { path: string; name: string }>> = {
+  acoustics: { path: 'sandbox/waves/', name: '파동 실험실' },
+  digital:   { path: 'sandbox/lofi/', name: '로파이 실험실' },
+  synthesis: { path: 'sandbox/synth/', name: '신디사이저' },
+  effects:   { path: 'sandbox/effects/', name: '모듈러 페달보드' },
+  mixing:    { path: 'sandbox/mixer/', name: '미니 믹서' },
+};
+
 // 위젯 타입 — MDX가 어떤 인터랙티브 컴포넌트를 띄울지 결정
 export const WIDGETS = ['effect', 'synth', 'subtractive', 'additive', 'fm', 'modulation', 'phase', 'beats', 'tone', 'comb', 'bitcrush', 'samplerate', 'aliasing', 'level', 'mixer', 'none'] as const;
 

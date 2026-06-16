@@ -97,7 +97,7 @@ function initTuner(root: HTMLElement) {
   const errEl = root.querySelector('.mic-err') as HTMLElement;
 
   let ctx: AudioContext | null = null, stream: MediaStream | null = null, raf = 0, running = false;
-  let buf: Float32Array, analyser: AnalyserNode;
+  let buf: Float32Array<ArrayBuffer>, analyser: AnalyserNode;
   let smoothFreq = 0;
 
   async function startMic() {

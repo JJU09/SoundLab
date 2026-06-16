@@ -10,8 +10,8 @@ export class AudioCore {
   input!: GainNode;       // 소스가 연결되는 체인 입구
   master!: GainNode;      // 이펙트 체인 종착 + 마스터 볼륨
   analyser!: AnalyserNode;
-  tdData!: Uint8Array;    // 시간축(오실로스코프)
-  fdData!: Uint8Array;    // 주파수축(스펙트럼)
+  tdData!: Uint8Array<ArrayBuffer>;    // 시간축(오실로스코프)
+  fdData!: Uint8Array<ArrayBuffer>;    // 주파수축(스펙트럼)
   defaultImpulse!: AudioBuffer; // 리버브 기본 임펄스 캐싱 (드롭아웃 방어)
   masterVol = 70;
 

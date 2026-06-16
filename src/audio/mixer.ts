@@ -18,8 +18,8 @@ export interface MixTrack {
   eq: BiquadFilterNode;   // 트랙별 1밴드 피킹 EQ (기본 gain 0 = 무색)
   pan: StereoPannerNode;
   analyser: AnalyserNode; // 트랙 미터·스펙트럼 (post-fader·post-EQ)
-  td: Uint8Array;
-  fd: Uint8Array;
+  td: Uint8Array<ArrayBuffer>;
+  fd: Uint8Array<ArrayBuffer>;
   vol: number;            // 0..100
   panV: number;           // -1..1
   muted: boolean;
@@ -188,7 +188,7 @@ export class MixBus {
   }
 
   // ── 마스터 L/R 스테레오 미터 (pan 토픽용) ──
-  private _lr: { l: AnalyserNode; r: AnalyserNode; tdL: Uint8Array; tdR: Uint8Array } | null = null;
+  private _lr: { l: AnalyserNode; r: AnalyserNode; tdL: Uint8Array<ArrayBuffer>; tdR: Uint8Array<ArrayBuffer> } | null = null;
 
   enableStereoMeter() {
     if (this._lr) return;
@@ -203,7 +203,7 @@ export class MixBus {
   // [L, R] 피크 (0..1). enableStereoMeter 전엔 [0,0].
   getStereoLevels(): [number, number] {
     if (!this._lr) return [0, 0];
-    const peak = (a: AnalyserNode, td: Uint8Array) => {
+    const peak = (a: AnalyserNode, td: Uint8Array<ArrayBuffer>) => {
       a.getByteTimeDomainData(td);
       let p = 0;
       for (let i = 0; i < td.length; i++) { const v = Math.abs(td[i] - 128) / 128; if (v > p) p = v; }

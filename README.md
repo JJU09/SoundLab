@@ -7,7 +7,7 @@
 <br />
 
 ## 🌐 Live Demo
-👉 **[SoundLab 웹사이트 바로가기](https://jju09.github.io/SoundLab/)**
+👉 **[SoundLab 웹사이트 바로가기](https://soundlab.jjuapp.com/)**
 * *회원가입이나 앱 설치 없이 브라우저에서 즉시 실행 가능합니다. (헤드폰 착용 권장)*
 
 <br />

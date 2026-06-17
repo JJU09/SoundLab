@@ -14,12 +14,6 @@ const SITE_NAME = 'SoundLab';
 const GA_ID = 'G-XE8CLT7CER';
 // 피드백 폼(노션) URL. 비워두면 헤더 피드백 버튼 미노출. 노션 폼 공유 링크를 붙여넣으면 자동 활성.
 const FEEDBACK_URL = 'https://outgoing-crayfish-491.notion.site/38285182bf2b804b97dbe266e0f9b9e7?pvs=105';
-// 현재 페이지 경로를 노션 폼 필드에 자동 prefill (어디서 의견을 남겼는지 추적).
-// 노션 폼에 아래 이름과 똑같은 텍스트 필드가 있어야 채워짐 — 필드명 바꾸면 이 값만 맞추면 됨.
-const FEEDBACK_PAGE_FIELD = 'page';
-const feedbackHref = FEEDBACK_URL
-  ? `${FEEDBACK_URL}${FEEDBACK_URL.includes('?') ? '&' : '?'}${encodeURIComponent(FEEDBACK_PAGE_FIELD)}=${encodeURIComponent(Astro.url.pathname)}`
-  : '';
 const { title, description = 'Web Audio API로 듣고 만지며 배우는 인터랙티브 사운드·음악 학습 사이트', image, type = 'website' } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const fullTitle = `${title} · ${SITE_NAME}`;
@@ -152,7 +146,7 @@ const sandboxNav = hubsSorted.map(h => ({
 
       <div class="flex items-center gap-2">
         {FEEDBACK_URL && (
-          <a href={feedbackHref} target="_blank" rel="noopener noreferrer"
+          <a href={FEEDBACK_URL} target="_blank" rel="noopener noreferrer"
             class="inline-flex items-center gap-1.5 text-sm font-semibold px-3 py-1.5 rounded-full border border-[var(--color-border)] text-[var(--color-ink-500)] hover:border-[var(--color-violet)] hover:text-[var(--color-violet)] transition"
             style="font-family:'Space Grotesk','Pretendard',sans-serif" title="의견·버그 제보">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>

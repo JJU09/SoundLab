@@ -16,7 +16,7 @@ const GA_ID = 'G-XE8CLT7CER';
 const FEEDBACK_URL = 'https://outgoing-crayfish-491.notion.site/38285182bf2b804b97dbe266e0f9b9e7?pvs=105';
 // 현재 페이지 경로를 노션 폼 필드에 자동 prefill (어디서 의견을 남겼는지 추적).
 // 노션 폼에 아래 이름과 똑같은 텍스트 필드가 있어야 채워짐 — 필드명 바꾸면 이 값만 맞추면 됨.
-const FEEDBACK_PAGE_FIELD = '페이지';
+const FEEDBACK_PAGE_FIELD = 'page';
 const feedbackHref = FEEDBACK_URL
   ? `${FEEDBACK_URL}${FEEDBACK_URL.includes('?') ? '&' : '?'}${encodeURIComponent(FEEDBACK_PAGE_FIELD)}=${encodeURIComponent(Astro.url.pathname)}`
   : '';

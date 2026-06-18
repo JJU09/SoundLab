@@ -11,6 +11,7 @@ interface GlossaryData {
   widget: string;
   widgetConfig?: Record<string, any>;
   relatedTopic?: string;
+  relatedTool?: { path: string; name: string };
   relatedTerms?: string[];
   aliases?: string[];
 }
@@ -24,6 +25,7 @@ const base = import.meta.env.BASE_URL;
 const hub = HUB_META[data.hub];
 const sandbox = SANDBOX_OF[data.hub];
 const hasWidget = data.widget && data.widget !== 'none';
+const showSandbox = sandbox && data.relatedTopic; // 도구 전용 용어엔 무관한 샌드박스 카드 숨김
 
 // "X란?" 조사 — 마지막 한글 음절에 받침 있으면 "이란", 없으면 "란".
 function ranSuffix(s: string) {
@@ -73,8 +75,8 @@ const topicHref = data.relatedTopic ? `${base}learn/${data.relatedTopic}/` : nul
       </div>
     )}
 
-    <!-- 더 알아보기 (토픽 + 샌드박스) -->
-    {(topicHref || sandbox) && (
+    <!-- 더 알아보기 (토픽 + 도구 + 샌드박스) -->
+    {(topicHref || data.relatedTool || showSandbox) && (
       <div class="mt-10 grid grid-cols-1 sm:grid-cols-2 gap-3">
         {topicHref && (
           <a href={topicHref} class="group flex items-center gap-3 p-4 rounded-xl border border-[var(--color-border)] bg-white hover:border-[var(--color-violet)] hover:shadow-lg transition-all">
@@ -84,11 +86,19 @@ const topicHref = data.relatedTopic ? `${base}learn/${data.relatedTopic}/` : nul
             </div>
           </a>
         )}
-        {sandbox && (
-          <a href={`${base}${sandbox.path}`} class="group flex items-center gap-3 p-4 rounded-xl border border-[var(--color-border)] bg-white hover:border-[var(--color-violet)] hover:shadow-lg transition-all">
+        {data.relatedTool && (
+          <a href={`${base}${data.relatedTool.path}`} class="group flex items-center gap-3 p-4 rounded-xl border border-[var(--color-border)] bg-white hover:border-[var(--color-violet)] hover:shadow-lg transition-all">
+            <div class="min-w-0">
+              <div class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)]">Tool · 도구</div>
+              <div class="font-bold text-[var(--color-ink-700)] group-hover:text-[var(--color-violet)] transition text-sm" style="font-family:'Space Grotesk','Pretendard',sans-serif">{data.relatedTool.name} 써보기 →</div>
+            </div>
+          </a>
+        )}
+        {showSandbox && (
+          <a href={`${base}${sandbox!.path}`} class="group flex items-center gap-3 p-4 rounded-xl border border-[var(--color-border)] bg-white hover:border-[var(--color-violet)] hover:shadow-lg transition-all">
             <div class="min-w-0">
               <div class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)]">Sandbox · 실험</div>
-              <div class="font-bold text-[var(--color-ink-700)] group-hover:text-[var(--color-violet)] transition text-sm" style="font-family:'Space Grotesk','Pretendard',sans-serif">{sandbox.name}에서 만져보기 →</div>
+              <div class="font-bold text-[var(--color-ink-700)] group-hover:text-[var(--color-violet)] transition text-sm" style="font-family:'Space Grotesk','Pretendard',sans-serif">{sandbox!.name}에서 만져보기 →</div>
             </div>
           </a>
         )}

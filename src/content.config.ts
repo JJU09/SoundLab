@@ -57,6 +57,7 @@ const glossary = defineCollection({
     widget: z.enum(WIDGETS).default('none'),    // 라이브 위젯 임베드(TopicWidget 재사용)
     widgetConfig: z.record(z.string(), z.any()).optional(),
     relatedTopic: z.string().optional(),        // "digital/aliasing" — 더 알아보기 링크
+    relatedTool: z.object({ path: z.string(), name: z.string() }).optional(), // 도구 크로스링크(예 BPM→메트로놈)
     relatedTerms: z.array(z.string()).optional(), // 관련 용어 slug
     aliases: z.array(z.string()).optional(),    // 검색 변형어(메타 keywords 등)
     order: z.number().default(0),

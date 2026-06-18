@@ -1,0 +1,24 @@
+---
+import { getCollection, render } from 'astro:content';
+import GlossaryLayout from '../../layouts/GlossaryLayout.astro';
+
+export async function getStaticPaths() {
+  const all = (await getCollection('glossary')).filter(e => !e.data.draft);
+  const byId = new Map(all.map(e => [e.id, e]));
+
+  return all.map(entry => {
+    // relatedTerms(slug 배열) → {slug, term} 링크로 해석 (존재하는 것만)
+    const related = (entry.data.relatedTerms ?? [])
+      .map(slug => byId.get(slug))
+      .filter((e): e is typeof entry => !!e)
+      .map(e => ({ slug: e.id, term: e.data.term }));
+    return { params: { slug: entry.id }, props: { entry, related } };
+  });
+}
+
+const { entry, related } = Astro.props;
+const { Content } = await render(entry);
+---
+<GlossaryLayout data={entry.data} related={related}>
+  <Content />
+</GlossaryLayout>

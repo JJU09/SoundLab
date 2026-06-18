@@ -1,0 +1,49 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+import { HUB_META, HUBS } from '../../content.config';
+const base = import.meta.env.BASE_URL;
+
+const all = (await getCollection('glossary')).filter(e => !e.data.draft);
+// 허브별 그룹 + 표제 정렬
+const hubsSorted = [...HUBS].sort((a, b) => HUB_META[a].order - HUB_META[b].order);
+const groups = hubsSorted
+  .map(h => ({
+    hub: h,
+    meta: HUB_META[h],
+    terms: all.filter(e => e.data.hub === h).sort((a, b) => a.data.term.localeCompare(b.data.term, 'ko')),
+  }))
+  .filter(g => g.terms.length > 0);
+const total = all.length;
+---
+<Base title="용어집" description="음향·신디시스·이펙트·믹싱 용어를 한 줄 정의 + 라이브 데모로 빠르게 이해하는 사운드 용어집. 데시벨·에일리어싱·ADSR·컴프레서 등.">
+
+<div class="max-w-4xl mx-auto px-4 sm:px-6 py-12">
+  <div class="mb-8">
+    <span class="text-xs font-mono px-2.5 py-1 rounded-full border border-[var(--color-violet-light)] text-[var(--color-violet)] bg-[var(--color-violet-glow)]">GLOSSARY</span>
+    <h1 class="text-3xl font-bold mt-3 mb-2" style="font-family:'Space Grotesk','Pretendard',sans-serif">사운드 용어집</h1>
+    <p class="text-[var(--color-ink-500)]">"이게 무슨 뜻이지?" 싶은 용어를 한 줄 정의 + 직접 들어보는 데모로. 총 {total}개.</p>
+  </div>
+
+  {groups.map(g => (
+    <section class="mb-10">
+      <div class="flex items-baseline gap-2 mb-3">
+        <h2 class="text-lg font-bold text-[var(--color-ink-700)]" style="font-family:'Space Grotesk','Pretendard',sans-serif">{g.meta.kr}</h2>
+        <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)]">{g.meta.label}</span>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {g.terms.map(t => (
+          <a href={`${base}glossary/${t.id}/`} class="group p-4 rounded-xl border border-[var(--color-border)] bg-white hover:border-[var(--color-violet)] hover:shadow-lg transition-all">
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-[var(--color-ink-700)] group-hover:text-[var(--color-violet)] transition" style="font-family:'Space Grotesk','Pretendard',sans-serif">{t.data.term}</span>
+              <span class="text-[10px] font-mono text-[var(--color-ink-300)]">{t.data.en}</span>
+            </div>
+            <p class="text-sm text-[var(--color-ink-500)] mt-1 line-clamp-2">{t.data.definition}</p>
+          </a>
+        ))}
+      </div>
+    </section>
+  ))}
+</div>
+
+</Base>

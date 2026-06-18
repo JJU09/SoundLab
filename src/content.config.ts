@@ -46,4 +46,22 @@ const topics = defineCollection({
   }),
 });
 
-export const collections = { topics };
+// 용어집 — "X란?" SEO 진입점. 토픽과 분리(간결 정의 + 라이브 위젯 + 토픽 크로스링크).
+const glossary = defineCollection({
+  loader: glob({ pattern: '**/*.mdx', base: './src/content/glossary' }),
+  schema: z.object({
+    term: z.string(),                           // 한글 표제 (에일리어싱)
+    en: z.string(),                             // 영문 (Aliasing)
+    hub: z.enum(HUBS),                          // 분류·관련 샌드박스 파생
+    definition: z.string(),                     // 1~2문장 정의(답변 먼저, 스니펫·meta 공용)
+    widget: z.enum(WIDGETS).default('none'),    // 라이브 위젯 임베드(TopicWidget 재사용)
+    widgetConfig: z.record(z.string(), z.any()).optional(),
+    relatedTopic: z.string().optional(),        // "digital/aliasing" — 더 알아보기 링크
+    relatedTerms: z.array(z.string()).optional(), // 관련 용어 slug
+    aliases: z.array(z.string()).optional(),    // 검색 변형어(메타 keywords 등)
+    order: z.number().default(0),
+    draft: z.boolean().default(false),
+  }),
+});
+
+export const collections = { topics, glossary };

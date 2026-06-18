@@ -1,0 +1,123 @@
+---
+import Base from './Base.astro';
+import TopicWidget from '../components/TopicWidget.astro';
+import { HUB_META, SANDBOX_OF } from '../content.config';
+
+interface GlossaryData {
+  term: string;
+  en: string;
+  hub: keyof typeof HUB_META;
+  definition: string;
+  widget: string;
+  widgetConfig?: Record<string, any>;
+  relatedTopic?: string;
+  relatedTerms?: string[];
+  aliases?: string[];
+}
+interface RelatedTermLink { slug: string; term: string; }
+interface Props {
+  data: GlossaryData;
+  related?: RelatedTermLink[];
+}
+const { data, related = [] } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const hub = HUB_META[data.hub];
+const sandbox = SANDBOX_OF[data.hub];
+const hasWidget = data.widget && data.widget !== 'none';
+
+// "X란?" 조사 — 마지막 한글 음절에 받침 있으면 "이란", 없으면 "란".
+function ranSuffix(s: string) {
+  const c = s.charCodeAt(s.length - 1);
+  if (c >= 0xac00 && c <= 0xd7a3) return ((c - 0xac00) % 28) !== 0 ? '이란' : '란';
+  return '이란'; // 영문·숫자 등은 기본 '이란'
+}
+const heading = `${data.term}${ranSuffix(data.term)}?`;
+const fullTitle = `${heading} — ${hub.kr} 용어`;
+const topicHref = data.relatedTopic ? `${base}learn/${data.relatedTopic}/` : null;
+---
+<Base title={heading} description={data.definition} type="article">
+
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 py-10">
+
+    <!-- 브레드크럼 -->
+    <nav class="flex items-center gap-2 text-xs font-mono text-[var(--color-ink-300)] mb-8">
+      <a href={base} class="hover:text-[var(--color-violet)] transition">홈</a><span>/</span>
+      <a href={`${base}glossary/`} class="hover:text-[var(--color-violet)] transition">용어집</a><span>/</span>
+      <span class="text-[var(--color-ink-700)]">{data.term}</span>
+    </nav>
+
+    <span class="text-xs font-mono px-2.5 py-1 rounded-full border border-[var(--color-violet-light)] text-[var(--color-violet)] bg-[var(--color-violet-glow)]">
+      {hub.label.toUpperCase()} · 용어
+    </span>
+
+    <h1 class="text-3xl sm:text-4xl font-bold mt-3 mb-2 leading-tight" style="font-family:'Space Grotesk','Pretendard',sans-serif">
+      {heading}
+      <span class="text-[var(--color-ink-300)] font-medium text-2xl ml-2">{data.en}</span>
+    </h1>
+
+    <!-- 정의 (답변 먼저 — 피처드 스니펫) -->
+    <p class="text-lg text-[var(--color-ink-700)] leading-relaxed mt-4 mb-8 p-4 rounded-xl bg-[var(--color-surface)] border-l-4 border-[var(--color-violet)]">
+      {data.definition}
+    </p>
+
+    <!-- 추가 설명(MDX, 짧게) -->
+    <div class="topic-body space-y-5 text-sm leading-relaxed text-[var(--color-ink-700)]">
+      <slot />
+    </div>
+
+    <!-- 라이브 위젯 -->
+    {hasWidget && (
+      <div class="mt-8">
+        <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-2">직접 들어보기 · 만져보기</div>
+        <TopicWidget widget={data.widget} config={data.widgetConfig} />
+      </div>
+    )}
+
+    <!-- 더 알아보기 (토픽 + 샌드박스) -->
+    {(topicHref || sandbox) && (
+      <div class="mt-10 grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {topicHref && (
+          <a href={topicHref} class="group flex items-center gap-3 p-4 rounded-xl border border-[var(--color-border)] bg-white hover:border-[var(--color-violet)] hover:shadow-lg transition-all">
+            <div class="min-w-0">
+              <div class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)]">Learn · 더 깊이</div>
+              <div class="font-bold text-[var(--color-ink-700)] group-hover:text-[var(--color-violet)] transition text-sm" style="font-family:'Space Grotesk','Pretendard',sans-serif">{hub.kr} 허브에서 자세히 →</div>
+            </div>
+          </a>
+        )}
+        {sandbox && (
+          <a href={`${base}${sandbox.path}`} class="group flex items-center gap-3 p-4 rounded-xl border border-[var(--color-border)] bg-white hover:border-[var(--color-violet)] hover:shadow-lg transition-all">
+            <div class="min-w-0">
+              <div class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)]">Sandbox · 실험</div>
+              <div class="font-bold text-[var(--color-ink-700)] group-hover:text-[var(--color-violet)] transition text-sm" style="font-family:'Space Grotesk','Pretendard',sans-serif">{sandbox.name}에서 만져보기 →</div>
+            </div>
+          </a>
+        )}
+      </div>
+    )}
+
+    <!-- 관련 용어 -->
+    {related.length > 0 && (
+      <div class="mt-8 pt-6 border-t border-[var(--color-border)]">
+        <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-2.5">관련 용어</div>
+        <div class="flex flex-wrap gap-2">
+          {related.map(r => (
+            <a href={`${base}glossary/${r.slug}/`} class="text-sm font-medium px-3 py-1.5 rounded-lg border border-[var(--color-border)] text-[var(--color-ink-500)] hover:border-[var(--color-violet)] hover:text-[var(--color-violet)] transition">{r.term}</a>
+          ))}
+        </div>
+      </div>
+    )}
+
+    <div class="mt-8">
+      <a href={`${base}glossary/`} class="text-sm font-medium text-[var(--color-ink-500)] hover:text-[var(--color-violet)] transition">← 용어집 전체 보기</a>
+    </div>
+  </div>
+
+  <script type="application/ld+json" set:html={JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'DefinedTerm',
+    name: data.term,
+    alternateName: data.en,
+    description: data.definition,
+    inDefinedTermSet: { '@type': 'DefinedTermSet', name: `SoundLab ${hub.kr} 용어집` },
+  })} />
+</Base>

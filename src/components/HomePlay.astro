@@ -1,0 +1,65 @@
+---
+// 홈 히어로 즉시-플레이 — 첫 방문자가 클릭 한 번으로 소리를 내보는 미니 인터랙션.
+// 펜타토닉이라 아무 조합이나 듣기 좋음. AudioCore는 첫 클릭 때 지연 생성(자동재생 경고 회피).
+---
+<div class="home-play mx-auto max-w-md">
+  <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface)] border border-[var(--color-border)] mb-2.5">
+    <canvas class="hp-scope block w-full" style="height:44px"></canvas>
+    <span class="hp-hint absolute inset-0 flex items-center justify-center text-[11px] font-mono text-[var(--color-ink-300)] pointer-events-none transition-opacity">↓ 눌러서 소리를 내보세요</span>
+  </div>
+  <div class="hp-pads grid grid-cols-7 gap-1.5">
+    {[60, 62, 64, 67, 69, 72, 74].map((m, i) => (
+      <button class="hp-pad h-12 rounded-lg border border-[var(--color-border)] bg-white transition active:scale-95"
+        data-midi={m} aria-label={`음 ${i + 1} 재생`}
+        style={`box-shadow: inset 0 -3px 0 rgba(124,58,237,${0.06 + i * 0.025})`}></button>
+    ))}
+  </div>
+</div>
+
+<script>
+import { AudioCore } from '../audio/core';
+import { SynthVoice } from '../audio/synth';
+
+function initHomePlay(root: HTMLElement) {
+  let core: AudioCore | null = null, voice: SynthVoice | null = null, raf = 0;
+  const scope = root.querySelector('.hp-scope') as HTMLCanvasElement;
+  const hint = root.querySelector('.hp-hint') as HTMLElement;
+  const ctx2d = scope.getContext('2d')!;
+  const fit = () => { const r = scope.getBoundingClientRect(); scope.width = Math.max(1, r.width * devicePixelRatio); scope.height = Math.max(1, r.height * devicePixelRatio); };
+  fit(); addEventListener('resize', fit);
+
+  const midiToFreq = (m: number) => 440 * Math.pow(2, (m - 69) / 12);
+
+  function ensure() {
+    if (core) return;
+    core = new AudioCore();
+    voice = new SynthVoice(core);
+    voice.wave = 'triangle'; voice.attack = 0.005; voice.decay = 0.18; voice.sustain = 0.25; voice.release = 0.3; voice.peak = 0.5;
+    draw();
+  }
+
+  function draw() {
+    raf = requestAnimationFrame(draw);
+    if (!core) return;
+    const td = core.getScope(), W = scope.width, H = scope.height;
+    ctx2d.clearRect(0, 0, W, H);
+    ctx2d.beginPath();
+    for (let i = 0; i < td.length; i++) { const x = i / td.length * W, y = td[i] / 255 * H; i ? ctx2d.lineTo(x, y) : ctx2d.moveTo(x, y); }
+    ctx2d.strokeStyle = '#7c3aed'; ctx2d.lineWidth = 1.5 * devicePixelRatio; ctx2d.stroke();
+  }
+
+  root.querySelectorAll<HTMLElement>('.hp-pad').forEach(pad => {
+    const play = () => {
+      ensure();
+      hint.style.opacity = '0';
+      voice!.set('freq', midiToFreq(Number(pad.dataset.midi)));
+      voice!.trigger(0.18);
+      pad.style.background = 'linear-gradient(180deg,#8b5cf6,#7c3aed)';
+      setTimeout(() => pad.style.background = '', 160);
+    };
+    pad.addEventListener('pointerdown', e => { e.preventDefault(); play(); });
+  });
+}
+
+document.querySelectorAll<HTMLElement>('.home-play').forEach(initHomePlay);
+</script>

@@ -14,6 +14,7 @@ export class AudioCore {
   fdData!: Uint8Array<ArrayBuffer>;    // 주파수축(스펙트럼)
   defaultImpulse!: AudioBuffer; // 리버브 기본 임펄스 캐싱 (드롭아웃 방어)
   masterVol = 70;
+  private _tracked = false;     // audio_play 이벤트 인스턴스당 1회 발화 가드
 
   constructor() {
     this.ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -68,6 +69,13 @@ export class AudioCore {
   getSpectrum() { this.analyser.getByteFrequencyData(this.fdData); return this.fdData; }
 
   // ── 트랜스포트 ──
-  async resume() { await this.ctx.resume(); }
+  async resume() {
+    await this.ctx.resume();
+    // 실제 재생(오디오 시작) = "도구를 진짜 썼다" 신호. 페이지별 사용 전환율 측정용. 인스턴스당 1회.
+    if (!this._tracked) {
+      this._tracked = true;
+      try { (window as any).gtag?.('event', 'audio_play', { page_path: location.pathname }); } catch (e) {}
+    }
+  }
   suspend() { this.ctx.suspend(); }
 }

@@ -51,6 +51,17 @@ const sigs: [string, number][] = [['2/4', 2], ['3/4', 3], ['4/4', 4], ['6/8', 6]
         <button class="tap-btn px-4 py-2 rounded-xl border border-[var(--color-border)] text-sm font-semibold text-[var(--color-ink-500)] hover:border-[var(--color-violet)] hover:text-[var(--color-violet)] transition" style="font-family:'Space Grotesk','Pretendard',sans-serif">탭 템포</button>
       </div>
 
+      <!-- 분할음 (subdivision) -->
+      <div class="flex items-center justify-between gap-3 flex-wrap">
+        <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)]">분할 · Subdivision</span>
+        <div class="flex gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" role="group" aria-label="분할음">
+          {[['1','♩'],['2','8분'],['3','셋잇단'],['4','16분']].map(([s, label]) => (
+            <button class="sub-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-[var(--color-ink-500)]"
+              data-sub={s} aria-pressed={s === '1' ? 'true' : 'false'} style="font-family:'Space Grotesk','Pretendard',sans-serif">{label}</button>
+          ))}
+        </div>
+      </div>
+
       <!-- 재생 -->
       <button class="play-btn w-full gradient-brand text-white font-semibold py-3.5 rounded-xl text-base flex items-center justify-center gap-2 transition hover:opacity-90" style="font-family:'Space Grotesk','Pretendard',sans-serif">
         <span class="play-dot w-2 h-2 rounded-full bg-white"></span>
@@ -80,10 +91,10 @@ const termOf = (bpm: number) => TERMS.find(([t]) => bpm < t)?.[1] ?? 'Prestissim
 
 function initMetro(root: HTMLElement) {
   const core = new AudioCore();
-  let bpm = 120, beats = 4, playing = false;
+  let bpm = 120, beats = 4, sub = 1, playing = false;
 
   // lookahead 스케줄러 (Web Audio 시계 기준 — 탭 백그라운드에서도 박자 유지)
-  let nextTime = 0, beatCount = 0;
+  let nextTime = 0, tickCount = 0;
   let timer: ReturnType<typeof setInterval> | null = null;
   const queue: { idx: number; time: number }[] = [];
 
@@ -98,18 +109,30 @@ function initMetro(root: HTMLElement) {
     o.start(time); o.stop(time + 0.06);
     o.onended = () => { try { o.disconnect(); g.disconnect(); } catch (e) {} };
   }
+  // 분할음(메인 박 사이의 약한 틱) — 낮은 음량·짧게
+  function subClick(time: number) {
+    const o = core.ctx.createOscillator(); o.type = 'square'; o.frequency.value = 1500;
+    const g = core.gain(0.0001);
+    g.gain.setValueAtTime(0.0001, time);
+    g.gain.exponentialRampToValueAtTime(0.13, time + 0.001);
+    g.gain.exponentialRampToValueAtTime(0.0001, time + 0.03);
+    o.connect(g); g.connect(core.input);
+    o.start(time); o.stop(time + 0.04);
+    o.onended = () => { try { o.disconnect(); g.disconnect(); } catch (e) {} };
+  }
   function schedule() {
-    const spb = 60 / bpm;
+    const spt = 60 / bpm / sub; // tick(분할) 간격
     while (nextTime < core.ctx.currentTime + 0.1) {
-      const idx = beatCount % beats;
-      click(nextTime, idx === 0);
-      queue.push({ idx, time: nextTime });
-      nextTime += spb; beatCount++;
+      const subIdx = tickCount % sub;
+      const beatIdx = Math.floor(tickCount / sub) % beats;
+      if (subIdx === 0) { click(nextTime, beatIdx === 0); queue.push({ idx: beatIdx, time: nextTime }); }
+      else subClick(nextTime);
+      nextTime += spt; tickCount++;
     }
   }
   async function start() {
     await core.resume();
-    beatCount = 0; nextTime = core.ctx.currentTime + 0.12;
+    tickCount = 0; nextTime = core.ctx.currentTime + 0.12;
     timer = setInterval(schedule, 25); playing = true;
     requestAnimationFrame(visual);
   }
@@ -170,6 +193,19 @@ function initMetro(root: HTMLElement) {
       sigBtns.forEach(b => { b.setAttribute('aria-pressed', 'false'); b.style.cssText = ''; });
       btn.setAttribute('aria-pressed', 'true'); sel();
       beats = Number(btn.dataset.beats); buildDots();
+    });
+    if (btn.getAttribute('aria-pressed') === 'true') sel();
+  });
+
+  // 분할음
+  const subBtns = [...root.querySelectorAll<HTMLElement>('.sub-btn')];
+  subBtns.forEach(btn => {
+    const sel = () => btn.style.cssText = 'background:white;color:var(--color-violet);box-shadow:0 1px 4px rgba(0,0,0,0.08)';
+    btn.addEventListener('click', () => {
+      subBtns.forEach(b => { b.setAttribute('aria-pressed', 'false'); b.style.cssText = ''; });
+      btn.setAttribute('aria-pressed', 'true'); sel();
+      sub = Number(btn.dataset.sub);
+      if (playing) { tickCount = 0; nextTime = core.ctx.currentTime + 0.06; } // 그리드 재정렬
     });
     if (btn.getAttribute('aria-pressed') === 'true') sel();
   });

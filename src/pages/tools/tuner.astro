@@ -48,11 +48,34 @@ const desc = '마이크로 음정을 실시간 잡아주는 무료 온라인 크
         🎤 마이크 켜기
       </button>
       <div class="mic-err hidden text-center text-sm text-[#b91c1c] font-medium"></div>
+
+      <!-- 기준음 캘리브레이션 + 악기 줄 기준음 -->
+      <div class="pt-4 mt-2 border-t border-[var(--color-border)] space-y-4">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">기준음 A4</span>
+          <div class="flex items-center gap-2">
+            <button class="a4-dec w-7 h-7 rounded-lg border border-[var(--color-border)] text-base font-bold text-[var(--color-ink-500)] hover:border-[var(--color-violet)] hover:text-[var(--color-violet)] transition" aria-label="기준음 감소">−</button>
+            <span class="a4-val text-sm font-mono text-[var(--color-ink-700)] w-16 text-center">440 Hz</span>
+            <button class="a4-inc w-7 h-7 rounded-lg border border-[var(--color-border)] text-base font-bold text-[var(--color-ink-500)] hover:border-[var(--color-violet)] hover:text-[var(--color-violet)] transition" aria-label="기준음 증가">+</button>
+          </div>
+        </div>
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">기준음 듣기</span>
+            <div class="inst-tabs flex gap-1 p-1 bg-[var(--color-surface-2)] rounded-lg" role="group" aria-label="악기">
+              {[['guitar','기타'],['bass','베이스'],['ukulele','우쿨렐레']].map(([k,t]) => (
+                <button class="inst-btn px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all text-[var(--color-ink-500)]" data-inst={k} aria-pressed={k==='guitar'?'true':'false'} style="font-family:'Space Grotesk','Pretendard',sans-serif">{t}</button>
+              ))}
+            </div>
+          </div>
+          <div class="string-row flex flex-wrap gap-1.5"></div>
+        </div>
+      </div>
     </div>
   </div>
 
   <p class="text-xs text-[var(--color-ink-300)] mt-4 text-center">
-    기준음 A4 = 440Hz · 초록이 되면 음이 맞은 것 · 권한 요청 시 <b class="text-[var(--color-ink-500)]">허용</b>을 눌러야 마이크가 켜집니다
+    초록이 되면 음이 맞은 것 · 기준음 A4는 기본 440Hz(아래에서 조정) · 권한 요청 시 <b class="text-[var(--color-ink-500)]">허용</b>을 눌러야 마이크가 켜집니다
   </p>
 
   <div class="mt-8 p-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-sm text-[var(--color-ink-500)]">
@@ -99,6 +122,7 @@ function initTuner(root: HTMLElement) {
   let ctx: AudioContext | null = null, stream: MediaStream | null = null, raf = 0, running = false;
   let buf: Float32Array<ArrayBuffer>, analyser: AnalyserNode;
   let smoothFreq = 0;
+  let a4 = 440; // 기준음(캘리브레이션). 피치 검출·기준음 재생 공용.
 
   async function startMic() {
     try {
@@ -132,8 +156,8 @@ function initTuner(root: HTMLElement) {
     const f = detectPitch(buf, ctx!.sampleRate);
     if (f < 0 || f < 30 || f > 5000) return; // 무음/범위 밖 → 직전 표시 유지
     smoothFreq = smoothFreq ? smoothFreq * 0.8 + f * 0.2 : f; // 떨림 완화
-    const midi = Math.round(12 * Math.log2(smoothFreq / 440) + 69);
-    const target = 440 * Math.pow(2, (midi - 69) / 12);
+    const midi = Math.round(12 * Math.log2(smoothFreq / a4) + 69);
+    const target = a4 * Math.pow(2, (midi - 69) / 12);
     const cents = Math.round(1200 * Math.log2(smoothFreq / target));
     nameEl.textContent = NOTES[((midi % 12) + 12) % 12] + (Math.floor(midi / 12) - 1);
     freqEl.textContent = smoothFreq.toFixed(1) + ' Hz  ·  목표 ' + target.toFixed(1) + ' Hz';
@@ -146,6 +170,57 @@ function initTuner(root: HTMLElement) {
   }
 
   micBtn.addEventListener('click', () => running ? stopMic() : startMic());
+
+  // ── 기준음 캘리브레이션 ──
+  const a4Val = root.querySelector('.a4-val') as HTMLElement;
+  const setA4 = (v: number) => { a4 = Math.max(430, Math.min(450, Math.round(v))); a4Val.textContent = a4 + ' Hz'; };
+  root.querySelector('.a4-dec')!.addEventListener('click', () => setA4(a4 - 1));
+  root.querySelector('.a4-inc')!.addEventListener('click', () => setA4(a4 + 1));
+
+  // ── 악기 줄 기준음 재생 (마이크와 별개 AudioContext, 지연 생성) ──
+  const TUNINGS: Record<string, { n: string; m: number }[]> = {
+    guitar: [{ n: 'E', m: 40 }, { n: 'A', m: 45 }, { n: 'D', m: 50 }, { n: 'G', m: 55 }, { n: 'B', m: 59 }, { n: 'E', m: 64 }],
+    bass: [{ n: 'E', m: 28 }, { n: 'A', m: 33 }, { n: 'D', m: 38 }, { n: 'G', m: 43 }],
+    ukulele: [{ n: 'G', m: 67 }, { n: 'C', m: 60 }, { n: 'E', m: 64 }, { n: 'A', m: 69 }],
+  };
+  let refCtx: AudioContext | null = null;
+  function playRef(midi: number) {
+    if (!refCtx) refCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    refCtx.resume();
+    const freq = a4 * Math.pow(2, (midi - 69) / 12);
+    const o = refCtx.createOscillator(); o.type = 'sine'; o.frequency.value = freq;
+    const g = refCtx.createGain(); const t = refCtx.currentTime;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.25, t + 0.02);
+    g.gain.setValueAtTime(0.25, t + 1.1);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 1.6);
+    o.connect(g); g.connect(refCtx.destination);
+    o.start(t); o.stop(t + 1.65);
+    o.onended = () => { try { o.disconnect(); g.disconnect(); } catch (e) {} };
+  }
+  const stringRow = root.querySelector('.string-row') as HTMLElement;
+  function buildStrings(inst: string) {
+    stringRow.innerHTML = '';
+    TUNINGS[inst].forEach(s => {
+      const b = document.createElement('button');
+      b.className = 'flex-1 min-w-[40px] py-2 rounded-lg border border-[var(--color-border)] text-sm font-bold text-[var(--color-ink-700)] hover:border-[var(--color-violet)] hover:text-[var(--color-violet)] transition';
+      b.textContent = s.n + (Math.floor(s.m / 12) - 1);
+      b.setAttribute('aria-label', s.n + ' 기준음 재생');
+      b.addEventListener('click', () => { playRef(s.m); b.style.cssText = 'border-color:var(--color-violet);color:var(--color-violet);background:var(--color-violet-glow)'; setTimeout(() => b.style.cssText = '', 300); });
+      stringRow.appendChild(b);
+    });
+  }
+  const instBtns = [...root.querySelectorAll<HTMLElement>('.inst-btn')];
+  instBtns.forEach(btn => {
+    const sel = () => btn.style.cssText = 'background:white;color:var(--color-violet);box-shadow:0 1px 4px rgba(0,0,0,0.08)';
+    btn.addEventListener('click', () => {
+      instBtns.forEach(b => { b.setAttribute('aria-pressed', 'false'); b.style.cssText = ''; });
+      btn.setAttribute('aria-pressed', 'true'); sel();
+      buildStrings(btn.dataset.inst!);
+    });
+    if (btn.getAttribute('aria-pressed') === 'true') sel();
+  });
+  buildStrings('guitar');
 }
 
 document.querySelectorAll<HTMLElement>('.tuner').forEach(initTuner);

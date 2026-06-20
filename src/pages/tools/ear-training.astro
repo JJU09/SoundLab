@@ -33,6 +33,16 @@ const desc = '음정과 코드를 듣고 맞히는 무료 온라인 청음(이�
         </div>
       </div>
 
+      <!-- 음정 방향 (음정 모드 전용) -->
+      <div class="dir-row flex items-center justify-between gap-3">
+        <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)]">방향 · Direction</span>
+        <div class="flex gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" role="group" aria-label="음정 방향">
+          {[['up','상행'],['down','하행'],['harm','화성']].map(([v,t]) => (
+            <button class="dir-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all text-[var(--color-ink-500)]" data-dir={v} aria-pressed={v==='up'?'true':'false'} style="font-family:'Space Grotesk','Pretendard',sans-serif">{t}</button>
+          ))}
+        </div>
+      </div>
+
       <!-- 재생 (듣기 → 다시 듣기 → 다음을 한 버튼으로) -->
       <button class="play-btn w-full gradient-brand text-white font-semibold py-3.5 rounded-xl text-base flex items-center justify-center gap-2 transition hover:opacity-90" style="font-family:'Space Grotesk','Pretendard',sans-serif">▶ 듣기</button>
 
@@ -71,7 +81,7 @@ const CHORD_POOL: Record<string, string[]> = { easy:['maj','min'], normal:['maj'
 
 function initEar(root: HTMLElement) {
   const core = new AudioCore();
-  let mode = 'interval', diff = 'easy';
+  let mode = 'interval', diff = 'easy', dir = 'up';
   let curRoot = 60, curAns = '', answered = false, hasQ = false;
   let answeredN = 0, correctN = 0, streak = 0;
   let best = Number(localStorage.getItem('sl-ear-best') || 0);
@@ -90,9 +100,10 @@ function initEar(root: HTMLElement) {
     await core.resume();
     const t = core.ctx.currentTime + 0.06;
     if (mode === 'interval') {
-      const s = Number(curAns);
-      note(midiToFreq(curRoot), t, 0.55);
-      note(midiToFreq(curRoot + s), t + 0.62, 0.6);
+      const s = Number(curAns), lo = midiToFreq(curRoot), hi = midiToFreq(curRoot + s);
+      if (dir === 'harm') { note(lo, t, 1.1); note(hi, t, 1.1); }           // 화성(동시)
+      else if (dir === 'down') { note(hi, t, 0.55); note(lo, t + 0.62, 0.6); } // 하행(높은음→낮은음)
+      else { note(lo, t, 0.55); note(hi, t + 0.62, 0.6); }                  // 상행
     } else {
       for (const iv of CHORDS[curAns].iv) note(midiToFreq(curRoot + iv), t, 1.35);
     }
@@ -164,8 +175,10 @@ function initEar(root: HTMLElement) {
     });
   }
   function reset() { hasQ = false; answered = false; buildOptions(); feedback.textContent=''; playBtn.textContent = '▶ 듣기'; }
-  bindGroup('.mode-btn', v => { mode = v; reset(); }, 'mode');
+  const dirRow = root.querySelector('.dir-row') as HTMLElement;
+  bindGroup('.mode-btn', v => { mode = v; dirRow.classList.toggle('hidden', v !== 'interval'); reset(); }, 'mode');
   bindGroup('.diff-btn', v => { diff = v; reset(); }, 'diff');
+  bindGroup('.dir-btn', v => { dir = v; }, 'dir'); // 다음 재생부터 적용
 
   buildOptions();
   playBtn.addEventListener('click', () => { if (!hasQ || answered) newQuestion(); else play(); });

@@ -184,9 +184,17 @@ const presetRow2 = starterPresets.slice(3);
     <div class="module-card rounded-2xl border border-[var(--color-border)] bg-white overflow-hidden transition-all duration-200" data-type={m.id}>
       <div class="flex items-center justify-between px-4 py-3 border-b border-[var(--color-border)] bg-[var(--color-surface)]">
         <div class="flex items-center gap-2.5">
-          <span class="drag-handle cursor-grab active:cursor-grabbing text-[var(--color-ink-300)] hover:text-[var(--color-violet)] touch-none select-none" title="드래그해서 순서 변경">
+          <span class="drag-handle hidden sm:inline-flex cursor-grab active:cursor-grabbing text-[var(--color-ink-300)] hover:text-[var(--color-violet)] touch-none select-none" title="드래그해서 순서 변경">
             <svg class="w-4 h-4 pointer-events-none" fill="currentColor" viewBox="0 0 20 20"><path d="M7 4a1 1 0 11-2 0 1 1 0 012 0zM7 10a1 1 0 11-2 0 1 1 0 012 0zM6 17a1 1 0 100-2 1 1 0 000 2zM15 4a1 1 0 11-2 0 1 1 0 012 0zM14 10a1 1 0 11-2 0 1 1 0 012 0zM14 17a1 1 0 100-2 1 1 0 000 2z"/></svg>
           </span>
+          <div class="reorder-btns sm:hidden flex items-center gap-0.5 -ml-1.5" role="group" aria-label="순서 변경">
+            <button class="reorder-up w-7 h-7 flex items-center justify-center rounded-lg text-[var(--color-ink-300)] active:bg-[var(--color-violet-glow)] active:text-[var(--color-violet)] transition" aria-label="위로 이동" title="위로">
+              <svg class="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M18 15l-6-6-6 6"/></svg>
+            </button>
+            <button class="reorder-down w-7 h-7 flex items-center justify-center rounded-lg text-[var(--color-ink-300)] active:bg-[var(--color-violet-glow)] active:text-[var(--color-violet)] transition" aria-label="아래로 이동" title="아래로">
+              <svg class="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+          </div>
           <div class="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-mono font-bold text-white gradient-brand">{m.num}</div>
           <span class="font-bold text-sm" style="font-family:'Space Grotesk','Pretendard',sans-serif">{m.name}</span>
           <span class="text-xs text-[var(--color-ink-300)]">{m.kr}</span>
@@ -391,7 +399,17 @@ function bindCard(card: HTMLElement, id: string, type: string) {
     updatePlaceholder();
   });
 
-  // 드래그 손잡이 (순서 변경)
+  // ▲▼ 순서 변경 (모바일 — 드래그 대체)
+  card.querySelector<HTMLButtonElement>('.reorder-up')?.addEventListener('click', () => {
+    const prev = card.previousElementSibling;
+    if (prev?.classList.contains('module-card')) { rack.insertBefore(card, prev); syncChain(); }
+  });
+  card.querySelector<HTMLButtonElement>('.reorder-down')?.addEventListener('click', () => {
+    const next = card.nextElementSibling;
+    if (next?.classList.contains('module-card')) { rack.insertBefore(next, card); syncChain(); }
+  });
+
+  // 드래그 손잡이 (순서 변경 — 데스크톱)
   const handle = card.querySelector<HTMLElement>('.drag-handle')!;
   handle.addEventListener('pointerdown', () => card.setAttribute('draggable', 'true'));
   handle.addEventListener('pointerup', () => card.removeAttribute('draggable'));

@@ -174,7 +174,7 @@ const related = [
       </div>
 
       <!-- 건반 -->
-      <div class="keyboard relative select-none" style="height:140px" tabindex="0" role="group" aria-label="건반">
+      <div class="keyboard relative select-none touch-none" style="height:140px" tabindex="0" role="group" aria-label="건반">
         <div class="flex h-full gap-[3px]">
           {whites.map(m => (
             <button class="key-w flex-1 rounded-b-md bg-white border border-[var(--color-border)] flex items-end justify-center pb-1.5 transition" data-midi={m} aria-label={noteName(m)}>
@@ -306,15 +306,34 @@ function initSynth(root: HTMLElement) {
     const el = keyEls.get(m); if (el) el.style.filter = '';
   };
 
-  // 포인터 (클릭·드래그 글리산도)
-  let pointerDown = false;
-  keyEls.forEach((el, m) => {
-    el.addEventListener('pointerdown', e => { e.preventDefault(); pointerDown = true; press(m); });
-    el.addEventListener('pointerenter', () => { if (pointerDown) press(m); });
-    el.addEventListener('pointerleave', () => { if (pointerDown) release(m); });
-    el.addEventListener('pointerup', () => release(m));
+  // 포인터 (클릭·드래그 글리산도 — 마우스·터치·멀티터치)
+  const kbEl = root.querySelector<HTMLElement>('.keyboard')!;
+  const keyUnder = (x: number, y: number): number | null => {
+    const el = document.elementFromPoint(x, y)?.closest<HTMLElement>('[data-midi]');
+    return el ? Number(el.dataset.midi) : null;
+  };
+  const activePtr = new Map<number, number>(); // pointerId → midi
+  kbEl.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    const m = keyUnder(e.clientX, e.clientY);
+    if (m == null) return;
+    activePtr.set(e.pointerId, m); press(m);
   });
-  addEventListener('pointerup', () => { pointerDown = false; held.forEach(release); });
+  kbEl.addEventListener('pointermove', e => {
+    if (!activePtr.has(e.pointerId)) return;
+    const prev = activePtr.get(e.pointerId)!;
+    const m = keyUnder(e.clientX, e.clientY);
+    if (m === prev) return;
+    release(prev);
+    if (m == null) activePtr.delete(e.pointerId);
+    else { activePtr.set(e.pointerId, m); press(m); }
+  });
+  const endPtr = (e: PointerEvent) => {
+    const m = activePtr.get(e.pointerId);
+    if (m != null) { release(m); activePtr.delete(e.pointerId); }
+  };
+  addEventListener('pointerup', endPtr);
+  addEventListener('pointercancel', endPtr);
 
   // 컴퓨터 키보드
   const KEYMAP: Record<string, number> = { a:60,w:61,s:62,e:63,d:64,f:65,t:66,g:67,y:68,h:69,u:70,j:71,k:72,o:73,l:74,p:75,';':76 };

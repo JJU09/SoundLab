@@ -7,7 +7,7 @@
     <canvas class="hp-scope block w-full" style="height:44px"></canvas>
     <span class="hp-hint absolute inset-0 flex items-center justify-center text-[11px] font-mono text-[var(--color-ink-300)] pointer-events-none transition-opacity">↓ 눌러서 소리를 내보세요</span>
   </div>
-  <div class="hp-pads grid grid-cols-7 gap-1.5">
+  <div class="hp-pads grid grid-cols-7 gap-1.5 touch-none">
     {[60, 62, 64, 67, 69, 72, 74].map((m, i) => (
       <button class="hp-pad h-12 rounded-lg border border-[var(--color-border)] bg-white transition active:scale-95"
         data-midi={m} aria-label={`음 ${i + 1} 재생`}

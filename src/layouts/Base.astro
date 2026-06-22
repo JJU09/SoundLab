@@ -161,7 +161,36 @@ const sandboxNav = hubsSorted.map(h => ({
           style="font-family:'Space Grotesk','Pretendard',sans-serif">
           시작하기
         </a>
+        <button id="mobile-menu-btn" type="button" aria-label="메뉴 열기" aria-expanded="false" aria-controls="mobile-menu"
+          class="sm:hidden inline-flex items-center justify-center w-9 h-9 -mr-1.5 rounded-lg text-[var(--color-ink-500)] hover:text-[var(--color-violet)] hover:bg-[var(--color-violet-glow)] transition">
+          <svg class="mm-icon-open w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+          <svg class="mm-icon-close w-5 h-5 hidden" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
       </div>
+    </div>
+
+    <!-- 모바일 메뉴 패널 (sm 미만에서만) -->
+    <div id="mobile-menu" class="sm:hidden hidden border-t border-[var(--color-border)] bg-white/95 backdrop-blur-md">
+      <nav class="max-w-6xl mx-auto px-4 py-3 max-h-[calc(100dvh-3.5rem)] overflow-y-auto flex flex-col gap-0.5">
+        <a href={`${base}learn/`} class="mm-head">지식 허브</a>
+        <div class="mm-group">
+          {hubNav.map(h => h.ready ? (
+            <a href={h.href} class="mm-sub"><span class="mm-en">{h.label}</span><span>{h.kr}</span></a>
+          ) : (
+            <span class="mm-sub mm-off"><span class="mm-en">{h.label}</span><span>{h.kr}</span><span class="mm-badge">준비 중</span></span>
+          ))}
+        </div>
+        <a href={`${base}sandbox/`} class="mm-head">샌드박스</a>
+        <div class="mm-group">
+          {sandboxNav.map(s => s.ready ? (
+            <a href={s.href} class="mm-sub"><span class="mm-en">{s.label}</span><span>{s.kr}</span></a>
+          ) : (
+            <span class="mm-sub mm-off"><span class="mm-en">{s.label}</span><span>{s.kr}</span><span class="mm-badge">준비 중</span></span>
+          ))}
+        </div>
+        <a href={`${base}tools/`} class="mm-head">도구</a>
+        <a href={`${base}glossary/`} class="mm-head">용어집</a>
+      </nav>
     </div>
   </header>
 
@@ -183,6 +212,28 @@ const sandboxNav = hubsSorted.map(h => ({
       <a href={`${base}privacy/`} class="text-xs text-[var(--color-ink-300)] hover:text-[var(--color-violet)] transition">개인정보처리방침</a>
     </div>
   </footer>
+
+  <script>
+    const mmBtn = document.getElementById('mobile-menu-btn');
+    const mmPanel = document.getElementById('mobile-menu');
+    if (mmBtn && mmPanel) {
+      const iconOpen = mmBtn.querySelector('.mm-icon-open');
+      const iconClose = mmBtn.querySelector('.mm-icon-close');
+      const setOpen = (open: boolean) => {
+        mmPanel.classList.toggle('hidden', !open);
+        iconOpen?.classList.toggle('hidden', open);
+        iconClose?.classList.toggle('hidden', !open);
+        mmBtn.setAttribute('aria-expanded', String(open));
+        mmBtn.setAttribute('aria-label', open ? '메뉴 닫기' : '메뉴 열기');
+      };
+      mmBtn.addEventListener('click', () => setOpen(mmPanel.classList.contains('hidden')));
+      mmPanel.addEventListener('click', (e) => {
+        if ((e.target as HTMLElement).closest('a')) setOpen(false);
+      });
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setOpen(false); });
+      window.matchMedia('(min-width: 640px)').addEventListener('change', (e) => { if (e.matches) setOpen(false); });
+    }
+  </script>
 </body>
 </html>
 
@@ -199,6 +250,32 @@ const sandboxNav = hubsSorted.map(h => ({
   .nav-link:hover {
     color: var(--color-violet);
     background: var(--color-violet-glow);
+  }
+
+  /* 모바일 메뉴 */
+  .mm-head {
+    font-family: 'Space Grotesk', 'Pretendard', sans-serif;
+    font-size: 15px; font-weight: 600;
+    color: var(--color-ink-500);
+    padding: 11px 12px; border-radius: 10px;
+  }
+  .mm-head:active { background: var(--color-violet-glow); color: var(--color-violet); }
+  .mm-group { display: flex; flex-direction: column; padding: 2px 0 6px 6px; }
+  .mm-sub {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 12px; border-radius: 9px;
+    font-size: 14px; font-weight: 500; color: var(--color-ink-500);
+  }
+  .mm-sub:active { background: var(--color-violet-glow); color: var(--color-violet); }
+  .mm-en {
+    font-family: ui-monospace, 'Space Grotesk', monospace;
+    font-size: 10px; color: var(--color-ink-300);
+    width: 74px; flex: none;
+  }
+  .mm-off { color: var(--color-ink-300); }
+  .mm-badge {
+    margin-left: auto; font-size: 9px; font-family: ui-monospace, monospace;
+    padding: 2px 7px; border-radius: 999px; background: var(--color-surface-2);
   }
 
   /* 드롭다운 */

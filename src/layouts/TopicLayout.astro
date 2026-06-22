@@ -3,6 +3,7 @@ import Base from './Base.astro';
 import TopicWidget from '../components/TopicWidget.astro';
 import Quiz from '../components/Quiz.astro';
 import ScaffoldBar from '../components/ScaffoldBar.astro';
+import AdUnit from '../components/AdUnit.astro';
 import { HUB_META, SANDBOX_OF } from '../content.config';
 import { QUIZZES } from '../lib/quizzes';
 
@@ -143,5 +144,7 @@ const accent = data.color === 'violet'
 
     </div>
     </div>
+
+    <AdUnit />
   </div>
 </Base>

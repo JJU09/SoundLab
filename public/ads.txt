@@ -1,0 +1,4 @@
+# Google AdSense ads.txt
+# 승인 후 아래 줄의 주석(#)을 해제하고 pub-0000000000000000 을 본인 게시자 ID로 교체하세요.
+# (게시자 ID는 ca-pub- 접두사를 빼고 pub- 부터 적습니다)
+# google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0

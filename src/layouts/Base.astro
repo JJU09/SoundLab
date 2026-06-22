@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import { getCollection } from 'astro:content';
 import { HUB_META, HUBS, SANDBOX_OF } from '../content.config';
+import { ADSENSE_ID } from '../ads.config';
 
 interface Props {
   title: string;
@@ -72,6 +73,10 @@ const sandboxNav = hubsSorted.map(h => ({
 
   {GA_ID && <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}></script>}
   {GA_ID && <script is:inline set:html={`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${GA_ID}',{anonymize_ip:true});`} />}
+
+  {/* Google AdSense — ads.config.ts 의 ADSENSE_ID 설정 시 자동 활성화 */}
+  {ADSENSE_ID && <meta name="google-adsense-account" content={ADSENSE_ID} />}
+  {ADSENSE_ID && <script is:inline async src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_ID}`} crossorigin="anonymous"></script>}
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -209,7 +214,10 @@ const sandboxNav = hubsSorted.map(h => ({
         <span class="text-sm font-semibold gradient-brand-text" style="font-family:'Space Grotesk','Pretendard',sans-serif">SoundLab</span>
       </div>
       <p class="text-xs text-[var(--color-ink-300)] font-mono">Web Audio API · 헤드폰 착용 권장</p>
-      <a href={`${base}privacy/`} class="text-xs text-[var(--color-ink-300)] hover:text-[var(--color-violet)] transition">개인정보처리방침</a>
+      <div class="flex items-center gap-4">
+        <a href={`${base}about/`} class="text-xs text-[var(--color-ink-300)] hover:text-[var(--color-violet)] transition">소개</a>
+        <a href={`${base}privacy/`} class="text-xs text-[var(--color-ink-300)] hover:text-[var(--color-violet)] transition">개인정보처리방침</a>
+      </div>
     </div>
   </footer>
 

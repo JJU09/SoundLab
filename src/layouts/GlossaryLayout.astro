@@ -1,6 +1,7 @@
 ---
 import Base from './Base.astro';
 import TopicWidget from '../components/TopicWidget.astro';
+import AdUnit from '../components/AdUnit.astro';
 import { HUB_META, SANDBOX_OF } from '../content.config';
 
 interface GlossaryData {
@@ -120,6 +121,8 @@ const topicHref = data.relatedTopic ? `${base}learn/${data.relatedTopic}/` : nul
     <div class="mt-8">
       <a href={`${base}glossary/`} class="text-sm font-medium text-[var(--color-ink-500)] hover:text-[var(--color-violet)] transition">← 용어집 전체 보기</a>
     </div>
+
+    <AdUnit />
   </div>
 
   <script type="application/ld+json" set:html={JSON.stringify({

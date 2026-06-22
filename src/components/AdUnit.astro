@@ -1,0 +1,26 @@
+---
+// 게이트된 AdSense 광고 단위.
+// ADSENSE_ID + 해당 슬롯이 모두 설정돼야 렌더링됩니다. 미설정 시 아무것도 출력하지 않음.
+import { ADSENSE_ID, AD_SLOTS, type AdSlot } from '../ads.config';
+
+interface Props {
+  slot?: AdSlot;
+  class?: string;
+}
+const { slot = 'content', class: cls = '' } = Astro.props;
+const slotId = AD_SLOTS[slot];
+const enabled = !!ADSENSE_ID && !!slotId;
+---
+{enabled && (
+  <aside class={`adunit my-10 ${cls}`} aria-label="광고">
+    <div class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5 text-center">Advertisement</div>
+    <ins
+      class="adsbygoogle"
+      style="display:block; min-height:90px"
+      data-ad-client={ADSENSE_ID}
+      data-ad-slot={slotId}
+      data-ad-format="auto"
+      data-full-width-responsive="true"></ins>
+    <script is:inline set:html="(adsbygoogle=window.adsbygoogle||[]).push({});" />
+  </aside>
+)}

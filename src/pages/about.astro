@@ -1,0 +1,95 @@
+---
+import Base from '../layouts/Base.astro';
+const base = import.meta.env.BASE_URL;
+
+const sections = [
+  {
+    title: 'SoundLab이란',
+    body: [
+      'SoundLab은 소리와 음악의 원리를 글로만 읽는 대신 직접 만지고 들으며 배우는 인터랙티브 학습 사이트입니다.',
+      '파동·디지털오디오·신디사이저·이펙트·믹싱 다섯 가지 지식 허브를 중심으로, 각 개념을 실시간으로 조작할 수 있는 위젯·샌드박스·연습 도구를 제공합니다.',
+    ],
+  },
+  {
+    title: '이렇게 만들었습니다',
+    list: [
+      ['브라우저 내 합성', '모든 소리는 Web Audio API로 기기 안에서 실시간 생성됩니다. 오디오 파일을 내려받지 않습니다.'],
+      ['무설치·무료', '앱 설치나 회원가입 없이, 링크만 열면 바로 사용할 수 있습니다.'],
+      ['한국어 우선', '음악·오디오 용어를 한국어 학습자 눈높이에 맞춰 설명합니다.'],
+    ],
+  },
+  {
+    title: '무엇을 할 수 있나요',
+    list: [
+      ['지식 허브', '단계별 레슨과 인터랙티브 위젯으로 개념을 익힙니다.'],
+      ['샌드박스', '신스·페달보드·믹서 등을 자유롭게 조립하고 연주합니다.'],
+      ['연습 도구', '메트로놈·튜너·청음·노이즈·톤 제너레이터 등 실전 도구.'],
+      ['용어집', '오디오 용어를 살아있는 예시와 함께 찾아봅니다.'],
+    ],
+  },
+  {
+    title: '문의·피드백',
+    body: [
+      '의견·버그 제보는 사이트 상단의 피드백 버튼 또는 GitHub 저장소 Issues로 보내 주세요. 보내 주신 의견은 다음 개선에 반영됩니다.',
+    ],
+  },
+];
+---
+<Base title="소개" description="SoundLab은 Web Audio API로 소리와 음악의 원리를 직접 만지며 배우는 무료 인터랙티브 학습 사이트입니다.">
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 py-12">
+
+    <!-- 브레드크럼 -->
+    <nav class="flex items-center gap-2 text-xs font-mono text-[var(--color-ink-300)] mb-8">
+      <a href={base} class="hover:text-[var(--color-violet)] transition">홈</a>
+      <span>/</span>
+      <span class="text-[var(--color-ink-700)]">소개</span>
+    </nav>
+
+    <!-- 헤더 -->
+    <div class="mb-10">
+      <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">About</span>
+      <h1 class="text-3xl sm:text-4xl font-bold mt-2 mb-3" style="font-family:'Space Grotesk','Pretendard',sans-serif">SoundLab 소개</h1>
+      <p class="text-[var(--color-ink-500)] leading-relaxed">
+        소리를 <b class="text-[var(--color-ink-700)]">직접 만들며</b> 배우는 음악의 원리 —
+        설치도, 회원가입도 없이 브라우저에서 바로.
+      </p>
+    </div>
+
+    <!-- 섹션 카드 -->
+    <div class="space-y-4">
+      {sections.map((s, i) => (
+        <section class="p-5 sm:p-6 rounded-2xl border border-[var(--color-border)] bg-white">
+          <div class="flex items-center gap-3 mb-3">
+            <span class="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-mono font-bold text-white gradient-brand">
+              {String(i + 1).padStart(2, '0')}
+            </span>
+            <h2 class="text-base font-bold" style="font-family:'Space Grotesk','Pretendard',sans-serif">{s.title}</h2>
+          </div>
+
+          {s.body && (
+            <div class="space-y-2 text-sm leading-relaxed text-[var(--color-ink-700)]">
+              {s.body.map(p => <p>{p}</p>)}
+            </div>
+          )}
+
+          {s.list && (
+            <ul class="space-y-2 mt-1">
+              {s.list.map(([name, desc]) => (
+                <li class="flex items-start gap-2.5 text-sm">
+                  <span class="mt-1.5 w-1.5 h-1.5 rounded-full bg-[var(--color-violet-light)] flex-none"></span>
+                  <span><b class="font-semibold text-[var(--color-ink-700)]">{name}</b><span class="text-[var(--color-ink-500)]"> — {desc}</span></span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      ))}
+    </div>
+
+    <!-- CTA -->
+    <div class="mt-8 flex flex-wrap gap-3">
+      <a href={`${base}learn/`} class="gradient-brand text-white text-sm font-semibold px-5 py-2.5 rounded-full transition hover:opacity-90" style="font-family:'Space Grotesk','Pretendard',sans-serif">학습 시작하기 →</a>
+      <a href={`${base}sandbox/`} class="text-sm font-semibold px-5 py-2.5 rounded-full border border-[var(--color-border)] text-[var(--color-ink-500)] hover:border-[var(--color-violet)] hover:text-[var(--color-violet)] transition">샌드박스 열기</a>
+    </div>
+  </div>
+</Base>

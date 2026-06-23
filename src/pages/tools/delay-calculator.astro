@@ -1,0 +1,198 @@
+---
+import Base from '../../layouts/Base.astro';
+const base = import.meta.env.BASE_URL;
+const desc = 'BPM을 입력하면 딜레이·리버브 타임을 음표별(1/1~1/32)로 ms·Hz로 계산. 정박·점음표·셋잇단, 탭 템포, 실제 들어보기까지 — 무료 온라인 BPM 딜레이 계산기.';
+const noteRows: { d: number; label: string; sub: string }[] = [
+  { d: 1, label: '1/1', sub: '온음표' },
+  { d: 2, label: '1/2', sub: '2분음표' },
+  { d: 4, label: '1/4', sub: '4분음표' },
+  { d: 8, label: '1/8', sub: '8분음표' },
+  { d: 16, label: '1/16', sub: '16분음표' },
+  { d: 32, label: '1/32', sub: '32분음표' },
+];
+const cols: { key: string; label: string; en: string }[] = [
+  { key: 'straight', label: '정박', en: 'Straight' },
+  { key: 'dotted', label: '점음표', en: 'Dotted' },
+  { key: 'triplet', label: '셋잇단', en: 'Triplet' },
+];
+---
+<Base title="BPM 딜레이 계산기" description={desc} type="website"
+  breadcrumbs={[{ name: '홈', url: base }, { name: '도구', url: `${base}tools/` }, { name: 'BPM 딜레이 계산기', url: Astro.url.pathname }]}>
+
+<div class="max-w-xl mx-auto px-4 sm:px-6 py-12">
+  <nav class="flex items-center gap-2 text-xs font-mono text-[var(--color-ink-300)] mb-6">
+    <a href={base} class="hover:text-[var(--color-violet)] transition">홈</a><span>/</span>
+    <a href={`${base}tools/`} class="hover:text-[var(--color-violet)] transition">도구</a><span>/</span>
+    <span class="text-[var(--color-ink-700)]">BPM 딜레이 계산기</span>
+  </nav>
+
+  <div class="mb-6">
+    <span class="text-xs font-mono px-2.5 py-1 rounded-full border border-[var(--color-violet-light)] text-[var(--color-violet)] bg-[var(--color-violet-glow)]">TOOLS</span>
+    <h1 class="text-3xl font-bold mt-3 mb-2" style="font-family:'Space Grotesk','Pretendard',sans-serif">BPM 딜레이 계산기</h1>
+    <p class="text-[var(--color-ink-500)]">BPM에 맞는 딜레이·리버브 타임을 음표별로 계산합니다. 값을 눌러 실제 타이밍을 들어보세요.</p>
+  </div>
+
+  <div class="calc rounded-2xl border border-[var(--color-border)] bg-white overflow-hidden">
+    <div class="p-6 sm:p-8 space-y-6">
+      <!-- BPM 표시 -->
+      <div class="text-center">
+        <div class="flex items-end justify-center gap-2">
+          <span class="bpm-num text-6xl font-bold tabular-nums leading-none" style="font-family:'Space Grotesk','Pretendard',sans-serif">120</span>
+          <span class="text-sm font-mono text-[var(--color-ink-300)] mb-1.5">BPM</span>
+        </div>
+        <div class="text-xs font-mono text-[var(--color-violet)] mt-1.5">1/4 = <span class="quarter-ms">500</span> ms</div>
+      </div>
+
+      <!-- BPM 컨트롤 -->
+      <div class="flex items-center gap-3">
+        <button class="bpm-dec w-10 h-10 flex-none rounded-xl border border-[var(--color-border)] text-xl font-bold text-[var(--color-ink-500)] hover:border-[var(--color-violet)] hover:text-[var(--color-violet)] transition" aria-label="BPM 감소">−</button>
+        <input type="range" class="sl-range bpm-range flex-1" min="40" max="240" step="1" value="120" aria-label="BPM" />
+        <button class="bpm-inc w-10 h-10 flex-none rounded-xl border border-[var(--color-border)] text-xl font-bold text-[var(--color-ink-500)] hover:border-[var(--color-violet)] hover:text-[var(--color-violet)] transition" aria-label="BPM 증가">+</button>
+      </div>
+
+      <!-- 단위 토글 + 탭 템포 -->
+      <div class="flex items-center justify-between gap-3 flex-wrap">
+        <div class="flex gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" role="group" aria-label="단위">
+          <button class="unit-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-[var(--color-ink-500)]" data-unit="ms" aria-pressed="true" style="font-family:'Space Grotesk','Pretendard',sans-serif">ms</button>
+          <button class="unit-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-[var(--color-ink-500)]" data-unit="hz" aria-pressed="false" style="font-family:'Space Grotesk','Pretendard',sans-serif">Hz</button>
+        </div>
+        <button class="tap-btn px-4 py-2 rounded-xl border border-[var(--color-border)] text-sm font-semibold text-[var(--color-ink-500)] hover:border-[var(--color-violet)] hover:text-[var(--color-violet)] transition" style="font-family:'Space Grotesk','Pretendard',sans-serif">탭 템포</button>
+      </div>
+
+      <!-- 표 -->
+      <table class="w-full text-center border-collapse">
+        <thead>
+          <tr class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)]">
+            <th class="text-left font-medium pb-2 pl-1">음표</th>
+            {cols.map(c => <th class="font-medium pb-2">{c.label}<span class="block text-[8px] normal-case tracking-normal text-[var(--color-ink-300)]/70">{c.en}</span></th>)}
+          </tr>
+        </thead>
+        <tbody>
+          {noteRows.map(r => (
+            <tr class="border-t border-[var(--color-border)]">
+              <th scope="row" class="text-left py-1.5 pl-1">
+                <span class="font-bold text-sm tabular-nums" style="font-family:'Space Grotesk','Pretendard',sans-serif">{r.label}</span>
+                <span class="block text-[10px] text-[var(--color-ink-300)] -mt-0.5">{r.sub}</span>
+              </th>
+              {cols.map(c => (
+                <td class="py-1">
+                  <button class="cell w-full min-h-[44px] rounded-lg text-sm font-mono tabular-nums text-[var(--color-ink-700)] hover:bg-[var(--color-violet-glow)] hover:text-[var(--color-violet)] active:scale-95 transition" data-denom={r.d} data-col={c.key} aria-label={`${r.label} ${c.label} 들어보기`}>—</button>
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <p class="text-xs text-[var(--color-ink-300)] mt-4 text-center">
+    값을 누르면 그 딜레이 타임으로 <b class="text-[var(--color-ink-500)]">에코를 들려줍니다</b> · <b class="text-[var(--color-ink-500)]">ms</b>는 딜레이·프리딜레이, <b class="text-[var(--color-ink-500)]">Hz</b>는 LFO·트레몰로 속도에 씁니다
+  </p>
+
+  <div class="mt-8 p-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-sm text-[var(--color-ink-500)] space-y-2">
+    <p><b class="text-[var(--color-ink-700)]">정박</b>은 딱 떨어지는 그루브, <b class="text-[var(--color-ink-700)]">점음표(1.5배)</b>는 넓고 끈적한 공간감, <b class="text-[var(--color-ink-700)]">셋잇단</b>은 스윙·굴러가는 느낌을 줍니다.</p>
+    <p>딜레이가 뭔지부터 궁금하다면 <a href={`${base}glossary/delay/`} class="text-[var(--color-violet)] font-medium hover:underline">딜레이</a>·<a href={`${base}glossary/reverb/`} class="text-[var(--color-violet)] font-medium hover:underline">리버브</a> 용어를, 박자 연습은 <a href={`${base}tools/metronome/`} class="text-[var(--color-violet)] font-medium hover:underline">메트로놈</a>에서 이어가세요.</p>
+  </div>
+</div>
+
+<script>
+import { AudioCore } from '../../audio/core';
+
+function initCalc(root: HTMLElement) {
+  const core = new AudioCore();
+  let bpm = 120;
+  let unit: 'ms' | 'hz' = 'ms';
+
+  const bpmNum = root.querySelector('.bpm-num') as HTMLElement;
+  const quarterMsEl = root.querySelector('.quarter-ms') as HTMLElement;
+  const range = root.querySelector('.bpm-range') as HTMLInputElement;
+  const cells = [...root.querySelectorAll<HTMLElement>('.cell')];
+
+  const setPct = (el: HTMLInputElement) => el.style.setProperty('--sl-pct', ((+el.value - +el.min) / (+el.max - +el.min) * 100) + '%');
+
+  // denom 음표 → ms (1/4 = 60000/bpm)
+  const msFor = (denom: number, col: string) => {
+    const straight = (60000 / bpm) * 4 / denom;
+    return col === 'dotted' ? straight * 1.5 : col === 'triplet' ? straight * 2 / 3 : straight;
+  };
+  const fmt = (ms: number) => {
+    if (unit === 'hz') { const hz = 1000 / ms; return hz >= 10 ? hz.toFixed(1) : hz.toFixed(2); }
+    return ms >= 100 ? ms.toFixed(0) : ms.toFixed(1);
+  };
+  function render() {
+    cells.forEach(c => {
+      const ms = msFor(Number(c.dataset.denom), c.dataset.col!);
+      c.dataset.ms = String(ms);
+      c.textContent = fmt(ms);
+    });
+  }
+  function setBpm(v: number) {
+    bpm = Math.max(40, Math.min(240, Math.round(v)));
+    bpmNum.textContent = String(bpm);
+    quarterMsEl.textContent = (60000 / bpm).toFixed(0);
+    range.value = String(bpm); setPct(range);
+    render();
+  }
+
+  // ── 오디오 미리듣기 (딜레이 에코) ──
+  function pluck(time: number, gain: number) {
+    const o = core.ctx.createOscillator(); o.type = 'triangle'; o.frequency.value = 587.33; // D5
+    const g = core.gain(0.0001);
+    g.gain.setValueAtTime(0.0001, time);
+    g.gain.exponentialRampToValueAtTime(gain, time + 0.003);
+    g.gain.exponentialRampToValueAtTime(0.0001, time + 0.18);
+    o.connect(g); g.connect(core.input);
+    o.start(time); o.stop(time + 0.2);
+    o.onended = () => { try { o.disconnect(); g.disconnect(); } catch (e) {} };
+  }
+  async function preview(ms: number) {
+    await core.resume();
+    const d = ms / 1000;
+    const n = Math.max(2, Math.min(6, Math.floor(2.4 / d) + 1)); // 총 길이 ~2.4초로 제한
+    const t0 = core.ctx.currentTime + 0.05;
+    for (let k = 0; k < n; k++) pluck(t0 + k * d, 0.5 * Math.pow(0.62, k));
+  }
+
+  // ── 이벤트 ──
+  range.addEventListener('input', () => setBpm(+range.value));
+  root.querySelector('.bpm-dec')!.addEventListener('click', () => setBpm(bpm - 1));
+  root.querySelector('.bpm-inc')!.addEventListener('click', () => setBpm(bpm + 1));
+
+  cells.forEach(c => c.addEventListener('click', () => {
+    cells.forEach(x => x.style.cssText = '');
+    c.style.cssText = 'background:var(--color-violet);color:white';
+    preview(Number(c.dataset.ms));
+  }));
+
+  // 단위 토글
+  const unitBtns = [...root.querySelectorAll<HTMLElement>('.unit-btn')];
+  unitBtns.forEach(btn => {
+    const sel = () => btn.style.cssText = 'background:white;color:var(--color-violet);box-shadow:0 1px 4px rgba(0,0,0,0.08)';
+    btn.addEventListener('click', () => {
+      unitBtns.forEach(b => { b.setAttribute('aria-pressed', 'false'); b.style.cssText = ''; });
+      btn.setAttribute('aria-pressed', 'true'); sel();
+      unit = btn.dataset.unit as 'ms' | 'hz'; render();
+    });
+    if (btn.getAttribute('aria-pressed') === 'true') sel();
+  });
+
+  // 탭 템포
+  let taps: number[] = [];
+  root.querySelector('.tap-btn')!.addEventListener('click', () => {
+    const now = performance.now();
+    taps = taps.filter(t => now - t < 2500); taps.push(now);
+    if (taps.length >= 2) {
+      const intervals = taps.slice(1).map((t, i) => t - taps[i]);
+      const avg = intervals.reduce((a, b) => a + b, 0) / intervals.length;
+      setBpm(60000 / avg);
+    }
+  });
+
+  setBpm(120);
+}
+
+document.querySelectorAll<HTMLElement>('.calc').forEach(initCalc);
+</script>
+
+</Base>

@@ -3,7 +3,8 @@ import Base from '../../layouts/Base.astro';
 const base = import.meta.env.BASE_URL;
 const desc = '화이트·핑크·브라운 노이즈를 재생하는 무료 온라인 노이즈 제너레이터. 집중·공부·수면·이명 완화용. 볼륨 조절과 자동 종료 타이머 내장. 설치 없이 브라우저에서.';
 ---
-<Base title="노이즈 제너레이터" description={desc} type="website">
+<Base title="노이즈 제너레이터" description={desc} type="website"
+  breadcrumbs={[{ name: '홈', url: base }, { name: '도구', url: `${base}tools/` }, { name: '노이즈 제너레이터', url: Astro.url.pathname }]}>
 
 <div class="max-w-xl mx-auto px-4 sm:px-6 py-12">
   <nav class="flex items-center gap-2 text-xs font-mono text-[var(--color-ink-300)] mb-6">

@@ -3,7 +3,8 @@ import Base from '../../layouts/Base.astro';
 const base = import.meta.env.BASE_URL;
 const desc = '마이크로 음정을 실시간 잡아주는 무료 온라인 크로마틱 튜너. 기타·바이올린·관악 등 모든 악기. 음이름·주파수·센트 편차 표시.';
 ---
-<Base title="크로마틱 튜너" description={desc} type="website">
+<Base title="크로마틱 튜너" description={desc} type="website"
+  breadcrumbs={[{ name: '홈', url: base }, { name: '도구', url: `${base}tools/` }, { name: '크로마틱 튜너', url: Astro.url.pathname }]}>
 
 <div class="max-w-xl mx-auto px-4 sm:px-6 py-12">
   <nav class="flex items-center gap-2 text-xs font-mono text-[var(--color-ink-300)] mb-6">

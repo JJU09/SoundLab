@@ -11,7 +11,8 @@ const related = [
   { href: `${base}learn/digital/levels/`, label: '레벨·헤드룸' },
 ];
 ---
-<Base title="로파이 실험실" description={desc} type="website">
+<Base title="로파이 실험실" description={desc} type="website"
+  breadcrumbs={[{ name: '홈', url: base }, { name: '샌드박스', url: `${base}sandbox/` }, { name: '로파이 실험실', url: Astro.url.pathname }]}>
 <SandboxShell
   title="로파이 실험실" en="Digital"
   desc="소리를 고르고 샘플레이트·비트뎁스를 낮춰 보세요. 디지털 열화가 어떤 소리·파형·스펙트럼을 만드는지 실시간으로 들립니다."

@@ -18,7 +18,8 @@ const related = [
   { href: `${base}learn/mixing/loudness/`, label: '라우드니스' },
 ];
 ---
-<Base title="미니 믹서" description={desc} type="website">
+<Base title="미니 믹서" description={desc} type="website"
+  breadcrumbs={[{ name: '홈', url: base }, { name: '샌드박스', url: `${base}sandbox/` }, { name: '미니 믹서', url: Astro.url.pathname }]}>
 <SandboxShell
   title="미니 믹서" en="Mixing"
   desc="세 트랙을 한 스피커에서 만나게 하고, 페이더·팬·EQ·컴프레서로 각 악기에 자리를 만들어 주세요."

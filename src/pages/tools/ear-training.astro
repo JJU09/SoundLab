@@ -3,7 +3,8 @@ import Base from '../../layouts/Base.astro';
 const base = import.meta.env.BASE_URL;
 const desc = '음정과 코드를 듣고 맞히는 무료 온라인 청음(이어 트레이닝) 훈련. 난이도별 음정·코드, 연속 정답·정답률 기록으로 절대음감·상대음감을 키웁니다.';
 ---
-<Base title="음정·코드 청음" description={desc} type="website">
+<Base title="음정·코드 청음" description={desc} type="website"
+  breadcrumbs={[{ name: '홈', url: base }, { name: '도구', url: `${base}tools/` }, { name: '음정·코드 청음', url: Astro.url.pathname }]}>
 
 <div class="max-w-xl mx-auto px-4 sm:px-6 py-12">
   <nav class="flex items-center gap-2 text-xs font-mono text-[var(--color-ink-300)] mb-6">

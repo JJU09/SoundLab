@@ -25,7 +25,8 @@ const related = [
   { href: `${base}learn/synthesis/adsr/`, label: 'ADSR 엔벨로프' },
 ];
 ---
-<Base title="신디사이저" description={desc} type="website">
+<Base title="신디사이저" description={desc} type="website"
+  breadcrumbs={[{ name: '홈', url: base }, { name: '샌드박스', url: `${base}sandbox/` }, { name: '신디사이저', url: Astro.url.pathname }]}>
 <SandboxShell
   title="신디사이저" en="Synthesis"
   desc="파형을 고르고 필터·엔벨로프·LFO로 다듬어 나만의 소리를 만들고, 건반으로 연주하세요. 2nd 오실레이터·모듈레이션까지 모든 컨트롤이 열려 있습니다."

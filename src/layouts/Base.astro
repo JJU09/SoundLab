@@ -9,13 +9,14 @@ interface Props {
   description?: string;
   image?: string;   // og:image 경로(base 기준). 미지정 시 기본 OG 이미지.
   type?: string;    // og:type — 기본 website, 글/레슨은 article
+  breadcrumbs?: { name: string; url: string }[]; // BreadcrumbList JSON-LD용 (url은 사이트 절대경로)
 }
 const SITE_NAME = 'SoundLab';
 // GA4 측정 ID(G-XXXXXXX). 비워두면 분석 스크립트 미출력(자리만 확보). 발급 후 채우면 자동 활성.
 const GA_ID = 'G-XE8CLT7CER';
 // 피드백 폼(노션) URL. 비워두면 헤더 피드백 버튼 미노출. 노션 폼 공유 링크를 붙여넣으면 자동 활성.
 const FEEDBACK_URL = 'https://outgoing-crayfish-491.notion.site/38285182bf2b804b97dbe266e0f9b9e7?pvs=105';
-const { title, description = 'Web Audio API로 듣고 만지며 배우는 인터랙티브 사운드·음악 학습 사이트', image, type = 'website' } = Astro.props;
+const { title, description = 'Web Audio API로 듣고 만지며 배우는 인터랙티브 사운드·음악 학습 사이트', image, type = 'website', breadcrumbs } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const fullTitle = `${title} · ${SITE_NAME}`;
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
@@ -70,6 +71,19 @@ const sandboxNav = hubsSorted.map(h => ({
     inLanguage: 'ko',
     description,
   })} />
+
+  {breadcrumbs && breadcrumbs.length > 0 && (
+    <script type="application/ld+json" set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: breadcrumbs.map((b, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        name: b.name,
+        item: new URL(b.url, Astro.site).href,
+      })),
+    })} />
+  )}
 
   {GA_ID && <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}></script>}
   {GA_ID && <script is:inline set:html={`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${GA_ID}',{anonymize_ip:true});`} />}

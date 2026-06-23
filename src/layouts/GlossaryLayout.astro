@@ -38,7 +38,12 @@ const heading = `${data.term}${ranSuffix(data.term)}?`;
 const fullTitle = `${heading} — ${hub.kr} 용어`;
 const topicHref = data.relatedTopic ? `${base}learn/${data.relatedTopic}/` : null;
 ---
-<Base title={heading} description={data.definition} type="article">
+<Base title={heading} description={data.definition} type="article"
+  breadcrumbs={[
+    { name: '홈', url: base },
+    { name: '용어집', url: `${base}glossary/` },
+    { name: data.term, url: Astro.url.pathname },
+  ]}>
 
   <div class="max-w-3xl mx-auto px-4 sm:px-6 py-10">
 

@@ -38,7 +38,12 @@ const accent = data.color === 'violet'
   ? 'border-[var(--color-violet-light)] text-[var(--color-violet)] bg-[var(--color-violet-glow)]'
   : 'border-[var(--color-blue-light)] text-[var(--color-blue)] bg-[var(--color-blue-glow)]';
 ---
-<Base title={`${data.title} (${data.kr})`} description={data.desc}>
+<Base title={`${data.title} (${data.kr})`} description={data.desc} type="article"
+  breadcrumbs={[
+    { name: '홈', url: base },
+    { name: hub.kr, url: `${base}learn/${data.hub}/` },
+    { name: data.title, url: Astro.url.pathname },
+  ]}>
 
   <div class="max-w-6xl mx-auto px-4 sm:px-6 py-10">
 

@@ -14,7 +14,8 @@ const related = [
   { href: `${base}learn/synthesis/additive/`, label: '가산 합성' },
 ];
 ---
-<Base title="파동 실험실" description={desc} type="website">
+<Base title="파동 실험실" description={desc} type="website"
+  breadcrumbs={[{ name: '홈', url: base }, { name: '샌드박스', url: `${base}sandbox/` }, { name: '파동 실험실', url: Astro.url.pathname }]}>
 <SandboxShell
   title="파동 실험실" en="Acoustics"
   desc="배음을 쌓아 음색을 만들고, 두 음을 겹쳐 맥놀이·위상 간섭을 관찰하세요. 파형과 스펙트럼이 실시간으로 바뀝니다."

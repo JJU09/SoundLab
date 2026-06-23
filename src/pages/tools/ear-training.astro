@@ -73,10 +73,10 @@ import { AudioCore } from '../../audio/core';
 
 const INTERVALS: Record<number, string> = { 1:'단2도', 2:'장2도', 3:'단3도', 4:'장3도', 5:'완전4도', 6:'트라이톤', 7:'완전5도', 8:'단6도', 9:'장6도', 10:'단7도', 11:'장7도', 12:'옥타브' };
 const INT_POOL: Record<string, number[]> = { easy:[4,5,7,12], normal:[2,3,4,5,7,9,10,12], hard:[1,2,3,4,5,6,7,8,9,10,11,12] };
-const CHORDS: Record<string, { name: string; iv: number[] }> = {
-  maj:{name:'장3화음', iv:[0,4,7]}, min:{name:'단3화음', iv:[0,3,7]},
-  dim:{name:'감3화음', iv:[0,3,6]}, aug:{name:'증3화음', iv:[0,4,8]},
-  dom7:{name:'속7화음', iv:[0,4,7,10]}, maj7:{name:'장7화음', iv:[0,4,7,11]}, min7:{name:'단7화음', iv:[0,3,7,10]},
+const CHORDS: Record<string, { name: string; sym: string; iv: number[] }> = {
+  maj:{name:'장3화음', sym:'maj', iv:[0,4,7]}, min:{name:'단3화음', sym:'m', iv:[0,3,7]},
+  dim:{name:'감3화음', sym:'dim', iv:[0,3,6]}, aug:{name:'증3화음', sym:'aug', iv:[0,4,8]},
+  dom7:{name:'속7화음', sym:'7', iv:[0,4,7,10]}, maj7:{name:'장7화음', sym:'maj7', iv:[0,4,7,11]}, min7:{name:'단7화음', sym:'m7', iv:[0,3,7,10]},
 };
 const CHORD_POOL: Record<string, string[]> = { easy:['maj','min'], normal:['maj','min','dim','aug'], hard:['maj','min','dim','aug','dom7','maj7','min7'] };
 
@@ -111,8 +111,8 @@ function initEar(root: HTMLElement) {
   }
 
   const pool = () => mode === 'interval'
-    ? INT_POOL[diff].map(s => ({ id: String(s), label: INTERVALS[s] }))
-    : CHORD_POOL[diff].map(id => ({ id, label: CHORDS[id].name }));
+    ? INT_POOL[diff].map(s => ({ id: String(s), label: INTERVALS[s], sym: '' }))
+    : CHORD_POOL[diff].map(id => ({ id, label: CHORDS[id].name, sym: CHORDS[id].sym }));
 
   // ── DOM ──
   const optsWrap = root.querySelector('.options') as HTMLElement;
@@ -127,8 +127,15 @@ function initEar(root: HTMLElement) {
     optsWrap.innerHTML = '';
     for (const o of pool()) {
       const b = document.createElement('button');
-      b.className = 'opt-btn px-3 py-3 rounded-xl border border-[var(--color-border)] bg-white text-sm font-semibold text-[var(--color-ink-700)] hover:border-[var(--color-violet)] transition disabled:cursor-default';
-      b.dataset.id = o.id; b.textContent = o.label;
+      b.className = 'opt-btn px-3 py-2.5 rounded-xl border border-[var(--color-border)] bg-white text-[var(--color-ink-700)] hover:border-[var(--color-violet)] transition disabled:cursor-default';
+      b.dataset.id = o.id;
+      if (o.sym) {
+        // 코드: 기호(주) + 한글 이론명(부)
+        b.innerHTML = `<span class="block text-base font-bold leading-tight" style="font-family:'Space Grotesk','Pretendard',sans-serif">${o.sym}</span><span class="block text-[11px] font-medium text-[var(--color-ink-300)] mt-0.5">${o.label}</span>`;
+      } else {
+        b.className += ' text-sm font-semibold';
+        b.textContent = o.label;
+      }
       b.addEventListener('click', () => answer(o.id));
       optsWrap.appendChild(b);
     }
@@ -160,7 +167,7 @@ function initEar(root: HTMLElement) {
     });
     playBtn.textContent = '다음 ▶';
   }
-  const labelOf = (id: string) => mode === 'interval' ? INTERVALS[Number(id)] : CHORDS[id].name;
+  const labelOf = (id: string) => mode === 'interval' ? INTERVALS[Number(id)] : `${CHORDS[id].sym} (${CHORDS[id].name})`;
 
   // 모드/난이도 토글 (그룹 단위)
   function bindGroup(sel: string, onPick: (v: string) => void, attr: string) {

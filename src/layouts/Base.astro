@@ -155,19 +155,19 @@ const sandboxNav = hubsSorted.map(h => ({
       <div class="flex items-center gap-2">
         {FEEDBACK_URL && (
           <a href={FEEDBACK_URL} target="_blank" rel="noopener noreferrer"
-            class="inline-flex items-center gap-1.5 text-sm font-semibold px-3 py-1.5 rounded-full border border-[var(--color-border)] text-[var(--color-ink-500)] hover:border-[var(--color-violet)] hover:text-[var(--color-violet)] transition"
+            class="inline-flex items-center justify-center gap-1.5 text-sm font-semibold px-3 py-1.5 min-h-[40px] rounded-full border border-[var(--color-border)] text-[var(--color-ink-500)] hover:border-[var(--color-violet)] hover:text-[var(--color-violet)] transition"
             style="font-family:'Space Grotesk','Pretendard',sans-serif" title="의견·버그 제보">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
             <span class="hidden sm:inline">피드백</span>
           </a>
         )}
         <a href={`${base}learn/`}
-          class="gradient-brand text-white text-sm font-semibold px-4 py-1.5 rounded-full transition hover:opacity-90"
+          class="inline-flex items-center gradient-brand text-white text-sm font-semibold px-4 py-1.5 min-h-[40px] rounded-full transition hover:opacity-90"
           style="font-family:'Space Grotesk','Pretendard',sans-serif">
           시작하기
         </a>
         <button id="mobile-menu-btn" type="button" aria-label="메뉴 열기" aria-expanded="false" aria-controls="mobile-menu"
-          class="sm:hidden inline-flex items-center justify-center w-9 h-9 -mr-1.5 rounded-lg text-[var(--color-ink-500)] hover:text-[var(--color-violet)] hover:bg-[var(--color-violet-glow)] transition">
+          class="sm:hidden inline-flex items-center justify-center w-10 h-10 -mr-1.5 rounded-lg text-[var(--color-ink-500)] hover:text-[var(--color-violet)] hover:bg-[var(--color-violet-glow)] transition">
           <svg class="mm-icon-open w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
           <svg class="mm-icon-close w-5 h-5 hidden" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
         </button>
@@ -214,9 +214,9 @@ const sandboxNav = hubsSorted.map(h => ({
         <span class="text-sm font-semibold gradient-brand-text" style="font-family:'Space Grotesk','Pretendard',sans-serif">SoundLab</span>
       </div>
       <p class="text-xs text-[var(--color-ink-300)] font-mono">Web Audio API · 헤드폰 착용 권장</p>
-      <div class="flex items-center gap-4">
-        <a href={`${base}about/`} class="text-xs text-[var(--color-ink-300)] hover:text-[var(--color-violet)] transition">소개</a>
-        <a href={`${base}privacy/`} class="text-xs text-[var(--color-ink-300)] hover:text-[var(--color-violet)] transition">개인정보처리방침</a>
+      <div class="flex items-center gap-2">
+        <a href={`${base}about/`} class="inline-flex items-center min-h-[40px] px-2 text-xs text-[var(--color-ink-300)] hover:text-[var(--color-violet)] transition">소개</a>
+        <a href={`${base}privacy/`} class="inline-flex items-center min-h-[40px] px-2 text-xs text-[var(--color-ink-300)] hover:text-[var(--color-violet)] transition">개인정보처리방침</a>
       </div>
     </div>
   </footer>

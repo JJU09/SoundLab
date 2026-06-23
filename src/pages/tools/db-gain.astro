@@ -1,0 +1,143 @@
+---
+import Base from '../../layouts/Base.astro';
+const base = import.meta.env.BASE_URL;
+const desc = '데시벨(dB)과 배수(×)·퍼센트를 양방향으로 변환하는 계산기. −6dB=절반, +6dB=2배 — 레벨 차이를 직접 들어보는 A/B 비교 내장. 무료 온라인 dB 게인 계산기.';
+const refs: number[] = [-12, -6, -3, 0, 3, 6, 12];
+---
+<Base title="데시벨(dB) 계산기" description={desc} type="website"
+  breadcrumbs={[{ name: '홈', url: base }, { name: '도구', url: `${base}tools/` }, { name: '데시벨(dB) 계산기', url: Astro.url.pathname }]}>
+
+<div class="max-w-xl mx-auto px-4 sm:px-6 py-12">
+  <nav class="flex items-center gap-2 text-xs font-mono text-[var(--color-ink-300)] mb-6">
+    <a href={base} class="hover:text-[var(--color-violet)] transition">홈</a><span>/</span>
+    <a href={`${base}tools/`} class="hover:text-[var(--color-violet)] transition">도구</a><span>/</span>
+    <span class="text-[var(--color-ink-700)]">데시벨(dB) 계산기</span>
+  </nav>
+
+  <div class="mb-6">
+    <span class="text-xs font-mono px-2.5 py-1 rounded-full border border-[var(--color-violet-light)] text-[var(--color-violet)] bg-[var(--color-violet-glow)]">TOOLS</span>
+    <h1 class="text-3xl font-bold mt-3 mb-2" style="font-family:'Space Grotesk','Pretendard',sans-serif">데시벨(dB) ↔ 배수 계산기</h1>
+    <p class="text-[var(--color-ink-500)]">데시벨을 진폭 배수·퍼센트로, 또는 그 반대로 변환합니다. 레벨 차이를 직접 들어보세요.</p>
+  </div>
+
+  <div class="dbg rounded-2xl border border-[var(--color-border)] bg-white overflow-hidden">
+    <div class="p-6 sm:p-8 space-y-6">
+      <!-- dB 대형 표시 -->
+      <div class="text-center">
+        <div class="flex items-end justify-center gap-2">
+          <span class="db-num text-6xl font-bold tabular-nums leading-none" style="font-family:'Space Grotesk','Pretendard',sans-serif">0</span>
+          <span class="text-sm font-mono text-[var(--color-ink-300)] mb-1.5">dB</span>
+        </div>
+        <div class="text-xs font-mono text-[var(--color-violet)] mt-1.5"><span class="ratio-lbl">1.000</span>배 · <span class="pct-lbl">100</span>%</div>
+      </div>
+
+      <!-- dB 슬라이더 -->
+      <input type="range" class="sl-range db-range w-full" min="-60" max="12" step="0.5" value="0" aria-label="데시벨" />
+
+      <!-- 입력 (양방향) -->
+      <div class="grid grid-cols-2 gap-3">
+        <label class="block">
+          <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)]">데시벨 (dB)</span>
+          <input type="number" class="db-in w-full mt-1 px-3 py-2.5 rounded-xl border border-[var(--color-border)] text-sm font-mono tabular-nums focus:border-[var(--color-violet)] focus:outline-none" value="0" step="0.1" />
+        </label>
+        <label class="block">
+          <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)]">배수 (×)</span>
+          <input type="number" class="ratio-in w-full mt-1 px-3 py-2.5 rounded-xl border border-[var(--color-border)] text-sm font-mono tabular-nums focus:border-[var(--color-violet)] focus:outline-none" value="1" min="0.001" step="0.01" />
+        </label>
+      </div>
+
+      <!-- 빠른 참조 -->
+      <div class="flex gap-1.5 flex-wrap">
+        {refs.map(d => (
+          <button class="ref-btn px-2.5 py-1.5 rounded-lg text-xs font-mono font-semibold border border-[var(--color-border)] text-[var(--color-ink-500)] hover:border-[var(--color-violet)] hover:text-[var(--color-violet)] transition" data-db={d}>{d > 0 ? `+${d}` : d}</button>
+        ))}
+      </div>
+
+      <!-- A/B 들어보기 -->
+      <button class="ab-btn w-full gradient-brand text-white font-semibold py-3.5 rounded-xl text-base flex items-center justify-center gap-2 transition hover:opacity-90" style="font-family:'Space Grotesk','Pretendard',sans-serif">
+        ▶ 0 dB ↔ 현재 레벨 들어보기
+      </button>
+    </div>
+  </div>
+
+  <p class="text-xs text-[var(--color-ink-300)] mt-4 text-center">
+    기준음(0 dB)을 먼저, 이어서 현재 레벨을 들려줍니다 · <b class="text-[var(--color-ink-500)]">−6 dB</b>면 진폭 절반, <b class="text-[var(--color-ink-500)]">+6 dB</b>면 2배
+  </p>
+
+  <div class="mt-8 p-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-sm text-[var(--color-ink-500)] space-y-2">
+    <p>데시벨은 <b class="text-[var(--color-ink-700)]">진폭 비율의 로그</b>입니다 — dB = 20·log₁₀(배수). 그래서 +6 dB마다 진폭이 2배씩 늘죠.</p>
+    <p>똑같은 소리 둘을 더하면 위상이 맞으면 <b class="text-[var(--color-ink-700)]">+6 dB</b>, 무관하면 <b class="text-[var(--color-ink-700)]">+3 dB</b> 커집니다.</p>
+    <p>관련 개념은 <a href={`${base}glossary/decibel/`} class="text-[var(--color-violet)] font-medium hover:underline">데시벨</a>·<a href={`${base}glossary/gain/`} class="text-[var(--color-violet)] font-medium hover:underline">게인</a>·<a href={`${base}glossary/loudness/`} class="text-[var(--color-violet)] font-medium hover:underline">라우드니스</a>에서.</p>
+  </div>
+</div>
+
+<script>
+import { AudioCore } from '../../audio/core';
+
+function initDbg(root: HTMLElement) {
+  const core = new AudioCore();
+  let db = 0;
+
+  const dbNum = root.querySelector('.db-num') as HTMLElement;
+  const ratioLbl = root.querySelector('.ratio-lbl') as HTMLElement;
+  const pctLbl = root.querySelector('.pct-lbl') as HTMLElement;
+  const range = root.querySelector('.db-range') as HTMLInputElement;
+  const dbIn = root.querySelector('.db-in') as HTMLInputElement;
+  const ratioIn = root.querySelector('.ratio-in') as HTMLInputElement;
+
+  const ratioOf = (d: number) => Math.pow(10, d / 20);
+  const setPct = () => range.style.setProperty('--sl-pct', ((db - +range.min) / (+range.max - +range.min) * 100) + '%');
+  const fmtRatio = (r: number) => r >= 100 ? r.toFixed(0) : r >= 10 ? r.toFixed(2) : r.toFixed(3);
+
+  // db를 기준으로 모든 표시 갱신 (focus된 입력은 덮어쓰지 않음)
+  function render(skip?: HTMLInputElement) {
+    db = Math.round(db * 10) / 10;
+    const r = ratioOf(db);
+    dbNum.textContent = (db > 0 ? '+' : '') + db;
+    ratioLbl.textContent = fmtRatio(r);
+    pctLbl.textContent = (r * 100).toFixed(r < 1 ? 1 : 0);
+    range.value = String(Math.max(-60, Math.min(12, db))); setPct();
+    if (skip !== dbIn) dbIn.value = String(db);
+    if (skip !== ratioIn) ratioIn.value = fmtRatio(r);
+  }
+  const setDb = (v: number, skip?: HTMLInputElement) => { db = v; render(skip); };
+
+  range.addEventListener('input', () => setDb(+range.value));
+  dbIn.addEventListener('input', () => { const v = parseFloat(dbIn.value); if (!isNaN(v)) setDb(v, dbIn); });
+  ratioIn.addEventListener('input', () => {
+    const r = parseFloat(ratioIn.value);
+    if (!isNaN(r) && r > 0) setDb(20 * Math.log10(r), ratioIn);
+  });
+
+  root.querySelectorAll<HTMLElement>('.ref-btn').forEach(b =>
+    b.addEventListener('click', () => setDb(Number(b.dataset.db))));
+
+  // ── A/B 들어보기 ──
+  function tone(startAt: number, gain: number, dur: number) {
+    const o = core.ctx.createOscillator(); o.type = 'sine'; o.frequency.value = 440;
+    const g = core.gain(0.0001);
+    g.gain.setValueAtTime(0.0001, startAt);
+    g.gain.exponentialRampToValueAtTime(Math.max(0.0002, gain), startAt + 0.015);
+    g.gain.setValueAtTime(Math.max(0.0002, gain), startAt + dur - 0.05);
+    g.gain.exponentialRampToValueAtTime(0.0001, startAt + dur);
+    o.connect(g); g.connect(core.input);
+    o.start(startAt); o.stop(startAt + dur + 0.02);
+    o.onended = () => { try { o.disconnect(); g.disconnect(); } catch (e) {} };
+  }
+  const abBtn = root.querySelector('.ab-btn') as HTMLButtonElement;
+  abBtn.addEventListener('click', async () => {
+    await core.resume();
+    const base0 = 0.3;                              // 0dB 기준 게인
+    const cur = Math.min(0.6, base0 * ratioOf(db)); // 현재 레벨(클리핑 방지 캡)
+    const t = core.ctx.currentTime + 0.05;
+    tone(t, base0, 0.7);          // 기준
+    tone(t + 0.85, cur, 0.7);     // 현재
+  });
+
+  render();
+}
+
+document.querySelectorAll<HTMLElement>('.dbg').forEach(initDbg);
+</script>
+
+</Base>

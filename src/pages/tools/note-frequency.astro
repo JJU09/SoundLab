@@ -1,0 +1,172 @@
+---
+import Base from '../../layouts/Base.astro';
+const base = import.meta.env.BASE_URL;
+const desc = '음이름과 주파수(Hz)를 양방향으로 변환. 옥타브별 12음 주파수표, A4 기준음(430~450Hz) 조정, 클릭 재생, 주파수→가까운 음 역변환까지 — 무료 온라인 노트 주파수 변환기.';
+const NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+const octaves = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+---
+<Base title="노트 주파수 변환기" description={desc} type="website"
+  breadcrumbs={[{ name: '홈', url: base }, { name: '도구', url: `${base}tools/` }, { name: '노트 주파수 변환기', url: Astro.url.pathname }]}>
+
+<div class="max-w-xl mx-auto px-4 sm:px-6 py-12">
+  <nav class="flex items-center gap-2 text-xs font-mono text-[var(--color-ink-300)] mb-6">
+    <a href={base} class="hover:text-[var(--color-violet)] transition">홈</a><span>/</span>
+    <a href={`${base}tools/`} class="hover:text-[var(--color-violet)] transition">도구</a><span>/</span>
+    <span class="text-[var(--color-ink-700)]">노트 주파수 변환기</span>
+  </nav>
+
+  <div class="mb-6">
+    <span class="text-xs font-mono px-2.5 py-1 rounded-full border border-[var(--color-violet-light)] text-[var(--color-violet)] bg-[var(--color-violet-glow)]">TOOLS</span>
+    <h1 class="text-3xl font-bold mt-3 mb-2" style="font-family:'Space Grotesk','Pretendard',sans-serif">노트 주파수 변환기</h1>
+    <p class="text-[var(--color-ink-500)]">음이름과 주파수(Hz)를 변환합니다. 음을 눌러 소리를 들어보세요.</p>
+  </div>
+
+  <div class="nf rounded-2xl border border-[var(--color-border)] bg-white overflow-hidden">
+    <div class="p-6 sm:p-8 space-y-6">
+      <!-- A4 기준음 -->
+      <div class="flex items-center justify-between gap-3">
+        <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)]">기준음 A4</span>
+        <div class="flex items-center gap-2">
+          <button class="a4-dec w-9 h-9 flex-none rounded-lg border border-[var(--color-border)] font-bold text-[var(--color-ink-500)] hover:border-[var(--color-violet)] hover:text-[var(--color-violet)] transition" aria-label="A4 감소">−</button>
+          <span class="a4-val text-sm font-mono font-medium tabular-nums w-20 text-center">440 Hz</span>
+          <button class="a4-inc w-9 h-9 flex-none rounded-lg border border-[var(--color-border)] font-bold text-[var(--color-ink-500)] hover:border-[var(--color-violet)] hover:text-[var(--color-violet)] transition" aria-label="A4 증가">+</button>
+        </div>
+      </div>
+
+      <!-- 옥타브 선택 -->
+      <div>
+        <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)]">옥타브</span>
+        <div class="oct-row grid gap-1 mt-2" style="grid-template-columns:repeat(9,minmax(0,1fr))" role="group" aria-label="옥타브 선택">
+          {octaves.map(o => (
+            <button class="oct-btn min-h-[40px] rounded-lg text-sm font-mono font-semibold text-[var(--color-ink-500)] border border-[var(--color-border)] transition-all" data-oct={o} aria-pressed={o === 4 ? 'true' : 'false'}>{o}</button>
+          ))}
+        </div>
+      </div>
+
+      <!-- 12음 표 -->
+      <div class="grid grid-cols-2 gap-2">
+        {NOTES.map(n => (
+          <button class="note-cell flex items-center justify-between gap-2 min-h-[48px] px-3.5 rounded-xl border border-[var(--color-border)] hover:border-[var(--color-violet)] hover:bg-[var(--color-violet-glow)] active:scale-95 transition" data-note={n}>
+            <span class="note-name font-bold text-sm" style="font-family:'Space Grotesk','Pretendard',sans-serif">{n}<span class="oct-label text-[var(--color-ink-300)]">4</span></span>
+            <span class="note-hz text-sm font-mono tabular-nums text-[var(--color-ink-500)]">—</span>
+          </button>
+        ))}
+      </div>
+
+      <!-- 주파수로 역변환 -->
+      <div class="pt-2 border-t border-[var(--color-border)]">
+        <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)]">주파수로 음 찾기</span>
+        <div class="flex items-center gap-3 mt-2">
+          <div class="flex items-center gap-1.5 flex-1">
+            <input type="number" class="freq-in w-full px-3 py-2.5 rounded-xl border border-[var(--color-border)] text-sm font-mono tabular-nums focus:border-[var(--color-violet)] focus:outline-none" value="440" min="16" max="20000" step="1" aria-label="주파수 입력" />
+            <span class="text-sm font-mono text-[var(--color-ink-300)]">Hz</span>
+          </div>
+          <div class="rev-out text-right min-w-[96px]">
+            <span class="rev-note font-bold text-lg" style="font-family:'Space Grotesk','Pretendard',sans-serif">A4</span>
+            <span class="rev-cent block text-[11px] font-mono text-[var(--color-ink-300)] -mt-0.5">±0 cent</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="text-xs text-[var(--color-ink-300)] mt-4 text-center">
+    음을 누르면 <b class="text-[var(--color-ink-500)]">사인파로 들려줍니다</b> · 표준 콘서트 피치는 <b class="text-[var(--color-ink-500)]">A4 = 440 Hz</b>
+  </p>
+
+  <div class="mt-8 p-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-sm text-[var(--color-ink-500)] space-y-2">
+    <p>한 옥타브 위는 주파수가 정확히 <b class="text-[var(--color-ink-700)]">2배</b>, 반음은 <b class="text-[var(--color-ink-700)]">2의 12제곱근(약 1.0595배)</b>입니다.</p>
+    <p>관련 개념은 <a href={`${base}glossary/concert-pitch/`} class="text-[var(--color-violet)] font-medium hover:underline">콘서트 피치</a>·<a href={`${base}glossary/octave/`} class="text-[var(--color-violet)] font-medium hover:underline">옥타브</a>·<a href={`${base}glossary/cent/`} class="text-[var(--color-violet)] font-medium hover:underline">센트</a>에서, 실시간 음정 측정은 <a href={`${base}tools/tuner/`} class="text-[var(--color-violet)] font-medium hover:underline">튜너</a>에서.</p>
+  </div>
+</div>
+
+<script>
+import { AudioCore } from '../../audio/core';
+
+const NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+
+function initNF(root: HTMLElement) {
+  const core = new AudioCore();
+  let a4 = 440;
+  let octave = 4;
+
+  const midiOf = (noteIdx: number, oct: number) => (oct + 1) * 12 + noteIdx;
+  const freqOf = (midi: number) => a4 * Math.pow(2, (midi - 69) / 12);
+
+  const a4Val = root.querySelector('.a4-val') as HTMLElement;
+  const cells = [...root.querySelectorAll<HTMLElement>('.note-cell')];
+
+  function render() {
+    a4Val.textContent = `${a4} Hz`;
+    cells.forEach(c => {
+      const idx = NOTES.indexOf(c.dataset.note!);
+      const f = freqOf(midiOf(idx, octave));
+      c.dataset.freq = String(f);
+      c.querySelector('.note-hz')!.textContent = f >= 1000 ? f.toFixed(0) : f.toFixed(2);
+      c.querySelector('.oct-label')!.textContent = String(octave);
+    });
+    renderReverse();
+  }
+
+  // ── 톤 재생 ──
+  function tone(freq: number) {
+    const t = core.ctx.currentTime;
+    const o = core.ctx.createOscillator(); o.type = 'sine'; o.frequency.value = freq;
+    const g = core.gain(0.0001);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.32, t + 0.01);
+    g.gain.setValueAtTime(0.32, t + 0.9);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 1.2);
+    o.connect(g); g.connect(core.input);
+    o.start(t); o.stop(t + 1.25);
+    o.onended = () => { try { o.disconnect(); g.disconnect(); } catch (e) {} };
+  }
+  cells.forEach(c => c.addEventListener('click', async () => {
+    await core.resume();
+    cells.forEach(x => x.style.cssText = '');
+    c.style.cssText = 'border-color:var(--color-violet);background:var(--color-violet-glow)';
+    tone(Number(c.dataset.freq));
+  }));
+
+  // ── A4 기준음 ──
+  const setA4 = (v: number) => { a4 = Math.max(430, Math.min(450, v)); render(); };
+  root.querySelector('.a4-dec')!.addEventListener('click', () => setA4(a4 - 1));
+  root.querySelector('.a4-inc')!.addEventListener('click', () => setA4(a4 + 1));
+
+  // ── 옥타브 ──
+  const octBtns = [...root.querySelectorAll<HTMLElement>('.oct-btn')];
+  octBtns.forEach(btn => {
+    const sel = () => btn.style.cssText = 'background:var(--color-violet);color:white;border-color:var(--color-violet)';
+    btn.addEventListener('click', () => {
+      octBtns.forEach(b => { b.setAttribute('aria-pressed', 'false'); b.style.cssText = ''; });
+      btn.setAttribute('aria-pressed', 'true'); sel();
+      octave = Number(btn.dataset.oct); render();
+    });
+    if (btn.getAttribute('aria-pressed') === 'true') sel();
+  });
+
+  // ── 주파수 → 음 역변환 ──
+  const freqIn = root.querySelector('.freq-in') as HTMLInputElement;
+  const revNote = root.querySelector('.rev-note') as HTMLElement;
+  const revCent = root.querySelector('.rev-cent') as HTMLElement;
+  function renderReverse() {
+    const f = parseFloat(freqIn.value);
+    if (!f || f <= 0) { revNote.textContent = '—'; revCent.textContent = ''; return; }
+    const midiF = 69 + 12 * Math.log2(f / a4);
+    const nearest = Math.round(midiF);
+    const cents = Math.round((midiF - nearest) * 100);
+    const name = NOTES[((nearest % 12) + 12) % 12];
+    const oct = Math.floor(nearest / 12) - 1;
+    revNote.textContent = `${name}${oct}`;
+    revCent.textContent = cents === 0 ? '정확' : `${cents > 0 ? '+' : ''}${cents} cent`;
+    revCent.style.color = Math.abs(cents) <= 5 ? 'var(--color-violet)' : 'var(--color-ink-300)';
+  }
+  freqIn.addEventListener('input', renderReverse);
+
+  render();
+}
+
+document.querySelectorAll<HTMLElement>('.nf').forEach(initNF);
+</script>
+
+</Base>

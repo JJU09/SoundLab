@@ -1,86 +1,129 @@
 # 🎛️ SoundLab (사운드랩)
 
-> **Web Audio API로 배우는 사운드 이펙트 실습 플레이그라운드**
-> 
-> 사용자가 직접 가상의 페달보드를 드래그하여 조립하고, 노브를 조작함에 따라 소리와 파형·주파수가 실시간으로 동기화되어 변하는 것을 보며 사운드 엔지니어링의 원리를 주도적으로 학습하는 인터랙티브 교육용 웹 애플리케이션입니다.
+> **Web Audio API로 듣고 만지며 배우는 인터랙티브 사운드·음악 학습 사이트**
+>
+> 소리를 글로만 읽는 대신 **직접 연주하고, 조립하고, 만지며** 음악과 오디오의 원리를 익힙니다. 모든 소리는 브라우저 안에서 실시간 합성되며(오디오 파일 0개), 설치도 회원가입도 없습니다.
 
 <br />
 
 ## 🌐 Live Demo
-👉 **[SoundLab 웹사이트 바로가기](https://soundlab.jjuapp.com/)**
-* *회원가입이나 앱 설치 없이 브라우저에서 즉시 실행 가능합니다. (헤드폰 착용 권장)*
+👉 **[soundlab.jjuapp.com](https://soundlab.jjuapp.com/)**
+* *무설치 · 무료 · 회원가입 없음 · 모바일 최적화 (헤드폰 착용 권장)*
 
 <br />
 
-## ✨ Key Features (핵심 기능)
+## ✨ 무엇이 있나요 (Features)
 
-* **동적 모듈러 페달보드 (Modular Sandbox):** 고정된 이펙터 구조에서 벗어나 사용자가 원하는 이펙터를 원하는 순서대로 무한히 생성하고 직렬 신호 체인을 커스텀 빌드할 수 있습니다. 카드의 배치 순서가 실시간으로 오디오 신호 흐름에 반영됩니다.
-* **이펙터별 맞춤형 실시간 시각화 (DSP Visualizer):**
-  * **Filter:** 스펙트럼 스케일 뷰 제공, 캔버스 드래그를 통해 가로축(Cutoff 주파수)과 세로축(Q값)을 직관적으로 동시 조작 가능.
-  * **Drive:** 파형 꼭대기가 수평으로 깎여 나가는 '클리핑(Clipping)' 현상을 관찰할 수 있도록 밀착 줌 렌더링 지원.
-  * **Chorus:** 인광 잔상 효과(Persistence)를 활용하여 피치 변조로 인해 파형들이 출렁이며 겹치는 앙상블감을 가시화.
-  * **Delay & Reverb:** 링버퍼 기반 시간 흐름 엔벨로프 스크롤 뷰를 장착하여 메아리와 잔향의 감쇠 꼬리 궤적을 긴 흐름으로 추적.
-* **무클릭 안티-팝(Anti-Pop) 오디오 재배선:** 재생 중에 체인의 순서를 바꾸거나 모듈을 탈착해도 전기 플러그를 뺐다 꽂을 때 발생하는 지르르한 팝 노이즈를 10ms 안티-팝 페이드 램프 알고리즘으로 완벽 차단했습니다.
-* **상태 직렬화 및 공유:** 현재 조립된 나만의 페달보드 전체 상태와 노브 설정을 Base64 스트링 URL로 압축하여 링크로 복사·공유할 수 있으며, 구버전 포맷 유입 시에도 호환 레이어를 통해 자동 마이그레이션 복원됩니다.
-* **개념 레슨 및 인터랙티브 퀴즈:** 각 이펙터별 본질을 관찰할 수 있는 추천 오디오 소스(지속음, 플럭, 노이즈)와 실습 가이드라인을 내장하고 있으며, 하단에 객관식 이해도 확인 퀴즈 피드백 시스템을 갖추고 있습니다.
+SoundLab은 네 개의 기둥으로 구성됩니다.
+
+### 📚 지식 허브 — 5개 허브 · 25개 레슨
+소리와 파동 · 디지털오디오 · 신디시스 · 이펙트 · 믹싱. 각 개념마다 **실시간으로 조작하는 인터랙티브 위젯**(14종)을 붙여, 슬라이더를 움직이면 파형·스펙트럼·소리가 즉시 반응합니다.
+
+### 🧪 샌드박스 — 5개
+규칙 없이 자유롭게 실험하는 놀이터.
+* **파동 실험실** — 파형·배음을 직접 쌓아 소리 만들기
+* **로파이 실험실** — 샘플레이트·비트뎁스를 낮춰 디지털 열화 체감
+* **신디사이저** — 오실레이터·필터·ADSR·LFO + 건반 연주 (터치 글리산도·멀티터치)
+* **모듈러 페달보드** — 이펙터를 자유롭게 꺼내 직렬 체인 조립
+* **미니 믹서** — 3트랙을 페이더·팬·EQ·컴프레서로 믹싱
+
+### 🛠️ 연습 도구 — 10개
+* **누구나** — 메트로놈 · 크로마틱 튜너 · 음정/코드 청음 · 노이즈(비·파도·바람·집중 앰비언트) · 톤 제너레이터
+* **프로듀싱·믹싱** — BPM 딜레이 계산기 · 데시벨(dB) 계산기 · 노트↔주파수 변환기 · 주파수↔파장 계산기 · EQ 주파수 청음
+
+### 📖 용어집 — 37개
+"이게 무슨 뜻이지?" 싶은 오디오 용어를 **한 줄 정의 + 라이브 데모**로. 본문 인라인 링크로 레슨·도구와 연결됩니다.
 
 <br />
 
-## 🏗️ Signal Chain & Architecture (신호 체인 구조)
+### 기술적 하이라이트
+* **제로 에셋(Zero-Asset):** 모든 소리는 OscillatorNode·노이즈 버퍼·DSP로 런타임 합성. 다운로드되는 오디오 파일이 없습니다.
+* **무클릭 안티-팝 재배선:** 재생 중 이펙트 체인 순서를 바꾸거나 모듈을 탈착해도 10ms 페이드 램프로 팝 노이즈를 차단.
+* **상태 직렬화·공유:** 페달보드 구성을 URL로 압축해 링크 공유 — 구버전 포맷도 마이그레이션 복원.
+* **이펙터별 맞춤 시각화:** Filter(스펙트럼+캔버스 드래그로 Cutoff·Q 동시 조작), Drive(클리핑 줌), Chorus(잔상 앙상블), Delay·Reverb(엔벨로프 스크롤).
+* **모바일 우선:** 햄버거 네비, 터치 연주(`pointer`+`touch-action`), 24px 슬라이더 히트영역, 한글 어절 줄바꿈.
+* **SEO·구조화 데이터:** 페이지별 메타·canonical·OG, BreadcrumbList·DefinedTerm JSON-LD, sitemap.
 
-### 오디오 신호 그래프 파이프라인
+<br />
+
+## 🏗️ 아키텍처
+
+### 공유 오디오 그래프 (`AudioCore`)
+모든 사운드 모듈은 하나의 코어 그래프를 공유합니다.
 ```text
-[Source (Tone/Pluck/Noise)] ➔ [chainIn Node] ➔ (동적 인스턴스 배열 순회 연동) ➔ [Master Gain] ➔ [Analyser] ➔ [Audio Destination]
+[Source / Engine] ➔ core.input ➔ Master Gain ➔ Analyser ➔ Audio Destination
+                                                    └─➔ (Canvas 2D 실시간 시각화)
 ```
 
-### 무재배선 Bypass 구현을 위한 Dry/Wet 셸(Shell) 구조
-이펙터 노드를 런타임에서 매번 끊지 않고 클릭 노이즈 없는 바이패스를 구현하기 위해 모든 인스턴스는 동일한 셸 게인 구조로 래핑되어 처리됩니다.
+### 무재배선 Bypass 셸 (이펙트 샌드박스)
+런타임에 노드를 끊지 않고 클릭 노이즈 없는 바이패스를 구현하기 위해, 모든 이펙트 인스턴스는 동일한 Dry/Wet 셸로 래핑됩니다.
 ```text
-input ─┬─➔ dryGain (Bypass 시 1, Active 시 0) ───────────────┐
+input ─┬─➔ dryGain (Bypass 시 1, Active 시 0) ──────────────────┐
        └─➔ [Effect Nodes] ➔ wetGain (Bypass 시 0, Active 시 Mix) ┴─➔ output
 ```
 
-<br />
-
-## 🛠️ Tech Stack (기술 스택)
-
-* **Audio Engine:** Web Audio API (순수 브라우저 오디오 컨텍스트 처리)
-* **Graphics:** Canvas 2D (`requestAnimationFrame` 기반 하드웨어 가속 최적화 렌더링)
-* **Framework:** Astro Framework (정적 지식 콘텐츠 문서 확장성 및 고성능을 위한 스택)
-* **Styling & Components:** Tailwind CSS v4 / Vanilla TypeScript
+### 콘텐츠 시스템
+* 레슨·용어집은 **Astro Content Collections**(`topics`, `glossary`)로 관리되는 MDX 문서.
+* 허브/샌드박스 메타데이터는 `content.config.ts`에 중앙화(`HUBS`, `HUB_META`, `SANDBOX_OF`).
 
 <br />
 
-## 📦 Getting Started (로컬 실행 방법)
+## 🛠️ Tech Stack
 
-로컬 환경에서 프로젝트를 실행하고 개발 환경을 구축하려면 아래 명령어를 terminal에서 실행하세요. Node.js 22 버전 이상이 필요합니다.
+| 영역 | 사용 기술 |
+|---|---|
+| **Audio** | Web Audio API (순수 브라우저 합성·DSP) |
+| **Graphics** | Canvas 2D (`requestAnimationFrame` 기반) |
+| **Framework** | Astro (정적 생성) + Content Collections (MDX) |
+| **Language** | Vanilla TypeScript (프레임워크 런타임 없음) |
+| **Styling** | Tailwind CSS v4 |
+| **분석/배포** | GA4 · GitHub Pages · `astro check` CI 게이트 |
+
+<br />
+
+## 📂 프로젝트 구조
+
+```text
+src/
+├── audio/        # 오디오 엔진 (core, synth, effects, mixer, pedalboard …)
+├── components/   # 인터랙티브 위젯 (*Widget.astro) · UI 컴포넌트
+├── content/      # 레슨(topics) · 용어집(glossary) MDX
+├── layouts/      # Base · TopicLayout · GlossaryLayout
+├── pages/        # learn/ · sandbox/ · tools/ · glossary/ 라우트
+└── styles/       # global.css (디자인 토큰 · 슬라이더 · 타이포)
+```
+
+<br />
+
+## 📦 Getting Started (로컬 실행)
+
+Node.js 22 이상이 필요합니다.
 
 ```bash
-# 1. 원본 소스코드 클론
+# 1. 클론
 git clone https://github.com/jju09/SoundLab.git
 cd SoundLab
 
-# 2. 의존성 패키지 설치
+# 2. 의존성 설치
 npm install
 
-# 3. 로컬 개발 서버 실행 (기본 포트: localhost:4321)
+# 3. 개발 서버 (localhost:4321)
 npm run dev
 
-# 4. 프로덕션 빌드 테스트 및 배포 파일 컴파일
+# 4. 타입 체크 + 프로덕션 빌드
+npm run check
 npm run build
 ```
 
 <br />
 
-## 🗺️ Future Roadmap (향후 개발 계획)
+## 🗺️ Roadmap
 
-* **Phase 2 (음향학 & 디지털 오디오 이론 지식 허브):**
-  * 소리의 3요소 인터랙티브 가이드 및 위상 간섭/상쇄(Phase Cancellation) 물리 시뮬레이터 구축.
-  * 샘플링 레이트 다운에 따른 에일리어싱(Aliasing) 잡음 및 비트뎁스 하락에 따른 양자화 노이즈 체감 코너 신설.
-* **Phase 3 (신스 사운드 디자인 및 심화 엔지니어링):**
-  * 감산 합성(Subtractive Synthesis) 신디사이저 개념 및 마우스 드래그형 ADSR 엔벨로프 위젯 연동.
-  * 프로 오디오 컴프레서(Compressor) 게인 감소 시각화 및 악기 간 주파수 충돌을 방지하는 EQ 믹싱 가상 부스 개설.
-  * Astro 콘텐츠 컬렉션(Content Collections) 아키텍처를 도입하여 다량의 이론 학습 마크다운 문서 시스템 정립.
+* ✅ **지식 허브 5종 · 인터랙티브 위젯** — 음향학·디지털 오디오·신디시스·이펙트·믹싱
+* ✅ **허브별 샌드박스 5종** — 파동·로파이·신스·페달보드·믹서
+* ✅ **연습 도구 10종** — 메트로놈·튜너·청음부터 BPM/dB/파장 계산기까지
+* ✅ **용어집 37종 + SEO·모바일 최적화**
+* ⏳ 계산기·도구 시리즈 확장, 임베드 위젯, 콘텐츠(롱테일) 확장
 
 <br />
 
@@ -89,4 +132,4 @@ npm run build
 Copyright (c) 2026 jju09. All rights reserved.
 
 본 프로젝트의 소스코드는 교육 및 학업 참조 목적으로 퍼블릭 공개되어 있으나, 저작권물의 보호를 위해 **Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)** 라이선스를 엄격히 적용합니다.
-저작권자의 서면 동의 없는 **무단 복제 배포, 상업적 웹사이트 미러링 및 구글 애드센스 등을 포함한 모든 영리 목적의 호스팅 및 배포 행위를 절대 금지**합니다. 
+저작권자의 서면 동의 없는 **무단 복제 배포, 상업적 웹사이트 미러링 및 구글 애드센스 등을 포함한 모든 영리 목적의 호스팅 및 배포 행위를 절대 금지**합니다.

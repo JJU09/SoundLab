@@ -1,0 +1,158 @@
+---
+import Base from '../../layouts/Base.astro';
+const base = import.meta.env.BASE_URL;
+const desc = '주파수와 음파 파장(m·cm)을 양방향으로 변환하는 계산기. ¼·½ 파장(흡음재 두께·정재파), 방 크기로 룸 모드(정재파 주파수)까지 — 음향·룸 어쿠스틱용 무료 온라인 파장 계산기.';
+const chips: number[] = [50, 100, 250, 500, 1000, 4000, 8000];
+---
+<Base title="주파수·파장 계산기" description={desc} type="website"
+  breadcrumbs={[{ name: '홈', url: base }, { name: '도구', url: `${base}tools/` }, { name: '주파수·파장 계산기', url: Astro.url.pathname }]}>
+
+<div class="max-w-xl mx-auto px-4 sm:px-6 py-12">
+  <nav class="flex items-center gap-2 text-xs font-mono text-[var(--color-ink-300)] mb-6">
+    <a href={base} class="hover:text-[var(--color-violet)] transition">홈</a><span>/</span>
+    <a href={`${base}tools/`} class="hover:text-[var(--color-violet)] transition">도구</a><span>/</span>
+    <span class="text-[var(--color-ink-700)]">주파수·파장 계산기</span>
+  </nav>
+
+  <div class="mb-6">
+    <span class="text-xs font-mono px-2.5 py-1 rounded-full border border-[var(--color-violet-light)] text-[var(--color-violet)] bg-[var(--color-violet-glow)]">TOOLS</span>
+    <h1 class="text-3xl font-bold mt-3 mb-2" style="font-family:'Space Grotesk','Pretendard',sans-serif">주파수·파장 계산기</h1>
+    <p class="text-[var(--color-ink-500)]">주파수로 음파의 파장을 계산합니다. 흡음재 두께·정재파·룸 모드 잡을 때 쓰세요.</p>
+  </div>
+
+  <div class="wl rounded-2xl border border-[var(--color-border)] bg-white overflow-hidden">
+    <div class="p-6 sm:p-8 space-y-6">
+      <!-- 주파수 대형 표시 -->
+      <div class="text-center">
+        <div class="flex items-end justify-center gap-2">
+          <span class="freq-num text-6xl font-bold tabular-nums leading-none" style="font-family:'Space Grotesk','Pretendard',sans-serif">343</span>
+          <span class="text-sm font-mono text-[var(--color-ink-300)] mb-1.5">Hz</span>
+        </div>
+        <div class="text-xs font-mono text-[var(--color-violet)] mt-1.5">파장 λ = <span class="lambda-lbl">1.00 m</span></div>
+      </div>
+
+      <!-- 주파수 슬라이더 + 입력 + 재생 -->
+      <input type="range" class="sl-range freq-range w-full" min="0" max="1000" step="1" value="406" aria-label="주파수" />
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-1.5 flex-1">
+          <input type="number" class="freq-in w-full px-3 py-2.5 rounded-xl border border-[var(--color-border)] text-sm font-mono tabular-nums focus:border-[var(--color-violet)] focus:outline-none" value="343" min="20" max="20000" step="1" aria-label="주파수 입력" />
+          <span class="text-sm font-mono text-[var(--color-ink-300)]">Hz</span>
+        </div>
+        <button class="play-btn px-4 py-2.5 rounded-xl border border-[var(--color-border)] text-sm font-semibold text-[var(--color-ink-500)] hover:border-[var(--color-violet)] hover:text-[var(--color-violet)] transition whitespace-nowrap" style="font-family:'Space Grotesk','Pretendard',sans-serif">▶ 듣기</button>
+      </div>
+
+      <!-- 파장 분해 -->
+      <div class="grid grid-cols-3 gap-2 text-center">
+        {[['full','전체 λ','정재파 길이'],['half','½ λ','룸 모드·축'],['quarter','¼ λ','흡음재 두께']].map(([k,t,d]) => (
+          <div class="p-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
+            <div class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)]">{t}</div>
+            <div class={`wl-${k} text-base font-bold tabular-nums text-[var(--color-ink-700)] mt-1`} style="font-family:'Space Grotesk','Pretendard',sans-serif">—</div>
+            <div class="text-[9px] text-[var(--color-ink-300)] mt-0.5">{d}</div>
+          </div>
+        ))}
+      </div>
+
+      <!-- 빠른 주파수 -->
+      <div class="flex gap-1.5 flex-wrap">
+        {chips.map(f => (
+          <button class="chip-btn px-2.5 py-1.5 rounded-lg text-xs font-mono font-semibold border border-[var(--color-border)] text-[var(--color-ink-500)] hover:border-[var(--color-violet)] hover:text-[var(--color-violet)] transition" data-f={f}>{f >= 1000 ? (f / 1000) + 'k' : f}</button>
+        ))}
+      </div>
+
+      <!-- 룸 모드 (역방향) -->
+      <div class="pt-2 border-t border-[var(--color-border)]">
+        <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)]">방 크기로 정재파 찾기</span>
+        <div class="flex items-center gap-3 mt-2">
+          <div class="flex items-center gap-1.5 flex-1">
+            <input type="number" class="room-in w-full px-3 py-2.5 rounded-xl border border-[var(--color-border)] text-sm font-mono tabular-nums focus:border-[var(--color-violet)] focus:outline-none" value="3" min="0.3" max="30" step="0.1" aria-label="방 한 변 길이(m)" />
+            <span class="text-sm font-mono text-[var(--color-ink-300)]">m</span>
+          </div>
+          <div class="room-out text-right text-sm font-mono tabular-nums text-[var(--color-ink-700)] min-w-[140px]">—</div>
+        </div>
+        <p class="text-[10px] text-[var(--color-ink-300)] mt-1.5">두 평행면 사이 거리. 기본 정재파와 배음에서 저음이 뭉치거나 빠집니다.</p>
+      </div>
+    </div>
+  </div>
+
+  <p class="text-xs text-[var(--color-ink-300)] mt-4 text-center">공기 20°C 기준 음속 <b class="text-[var(--color-ink-500)]">343 m/s</b> · 파장 λ = 음속 ÷ 주파수 · 흡음재는 ¼ 파장 두께부터 효과</p>
+
+  <div class="mt-8 p-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-sm text-[var(--color-ink-500)] space-y-2">
+    <p>저음일수록 파장이 길어요 — <b class="text-[var(--color-ink-700)]">100 Hz</b>는 약 3.4 m, <b class="text-[var(--color-ink-700)]">1 kHz</b>는 34 cm. 그래서 저음 잡기가 공간을 많이 먹습니다.</p>
+    <p>관련 개념은 <a href={`${base}glossary/hz/`} class="text-[var(--color-violet)] font-medium hover:underline">주파수</a>·<a href={`${base}glossary/resonance/`} class="text-[var(--color-violet)] font-medium hover:underline">공명</a>에서, 소리의 기초는 <a href={`${base}learn/acoustics/`} class="text-[var(--color-violet)] font-medium hover:underline">소리와 파동</a> 허브에서.</p>
+  </div>
+</div>
+
+<script>
+import { AudioCore } from '../../audio/core';
+
+const C = 343; // 음속 m/s (공기 20°C)
+
+function initWL(root: HTMLElement) {
+  const core = new AudioCore();
+  let freq = 343;
+
+  const freqNum = root.querySelector('.freq-num') as HTMLElement;
+  const lambdaLbl = root.querySelector('.lambda-lbl') as HTMLElement;
+  const range = root.querySelector('.freq-range') as HTMLInputElement;
+  const freqIn = root.querySelector('.freq-in') as HTMLInputElement;
+  const wlFull = root.querySelector('.wl-full') as HTMLElement;
+  const wlHalf = root.querySelector('.wl-half') as HTMLElement;
+  const wlQuarter = root.querySelector('.wl-quarter') as HTMLElement;
+
+  // 로그 슬라이더 20Hz~20kHz
+  const pToFreq = (p: number) => 20 * Math.pow(1000, p / 1000);
+  const freqToP = (f: number) => 1000 * Math.log(f / 20) / Math.log(1000);
+  const fmtLen = (m: number) => m >= 1 ? m.toFixed(2) + ' m' : (m * 100).toFixed(1) + ' cm';
+
+  function render(syncSlider = true, syncInput = true) {
+    freq = Math.max(20, Math.min(20000, freq));
+    const lambda = C / freq;
+    freqNum.textContent = freq >= 1000 ? (freq / 1000).toFixed(freq % 1000 === 0 ? 0 : 2) + 'k' : String(Math.round(freq));
+    lambdaLbl.textContent = fmtLen(lambda);
+    wlFull.textContent = fmtLen(lambda);
+    wlHalf.textContent = fmtLen(lambda / 2);
+    wlQuarter.textContent = fmtLen(lambda / 4);
+    if (syncSlider) { const p = freqToP(freq); range.value = String(p); range.style.setProperty('--sl-pct', (p / 10) + '%'); }
+    if (syncInput) freqIn.value = String(Math.round(freq));
+  }
+  const setFreq = (f: number, syncSlider = true, syncInput = true) => { freq = f; render(syncSlider, syncInput); };
+
+  range.addEventListener('input', () => setFreq(pToFreq(+range.value), false, true));
+  freqIn.addEventListener('input', () => { const v = parseFloat(freqIn.value); if (!isNaN(v) && v > 0) setFreq(v, true, false); });
+  root.querySelectorAll<HTMLElement>('.chip-btn').forEach(b => b.addEventListener('click', () => setFreq(Number(b.dataset.f))));
+
+  // ── 톤 재생 ──
+  const playBtn = root.querySelector('.play-btn') as HTMLButtonElement;
+  playBtn.addEventListener('click', async () => {
+    await core.resume();
+    const t = core.ctx.currentTime + 0.04;
+    const o = core.ctx.createOscillator(); o.type = 'sine'; o.frequency.value = freq;
+    const g = core.gain(0.0001);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.3, t + 0.01);
+    g.gain.setValueAtTime(0.3, t + 0.9);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 1.2);
+    o.connect(g); g.connect(core.input);
+    o.start(t); o.stop(t + 1.25);
+    o.onended = () => { try { o.disconnect(); g.disconnect(); } catch (e) {} };
+  });
+
+  // ── 룸 모드 ──
+  const roomIn = root.querySelector('.room-in') as HTMLInputElement;
+  const roomOut = root.querySelector('.room-out') as HTMLElement;
+  function renderRoom() {
+    const L = parseFloat(roomIn.value);
+    if (!L || L <= 0) { roomOut.textContent = '—'; return; }
+    const f1 = C / (2 * L);
+    roomOut.innerHTML = `<b style="color:var(--color-violet)">${f1.toFixed(1)} Hz</b><span class="text-[var(--color-ink-300)]"> · ${(f1 * 2).toFixed(0)} · ${(f1 * 3).toFixed(0)}</span>`;
+  }
+  roomIn.addEventListener('input', renderRoom);
+
+  render();
+  renderRoom();
+}
+
+document.querySelectorAll<HTMLElement>('.wl').forEach(initWL);
+</script>
+
+</Base>

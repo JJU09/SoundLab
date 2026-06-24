@@ -2,60 +2,79 @@
 import Base from '../../layouts/Base.astro';
 const base = import.meta.env.BASE_URL;
 
-// 도구 목록 — ready=false는 "준비 중" 표시. 새 도구 추가 시 여기에 등록.
+// 도구 목록 — cat: 'general'(누구나) | 'pro'(프로듀싱·믹싱). ready=false는 "준비 중".
 const tools = [
-  { slug: 'metronome', name: '메트로놈', en: 'Metronome', desc: '정확한 박자 연습용 온라인 메트로놈. BPM·박자표·탭 템포.', ready: true, icon: 'M9 3h6l4 18H5z M12 18l1.8-9' },
-  { slug: 'delay-calculator', name: 'BPM 딜레이 계산기', en: 'Delay Calculator', desc: 'BPM에서 딜레이·리버브 타임(ms·Hz)을 음표별로. 정박·점음표·셋잇단, 들어보기 내장.', ready: true, icon: 'M4 12h2 M9 6v12 M14 9v6 M19 10.5v3' },
-  { slug: 'note-frequency', name: '노트 주파수 변환기', en: 'Note ↔ Frequency', desc: '음이름↔주파수(Hz) 변환표. 옥타브별 12음 주파수, A4 기준음 조정, 클릭 재생.', ready: true, icon: 'M9 18V5l12-2v13 M6 15a3 3 0 1 0 6 0 3 3 0 0 0-6 0z' },
-  { slug: 'db-gain', name: '데시벨(dB) 계산기', en: 'dB ↔ Gain', desc: '데시벨↔배수(×)↔퍼센트 양방향 변환. 레벨 차이를 직접 들어보는 A/B 비교 내장.', ready: true, icon: 'M5 20v-5 M5 11V4 M12 20v-9 M12 7V4 M19 20v-3 M19 13V4 M3 15h4 M10 7h4 M17 13h4' },
-  { slug: 'wavelength', name: '주파수·파장 계산기', en: 'Wavelength', desc: '주파수↔음파 파장(m·cm) 변환. ¼·½ 파장, 방 크기로 정재파(룸 모드)까지. 음향·룸 어쿠스틱용.', ready: true, icon: 'M3 8c2-5 4-5 6 0s4 5 6 0 4-5 6 0 M3 16h12 M3 14v4 M15 14v4' },
-  { slug: 'ear-training', name: '음정·코드 청음', en: 'Ear Training', desc: '음정과 코드를 듣고 맞히는 청음 훈련. 난이도별·연속 정답 기록.', ready: true, icon: 'M9 18V5l12-2v13 M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0z M21 16a3 3 0 1 1-6 0 3 3 0 0 1 6 0z' },
-  { slug: 'eq-ear', name: 'EQ 주파수 청음', en: 'EQ Ear Trainer', desc: '어느 주파수가 부스트됐는지 맞히는 믹싱 귀 훈련. 난이도별·기록.', ready: true, icon: 'M6 4v16 M12 4v16 M18 4v16 M3.5 9h5 M9.5 13h5 M15.5 8h5' },
-  { slug: 'tuner', name: '크로마틱 튜너', en: 'Tuner', desc: '마이크로 음정을 실시간으로 잡아주는 온라인 튜너. 모든 악기.', ready: true, icon: 'M9 3v7a3 3 0 0 0 6 0V3 M12 13v8' },
-  { slug: 'noise', name: '노이즈 제너레이터', en: 'Noise Generator', desc: '화이트·핑크·브라운 노이즈. 집중·수면·이명 완화용 타이머 내장.', ready: true, icon: 'M4 10v4 M8 6v12 M12 3v18 M16 6v12 M20 10v4' },
-  { slug: 'tone-generator', name: '톤 제너레이터', en: 'Tone Generator', desc: '20Hz~20kHz 주파수 발생기. 가청주파수·청력 테스트, 스피커 점검.', ready: true, icon: 'M3 12c2-7 4-7 6 0s4 7 6 0 4-7 6 0' },
+  // ── 누구나 ──
+  { slug: 'metronome', name: '메트로놈', en: 'Metronome', cat: 'general', desc: '정확한 박자 연습용 온라인 메트로놈. BPM·박자표·탭 템포.', ready: true, icon: 'M9 3h6l4 18H5z M12 18l1.8-9' },
+  { slug: 'tuner', name: '크로마틱 튜너', en: 'Tuner', cat: 'general', desc: '마이크로 음정을 실시간으로 잡아주는 온라인 튜너. 모든 악기.', ready: true, icon: 'M9 3v7a3 3 0 0 0 6 0V3 M12 13v8' },
+  { slug: 'ear-training', name: '음정·코드 청음', en: 'Ear Training', cat: 'general', desc: '음정과 코드를 듣고 맞히는 청음 훈련. 난이도별·연속 정답 기록.', ready: true, icon: 'M9 18V5l12-2v13 M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0z M21 16a3 3 0 1 1-6 0 3 3 0 0 1 6 0z' },
+  { slug: 'noise', name: '노이즈 제너레이터', en: 'Noise Generator', cat: 'general', desc: '비·파도·바람·집중 앰비언트 사운드. 공부·수면·이명 완화, 타이머 내장.', ready: true, icon: 'M4 10v4 M8 6v12 M12 3v18 M16 6v12 M20 10v4' },
+  { slug: 'tone-generator', name: '톤 제너레이터', en: 'Tone Generator', cat: 'general', desc: '20Hz~20kHz 주파수 발생기. 가청주파수·청력 테스트, 스피커 점검.', ready: true, icon: 'M3 12c2-7 4-7 6 0s4 7 6 0 4-7 6 0' },
+  // ── 프로듀싱 · 믹싱 ──
+  { slug: 'delay-calculator', name: 'BPM 딜레이 계산기', en: 'Delay Calculator', cat: 'pro', desc: 'BPM에서 딜레이·리버브 타임(ms·Hz)을 음표별로. 정박·점음표·셋잇단, 들어보기 내장.', ready: true, icon: 'M4 12h2 M9 6v12 M14 9v6 M19 10.5v3' },
+  { slug: 'db-gain', name: '데시벨(dB) 계산기', en: 'dB ↔ Gain', cat: 'pro', desc: '데시벨↔배수(×)↔퍼센트 양방향 변환. 레벨 차이를 직접 들어보는 A/B 비교 내장.', ready: true, icon: 'M5 20v-5 M5 11V4 M12 20v-9 M12 7V4 M19 20v-3 M19 13V4 M3 15h4 M10 7h4 M17 13h4' },
+  { slug: 'note-frequency', name: '노트 주파수 변환기', en: 'Note ↔ Frequency', cat: 'pro', desc: '음이름↔주파수(Hz) 변환표. 옥타브별 12음 주파수, A4 기준음 조정, 클릭 재생.', ready: true, icon: 'M9 18V5l12-2v13 M6 15a3 3 0 1 0 6 0 3 3 0 0 0-6 0z' },
+  { slug: 'wavelength', name: '주파수·파장 계산기', en: 'Wavelength', cat: 'pro', desc: '주파수↔음파 파장(m·cm) 변환. ¼·½ 파장, 방 크기로 정재파(룸 모드)까지. 음향·룸 어쿠스틱용.', ready: true, icon: 'M3 8c2-5 4-5 6 0s4 5 6 0 4-5 6 0 M3 16h12 M3 14v4 M15 14v4' },
+  { slug: 'eq-ear', name: 'EQ 주파수 청음', en: 'EQ Ear Trainer', cat: 'pro', desc: '어느 주파수가 부스트됐는지 맞히는 믹싱 귀 훈련. 난이도별·기록.', ready: true, icon: 'M6 4v16 M12 4v16 M18 4v16 M3.5 9h5 M9.5 13h5 M15.5 8h5' },
+];
+
+const CATS = [
+  { id: 'general', label: '누구나', en: 'For everyone', sub: '악기·음악 경험이 없어도 — 연주·튜닝·청음·집중에.' },
+  { id: 'pro', label: '프로듀싱 · 믹싱', en: 'For producers', sub: 'DAW·미디를 다뤄봤다면 — 계산기와 믹싱 귀 훈련.' },
 ];
 ---
-<Base title="도구" description="음악 연습에 바로 쓰는 무료 온라인 도구 — 메트로놈, 청음 훈련, 튜너. 설치 없이 브라우저에서.">
+<Base title="도구" description="메트로놈·튜너·청음부터 BPM 딜레이·dB·파장 계산기까지 — 설치 없이 브라우저에서 쓰는 무료 음악·오디오 도구.">
 
 <div class="max-w-4xl mx-auto px-4 sm:px-6 py-12">
-  <div class="mb-8">
+  <div class="mb-10">
     <span class="text-xs font-mono px-2.5 py-1 rounded-full border border-[var(--color-violet-light)] text-[var(--color-violet)] bg-[var(--color-violet-glow)]">TOOLS</span>
-    <h1 class="text-3xl font-bold mt-3 mb-2" style="font-family:'Space Grotesk','Pretendard',sans-serif">음악 연습 도구</h1>
-    <p class="text-[var(--color-ink-500)]">설치 없이 브라우저에서 바로 쓰는 무료 도구. 박자 연습·청음 훈련·튜닝을 한 곳에서.</p>
+    <h1 class="text-3xl font-bold mt-3 mb-2" style="font-family:'Space Grotesk','Pretendard',sans-serif">음악·오디오 도구</h1>
+    <p class="text-[var(--color-ink-500)]">연주·연습부터 프로듀싱·믹싱까지 — 설치 없이 브라우저에서 바로 쓰는 무료 도구.</p>
   </div>
 
-  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-    {tools.map(t => (
-      t.ready ? (
-        <a href={`${base}tools/${t.slug}/`} class="group flex items-start gap-4 p-5 rounded-2xl border border-[var(--color-border)] bg-white hover:border-[var(--color-violet)] hover:shadow-lg transition-all">
-          <div class="w-11 h-11 flex-none rounded-xl gradient-brand flex items-center justify-center">
-            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d={t.icon}/></svg>
-          </div>
-          <div class="min-w-0">
-            <div class="flex items-center gap-2">
-              <span class="font-bold text-[var(--color-ink-700)] group-hover:text-[var(--color-violet)] transition" style="font-family:'Space Grotesk','Pretendard',sans-serif">{t.name}</span>
-              <span class="text-[10px] font-mono text-[var(--color-ink-300)]">{t.en}</span>
-            </div>
-            <p class="text-sm text-[var(--color-ink-500)] mt-1">{t.desc}</p>
-          </div>
-        </a>
-      ) : (
-        <div class="flex items-start gap-4 p-5 rounded-2xl border border-dashed border-[var(--color-border)] bg-[var(--color-surface)] opacity-70">
-          <div class="w-11 h-11 flex-none rounded-xl bg-[var(--color-surface-2)] flex items-center justify-center">
-            <svg class="w-5 h-5 text-[var(--color-ink-300)]" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d={t.icon}/></svg>
-          </div>
-          <div class="min-w-0">
-            <div class="flex items-center gap-2 flex-wrap">
-              <span class="font-bold text-[var(--color-ink-600)]" style="font-family:'Space Grotesk','Pretendard',sans-serif">{t.name}</span>
-              <span class="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-[var(--color-surface-2)] text-[var(--color-ink-300)]">준비 중</span>
-            </div>
-            <p class="text-sm text-[var(--color-ink-500)] mt-1">{t.desc}</p>
-          </div>
+  {CATS.map(c => (
+    <section class="mb-10">
+      <div class="mb-4">
+        <div class="flex items-baseline gap-2.5">
+          <h2 class="text-lg font-bold text-[var(--color-ink-700)]" style="font-family:'Space Grotesk','Pretendard',sans-serif">{c.label}</h2>
+          <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)]">{c.en}</span>
         </div>
-      )
-    ))}
-  </div>
+        <p class="text-sm text-[var(--color-ink-500)] mt-1">{c.sub}</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {tools.filter(t => t.cat === c.id).map(t => (
+          t.ready ? (
+            <a href={`${base}tools/${t.slug}/`} class="group flex items-start gap-4 p-5 rounded-2xl border border-[var(--color-border)] bg-white hover:border-[var(--color-violet)] hover:shadow-lg transition-all">
+              <div class="w-11 h-11 flex-none rounded-xl gradient-brand flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d={t.icon}/></svg>
+              </div>
+              <div class="min-w-0">
+                <div class="flex items-center gap-2">
+                  <span class="font-bold text-[var(--color-ink-700)] group-hover:text-[var(--color-violet)] transition" style="font-family:'Space Grotesk','Pretendard',sans-serif">{t.name}</span>
+                  <span class="text-[10px] font-mono text-[var(--color-ink-300)]">{t.en}</span>
+                </div>
+                <p class="text-sm text-[var(--color-ink-500)] mt-1">{t.desc}</p>
+              </div>
+            </a>
+          ) : (
+            <div class="flex items-start gap-4 p-5 rounded-2xl border border-dashed border-[var(--color-border)] bg-[var(--color-surface)] opacity-70">
+              <div class="w-11 h-11 flex-none rounded-xl bg-[var(--color-surface-2)] flex items-center justify-center">
+                <svg class="w-5 h-5 text-[var(--color-ink-300)]" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d={t.icon}/></svg>
+              </div>
+              <div class="min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="font-bold text-[var(--color-ink-600)]" style="font-family:'Space Grotesk','Pretendard',sans-serif">{t.name}</span>
+                  <span class="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-[var(--color-surface-2)] text-[var(--color-ink-300)]">준비 중</span>
+                </div>
+                <p class="text-sm text-[var(--color-ink-500)] mt-1">{t.desc}</p>
+              </div>
+            </div>
+          )
+        ))}
+      </div>
+    </section>
+  ))}
 </div>
 
 </Base>

@@ -1,9 +1,9 @@
 ---
 import Base from '../../layouts/Base.astro';
 const base = import.meta.env.BASE_URL;
-const desc = '화이트·핑크·브라운 노이즈를 재생하는 무료 온라인 노이즈 제너레이터. 집중·공부·수면·이명 완화용. 볼륨 조절과 자동 종료 타이머 내장. 설치 없이 브라우저에서.';
+const desc = '빗소리·파도·바람·집중 앰비언트 사운드와 화이트·핑크·브라운 백색소음을 재생하는 무료 온라인 노이즈 제너레이터. 공부·수면·이명 완화용, 자동 종료 타이머 내장. 설치 없이 브라우저에서.';
 ---
-<Base title="노이즈 제너레이터" description={desc} type="website"
+<Base title="노이즈·백색소음 제너레이터" description={desc} type="website"
   breadcrumbs={[{ name: '홈', url: base }, { name: '도구', url: `${base}tools/` }, { name: '노이즈 제너레이터', url: Astro.url.pathname }]}>
 
 <div class="max-w-xl mx-auto px-4 sm:px-6 py-12">
@@ -16,19 +16,22 @@ const desc = '화이트·핑크·브라운 노이즈를 재생하는 무료 온�
   <div class="mb-6">
     <span class="text-xs font-mono px-2.5 py-1 rounded-full border border-[var(--color-violet-light)] text-[var(--color-violet)] bg-[var(--color-violet-glow)]">TOOLS</span>
     <h1 class="text-3xl font-bold mt-3 mb-2" style="font-family:'Space Grotesk','Pretendard',sans-serif">노이즈 제너레이터</h1>
-    <p class="text-[var(--color-ink-500)]">집중·공부·수면·이명 완화에. 노이즈 종류를 고르고 재생하세요. 자동 종료 타이머 내장.</p>
+    <p class="text-[var(--color-ink-500)]">비·파도·바람·집중 사운드로 공부·수면·이명 완화에. 원하는 분위기를 고르고 재생하세요. 자동 종료 타이머 내장.</p>
   </div>
 
   <div class="noise rounded-2xl border border-[var(--color-border)] bg-white overflow-hidden">
     <div class="p-6 sm:p-8 space-y-6">
-      <!-- 노이즈 종류 -->
-      <div class="grid grid-cols-3 gap-2">
-        {[['white','화이트','밝고 쉭쉭'],['pink','핑크','균형·자연','1'],['brown','브라운','깊고 묵직']].map(([v,t,d,def]) => (
-          <button class="type-btn p-3 rounded-xl border border-[var(--color-border)] bg-white text-center transition hover:border-[var(--color-violet)]" data-type={v} aria-pressed={def?'true':'false'}>
-            <div class="text-sm font-bold text-[var(--color-ink-700)]" style="font-family:'Space Grotesk','Pretendard',sans-serif">{t}</div>
-            <div class="text-[10px] text-[var(--color-ink-300)] mt-0.5">{d}</div>
-          </button>
-        ))}
+      <!-- 사운드 프리셋 -->
+      <div>
+        <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)]">사운드</span>
+        <div class="grid grid-cols-4 gap-2 mt-2">
+          {[['focus','집중','묵직·잔잔'],['rain','비','부드러운 쉭'],['ocean','파도','밀려왔다 빠짐'],['wind','바람','일렁이는']].map(([k,t,d]) => (
+            <button class="preset-btn p-3 rounded-xl border border-[var(--color-border)] bg-white text-center transition hover:border-[var(--color-violet)]" data-preset={k} aria-pressed={k==='focus'?'true':'false'}>
+              <div class="text-sm font-bold text-[var(--color-ink-700)]" style="font-family:'Space Grotesk','Pretendard',sans-serif">{t}</div>
+              <div class="text-[9px] text-[var(--color-ink-300)] mt-0.5">{d}</div>
+            </button>
+          ))}
+        </div>
       </div>
 
       <!-- 재생 -->
@@ -51,8 +54,18 @@ const desc = '화이트·핑크·브라운 노이즈를 재생하는 무료 온�
           <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Tone · 음색</span>
           <span class="tone-val text-sm font-mono text-[var(--color-ink-700)]">선명</span>
         </div>
-        <input type="range" class="sl-range tone-range w-full" min="0" max="1000" step="1" value="1000" aria-label="톤(부드럽게/선명)" />
+        <input type="range" class="sl-range tone-range w-full" min="0" max="1000" step="1" value="560" aria-label="톤(부드럽게/선명)" />
         <div class="flex justify-between text-[10px] font-mono text-[var(--color-ink-300)] mt-1 px-0.5"><span>부드럽게</span><span>선명</span></div>
+      </div>
+
+      <!-- 원본 노이즈 (고급) -->
+      <div>
+        <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)]">원본 노이즈</span>
+        <div class="grid grid-cols-3 gap-2 mt-2">
+          {[['white','화이트'],['pink','핑크'],['brown','브라운']].map(([v,t]) => (
+            <button class="type-btn px-3 py-2 rounded-xl border border-[var(--color-border)] bg-white text-center text-sm font-semibold text-[var(--color-ink-700)] transition hover:border-[var(--color-violet)]" data-type={v} aria-pressed="false" style="font-family:'Space Grotesk','Pretendard',sans-serif">{t}</button>
+          ))}
+        </div>
       </div>
 
       <!-- 타이머 -->
@@ -70,7 +83,7 @@ const desc = '화이트·핑크·브라운 노이즈를 재생하는 무료 온�
     </div>
   </div>
 
-  <p class="text-xs text-[var(--color-ink-300)] mt-4 text-center">화이트=전 대역 균등 · 핑크=옥타브당 균등(자연스러움) · 브라운=저음 강조(가장 부드러움) · 편하게 들리는 볼륨으로</p>
+  <p class="text-xs text-[var(--color-ink-300)] mt-4 text-center">프리셋은 노이즈에 필터·느린 변조를 더한 것 · 톤을 왼쪽으로 내리면 더 먹먹·부드럽게 · 원본은 화이트(밝음)·핑크(자연)·브라운(묵직) · 편한 볼륨으로</p>
 
   <div class="mt-8 p-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-sm text-[var(--color-ink-500)]">
     노이즈가 어떻게 소리가 되는지, 화이트 vs 핑크의 차이는 <a href={`${base}learn/acoustics/tone/`} class="text-[var(--color-violet)] font-medium hover:underline">소리의 3요소</a>와
@@ -83,11 +96,18 @@ import { AudioCore } from '../../audio/core';
 
 function initNoise(root: HTMLElement) {
   const core = new AudioCore();
-  let type = 'pink', playing = false, vol = 40;
+  let type = 'brown', playing = false, vol = 40;
+  // 체인: src → lpf → swellGain → out(마스터 볼륨) → core.input
   const out = core.gain(vol / 100 * 0.6); out.connect(core.input);
-  // 톤 = 로우패스. 컷오프 낮추면 고음이 깎여 부드럽고 먹먹하게(빗소리·먼 파도 느낌).
-  const lpf = core.ctx.createBiquadFilter(); lpf.type = 'lowpass'; lpf.frequency.value = 20000; lpf.Q.value = 0.7;
-  lpf.connect(out);
+  const swellGain = core.gain(1); swellGain.connect(out);
+  // 톤 = 로우패스. 컷오프 낮추면 고음이 깎여 부드럽고 먹먹하게(빗소리·먼 파도).
+  const lpf = core.ctx.createBiquadFilter(); lpf.type = 'lowpass'; lpf.frequency.value = 3000; lpf.Q.value = 0.7;
+  lpf.connect(swellGain);
+  // 음량 스웰 LFO(파도) → swellGain.gain / 필터 스윕 LFO(바람) → lpf.frequency
+  const swellLFO = core.ctx.createOscillator(); swellLFO.frequency.value = 0.09;
+  const swellDepth = core.gain(0); swellLFO.connect(swellDepth); swellDepth.connect(swellGain.gain); swellLFO.start();
+  const sweepLFO = core.ctx.createOscillator(); sweepLFO.frequency.value = 0.07;
+  const sweepDepth = core.gain(0); sweepLFO.connect(sweepDepth); sweepDepth.connect(lpf.frequency); sweepLFO.start();
   let src: AudioBufferSourceNode | null = null;
   const cache: Record<string, AudioBuffer> = {};
 
@@ -142,18 +162,42 @@ function initNoise(root: HTMLElement) {
   }
   playBtn.addEventListener('click', () => setPlaying(!playing));
 
-  // 종류
+  // ── 변조 (파도=음량 스웰, 바람=필터 스윕) ──
+  function setSwell(on: boolean) {
+    core.smooth(swellGain.gain, on ? 0.5 : 1, 0.4);
+    core.smooth(swellDepth.gain, on ? 0.45 : 0, 0.4);
+  }
+  function setSweep(on: boolean) { core.smooth(sweepDepth.gain, on ? 1100 : 0, 0.3); }
+
+  // ── 프리셋 / 원본 종류 ──
+  const PRESETS: Record<string, { type: string; tone: number; swell: boolean; sweep: boolean }> = {
+    focus: { type: 'brown', tone: 560, swell: false, sweep: false },
+    rain:  { type: 'pink',  tone: 700, swell: false, sweep: false },
+    ocean: { type: 'brown', tone: 470, swell: true,  sweep: false },
+    wind:  { type: 'brown', tone: 440, swell: false, sweep: true  },
+  };
+  const presetBtns = [...root.querySelectorAll<HTMLElement>('.preset-btn')];
   const typeBtns = [...root.querySelectorAll<HTMLElement>('.type-btn')];
-  typeBtns.forEach(btn => {
-    const on = () => btn.style.cssText = 'border-color:var(--color-violet);background:var(--color-violet-glow)';
-    btn.addEventListener('click', () => {
-      typeBtns.forEach(b => { b.setAttribute('aria-pressed','false'); b.style.cssText=''; });
-      btn.setAttribute('aria-pressed','true'); on();
-      type = btn.dataset.type!;
-      if (playing) startSrc(); // 끊김 없이 교체
-    });
-    if (btn.getAttribute('aria-pressed') === 'true') on();
-  });
+  const hi = (b: HTMLElement, on: boolean) => { b.setAttribute('aria-pressed', String(on)); b.style.cssText = on ? 'border-color:var(--color-violet);background:var(--color-violet-glow)' : ''; };
+
+  function applyPreset(key: string) {
+    const p = PRESETS[key]; type = p.type;
+    presetBtns.forEach(b => hi(b, b.dataset.preset === key));
+    typeBtns.forEach(b => hi(b, b.dataset.type === p.type));
+    setTone(p.tone, true);
+    setSwell(p.swell); setSweep(p.sweep);
+    if (playing) startSrc();
+  }
+  presetBtns.forEach(b => b.addEventListener('click', () => applyPreset(b.dataset.preset!)));
+
+  // 원본 노이즈 직접 선택 → 변조 끄고 프리셋 해제
+  typeBtns.forEach(btn => btn.addEventListener('click', () => {
+    presetBtns.forEach(b => hi(b, false));
+    typeBtns.forEach(b => hi(b, b === btn));
+    type = btn.dataset.type!;
+    setSwell(false); setSweep(false);
+    if (playing) startSrc();
+  }));
 
   // 볼륨
   const volRange = root.querySelector('.vol-range') as HTMLInputElement;
@@ -165,16 +209,18 @@ function initNoise(root: HTMLElement) {
     core.smooth(out.gain, vol / 100 * 0.6);
   });
 
-  // 톤(로우패스 컷오프) — 300Hz~20kHz 로그
+  // ── 톤(로우패스 컷오프) — 300Hz~20kHz 로그 ──
   const toneRange = root.querySelector('.tone-range') as HTMLInputElement;
   const toneVal = root.querySelector('.tone-val') as HTMLElement;
-  toneRange.style.setProperty('--sl-pct', '100%');
-  toneRange.addEventListener('input', () => {
-    const p = +toneRange.value, hz = Math.round(300 * Math.pow(20000 / 300, p / 1000));
+  const toneToHz = (p: number) => Math.round(300 * Math.pow(20000 / 300, p / 1000));
+  function setTone(p: number, moveSlider: boolean) {
+    if (moveSlider) toneRange.value = String(p);
     toneRange.style.setProperty('--sl-pct', (p / 10) + '%');
+    const hz = toneToHz(p);
     toneVal.textContent = p >= 990 ? '선명' : p <= 20 ? '부드럽게' : (hz >= 1000 ? (hz / 1000).toFixed(1) + 'kHz' : hz + 'Hz');
-    core.smooth(lpf.frequency, hz, 0.03);
-  });
+    core.smooth(lpf.frequency, hz, 0.05);
+  }
+  toneRange.addEventListener('input', () => setTone(+toneRange.value, false));
 
   // 타이머 버튼
   const timerBtns = [...root.querySelectorAll<HTMLElement>('.timer-btn')];
@@ -187,6 +233,8 @@ function initNoise(root: HTMLElement) {
     });
     if (btn.getAttribute('aria-pressed') === 'true') on();
   });
+
+  applyPreset('focus'); // 기본: 부드러운 집중 사운드 (첫 재생이 귀에 편하도록)
 }
 
 document.querySelectorAll<HTMLElement>('.noise').forEach(initNoise);

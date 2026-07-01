@@ -8,7 +8,7 @@
 //
 // ADSENSE_ID 가 비어 있으면 광고 스크립트·검증 메타·광고 태그가 전혀 출력되지
 // 않습니다(= 현재 상태). 승인 전까지 사이트에 어떤 광고 코드도 노출되지 않습니다.
-export const ADSENSE_ID = '';
+export const ADSENSE_ID = 'ca-pub-6535120318685843';
 
 // 광고 단위 슬롯 ID (AdSense → 광고 → 광고 단위 기준)
 export const AD_SLOTS = {

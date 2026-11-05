@@ -1,0 +1,163 @@
+---
+// 드럼 시퀀서 위젯 — 16스텝(4/4 한 마디) 격자. 프리셋을 고르거나 칸을 눌러 직접 찍는다.
+// config:
+//   tracks  : 보여 줄 트랙 (기본 ['kick','snare','hat'])  — kick·snare·hat·open·clap
+//   presets : 프리셋 id 목록 (src/audio/drums.ts PRESETS)
+//   swing   : true면 스윙 슬라이더 표시
+//   title   : 헤더 제목
+import { PRESETS, TRACK_LABEL, type DrumTrack } from '../audio/drums';
+interface Props { config?: Record<string, any>; }
+const { config = {} } = Astro.props;
+const presetIds: string[] = (config.presets ?? ['rock8']).filter((id: string) => PRESETS[id]);
+const first = PRESETS[presetIds[0]];
+const tracks: DrumTrack[] = config.tracks ?? (Object.keys(first.tracks) as DrumTrack[]);
+const showSwing = !!config.swing;
+const title = config.title ?? '드럼 패턴';
+const COUNTS = ['1', 'e', '&', 'a', '2', 'e', '&', 'a', '3', 'e', '&', 'a', '4', 'e', '&', 'a'];
+const seg = 'px-2 py-1.5 rounded-lg text-xs font-semibold transition-all text-[var(--color-ink-500)]';
+---
+<div class="drum-widget rounded-2xl border border-[var(--color-border)] bg-white overflow-hidden"
+  data-presets={JSON.stringify(presetIds.map(id => PRESETS[id]))} data-tracks={JSON.stringify(tracks)}>
+  <div class="flex items-center justify-between px-5 py-4 border-b border-[var(--color-border)] bg-[var(--color-surface)]">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg flex items-center justify-center gradient-brand">
+        <svg class="text-white" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><ellipse cx="12" cy="8" rx="8" ry="3"/><path d="M4 8v8c0 1.7 3.6 3 8 3s8-1.3 8-3V8"/></svg>
+      </div>
+      <div>
+        <span class="font-bold text-base" style="font-family:'Space Grotesk','Pretendard',sans-serif">{title}</span>
+        <span class="text-sm text-[var(--color-ink-300)] ml-2">Step Sequencer</span>
+      </div>
+    </div>
+    <button type="button" class="play-btn gradient-brand text-white text-sm font-semibold px-4 py-1.5 rounded-full transition hover:opacity-90" style="font-family:'Space Grotesk','Pretendard',sans-serif">▶ 재생</button>
+  </div>
+
+  <div class="p-5 space-y-4">
+    {presetIds.length > 1 && (
+      <div class="grid gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" style={`grid-template-columns:repeat(${Math.min(presetIds.length, presetIds.length > 4 ? 3 : 4)},1fr)`} role="group">
+        {presetIds.map((id, i) => <button type="button" class={`preset-btn ${seg}`} data-id={id} aria-pressed={i === 0 ? 'true' : 'false'}>{PRESETS[id].name}</button>)}
+      </div>
+    )}
+    <div class="preset-desc text-xs text-[var(--color-ink-500)] text-center min-h-[1.4em]">{first.desc}</div>
+
+    <div class="grid-wrap space-y-1.5">
+      <div class="flex items-center gap-1">
+        <span class="w-12 flex-none"></span>
+        <div class="steps flex-1 grid gap-[2px]" style="grid-template-columns:repeat(16,1fr)">
+          {COUNTS.map((c, i) => <span class={`text-center text-[9px] font-mono ${i % 4 === 0 ? 'text-[var(--color-violet)] font-bold' : 'text-[var(--color-ink-300)]'}`}>{c}</span>)}
+        </div>
+      </div>
+      {tracks.map(t => (
+        <div class="flex items-center gap-1">
+          <span class="w-12 flex-none text-[11px] font-semibold text-[var(--color-ink-500)]">{TRACK_LABEL[t]}</span>
+          <div class="steps flex-1 grid gap-[2px]" style="grid-template-columns:repeat(16,1fr)">
+            {COUNTS.map((_, i) => <button type="button" class:list={['cell', i % 4 === 0 && 'beat']} data-t={t} data-i={i} aria-label={`${TRACK_LABEL[t]} ${i + 1}번째 칸`}></button>)}
+          </div>
+        </div>
+      ))}
+    </div>
+
+    {showSwing && (
+      <div>
+        <div class="flex items-center justify-between mb-1">
+          <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Swing · 스윙</span>
+          <span class="swing-val text-sm font-mono text-[var(--color-ink-700)]">50% (정박)</span>
+        </div>
+        <input type="range" class="sl-range swing-range" min="50" max="75" step="1" value="50" aria-label="스윙" />
+      </div>
+    )}
+    <div>
+      <div class="flex items-center justify-between mb-1">
+        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">BPM · 템포</span>
+        <span class="bpm-val text-sm font-mono text-[var(--color-ink-700)]">{first.bpm}</span>
+      </div>
+      <input type="range" class="sl-range bpm-range" min="50" max="180" step="1" value={first.bpm} aria-label="템포" />
+    </div>
+  </div>
+</div>
+
+<style>
+  .drum-widget .cell { aspect-ratio: 1 / 1.25; border-radius: 4px; background: var(--color-surface-2); border: 1px solid var(--color-border); cursor: pointer; transition: background .06s, transform .06s; }
+  .drum-widget .cell.beat { border-color: #c9c3ee; }
+  .drum-widget .cell.x { background: linear-gradient(135deg, #7c3aed, #2563eb); border-color: transparent; }
+  .drum-widget .cell.o { background: #b9aef2; border-color: transparent; }
+  .drum-widget .cell.now { outline: 2px solid #f59e0b; outline-offset: -1px; }
+  .drum-widget .cell.x.now, .drum-widget .cell.o.now { transform: scale(1.12); }
+</style>
+
+<script>
+import { AudioCore } from '../audio/core';
+import { hit, type DrumPreset, type DrumTrack } from '../audio/drums';
+
+function initDrum(root: HTMLElement) {
+  const presets: DrumPreset[] = JSON.parse(root.dataset.presets || '[]');
+  const tracks: DrumTrack[] = JSON.parse(root.dataset.tracks || '[]');
+  let core: AudioCore | null = null;
+  let pattern: Record<string, string[]> = {};
+  let bpm = presets[0].bpm, swing = 0.5;
+  const playBtn = root.querySelector('.play-btn') as HTMLButtonElement;
+  const desc = root.querySelector('.preset-desc') as HTMLElement;
+  const bpmRange = root.querySelector('.bpm-range') as HTMLInputElement, bpmVal = root.querySelector('.bpm-val') as HTMLElement;
+  const swingRange = root.querySelector<HTMLInputElement>('.swing-range'), swingVal = root.querySelector<HTMLElement>('.swing-val');
+  const setPct = (el: HTMLInputElement) => el.style.setProperty('--sl-pct', ((+el.value - +el.min) / (+el.max - +el.min) * 100) + '%');
+  const cell = (t: string, i: number) => root.querySelector<HTMLElement>(`.cell[data-t="${t}"][data-i="${i}"]`)!;
+
+  function paint() {
+    for (const t of tracks) for (let i = 0; i < 16; i++) { const c = cell(t, i); c.classList.toggle('x', pattern[t][i] === 'x'); c.classList.toggle('o', pattern[t][i] === 'o'); }
+  }
+  const swingText = () => swing <= 0.5 ? '50% (정박)' : Math.abs(swing - 0.667) < 0.02 ? `${Math.round(swing * 100)}% (셋잇단 2:1)` : `${Math.round(swing * 100)}%`;
+  function load(p: DrumPreset) {
+    pattern = {};
+    for (const t of tracks) pattern[t] = (p.tracks[t] ?? '................').split('');
+    bpm = p.bpm; bpmRange.value = String(bpm); bpmVal.textContent = String(bpm); setPct(bpmRange);
+    if (swingRange) { swing = p.swing ?? 0.5; swingRange.value = String(Math.round(swing * 100)); swingVal!.textContent = swingText(); setPct(swingRange); }
+    desc.textContent = p.desc; paint();
+  }
+  load(presets[0]);
+
+  root.querySelectorAll<HTMLElement>('.cell').forEach(c => c.addEventListener('click', () => {
+    const t = c.dataset.t!, i = Number(c.dataset.i);
+    pattern[t][i] = pattern[t][i] === '.' ? 'x' : '.';
+    paint();
+  }));
+  bpmRange.addEventListener('input', () => { bpm = +bpmRange.value; bpmVal.textContent = String(bpm); setPct(bpmRange); });
+  if (swingRange) { setPct(swingRange); swingRange.addEventListener('input', () => { swing = +swingRange.value / 100; swingVal!.textContent = swingText(); setPct(swingRange); }); }
+
+  const btns = root.querySelectorAll<HTMLButtonElement>('.preset-btn');
+  const sel = (b: HTMLButtonElement) => { b.style.cssText = 'background:white;color:var(--color-violet);box-shadow:0 1px 4px rgba(0,0,0,0.08)'; };
+  btns.forEach(b => {
+    if (b.getAttribute('aria-pressed') === 'true') sel(b);
+    b.addEventListener('click', () => { btns.forEach(x => { x.setAttribute('aria-pressed', 'false'); x.style.cssText = ''; }); b.setAttribute('aria-pressed', 'true'); sel(b); load(presets.find(p => p.id === b.dataset.id)!); });
+  });
+
+  // 스케줄러 — 스윙은 박 안의 위치를 비율로 민다 (8분 뒷박 = swing × 1박)
+  let playing = false, timer = 0, step = 0, barStart = 0;
+  const offset = (i: number) => {
+    const inBeat = i % 4, beat = Math.floor(i / 4);
+    const pos = inBeat === 0 ? 0 : inBeat === 2 ? swing : inBeat === 1 ? swing / 2 : swing + (1 - swing) / 2;
+    return beat + pos; // 박 단위
+  };
+  function tick() {
+    const c = core!, spb = 60 / bpm;
+    while (true) {
+      const t = barStart + offset(step) * spb;
+      if (t > c.ctx.currentTime + 0.12) break;
+      const i = step;
+      for (const tr of tracks) { const v = pattern[tr][i]; if (v !== '.') hit(c, tr, t, v === 'o' ? 0.45 : 1); }
+      setTimeout(() => {
+        root.querySelectorAll('.cell.now').forEach(e => e.classList.remove('now'));
+        tracks.forEach(tr => cell(tr, i).classList.add('now'));
+      }, Math.max(0, (t - c.ctx.currentTime) * 1000));
+      step++;
+      if (step === 16) { step = 0; barStart += 4 * spb; }
+    }
+  }
+  playBtn.addEventListener('click', async () => {
+    if (playing) { playing = false; clearInterval(timer); playBtn.textContent = '▶ 재생'; root.querySelectorAll('.cell.now').forEach(e => e.classList.remove('now')); return; }
+    core ??= new AudioCore(); await core.resume();
+    playing = true; playBtn.textContent = '⏸ 정지'; step = 0; barStart = core.ctx.currentTime + 0.1;
+    tick(); timer = window.setInterval(tick, 25);
+  });
+}
+
+document.querySelectorAll<HTMLElement>('.drum-widget').forEach(initDrum);
+</script>

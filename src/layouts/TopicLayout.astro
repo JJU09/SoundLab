@@ -6,6 +6,7 @@ import ScaffoldBar from '../components/ScaffoldBar.astro';
 import AdUnit from '../components/AdUnit.astro';
 import { HUB_META, SANDBOX_OF } from '../content.config';
 import { QUIZZES } from '../lib/quizzes';
+import { getCollection } from 'astro:content';
 
 interface TopicData {
   hub: keyof typeof HUB_META;
@@ -19,6 +20,7 @@ interface TopicData {
   widgetConfig?: Record<string, any>;
   quiz?: string;
   scaffold?: boolean;
+  prereqs?: string[];
 }
 interface NavLink { slug: string; title: string; kr: string; }
 
@@ -34,6 +36,12 @@ const sandbox = SANDBOX_OF[data.hub]; // 허브 샌드박스 크로스링크 (�
 const hasWidget = data.widget && data.widget !== 'none';
 const quiz = data.quiz ? QUIZZES[data.quiz] : null;
 const num = String(data.order).padStart(2, '0');
+// 먼저 알면 좋은 개념 — 존재하는 토픽만 링크 (아직 없는 토픽은 이름 없이 건너뜀)
+const allTopics = data.prereqs?.length ? await getCollection('topics') : [];
+const prereqLinks = (data.prereqs ?? []).map(id => {
+  const t = allTopics.find(x => x.id === id && !x.data.draft);
+  return t ? { href: `${base}learn/${id}/`, title: t.data.title, kr: t.data.kr } : null;
+}).filter((x): x is { href: string; title: string; kr: string } => !!x);
 const accent = data.color === 'violet'
   ? 'border-[var(--color-violet-light)] text-[var(--color-violet)] bg-[var(--color-violet-glow)]'
   : 'border-[var(--color-blue-light)] text-[var(--color-blue)] bg-[var(--color-blue-glow)]';
@@ -89,6 +97,15 @@ const accent = data.color === 'violet'
         </p>
 
         <p class="text-[var(--color-ink-700)] leading-relaxed mb-8">{data.desc}</p>
+
+        {prereqLinks.length > 0 && (
+          <div class="flex flex-wrap items-center gap-2 -mt-4 mb-8 text-sm">
+            <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">먼저 알면 좋아요</span>
+            {prereqLinks.map(p => (
+              <a href={p.href} class="px-2.5 py-1 rounded-full border border-[var(--color-border)] text-[var(--color-ink-700)] hover:border-[var(--color-violet)] hover:text-[var(--color-violet)] transition">{p.kr}</a>
+            ))}
+          </div>
+        )}
 
         <!-- MDX 본문 -->
         <div class="topic-body space-y-6 text-sm leading-relaxed text-[var(--color-ink-700)]">

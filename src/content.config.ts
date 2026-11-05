@@ -48,7 +48,7 @@ export const SANDBOX_OF: Partial<Record<Hub, { path: string; name: string }>> = 
 };
 
 // 위젯 타입 — MDX가 어떤 인터랙티브 컴포넌트를 띄울지 결정
-export const WIDGETS = ['effect', 'synth', 'subtractive', 'additive', 'fm', 'modulation', 'phase', 'beats', 'tone', 'comb', 'bitcrush', 'samplerate', 'aliasing', 'level', 'mixer', 'none'] as const;
+export const WIDGETS = ['effect', 'synth', 'subtractive', 'additive', 'fm', 'modulation', 'phase', 'beats', 'tone', 'comb', 'bitcrush', 'samplerate', 'aliasing', 'level', 'mixer', 'piano', 'none'] as const;
 
 const topics = defineCollection({
   loader: glob({ pattern: '**/*.mdx', base: './src/content/topics' }),
@@ -65,6 +65,7 @@ const topics = defineCollection({
     widgetConfig: z.record(z.string(), z.any()).optional(),
     quiz: z.string().optional(),                // QUIZZES 키 (없으면 퀴즈 생략)
     scaffold: z.boolean().default(false),       // 수준별 동적 스캐폴딩(Easy/Normal/Hard) 활성
+    prereqs: z.array(z.string()).optional(),    // 먼저 알면 좋은 개념 — 토픽 id "<hub>/<slug>" 목록
     draft: z.boolean().default(false),
   }),
 });

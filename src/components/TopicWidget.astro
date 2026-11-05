@@ -16,6 +16,7 @@ import SampleRateWidget from './SampleRateWidget.astro';
 import AliasWidget from './AliasWidget.astro';
 import LevelWidget from './LevelWidget.astro';
 import MixerWidget from './MixerWidget.astro';
+import PianoWidget from './PianoWidget.astro';
 import { MODULE_MAP, type ModuleId } from '../lib/modules';
 
 interface Props {
@@ -42,3 +43,4 @@ const effectModule = widget === 'effect' && moduleId ? MODULE_MAP[moduleId] : nu
 {widget === 'aliasing' && <AliasWidget config={config} />}
 {widget === 'level' && <LevelWidget config={config} />}
 {widget === 'mixer' && <MixerWidget config={config} />}
+{widget === 'piano' && <PianoWidget config={config} />}

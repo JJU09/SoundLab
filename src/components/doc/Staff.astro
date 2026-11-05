@@ -1,0 +1,187 @@
+---
+// 오선보 렌더러 — MDX 본문에 바로 쓰는 SVG 악보. 선택적으로 ▶ 들어보기.
+//   <Staff notes="C4/q D4/q E4/h | C4+E4+G4/w" clef="treble" time="4/4" keySig={0} labels play />
+// notes 문법: 음/길이 를 공백으로 구분. 길이 w(온)·h(2분)·q(4분)·8(8분)·16(16분), 점음표는 뒤에 "."(예 q.)
+//   화음은 "+"로 묶음(C4+E4+G4/w), 쉼표는 r/q, 마디줄은 "|".
+// keySig: 양수 = 샵 개수, 음수 = 플랫 개수.
+import { parseNote, solfegeName, LETTERS } from '../../lib/music';
+
+interface Props {
+  notes: string;
+  clef?: 'treble' | 'bass';
+  time?: string;
+  keySig?: number;
+  labels?: boolean;
+  play?: boolean;
+  bpm?: number;
+  caption?: string;
+  highlight?: number[]; // 강조할 음표 인덱스(0부터, 마디줄 제외)
+}
+const { notes, clef = 'treble', time, keySig = 0, labels = false, play = false, bpm = 90, caption, highlight = [] } = Astro.props;
+
+const S = 10;                       // 줄 간격
+const TOP = 34;                     // 맨 윗줄 y
+const BOTTOM = TOP + 4 * S;         // 맨 아랫줄 y
+const BASE = clef === 'treble' ? 30 : 18;   // 맨 아랫줄의 온음계 번호 (E4 / G2)
+const diat = (letter: string, oct: number) => oct * 7 + LETTERS.indexOf(letter as any);
+const yOf = (d: number) => BOTTOM - (d - BASE) * S / 2;
+const BEATS: Record<string, number> = { w: 4, h: 2, q: 1, '8': 0.5, '16': 0.25 };
+const ADV: Record<string, number> = { w: 4.6, h: 3.6, q: 2.8, '8': 2.3, '16': 2.0 };
+
+type Ev = { kind: 'bar' } | { kind: 'rest'; dur: string; dot: boolean } | { kind: 'note'; keys: { d: number; acc: number; midi: number; name: string }[]; dur: string; dot: boolean };
+const events: Ev[] = notes.trim().split(/\s+/).map(tok => {
+  if (tok === '|') return { kind: 'bar' } as Ev;
+  const [p, durRaw = 'q'] = tok.split('/');
+  const dot = durRaw.endsWith('.');
+  const dur = dot ? durRaw.slice(0, -1) : durRaw;
+  if (p === 'r') return { kind: 'rest', dur, dot } as Ev;
+  const keys = p.split('+').map(s => {
+    const n = parseNote(s)!;
+    return { d: diat(n.letter, n.octave), acc: n.acc, midi: n.midi, name: solfegeName(n.midi) };
+  });
+  return { kind: 'note', keys, dur, dot } as Ev;
+});
+
+// 조표 위치 (높은음자리표 기준 온음계 번호, 낮은음자리표는 두 옥타브 아래)
+const SHARP_POS = [38, 35, 39, 36, 33, 37, 34];
+const FLAT_POS = [34, 37, 33, 36, 32, 35, 31];
+const shift = clef === 'treble' ? 0 : -14;
+const keyPos = (keySig > 0 ? SHARP_POS.slice(0, keySig) : FLAT_POS.slice(0, -keySig)).map(d => d + shift);
+
+let x = 46;                                   // 음자리표 뒤
+const keyX = x; x += keyPos.length * 9 + (keyPos.length ? 6 : 0);
+const timeX = x; if (time) x += 22;
+x += 8;
+
+type Placed = { ev: Ev; x: number; idx: number };
+const placed: Placed[] = [];
+let ni = 0;
+for (const ev of events) {
+  if (ev.kind === 'bar') { placed.push({ ev, x: x + 4, idx: -1 }); x += 16; continue; }
+  const hasAcc = ev.kind === 'note' && ev.keys.some(k => k.acc !== 0);
+  if (hasAcc) x += 9;
+  placed.push({ ev, x, idx: ni++ });
+  x += ADV[ev.dur] * S * (ev.dot ? 1.25 : 1);
+}
+const width = Math.max(x + 12, 160);
+const labelY = BOTTOM + 34;
+const height = labels ? labelY + 14 : BOTTOM + 30;
+
+const mid = BASE + 4;                         // 가운데 줄
+const ledgers = (d: number) => {
+  const out: number[] = [];
+  for (let l = BASE - 2; l >= d; l -= 2) out.push(l);
+  for (let l = BASE + 10; l <= d; l += 2) out.push(l);
+  return out;
+};
+const ACC_CH: Record<number, string> = { 1: '♯', [-1]: '♭' };
+const REST_CH: Record<string, string> = { w: '\u{1D13B}', h: '\u{1D13C}', q: '\u{1D13D}', '8': '\u{1D13E}', '16': '\u{1D13F}' };
+
+// 재생용 데이터
+const seq = events.filter(e => e.kind !== 'bar').map(e => ({
+  midi: e.kind === 'note' ? e.keys.map(k => k.midi) : [],
+  beats: BEATS[(e as any).dur] * ((e as any).dot ? 1.5 : 1),
+}));
+const [tsTop, tsBot] = (time ?? '').split('/');
+---
+<figure class="staff-fig not-prose my-4" data-seq={JSON.stringify(seq)} data-bpm={bpm}>
+  <div class="rounded-xl border border-[var(--color-border)] bg-white px-3 pt-2 pb-1 overflow-x-auto">
+    <svg viewBox={`0 0 ${width} ${height}`} width={Math.round(width * 1.3)} height={Math.round(height * 1.3)} class="block max-w-full h-auto mx-auto" role="img"
+      aria-label={`오선보: ${events.filter(e => e.kind === 'note').map((e: any) => e.keys.map((k: any) => k.name).join('·')).join(', ')}`}>
+      <!-- 오선 -->
+      {[0, 1, 2, 3, 4].map(i => <line x1="4" x2={width - 4} y1={TOP + i * S} y2={TOP + i * S} stroke="#3a3a48" stroke-width="1" />)}
+      <line x1="4" x2="4" y1={TOP} y2={BOTTOM} stroke="#3a3a48" stroke-width="1" />
+      <line x1={width - 4} x2={width - 4} y1={TOP} y2={BOTTOM} stroke="#3a3a48" stroke-width="1.6" />
+      <!-- 음자리표 -->
+      {clef === 'treble'
+        ? <text x="9" y={TOP + 3 * S} class="mus" font-size={S * 4}>{'\u{1D11E}'}</text>
+        : <text x="9" y={TOP + 1 * S} class="mus" font-size={S * 4}>{'\u{1D122}'}</text>}
+      <!-- 조표 -->
+      {keyPos.map((d, i) => <text x={keyX + i * 9} y={yOf(d) + (keySig > 0 ? 3.5 : 2.5)} class="mus" font-size={S * 1.7}>{keySig > 0 ? '♯' : '♭'}</text>)}
+      <!-- 박자표 -->
+      {time && <>
+        <text x={timeX + 8} y={TOP + 2 * S - 1} class="ts" font-size={S * 2.1} text-anchor="middle">{tsTop}</text>
+        <text x={timeX + 8} y={BOTTOM - 1} class="ts" font-size={S * 2.1} text-anchor="middle">{tsBot}</text>
+      </>}
+      <!-- 음표 -->
+      {placed.map(({ ev, x: nx, idx }) => {
+        if (ev.kind === 'bar') return <line x1={nx} x2={nx} y1={TOP} y2={BOTTOM} stroke="#3a3a48" stroke-width="1" />;
+        const hl = highlight.includes(idx);
+        const col = hl ? '#7c3aed' : '#1d1d26';
+        if (ev.kind === 'rest') {
+          const ry = ev.dur === 'w' ? TOP + S : ev.dur === 'h' ? TOP + 2 * S : TOP + 2 * S;
+          return <g class="nt" data-i={idx}><text x={nx - 4} y={ry + (ev.dur === 'w' || ev.dur === 'h' ? 0 : 4)} class="mus" font-size={S * 3.2} fill={col}>{REST_CH[ev.dur]}</text></g>;
+        }
+        const ds = ev.keys.map(k => k.d);
+        const avg = ds.reduce((a, b) => a + b, 0) / ds.length;
+        const up = avg < mid;
+        const filled = ev.dur !== 'w' && ev.dur !== 'h';
+        const stem = ev.dur !== 'w';
+        const lo = Math.min(...ds), hi = Math.max(...ds);
+        const sx = up ? nx + 5.4 : nx - 5.4;
+        const sy1 = up ? yOf(lo) : yOf(hi);
+        const sy2 = up ? yOf(hi) - 3.5 * S : yOf(lo) + 3.5 * S;
+        const flags = ev.dur === '8' ? 1 : ev.dur === '16' ? 2 : 0;
+        const allLed = [...new Set(ev.keys.flatMap(k => ledgers(k.d)))];
+        return (
+          <g class="nt" data-i={idx} fill={col} stroke={col}>
+            {allLed.map(l => <line x1={nx - 9} x2={nx + 9} y1={yOf(l)} y2={yOf(l)} stroke-width="1" />)}
+            {ev.keys.map(k => <>
+              {k.acc !== 0 && <text x={nx - 17} y={yOf(k.d) + (k.acc > 0 ? 3.5 : 2.5)} class="mus" font-size={S * 1.7} stroke="none">{ACC_CH[k.acc]}</text>}
+              <ellipse cx={nx} cy={yOf(k.d)} rx="5.6" ry="3.9" transform={`rotate(-20 ${nx} ${yOf(k.d)})`}
+                fill={filled ? col : 'white'} stroke-width={filled ? 0 : 1.6} />
+              {ev.dot && <circle cx={nx + 9} cy={yOf(k.d) - ((k.d - BASE) % 2 === 0 ? S / 2 : 0)} r="1.6" stroke="none" />}
+            </>)}
+            {stem && <line x1={sx} x2={sx} y1={sy1} y2={sy2} stroke-width="1.3" />}
+            {Array.from({ length: flags }).map((_, f) => up
+              ? <path d={`M${sx} ${sy2 + f * 7} q 2 7 8 10 q -3 -4 -8 -5 z`} stroke-width="1" />
+              : <path d={`M${sx} ${sy2 - f * 7} q 2 -7 8 -10 q -3 4 -8 5 z`} stroke-width="1" />)}
+            {labels && <text x={nx} y={labelY} text-anchor="middle" class="lb" stroke="none">{ev.keys.map(k => k.name).join('·')}</text>}
+          </g>
+        );
+      })}
+    </svg>
+    {play && (
+      <div class="flex justify-end pb-1.5">
+        <button type="button" class="staff-play text-xs font-semibold px-3 py-1 rounded-full border border-[var(--color-violet-light)] text-[var(--color-violet)] hover:bg-[var(--color-violet-glow)] transition"
+          style="font-family:'Space Grotesk','Pretendard',sans-serif">▶ 들어보기</button>
+      </div>
+    )}
+  </div>
+  {caption && <figcaption class="text-xs text-[var(--color-ink-300)] mt-1.5 text-center">{caption}</figcaption>}
+</figure>
+
+<style>
+  .staff-fig :global(.mus) { font-family: 'SL Music', 'Noto Music', serif; }
+  .staff-fig :global(.ts) { font-family: 'Space Grotesk', 'Pretendard', sans-serif; font-weight: 700; fill: #1d1d26; }
+  .staff-fig :global(.lb) { font-family: 'Pretendard', sans-serif; font-size: 11px; fill: var(--color-ink-500); }
+  .staff-fig :global(.nt.on) { fill: #7c3aed; stroke: #7c3aed; }
+  .staff-fig :global(.nt.on ellipse) { fill: #7c3aed; }
+</style>
+
+<script>
+import { AudioCore } from '../../audio/core';
+import { playSequence } from '../../audio/keys';
+
+let core: AudioCore | null = null;
+document.querySelectorAll<HTMLElement>('.staff-fig').forEach(fig => {
+  const btn = fig.querySelector<HTMLButtonElement>('.staff-play');
+  if (!btn) return;
+  const seq: { midi: number[]; beats: number }[] = JSON.parse(fig.dataset.seq || '[]');
+  const bpm = Number(fig.dataset.bpm) || 90;
+  btn.addEventListener('click', async () => {
+    core ??= new AudioCore();
+    await core.resume();
+    playSequence(core, seq, bpm);
+    // 재생 위치 하이라이트
+    const spb = 60 / bpm;
+    let t = 60;
+    seq.forEach((n, i) => {
+      const el = fig.querySelector<SVGGElement>(`.nt[data-i="${i}"]`);
+      setTimeout(() => el?.classList.add('on'), t);
+      setTimeout(() => el?.classList.remove('on'), t + n.beats * spb * 1000 - 30);
+      t += n.beats * spb * 1000;
+    });
+  });
+});
+</script>

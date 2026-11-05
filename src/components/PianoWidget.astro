@@ -1,0 +1,153 @@
+---
+// 건반 위젯 — 누르면 소리가 나고 음이름을 보여준다. 음악 영역(악보·리듬·음계·화성) 레슨 공용.
+// config:
+//   from / to   : 표시 범위 (기본 C4 ~ B5, 두 옥타브)
+//   labels      : 'kr'(도레미, 다장조 기준) | 'en'(CDE) | 'both' | 'none'  (사용자가 위젯에서 바꿀 수 있음)
+//   highlight   : 강조할 음 목록 (예: ["C4","E4","G4"]) — 음계·코드 레슨에서 사용
+//   title       : 헤더 제목 (기본 "건반")
+import { parseNote, range, isBlack, midiName, solfegeName } from '../lib/music';
+interface Props { config?: Record<string, any>; }
+const { config = {} } = Astro.props;
+const lo = parseNote(config.from ?? 'C4')?.midi ?? 60;
+const hi = parseNote(config.to ?? 'B5')?.midi ?? 83;
+const labels: string = config.labels ?? 'both';
+const highlight: number[] = (config.highlight ?? []).map((s: string) => parseNote(s)?.midi).filter((m: any) => m != null);
+const title: string = config.title ?? '건반';
+const keys = range(lo, hi);
+const whites = keys.filter(m => !isBlack(m));
+const W = 100 / whites.length; // 흰 건반 폭(%)
+// 검은 건반 위치: 왼쪽 흰 건반의 오른쪽 끝에 중심
+const blackLeft = (m: number) => (whites.indexOf(m - 1) + 1) * W - W * 0.3;
+const labelOpts: [string, string][] = [['kr', '도레미'], ['en', 'CDE'], ['both', '둘 다'], ['none', '숨김']];
+---
+<div class="piano-widget rounded-2xl border border-[var(--color-border)] bg-white overflow-hidden outline-none"
+  tabindex="0" data-labels={labels} data-lo={lo} aria-label="건반 위젯. 키보드 A부터 K까지로도 연주할 수 있어요">
+
+  <div class="flex items-center justify-between px-5 py-4 border-b border-[var(--color-border)] bg-[var(--color-surface)]">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg flex items-center justify-center gradient-brand">
+        <svg class="text-white" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 4v10M12 4v16M16 4v10"/></svg>
+      </div>
+      <div>
+        <span class="font-bold text-base" style="font-family:'Space Grotesk','Pretendard',sans-serif">{title}</span>
+        <span class="text-sm text-[var(--color-ink-300)] ml-2">Keyboard</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="p-5 space-y-4">
+    <!-- 지금 누른 음 -->
+    <div class="rounded-xl bg-[var(--color-surface-2)] border border-[var(--color-border)] px-4 py-3 text-center" aria-live="polite">
+      <div class="now-kr text-3xl font-bold text-[var(--color-ink-700)] leading-tight" style="font-family:'Space Grotesk','Pretendard',sans-serif">건반을 눌러 보세요</div>
+      <div class="now-en text-sm font-mono text-[var(--color-violet)] mt-1">&nbsp;</div>
+    </div>
+
+    <!-- 건반 -->
+    <div class="kb relative select-none touch-none" style="height:150px">
+      {whites.map((m, i) => (
+        <button type="button" class:list={['key white', highlight.includes(m) && 'hl']} data-midi={m}
+          style={`left:${i * W}%;width:${W}%`} aria-label={`${solfegeName(m)} ${midiName(m)}`}>
+          {m === 60 && <span class="mid-c" title="가운데 도 (C4)"></span>}
+          <span class="lab lab-kr">{solfegeName(m)}</span>
+          <span class="lab lab-en">{midiName(m, 'sharp', m % 12 === 0)}</span>
+        </button>
+      ))}
+      {keys.filter(isBlack).map(m => (
+        <button type="button" class:list={['key black', highlight.includes(m) && 'hl']} data-midi={m}
+          style={`left:${blackLeft(m)}%;width:${W * 0.6}%`} aria-label={`${solfegeName(m)} ${midiName(m)}`}></button>
+      ))}
+    </div>
+    <div class="flex items-center justify-between text-[10px] font-mono text-[var(--color-ink-300)]">
+      <span><span class="inline-block w-1.5 h-1.5 rounded-full bg-[var(--color-violet)] align-middle mr-1"></span>가운데 도 (C4)</span>
+      <span class="hidden sm:inline">키보드 A W S E D F T G Y H U J K</span>
+    </div>
+
+    <!-- 표기 -->
+    <div>
+      <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">Labels · 건반 위 이름</div>
+      <div class="flex gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" role="group">
+        {labelOpts.map(([v, t]) => (
+          <button type="button" class="lab-btn flex-1 px-2 py-1.5 rounded-lg text-xs font-semibold transition-all text-[var(--color-ink-500)]"
+            data-v={v} aria-pressed={v === labels ? 'true' : 'false'} style="font-family:'Space Grotesk','Pretendard',sans-serif">{t}</button>
+        ))}
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .kb .key { position: absolute; top: 0; border: 0; padding: 0; cursor: pointer; transition: background .08s, transform .08s; }
+  .kb .white { height: 100%; background: #fff; border: 1px solid var(--color-border); border-radius: 0 0 8px 8px; z-index: 1;
+    display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding-bottom: 6px; gap: 1px; }
+  .kb .black { height: 60%; background: #23232f; border-radius: 0 0 5px 5px; z-index: 2; box-shadow: 0 2px 3px rgba(0,0,0,.25); }
+  .kb .white.hl { background: var(--color-violet-glow); }
+  .kb .black.hl { background: #6d4fd8; }
+  .kb .white.on { background: #ddd6fe; transform: translateY(1px); }
+  .kb .black.on { background: #7c3aed; transform: translateY(1px); }
+  .kb .lab { font-size: 10px; line-height: 1.1; color: var(--color-ink-500); pointer-events: none; font-family: 'Pretendard', sans-serif; }
+  .kb .lab-en { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--color-ink-300); }
+  .kb .mid-c { position: absolute; top: 42%; left: 50%; margin-left: -3px; width: 6px; height: 6px; border-radius: 50%; background: var(--color-violet); pointer-events: none; }
+  .piano-widget[data-labels="kr"] .lab-en, .piano-widget[data-labels="en"] .lab-kr,
+  .piano-widget[data-labels="none"] .lab { display: none; }
+  .piano-widget:focus-visible { box-shadow: 0 0 0 2px var(--color-violet-light); }
+</style>
+
+<script>
+import { AudioCore } from '../audio/core';
+import { playKey } from '../audio/keys';
+import { midiName, solfegeName, isBlack } from '../lib/music';
+
+// PC 키보드 → 반음 오프셋 (C부터 한 옥타브 + 도)
+const KEYMAP: Record<string, number> = { a: 0, w: 1, s: 2, e: 3, d: 4, f: 5, t: 6, g: 7, y: 8, h: 9, u: 10, j: 11, k: 12 };
+
+function initPiano(root: HTMLElement) {
+  let core: AudioCore | null = null;
+  const lo = Number(root.dataset.lo) || 60;
+  const nowKr = root.querySelector('.now-kr') as HTMLElement;
+  const nowEn = root.querySelector('.now-en') as HTMLElement;
+  const keyEl = (m: number) => root.querySelector<HTMLElement>(`.key[data-midi="${m}"]`);
+
+  async function press(m: number) {
+    const el = keyEl(m); if (!el) return;
+    core ??= new AudioCore();
+    await core.resume();
+    playKey(core, m);
+    el.classList.add('on');
+    setTimeout(() => el.classList.remove('on'), 180);
+    nowKr.textContent = solfegeName(m);
+    nowEn.textContent = isBlack(m) ? `${midiName(m, 'sharp')} = ${midiName(m, 'flat')}` : midiName(m);
+  }
+
+  // 포인터: 누른 채로 미끄러지면 글리산도
+  let down = false, last = -1;
+  const kb = root.querySelector('.kb') as HTMLElement;
+  const hit = (e: PointerEvent) => {
+    const el = (document.elementFromPoint(e.clientX, e.clientY) as HTMLElement | null)?.closest<HTMLElement>('.key');
+    return el && kb.contains(el) ? Number(el.dataset.midi) : -1;
+  };
+  kb.addEventListener('pointerdown', e => { down = true; last = hit(e); if (last >= 0) press(last); });
+  kb.addEventListener('pointermove', e => { if (!down) return; const m = hit(e); if (m >= 0 && m !== last) { last = m; press(m); } });
+  addEventListener('pointerup', () => { down = false; last = -1; });
+
+  root.addEventListener('keydown', e => {
+    if (e.repeat || e.metaKey || e.ctrlKey || e.altKey) return;
+    const off = KEYMAP[e.key.toLowerCase()];
+    if (off == null) return;
+    e.preventDefault();
+    const base = lo % 12 === 0 ? lo : lo + (12 - (lo % 12));
+    press(base + off);
+  });
+
+  root.querySelectorAll<HTMLButtonElement>('.lab-btn').forEach(btn => {
+    const sel = () => { btn.style.cssText = 'background:white;color:var(--color-violet);box-shadow:0 1px 4px rgba(0,0,0,0.08)'; };
+    btn.addEventListener('click', () => {
+      root.querySelectorAll<HTMLElement>('.lab-btn').forEach(b => { b.setAttribute('aria-pressed', 'false'); b.style.cssText = ''; });
+      btn.setAttribute('aria-pressed', 'true'); sel();
+      root.dataset.labels = btn.dataset.v!;
+    });
+    if (btn.getAttribute('aria-pressed') === 'true') sel();
+  });
+}
+
+document.querySelectorAll<HTMLElement>('.piano-widget').forEach(initPiano);
+</script>

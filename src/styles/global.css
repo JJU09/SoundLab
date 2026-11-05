@@ -1,5 +1,12 @@
 @import "tailwindcss";
 
+/* 오선보용 음악 기호 (Noto Music 부분 집합, SIL OFL 1.1 — public/fonts/OFL-NotoMusic.txt) */
+@font-face {
+  font-family: "SL Music";
+  src: url("/fonts/sl-music.woff2") format("woff2");
+  font-display: block;
+}
+
 @theme {
   --color-bg: #ffffff;
   --color-surface: #f8f8fc;

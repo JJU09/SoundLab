@@ -1,0 +1,72 @@
+---
+hub: melody
+title: Modes
+kr: 모드
+order: 6
+color: violet
+tagline: 같은 일곱 음, 다른 중심
+desc: 장음계의 일곱 음을 그대로 두고 시작음만 바꾸면 일곱 가지 모드가 생깁니다. 도리안의 세련된 단조, 믹솔리디안의 록 장조, 리디안의 몽환적인 밝음처럼 모드마다 다른 색을 만드는 "특징음"을 같은 으뜸음에서 비교하며 익힙니다.
+widget: piano
+widgetConfig:
+  mode: scale
+  scales: [ionian, dorian, phrygian, lydian, mixolydian, aeolian, locrian]
+  root: C
+  title: 모드 비교
+  labels: en
+quiz: modes
+scaffold: true
+prereqs:
+  - melody/major-scale
+  - melody/minor-scales
+---
+import Level from '../../../components/doc/Level.astro';
+import DefList from '../../../components/doc/DefList.astro';
+import DefCard from '../../../components/doc/DefCard.astro';
+import Callout from '../../../components/doc/Callout.astro';
+import Staff from '../../../components/doc/Staff.astro';
+
+{/* ───────── 초급 ───────── */}
+<Level show="easy">
+## 시작음만 바꿔도 색이 달라요
+
+흰 건반 일곱 개(도레미파솔라시)는 그대로 두고, **어디서 시작해 어디서 끝나느냐**만 바꿔 보세요. 도에서 시작하면 밝은 장음계, 라에서 시작하면 어두운 단음계였죠. **레**나 **솔**, **파**에서 시작하면 또 다른 분위기가 나요. 이렇게 시작음(중심음)에 따라 생기는 일곱 가지 음계를 **모드**라고 해요.
+
+<Staff notes="D4/q E4/q F4/q G4/q | A4/q B4/q C5/q D5/q" time="4/4" labels play caption="레부터 레까지 흰 건반 — 도리안 모드" />
+
+## 직접 해보기
+
+<Callout>
+오른쪽 위젯은 모두 <b>C(도)</b>에서 시작하게 맞춰 두었어요. **이오니안**(= 장음계)을 들은 다음 **리디안**, **믹솔리디안**으로 바꿔 들어 보세요. 대부분 같은데 딱 한 음만 달라서 느낌이 바뀌어요. 어떤 음이 바뀌었는지 칠해진 건반을 비교해 보세요.
+</Callout>
+</Level>
+
+{/* ───────── 중급 ───────── */}
+<Level show="normal">
+## 일곱 모드와 특징음
+
+같은 으뜸음에서 장음계(이오니안) 또는 자연 단음계(에올리안)와 비교하면, 모드마다 색을 결정하는 **특징음**이 하나씩 보입니다.
+
+<DefList>
+  <DefCard term="이오니안 (1번째 음에서) = 장음계">기준. 밝고 안정적.</DefCard>
+  <DefCard term="도리안 (2번째) — 단조 + 밝은 6음">자연 단음계의 ♭6을 6으로. 어둡지만 세련된 단조 — 펑크·재즈·시티팝, 산타나의 기타.</DefCard>
+  <DefCard term="프리지안 (3번째) — 단조 + ♭2">으뜸음 바로 위 반음이 긴장감을 만듦. 플라멩코, 메탈 리프.</DefCard>
+  <DefCard term="리디안 (4번째) — 장조 + ♯4">공중에 뜬 듯한 몽환적 밝음. 영화·게임 음악의 경이로운 장면.</DefCard>
+  <DefCard term="믹솔리디안 (5번째) — 장조 + ♭7">밝지만 느긋하고 거친 장조. 록·블루스·펑크의 단골.</DefCard>
+  <DefCard term="에올리안 (6번째) = 자연 단음계">기준이 되는 단조.</DefCard>
+  <DefCard term="로크리안 (7번째) — ♭2 + ♭5">으뜸화음이 감화음이라 중심이 불안정. 실제 곡에서는 드뭅니다.</DefCard>
+</DefList>
+
+<Callout>
+모드를 살리는 요령은 **특징음을 강조하는 것**입니다. 도리안이라면 6음, 믹솔리디안이라면 ♭7을 멜로디의 긴 음이나 반복 리프에 넣으세요. 특징음을 피하면 그냥 장조나 단조처럼 들립니다.
+</Callout>
+</Level>
+
+{/* ───────── 고급 ───────── */}
+<Level show="hard">
+## 모드를 작곡에 쓰기
+
+- **상대 모드 vs 평행 모드** — "D 도리안 = C장조 음을 레부터"는 상대적 이해이고, "C 도리안 = C 단조 + 6"은 같은 으뜸음 기준의 평행 비교입니다. 작곡할 때는 평행 비교가 더 쓸모 있습니다. 곡의 중심음은 그대로 두고 색만 바꾸는 것이기 때문입니다.
+- **모드는 화음으로도 드러난다** — 믹솔리디안의 ♭VII(C 믹솔리디안이면 B♭), 도리안의 IV 장3화음(D 도리안이면 G), 리디안의 II 장3화음(C 리디안이면 D)처럼, 특징음이 들어간 특징 화음을 반복하면 모드 색이 선명해집니다. I–♭VII–IV는 록의 대표 진행입니다.
+- **모드 인터체인지와의 관계** — 같은 으뜸음의 다른 모드에서 화음을 빌려 오는 것이 모달 인터체인지입니다. 장조 곡에 에올리안의 ♭VI·♭VII을 섞는 것이 팝에서 가장 흔합니다(→ 화성 허브).
+- **선법 재즈** — 마일스 데이비스의 「So What」처럼 코드 진행 대신 한 모드 위에서 오래 머무는 작법은 모드의 색 자체를 음악의 주제로 삼습니다.
+</Level>

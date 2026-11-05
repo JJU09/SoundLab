@@ -5,7 +5,9 @@
 //   labels      : 'kr'(도레미, 다장조 기준) | 'en'(CDE) | 'both' | 'none'  (사용자가 위젯에서 바꿀 수 있음)
 //   highlight   : 강조할 음 목록 (예: ["C4","E4","G4"]) — 음계·코드 레슨에서 사용
 //   title       : 헤더 제목 (기본 "건반")
-import { parseNote, range, isBlack, midiName, solfegeName } from '../lib/music';
+//   mode        : 'free'(기본) | 'interval'(두 건반 사이 음정) | 'scale'(으뜸음·음계를 골라 강조·재생)
+//   scales      : scale 모드에서 고를 음계 id 목록 (lib/music.ts SCALES), root: 처음 으뜸음 이름 (예 'C')
+import { parseNote, range, isBlack, midiName, solfegeName, SCALES, ROOTS } from '../lib/music';
 interface Props { config?: Record<string, any>; }
 const { config = {} } = Astro.props;
 const lo = parseNote(config.from ?? 'C4')?.midi ?? 60;
@@ -13,6 +15,10 @@ const hi = parseNote(config.to ?? 'B5')?.midi ?? 83;
 const labels: string = config.labels ?? 'both';
 const highlight: number[] = (config.highlight ?? []).map((s: string) => parseNote(s)?.midi).filter((m: any) => m != null);
 const title: string = config.title ?? '건반';
+const mode: string = config.mode ?? 'free';
+const scaleIds: string[] = (config.scales ?? ['major']).filter((id: string) => SCALES[id]);
+const rootName: string = config.root ?? 'C';
+const seg = 'px-2 py-1.5 rounded-lg text-xs font-semibold transition-all text-[var(--color-ink-500)]';
 const keys = range(lo, hi);
 const whites = keys.filter(m => !isBlack(m));
 const W = 100 / whites.length; // 흰 건반 폭(%)
@@ -21,7 +27,7 @@ const blackLeft = (m: number) => (whites.indexOf(m - 1) + 1) * W - W * 0.3;
 const labelOpts: [string, string][] = [['kr', '도레미'], ['en', 'CDE'], ['both', '둘 다'], ['none', '숨김']];
 ---
 <div class="piano-widget rounded-2xl border border-[var(--color-border)] bg-white overflow-hidden outline-none"
-  tabindex="0" data-labels={labels} data-lo={lo} aria-label="건반 위젯. 키보드 A부터 K까지로도 연주할 수 있어요">
+  tabindex="0" data-labels={labels} data-lo={lo} data-mode={mode} data-root={rootName} data-scale={scaleIds[0]} aria-label="건반 위젯. 키보드 A부터 K까지로도 연주할 수 있어요">
 
   <div class="flex items-center justify-between px-5 py-4 border-b border-[var(--color-border)] bg-[var(--color-surface)]">
     <div class="flex items-center gap-3">
@@ -62,6 +68,25 @@ const labelOpts: [string, string][] = [['kr', '도레미'], ['en', 'CDE'], ['bot
       <span class="hidden sm:inline">키보드 A W S E D F T G Y H U J K</span>
     </div>
 
+    {mode === 'scale' && <>
+      <div class="steps-row flex flex-wrap justify-center gap-1 text-[11px] font-mono min-h-[1.5em]"></div>
+      <div>
+        <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">Root · 으뜸음</div>
+        <div class="grid grid-cols-6 gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" role="group">
+          {ROOTS.map(r => <button type="button" class={`root-btn ${seg}`} style="padding-left:0;padding-right:0" data-v={r.name} aria-pressed={r.name === rootName ? 'true' : 'false'}>{r.name}</button>)}
+        </div>
+      </div>
+      {scaleIds.length > 1 && (
+        <div>
+          <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">Scale · 음계</div>
+          <div class="grid gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" style={`grid-template-columns:repeat(${Math.min(scaleIds.length, 3)},1fr)`} role="group">
+            {scaleIds.map((id, i) => <button type="button" class={`scale-btn ${seg}`} data-v={id} aria-pressed={i === 0 ? 'true' : 'false'}>{SCALES[id].kr}</button>)}
+          </div>
+        </div>
+      )}
+      <button type="button" class="scale-play w-full text-sm font-semibold py-2 rounded-xl gradient-brand text-white hover:opacity-90 transition">▶ 음계 들어보기</button>
+    </>}
+
     <!-- 표기 -->
     <div>
       <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">Labels · 건반 위 이름</div>
@@ -95,7 +120,7 @@ const labelOpts: [string, string][] = [['kr', '도레미'], ['en', 'CDE'], ['bot
 <script>
 import { AudioCore } from '../audio/core';
 import { playKey } from '../audio/keys';
-import { midiName, solfegeName, isBlack } from '../lib/music';
+import { midiName, solfegeName, isBlack, intervalName, SCALES, ROOTS, spellScale, LETTER_PC } from '../lib/music';
 
 // PC 키보드 → 반음 오프셋 (C부터 한 옥타브 + 도)
 const KEYMAP: Record<string, number> = { a: 0, w: 1, s: 2, e: 3, d: 4, f: 5, t: 6, g: 7, y: 8, h: 9, u: 10, j: 11, k: 12 };
@@ -107,15 +132,72 @@ function initPiano(root: HTMLElement) {
   const nowEn = root.querySelector('.now-en') as HTMLElement;
   const keyEl = (m: number) => root.querySelector<HTMLElement>(`.key[data-midi="${m}"]`);
 
-  async function press(m: number) {
+  const mode = root.dataset.mode || 'free';
+  let first: number | null = null;          // interval 모드: 첫 음
+  let spelled: Record<number, string> = {}; // scale 모드: pc → 음계 철자
+
+  async function sound(m: number) {
     const el = keyEl(m); if (!el) return;
     core ??= new AudioCore();
     await core.resume();
     playKey(core, m);
     el.classList.add('on');
     setTimeout(() => el.classList.remove('on'), 180);
-    nowKr.textContent = solfegeName(m);
+  }
+  async function press(m: number) {
+    await sound(m);
+    if (mode === 'interval') {
+      root.querySelectorAll('.key.hl').forEach(k => k.classList.remove('hl'));
+      if (first == null) {
+        first = m; keyEl(m)?.classList.add('hl');
+        nowKr.textContent = solfegeName(m); nowEn.textContent = '두 번째 건반을 눌러 보세요';
+      } else {
+        const a = first, d = m - a; first = null;
+        keyEl(a)?.classList.add('hl'); keyEl(m)?.classList.add('hl');
+        nowKr.textContent = d === 0 ? '완전1도' : intervalName(d);
+        nowEn.textContent = `${solfegeName(a)} → ${solfegeName(m)} · 반음 ${Math.abs(d)}개${d < 0 ? ' (아래로)' : ''}`;
+        if (d !== 0 && core) playKey(core, a, core.ctx.currentTime + 0.45);
+      }
+      return;
+    }
+    const pc = ((m % 12) + 12) % 12;
+    nowKr.textContent = spelled[pc] ? spelled[pc] : solfegeName(m);
     nowEn.textContent = isBlack(m) ? `${midiName(m, 'sharp')} = ${midiName(m, 'flat')}` : midiName(m);
+  }
+
+  // ── scale 모드 ──
+  if (mode === 'scale') {
+    let rootN = root.dataset.root || 'C', scId = root.dataset.scale || 'major';
+    const stepsRow = root.querySelector('.steps-row') as HTMLElement;
+    let notes: number[] = [];
+    const STEP_TXT: Record<number, string> = { 1: '반', 2: '온', 3: '온반', 4: '장3' };
+    function apply() {
+      const r = ROOTS.find(x => x.name === rootN)!, sc = SCALES[scId];
+      const sp = spellScale(r, sc);
+      spelled = {}; sp.forEach(x => (spelled[x.pc] = `${x.kr} (${x.name})`));
+      const rootPc = (LETTER_PC[r.letter] + r.acc + 12) % 12;
+      const start = lo + ((rootPc - (lo % 12) + 12) % 12);
+      notes = [...sc.steps.map(st => start + st), start + 12];
+      root.querySelectorAll('.key').forEach(k => k.classList.remove('hl'));
+      notes.forEach(n => keyEl(n)?.classList.add('hl'));
+      const gaps = notes.slice(1).map((n, i) => n - notes[i]);
+      stepsRow.innerHTML = sp.map((x, i) => `<span class="px-1.5 py-0.5 rounded bg-[var(--color-violet-glow)] text-[var(--color-violet)] font-bold">${x.name}</span>` + (i < gaps.length ? `<span class="text-[var(--color-ink-300)] self-center">${STEP_TXT[gaps[i]] ?? gaps[i]}</span>` : '')).join('') + `<span class="px-1.5 py-0.5 rounded bg-[var(--color-violet-glow)] text-[var(--color-violet)] font-bold">${sp[0].name}</span>`;
+      nowKr.textContent = `${r.name} ${sc.kr}`; nowEn.textContent = sc.desc;
+    }
+    const segSel = (cls: string, cb: (v: string) => void) => {
+      const btns = root.querySelectorAll<HTMLButtonElement>(cls);
+      const paint = (b: HTMLButtonElement) => { b.style.cssText = 'background:white;color:var(--color-violet);box-shadow:0 1px 4px rgba(0,0,0,0.08)'; };
+      btns.forEach(b => { if (b.getAttribute('aria-pressed') === 'true') paint(b);
+        b.addEventListener('click', () => { btns.forEach(x => { x.setAttribute('aria-pressed', 'false'); x.style.cssText = ''; }); b.setAttribute('aria-pressed', 'true'); paint(b); cb(b.dataset.v!); }); });
+    };
+    segSel('.root-btn', v => { rootN = v; apply(); });
+    segSel('.scale-btn', v => { scId = v; apply(); });
+    root.querySelector('.scale-play')!.addEventListener('click', async () => {
+      core ??= new AudioCore(); await core.resume();
+      const t0 = core.ctx.currentTime + 0.05;
+      notes.forEach((n, i) => { playKey(core!, n, t0 + i * 0.32, 0.5); setTimeout(() => { keyEl(n)?.classList.add('on'); setTimeout(() => keyEl(n)?.classList.remove('on'), 260); }, 50 + i * 320); });
+    });
+    apply();
   }
 
   // 포인터: 누른 채로 미끄러지면 글리산도

@@ -1,0 +1,77 @@
+---
+hub: notation
+title: Dynamics & Tempo
+kr: 셈여림과 빠르기말
+order: 6
+color: violet
+tagline: 얼마나 세게, 얼마나 빠르게
+desc: 같은 멜로디도 세기와 빠르기가 바뀌면 전혀 다른 감정이 됩니다. pp부터 ff까지의 셈여림표, Largo부터 Presto까지의 빠르기말, 점점 세게·점점 느리게 같은 변화 표시를 직접 들으며 익힙니다.
+widget: rhythm
+widgetConfig:
+  mode: expression
+quiz: expression
+scaffold: true
+prereqs:
+  - notation/notes
+---
+import Level from '../../../components/doc/Level.astro';
+import DefList from '../../../components/doc/DefList.astro';
+import DefCard from '../../../components/doc/DefCard.astro';
+import Callout from '../../../components/doc/Callout.astro';
+
+{/* ───────── 초급 ───────── */}
+<Level show="easy">
+## 같은 노래, 다른 느낌
+
+「반짝반짝 작은 별」을 **아주 작게, 느리게** 부르면 자장가 같고, **크게, 빠르게** 부르면 신나는 응원가 같아요. 악보에는 이렇게 **얼마나 세게**(셈여림), **얼마나 빠르게**(빠르기)를 적는 표시가 있어요.
+
+- **p (피아노)** — 여리게. 이탈리아어로 "부드럽게"라는 뜻이에요.
+- **f (포르테)** — 세게. "강하게"라는 뜻이에요.
+- 글자를 겹치면 더 강해져요. **pp**는 아주 여리게, **ff**는 아주 세게.
+
+## 직접 해보기
+
+<Callout>
+오른쪽 위젯에서 **Largo + pp**로 한 번, **Presto + ff**로 한 번 재생해 보세요. 같은 멜로디인데 기분이 완전히 달라지죠? 작곡할 때 멜로디만큼 중요한 게 이 표시들이에요.
+</Callout>
+</Level>
+
+{/* ───────── 중급 ───────── */}
+<Level show="normal">
+## 셈여림표
+
+여린 쪽부터 센 쪽까지 여섯 단계가 기본입니다. <b>m(메조)</b>은 "조금"이라는 뜻입니다.
+
+<DefList>
+  <DefCard term="pp · p · mp">아주 여리게 · 여리게 · 조금 여리게</DefCard>
+  <DefCard term="mf · f · ff">조금 세게 · 세게 · 아주 세게</DefCard>
+  <DefCard term="cresc. ( < ) · decresc. / dim. ( > )">점점 세게 · 점점 여리게. 악보에서는 벌어지는(＜), 닫히는(＞) 쐐기 모양으로도 적습니다.</DefCard>
+  <DefCard term="sfz · > (악센트)">그 음만 갑자기 세게.</DefCard>
+</DefList>
+
+## 빠르기말과 메트로놈 표시
+
+빠르기는 이탈리아어 **빠르기말**이나 **♩ = 120**처럼 1분에 몇 박인지(BPM)로 적습니다. 빠르기말이 가리키는 BPM은 대략적인 범위라, 아래 숫자는 위젯에서 쓰는 대표값입니다.
+
+<DefList>
+  <DefCard term="Largo · Adagio">아주 느리게(약 50) · 느리게(약 70) — 슬픈 발라드의 도입부</DefCard>
+  <DefCard term="Andante · Moderato">걷는 빠르기로(약 90) · 보통 빠르게(약 110) — 대부분의 팝·발라드</DefCard>
+  <DefCard term="Allegro · Presto">빠르게(약 135) · 매우 빠르게(약 175) — 댄스·록, 빠른 기악곡</DefCard>
+  <DefCard term="rit. · accel. · a tempo">점점 느리게 · 점점 빠르게 · 원래 빠르기로</DefCard>
+</DefList>
+
+<Callout>
+팝 악보에는 빠르기말 대신 **♩ = 72** 같은 숫자가 더 흔합니다. 위젯의 BPM 슬라이더를 72(발라드), 100(미디엄 팝), 128(댄스)로 옮겨 가며 같은 멜로디를 들어 보세요. 곡의 장르감은 BPM에서 먼저 정해집니다. 메트로놈으로 연습하려면 [메트로놈 도구](/tools/metronome/)를 쓰세요.
+</Callout>
+</Level>
+
+{/* ───────── 고급 ───────── */}
+<Level show="hard">
+## 표현은 상대적이다
+
+- **셈여림은 절대값이 아닙니다** — 피아노 독주의 f와 오케스트라 전체의 f는 실제 음량이 다릅니다. 셈여림은 그 곡 안에서의 **상대적인 대비**를 적는 표시라서, ppp·fff처럼 더 확장해 극단을 표현하기도 합니다.
+- **세기는 음색도 바꿉니다** — 실제 악기는 세게 칠수록 소리만 커지는 게 아니라 고음 배음이 늘어나 밝아집니다. 이 위젯은 음량만 바꾸지만, 좋은 가상악기는 벨로시티에 따라 샘플과 필터를 함께 바꿉니다(→ [필터](/learn/effects/filter/)).
+- **DAW에서는 벨로시티와 오토메이션** — MIDI 벨로시티(0~127)가 음 하나하나의 셈여림이고, 볼륨 오토메이션이 crescendo입니다. 모든 음을 같은 벨로시티로 찍으면 기계적으로 들리는 이유가 이것입니다.
+- **템포 변화의 문법** — rit.는 곡 끝이나 단락 끝에서 숨을 고를 때, rubato는 박을 자유롭게 밀고 당기며 표현할 때 씁니다. 영화음악은 장면 길이에 맞추려고 템포 맵을 촘촘하게 그리기도 합니다.
+- **최종 음량은 믹싱의 몫** — 악보의 셈여림이 곡 안의 대비라면, 곡 전체의 최종 크기는 마스터링에서 라우드니스로 맞춥니다(→ [라우드니스](/learn/mixing/loudness/)).
+</Level>

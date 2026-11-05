@@ -2,9 +2,10 @@
 // 오선보 렌더러 — MDX 본문에 바로 쓰는 SVG 악보. 선택적으로 ▶ 들어보기.
 //   <Staff notes="C4/q D4/q E4/h | C4+E4+G4/w" clef="treble" time="4/4" keySig={0} labels play />
 // notes 문법: 음/길이 를 공백으로 구분. 길이 w(온)·h(2분)·q(4분)·8(8분)·16(16분), 점음표는 뒤에 "."(예 q.)
-//   화음은 "+"로 묶음(C4+E4+G4/w), 쉼표는 r/q, 마디줄은 "|".
+//   화음은 "+"로 묶음(C4+E4+G4/w), 쉼표는 r/q, 마디줄은 "|". 임시표: # b n(제자리).
+//   조표(keySig)와 마디 안 임시표는 재생·계이름에 자동 반영 — 조표에 있는 음은 F4처럼 그냥 적는다.
 // keySig: 양수 = 샵 개수, 음수 = 플랫 개수.
-import { parseNote, solfegeName, LETTERS } from '../../lib/music';
+import { parseNote, LETTERS, SOLFEGE } from '../../lib/music';
 
 interface Props {
   notes: string;
@@ -28,16 +29,29 @@ const yOf = (d: number) => BOTTOM - (d - BASE) * S / 2;
 const BEATS: Record<string, number> = { w: 4, h: 2, q: 1, '8': 0.5, '16': 0.25 };
 const ADV: Record<string, number> = { w: 4.6, h: 3.6, q: 2.8, '8': 2.3, '16': 2.0 };
 
-type Ev = { kind: 'bar' } | { kind: 'rest'; dur: string; dot: boolean } | { kind: 'note'; keys: { d: number; acc: number; midi: number; name: string }[]; dur: string; dot: boolean };
+type Key = { d: number; acc: number; midi: number; name: string }; // acc = 그릴 임시표: 1 ♯ / -1 ♭ / 2 ♮ / 0 없음
+type Ev = { kind: 'bar' } | { kind: 'rest'; dur: string; dot: boolean } | { kind: 'note'; keys: Key[]; dur: string; dot: boolean };
+// 조표가 적용되는 글자 (샵 순서 F C G D A E B / 플랫 순서 B E A D G C F)
+const keyAcc: Record<string, number> = {};
+if (keySig > 0) 'FCGDAEB'.slice(0, keySig).split('').forEach(l => (keyAcc[l] = 1));
+if (keySig < 0) 'BEADGCF'.slice(0, -keySig).split('').forEach(l => (keyAcc[l] = -1));
+let barAcc: Record<string, number> = {};   // 마디 안 임시표는 같은 마디·같은 음 끝까지 유효
 const events: Ev[] = notes.trim().split(/\s+/).map(tok => {
-  if (tok === '|') return { kind: 'bar' } as Ev;
+  if (tok === '|') { barAcc = {}; return { kind: 'bar' } as Ev; }
   const [p, durRaw = 'q'] = tok.split('/');
   const dot = durRaw.endsWith('.');
   const dur = dot ? durRaw.slice(0, -1) : durRaw;
   if (p === 'r') return { kind: 'rest', dur, dot } as Ev;
-  const keys = p.split('+').map(s => {
-    const n = parseNote(s)!;
-    return { d: diat(n.letter, n.octave), acc: n.acc, midi: n.midi, name: solfegeName(n.midi) };
+  const keys = p.split('+').map(str => {
+    const m = /^([A-G])(#|♯|b|♭|n|♮)?(-?\d)$/.exec(str.trim())!;
+    const letter = m[1], oct = Number(m[3]);
+    const explicit = m[2] == null ? null : /[#♯]/.test(m[2]) ? 1 : /[b♭]/.test(m[2]) ? -1 : 0;
+    const tag = letter + oct;
+    if (explicit != null) barAcc[tag] = explicit;
+    const eff = barAcc[tag] ?? keyAcc[letter] ?? 0;
+    const midi = parseNote(letter + oct)!.midi + eff;
+    const name = SOLFEGE[letter as keyof typeof SOLFEGE] + (eff === 1 ? '♯' : eff === -1 ? '♭' : '');
+    return { d: diat(letter, oct), acc: explicit == null ? 0 : explicit === 0 ? 2 : explicit, midi, name };
   });
   return { kind: 'note', keys, dur, dot } as Ev;
 });
@@ -74,7 +88,7 @@ const ledgers = (d: number) => {
   for (let l = BASE + 10; l <= d; l += 2) out.push(l);
   return out;
 };
-const ACC_CH: Record<number, string> = { 1: '♯', [-1]: '♭' };
+const ACC_CH: Record<number, string> = { 1: '♯', [-1]: '♭', 2: '♮' };
 const REST_CH: Record<string, string> = { w: '\u{1D13B}', h: '\u{1D13C}', q: '\u{1D13D}', '8': '\u{1D13E}', '16': '\u{1D13F}' };
 
 // 재생용 데이터
@@ -95,7 +109,7 @@ const [tsTop, tsBot] = (time ?? '').split('/');
       <!-- 음자리표 -->
       {clef === 'treble'
         ? <text x="9" y={TOP + 3 * S} class="mus" font-size={S * 4}>{'\u{1D11E}'}</text>
-        : <text x="9" y={TOP + 1 * S} class="mus" font-size={S * 4}>{'\u{1D122}'}</text>}
+        : <text x="9" y={TOP + 3 * S} class="mus" font-size={S * 4}>{'\u{1D122}'}</text>}
       <!-- 조표 -->
       {keyPos.map((d, i) => <text x={keyX + i * 9} y={yOf(d) + (keySig > 0 ? 3.5 : 2.5)} class="mus" font-size={S * 1.7}>{keySig > 0 ? '♯' : '♭'}</text>)}
       <!-- 박자표 -->
@@ -109,7 +123,7 @@ const [tsTop, tsBot] = (time ?? '').split('/');
         const hl = highlight.includes(idx);
         const col = hl ? '#7c3aed' : '#1d1d26';
         if (ev.kind === 'rest') {
-          const ry = ev.dur === 'w' ? TOP + S : ev.dur === 'h' ? TOP + 2 * S : TOP + 2 * S;
+          const ry = ev.dur === 'w' || ev.dur === 'h' ? TOP + 3 * S : TOP + 2 * S; // 온쉼표는 넷째 줄에 매달리고, 2분쉼표는 셋째 줄에 얹힘 (글리프 기준선 보정)
           return <g class="nt" data-i={idx}><text x={nx - 4} y={ry + (ev.dur === 'w' || ev.dur === 'h' ? 0 : 4)} class="mus" font-size={S * 3.2} fill={col}>{REST_CH[ev.dur]}</text></g>;
         }
         const ds = ev.keys.map(k => k.d);
@@ -127,7 +141,7 @@ const [tsTop, tsBot] = (time ?? '').split('/');
           <g class="nt" data-i={idx} fill={col} stroke={col}>
             {allLed.map(l => <line x1={nx - 9} x2={nx + 9} y1={yOf(l)} y2={yOf(l)} stroke-width="1" />)}
             {ev.keys.map(k => <>
-              {k.acc !== 0 && <text x={nx - 17} y={yOf(k.d) + (k.acc > 0 ? 3.5 : 2.5)} class="mus" font-size={S * 1.7} stroke="none">{ACC_CH[k.acc]}</text>}
+              {k.acc !== 0 && <text x={nx - 17} y={yOf(k.d) + (k.acc === -1 ? 2.5 : 3.5)} class="mus" font-size={S * 1.7} stroke="none">{ACC_CH[k.acc]}</text>}
               <ellipse cx={nx} cy={yOf(k.d)} rx="5.6" ry="3.9" transform={`rotate(-20 ${nx} ${yOf(k.d)})`}
                 fill={filled ? col : 'white'} stroke-width={filled ? 0 : 1.6} />
               {ev.dot && <circle cx={nx + 9} cy={yOf(k.d) - ((k.d - BASE) % 2 === 0 ? S / 2 : 0)} r="1.6" stroke="none" />}
@@ -135,7 +149,7 @@ const [tsTop, tsBot] = (time ?? '').split('/');
             {stem && <line x1={sx} x2={sx} y1={sy1} y2={sy2} stroke-width="1.3" />}
             {Array.from({ length: flags }).map((_, f) => up
               ? <path d={`M${sx} ${sy2 + f * 7} q 2 7 8 10 q -3 -4 -8 -5 z`} stroke-width="1" />
-              : <path d={`M${sx} ${sy2 - f * 7} q 2 -7 8 -10 q -3 4 -8 5 z`} stroke-width="1" />)}
+              : <path d={`M${sx} ${sy2 - f * 7} q 6 -2 7 -10 q 0 6 -7 6 z`} stroke-width="1" />)}
             {labels && <text x={nx} y={labelY} text-anchor="middle" class="lb" stroke="none">{ev.keys.map(k => k.name).join('·')}</text>}
           </g>
         );

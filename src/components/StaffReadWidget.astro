@@ -1,0 +1,153 @@
+---
+// 오선 읽기 연습 위젯 — 오선 위에 음표 하나를 보여 주고 음이름을 맞힌다. 맞히면 소리로 확인.
+// config:
+//   clef   : 'treble' | 'bass' | 'both' (기본 treble, 사용자가 전환 가능)
+//   names  : 'kr' | 'en' (답 버튼 표기, 기본 kr)
+//   ledger : true면 덧줄 음(가운데 도 등)까지 출제
+interface Props { config?: Record<string, any>; }
+const { config = {} } = Astro.props;
+const clef = config.clef ?? 'treble';
+const names = config.names ?? 'kr';
+const ledger = config.ledger ? '1' : '0';
+const clefOpts: [string, string][] = [['treble', '높은음자리표'], ['bass', '낮은음자리표'], ['both', '섞어서']];
+---
+<div class="staffread-widget rounded-2xl border border-[var(--color-border)] bg-white overflow-hidden"
+  data-clef={clef} data-names={names} data-ledger={ledger}>
+
+  <div class="flex items-center justify-between px-5 py-4 border-b border-[var(--color-border)] bg-[var(--color-surface)]">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg flex items-center justify-center gradient-brand">
+        <svg class="text-white" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M3 6h18M3 10h18M3 14h18M3 18h18"/><ellipse cx="14" cy="12" rx="2.6" ry="2" fill="currentColor"/></svg>
+      </div>
+      <div>
+        <span class="font-bold text-base" style="font-family:'Space Grotesk','Pretendard',sans-serif">오선 읽기</span>
+        <span class="text-sm text-[var(--color-ink-300)] ml-2">Note Reading</span>
+      </div>
+    </div>
+    <div class="text-right">
+      <div class="streak text-lg font-bold tabular-nums text-[var(--color-violet)] leading-none" style="font-family:'Space Grotesk','Pretendard',sans-serif">0</div>
+      <div class="text-[10px] font-mono text-[var(--color-ink-300)]">연속 정답</div>
+    </div>
+  </div>
+
+  <div class="p-5 space-y-4">
+    <div class="rounded-xl bg-white border border-[var(--color-border)] flex items-center justify-center" style="height:150px">
+      <svg class="sr-svg" viewBox="0 0 220 120" width="100%" height="140" aria-label="오선 위의 음표"></svg>
+    </div>
+    <div class="feedback text-center text-sm font-medium min-h-[1.5em] text-[var(--color-ink-500)]" aria-live="polite">이 음의 이름은?</div>
+    <div class="answers grid grid-cols-7 gap-1"></div>
+    <button type="button" class="next-btn w-full text-sm font-semibold py-2 rounded-xl border border-[var(--color-border)] text-[var(--color-ink-500)] hover:border-[var(--color-violet)] hover:text-[var(--color-violet)] transition">다음 문제 →</button>
+
+    <div>
+      <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">Clef · 음자리표</div>
+      <div class="flex gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" role="group">
+        {clefOpts.map(([v, t]) => (
+          <button type="button" class="clef-btn flex-1 px-2 py-1.5 rounded-lg text-xs font-semibold transition-all text-[var(--color-ink-500)]"
+            data-v={v} aria-pressed={v === clef ? 'true' : 'false'} style="font-family:'Space Grotesk','Pretendard',sans-serif">{t}</button>
+        ))}
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .staffread-widget :global(.mus) { font-family: 'SL Music', 'Noto Music', serif; }
+  .staffread-widget :global(.ans-btn) { padding: 8px 0; border-radius: 10px; border: 1px solid var(--color-border); background: #fff;
+    font-size: 13px; font-weight: 700; color: var(--color-ink-700); transition: border-color .1s, background .1s; }
+  .staffread-widget :global(.ans-btn:hover) { border-color: var(--color-violet); }
+  .staffread-widget :global(.ans-btn.ok) { background: #dcfce7; border-color: #22c55e; }
+  .staffread-widget :global(.ans-btn.no) { background: #fee2e2; border-color: #ef4444; }
+</style>
+
+<script>
+import { AudioCore } from '../audio/core';
+import { playKey } from '../audio/keys';
+import { LETTERS, LETTER_PC, SOLFEGE } from '../lib/music';
+
+const NS = 'http://www.w3.org/2000/svg';
+const S = 12, TOP = 30, BOTTOM = TOP + 4 * S;
+// 맨 아랫줄의 온음계 번호: 높은음 E4(=30), 낮은음 G2(=18). 번호 = 옥타브*7 + 글자 순서
+const BASE: Record<string, number> = { treble: 30, bass: 18 };
+
+function initStaffRead(root: HTMLElement) {
+  let core: AudioCore | null = null;
+  let clefMode = root.dataset.clef || 'treble';
+  const useLedger = root.dataset.ledger === '1';
+  const kr = root.dataset.names !== 'en';
+  const svg = root.querySelector('.sr-svg') as SVGSVGElement;
+  const fb = root.querySelector('.feedback') as HTMLElement;
+  const answers = root.querySelector('.answers') as HTMLElement;
+  const streakEl = root.querySelector('.streak') as HTMLElement;
+  let cur = { clef: 'treble', d: 30 }, answered = false, streak = 0, last = -1;
+
+  const el = (tag: string, attrs: Record<string, any>, text?: string) => {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs) e.setAttribute(k, String(attrs[k]));
+    if (text) e.textContent = text;
+    svg.appendChild(e); return e;
+  };
+
+  function draw() {
+    svg.innerHTML = '';
+    for (let i = 0; i < 5; i++) el('line', { x1: 8, x2: 212, y1: TOP + i * S, y2: TOP + i * S, stroke: '#3a3a48', 'stroke-width': 1 });
+    if (cur.clef === 'treble') el('text', { x: 12, y: TOP + 3 * S, class: 'mus', 'font-size': S * 4 }, '\u{1D11E}');
+    else el('text', { x: 12, y: TOP + 3 * S, class: 'mus', 'font-size': S * 4 }, '\u{1D122}');
+    const base = BASE[cur.clef];
+    const y = BOTTOM - (cur.d - base) * S / 2, x = 130;
+    for (let l = base - 2; l >= cur.d; l -= 2) { const ly = BOTTOM - (l - base) * S / 2; el('line', { x1: x - 13, x2: x + 13, y1: ly, y2: ly, stroke: '#3a3a48', 'stroke-width': 1.2 }); }
+    for (let l = base + 10; l <= cur.d; l += 2) { const ly = BOTTOM - (l - base) * S / 2; el('line', { x1: x - 13, x2: x + 13, y1: ly, y2: ly, stroke: '#3a3a48', 'stroke-width': 1.2 }); }
+    el('ellipse', { cx: x, cy: y, rx: 7.2, ry: 5, transform: `rotate(-20 ${x} ${y})`, fill: '#1d1d26' });
+    const up = cur.d < base + 4;
+    el('line', { x1: up ? x + 6.8 : x - 6.8, x2: up ? x + 6.8 : x - 6.8, y1: y, y2: up ? y - 3.5 * S : y + 3.5 * S, stroke: '#1d1d26', 'stroke-width': 1.5 });
+  }
+
+  const letterOf = (d: number) => LETTERS[((d % 7) + 7) % 7];
+  const midiOf = (d: number) => { const oct = Math.floor(d / 7); return (oct + 1) * 12 + LETTER_PC[letterOf(d)]; };
+
+  function next() {
+    const clef = clefMode === 'both' ? (Math.random() < 0.5 ? 'treble' : 'bass') : clefMode;
+    const base = BASE[clef];
+    const lo = useLedger ? base - 2 : base - 1, hi = useLedger ? base + 10 : base + 9; // 오선 안(+위아래 한 칸) 또는 덧줄 하나까지
+    let d; do { d = lo + Math.floor(Math.random() * (hi - lo + 1)); } while (d === last);
+    last = d; cur = { clef, d }; answered = false;
+    draw();
+    fb.textContent = '이 음의 이름은?'; fb.style.color = '';
+    answers.querySelectorAll('.ans-btn').forEach(b => b.classList.remove('ok', 'no'));
+  }
+
+  for (const L of LETTERS) {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'ans-btn'; b.dataset.l = L;
+    b.textContent = kr ? SOLFEGE[L] : L;
+    b.addEventListener('click', async () => {
+      if (answered) return;
+      const right = letterOf(cur.d);
+      core ??= new AudioCore(); await core.resume();
+      if (L === right) {
+        answered = true; streak++; b.classList.add('ok');
+        playKey(core, midiOf(cur.d));
+        fb.textContent = `정답! ${SOLFEGE[right]} (${right}${Math.floor(cur.d / 7)})`; fb.style.color = '#16a34a';
+        setTimeout(next, 900);
+      } else {
+        streak = 0; b.classList.add('no');
+        fb.textContent = '다시 생각해 보세요 — 맨 아랫줄부터 한 칸씩 세어 보세요'; fb.style.color = '#dc2626';
+      }
+      streakEl.textContent = String(streak);
+    });
+    answers.appendChild(b);
+  }
+
+  root.querySelector('.next-btn')!.addEventListener('click', next);
+  root.querySelectorAll<HTMLButtonElement>('.clef-btn').forEach(btn => {
+    const sel = () => { btn.style.cssText = 'background:white;color:var(--color-violet);box-shadow:0 1px 4px rgba(0,0,0,0.08)'; };
+    btn.addEventListener('click', () => {
+      root.querySelectorAll<HTMLElement>('.clef-btn').forEach(b => { b.setAttribute('aria-pressed', 'false'); b.style.cssText = ''; });
+      btn.setAttribute('aria-pressed', 'true'); sel(); clefMode = btn.dataset.v!; next();
+    });
+    if (btn.getAttribute('aria-pressed') === 'true') sel();
+  });
+  next();
+}
+
+document.querySelectorAll<HTMLElement>('.staffread-widget').forEach(initStaffRead);
+</script>

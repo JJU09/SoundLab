@@ -1,0 +1,276 @@
+---
+// 리듬 위젯 — 세 가지 모드.
+//   mode 'values'     : 4/4 한 마디를 음표·쉼표로 채우고 박에 맞춰 들어 보기 (음표 길이)
+//   mode 'meter'      : 2/4·3/4·4/4·6/8 박자의 셈과 여림(강·약)을 메트로놈으로 (박자표)
+//   mode 'expression' : 같은 선율을 빠르기말·셈여림을 바꿔 연주 (셈여림과 빠르기말)
+interface Props { config?: Record<string, any>; }
+const { config = {} } = Astro.props;
+const mode: 'values' | 'meter' | 'expression' = config.mode ?? 'values';
+const meter: string = config.meter ?? '4/4';
+const TITLES = { values: ['음표 길이', 'Note Values'], meter: ['박자', 'Meter'], expression: ['셈여림과 빠르기', 'Dynamics & Tempo'] } as const;
+const VALUES: [string, string, number, boolean][] = [
+  ['w', '온음표', 4, false], ['h.', '점2분음표', 3, false], ['h', '2분음표', 2, false], ['q', '4분음표', 1, false],
+  ['8', '8분음표', 0.5, false], ['qr', '4분쉼표', 1, true], ['hr', '2분쉼표', 2, true], ['8r', '8분쉼표', 0.5, true],
+];
+const METERS = ['2/4', '3/4', '4/4', '6/8'];
+const TEMPI: [string, string, number][] = [['Largo', '아주 느리게', 50], ['Adagio', '느리게', 70], ['Andante', '걷는 빠르기로', 90], ['Moderato', '보통 빠르게', 110], ['Allegro', '빠르게', 135], ['Presto', '매우 빠르게', 175]];
+const DYN: [string, string, number][] = [['pp', '피아니시모', 0.06], ['p', '피아노', 0.12], ['mp', '메조 피아노', 0.2], ['mf', '메조 포르테', 0.3], ['f', '포르테', 0.42], ['ff', '포르티시모', 0.6]];
+const seg = 'px-2 py-1.5 rounded-lg text-xs font-semibold transition-all text-[var(--color-ink-500)]';
+---
+<div class="rhythm-widget rounded-2xl border border-[var(--color-border)] bg-white overflow-hidden" data-mode={mode} data-meter={meter}>
+  <div class="flex items-center justify-between px-5 py-4 border-b border-[var(--color-border)] bg-[var(--color-surface)]">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg flex items-center justify-center gradient-brand">
+        <svg class="text-white" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M9 18V5l10-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg>
+      </div>
+      <div>
+        <span class="font-bold text-base" style="font-family:'Space Grotesk','Pretendard',sans-serif">{TITLES[mode][0]}</span>
+        <span class="text-sm text-[var(--color-ink-300)] ml-2">{TITLES[mode][1]}</span>
+      </div>
+    </div>
+    <button type="button" class="play-btn gradient-brand text-white text-sm font-semibold px-4 py-1.5 rounded-full transition hover:opacity-90" style="font-family:'Space Grotesk','Pretendard',sans-serif">▶ 재생</button>
+  </div>
+
+  <div class="p-5 space-y-4">
+    {mode === 'values' && <>
+      <div>
+        <div class="flex items-baseline justify-between mb-1.5">
+          <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">4/4 · 한 마디</span>
+          <span class="fill-txt text-xs font-mono text-[var(--color-ink-500)]">0 / 4박</span>
+        </div>
+        <div class="bar relative rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-2)] overflow-hidden" style="height:64px">
+          <div class="grid-lines absolute inset-0 grid grid-cols-4 pointer-events-none">
+            {[1, 2, 3, 4].map(n => <div class="border-r border-dashed border-[var(--color-border)] last:border-r-0 relative"><span class="absolute bottom-1 left-1.5 text-[10px] font-mono text-[var(--color-ink-300)]">{n}</span></div>)}
+          </div>
+          <div class="blocks absolute inset-0 flex p-1.5 pb-5 gap-0.5"></div>
+          <div class="cursor absolute top-0 bottom-0 w-0.5 bg-[var(--color-violet)] opacity-0" style="left:0"></div>
+        </div>
+      </div>
+      <div>
+        <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">눌러서 마디 채우기</div>
+        <div class="grid grid-cols-4 gap-1.5">
+          {VALUES.map(([id, name, beats, rest]) => (
+            <button type="button" class="val-btn rounded-xl border border-[var(--color-border)] bg-white px-1 py-2 hover:border-[var(--color-violet)] transition disabled:opacity-40 disabled:cursor-not-allowed"
+              data-id={id} data-beats={beats} data-rest={rest ? '1' : '0'} data-name={name}>
+              <span class="block text-xs font-bold text-[var(--color-ink-700)]">{name}</span>
+              <span class="block text-[10px] font-mono text-[var(--color-ink-300)]">{beats}박</span>
+            </button>
+          ))}
+        </div>
+      </div>
+      <button type="button" class="clear-btn w-full text-sm font-semibold py-2 rounded-xl border border-[var(--color-border)] text-[var(--color-ink-500)] hover:border-[var(--color-violet)] hover:text-[var(--color-violet)] transition">마디 비우기</button>
+    </>}
+
+    {mode === 'meter' && <>
+      <div class="beats flex justify-center gap-2 py-3"></div>
+      <div class="meter-desc text-center text-sm text-[var(--color-ink-500)] min-h-[1.5em]"></div>
+      <div>
+        <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">Time Signature · 박자표</div>
+        <div class="flex gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" role="group">
+          {METERS.map(m => <button type="button" class={`meter-btn flex-1 ${seg}`} data-v={m} aria-pressed={m === meter ? 'true' : 'false'} style="font-family:'Space Grotesk','Pretendard',sans-serif">{m}</button>)}
+        </div>
+      </div>
+    </>}
+
+    {mode === 'expression' && <>
+      <div class="rounded-xl bg-[var(--color-surface-2)] border border-[var(--color-border)] px-4 py-3 text-center">
+        <div class="expr-now text-2xl font-bold text-[var(--color-ink-700)]" style="font-family:'Space Grotesk','Pretendard',sans-serif">Moderato · mf</div>
+        <div class="expr-sub text-xs text-[var(--color-ink-500)] mt-1">보통 빠르게 · 조금 세게 — ♩ = 110</div>
+      </div>
+      <div>
+        <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">Tempo · 빠르기말</div>
+        <div class="grid grid-cols-3 gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" role="group">
+          {TEMPI.map(([t, k, bpm]) => <button type="button" class={`tempo-btn ${seg}`} data-v={t} data-kr={k} data-bpm={bpm} aria-pressed={t === 'Moderato' ? 'true' : 'false'}>{t}</button>)}
+        </div>
+      </div>
+      <div>
+        <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">Dynamics · 셈여림</div>
+        <div class="grid grid-cols-6 gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" role="group">
+          {DYN.map(([d, k, g]) => <button type="button" class={`dyn-btn ${seg} italic font-serif`} data-v={d} data-kr={k} data-g={g} aria-pressed={d === 'mf' ? 'true' : 'false'}>{d}</button>)}
+        </div>
+      </div>
+    </>}
+
+    {mode !== 'values' && (
+      <div>
+        <div class="flex items-center justify-between mb-1">
+          <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">BPM · 템포</span>
+          <span class="bpm-val text-sm font-mono text-[var(--color-ink-700)]">{mode === 'meter' ? 90 : 110}</span>
+        </div>
+        <input type="range" class="sl-range bpm-range" min="40" max="200" step="1" value={mode === 'meter' ? 90 : 110} aria-label="템포" />
+      </div>
+    )}
+  </div>
+</div>
+
+<style>
+  .rhythm-widget :global(.blk) { display: flex; flex-direction: column; justify-content: center; align-items: center; border-radius: 8px;
+    font-size: 10px; font-weight: 700; line-height: 1.15; text-align: center; overflow: hidden; transition: transform .08s, filter .08s; }
+  .rhythm-widget :global(.blk.note) { background: linear-gradient(135deg, #7c3aed, #2563eb); color: #fff; }
+  .rhythm-widget :global(.blk.rest) { background: #fff; color: var(--color-ink-300); border: 1.5px dashed var(--color-ink-300); }
+  .rhythm-widget :global(.blk.on) { filter: brightness(1.3); transform: scaleY(1.06); }
+  .rhythm-widget :global(.dot) { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 800; font-family: 'Space Grotesk', 'Pretendard', sans-serif; border: 2px solid var(--color-border); color: var(--color-ink-300); transition: all .06s; }
+  .rhythm-widget :global(.dot.S) { width: 42px; height: 42px; }
+  .rhythm-widget :global(.dot.M) { width: 38px; height: 38px; }
+  .rhythm-widget :global(.dot.on) { background: var(--color-violet); border-color: var(--color-violet); color: #fff; }
+</style>
+
+<script>
+import { AudioCore } from '../audio/core';
+import { playKey } from '../audio/keys';
+
+// 박자별 셈여림: S 강 / M 중강 / w 약
+const ACCENTS: Record<string, string[]> = { '2/4': ['S', 'w'], '3/4': ['S', 'w', 'w'], '4/4': ['S', 'w', 'M', 'w'], '6/8': ['S', 'w', 'w', 'M', 'w', 'w'] };
+const METER_DESC: Record<string, string> = {
+  '2/4': '강 · 약 — 행진곡처럼 하나, 둘',
+  '3/4': '강 · 약 · 약 — 왈츠의 쿵짝짝',
+  '4/4': '강 · 약 · 중강 · 약 — 팝·록의 기본',
+  '6/8': '강 · 약 · 약 · 중강 · 약 · 약 — 셋씩 두 묶음, 발라드·자장가',
+};
+// 「반짝반짝 작은 별」 두 마디 (MIDI, 박)
+const MELODY: [number, number][] = [[60, 1], [60, 1], [67, 1], [67, 1], [69, 1], [69, 1], [67, 2], [65, 1], [65, 1], [64, 1], [64, 1], [62, 1], [62, 1], [60, 2]];
+
+function click(core: AudioCore, t: number, level: string) {
+  const o = core.ctx.createOscillator(), g = core.gain(0.0001);
+  o.type = 'square'; o.frequency.value = level === 'S' ? 1760 : level === 'M' ? 1320 : 990;
+  const peak = level === 'S' ? 0.32 : level === 'M' ? 0.2 : 0.11;
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(peak, t + 0.002); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.05);
+  o.connect(g); g.connect(core.input); o.start(t); o.stop(t + 0.06);
+  o.onended = () => { try { o.disconnect(); g.disconnect(); } catch (e) {} };
+}
+
+function initRhythm(root: HTMLElement) {
+  const mode = root.dataset.mode;
+  let core: AudioCore | null = null;
+  const playBtn = root.querySelector('.play-btn') as HTMLButtonElement;
+  let playing = false, timer = 0, timeouts: number[] = [];
+  const later = (ms: number, fn: () => void) => timeouts.push(window.setTimeout(fn, ms));
+  const bpmRange = root.querySelector<HTMLInputElement>('.bpm-range');
+  const bpmVal = root.querySelector<HTMLElement>('.bpm-val');
+  const setPct = (el: HTMLInputElement) => el.style.setProperty('--sl-pct', ((+el.value - +el.min) / (+el.max - +el.min) * 100) + '%');
+  let bpm = bpmRange ? +bpmRange.value : 90;
+  if (bpmRange) { setPct(bpmRange); bpmRange.addEventListener('input', () => { bpm = +bpmRange.value; bpmVal!.textContent = String(bpm); setPct(bpmRange); onBpm(); }); }
+  let onBpm = () => {};
+
+  const segSel = (sel: string, cb: (b: HTMLButtonElement) => void) => {
+    const btns = root.querySelectorAll<HTMLButtonElement>(sel);
+    const paint = (b: HTMLButtonElement) => { b.style.cssText = 'background:white;color:var(--color-violet);box-shadow:0 1px 4px rgba(0,0,0,0.08)'; };
+    btns.forEach(b => {
+      if (b.getAttribute('aria-pressed') === 'true') paint(b);
+      b.addEventListener('click', () => { btns.forEach(x => { x.setAttribute('aria-pressed', 'false'); x.style.cssText = ''; }); b.setAttribute('aria-pressed', 'true'); paint(b); cb(b); });
+    });
+  };
+
+  function stop() {
+    playing = false; clearInterval(timer); timeouts.forEach(clearTimeout); timeouts = [];
+    playBtn.textContent = '▶ 재생';
+    root.querySelectorAll('.on').forEach(e => e.classList.remove('on'));
+    const cur = root.querySelector<HTMLElement>('.cursor'); if (cur) cur.style.opacity = '0';
+  }
+  let start = async () => {};
+  playBtn.addEventListener('click', async () => {
+    if (playing) return stop();
+    core ??= new AudioCore(); await core.resume();
+    playing = true; playBtn.textContent = '⏸ 정지';
+    await start();
+  });
+
+  // ── 음표 길이 ──
+  if (mode === 'values') {
+    const blocks = root.querySelector('.blocks') as HTMLElement;
+    const fillTxt = root.querySelector('.fill-txt') as HTMLElement;
+    const cursor = root.querySelector('.cursor') as HTMLElement;
+    const items: { beats: number; rest: boolean; name: string }[] = [
+      { beats: 2, rest: false, name: '2분음표' }, { beats: 1, rest: false, name: '4분음표' }, { beats: 1, rest: true, name: '4분쉼표' },
+    ];
+    const total = () => items.reduce((n, i) => n + i.beats, 0);
+    function render() {
+      blocks.innerHTML = '';
+      for (const it of items) {
+        const d = document.createElement('div');
+        d.className = `blk ${it.rest ? 'rest' : 'note'}`;
+        d.style.flex = `${it.beats} 0 0`;
+        d.innerHTML = `${it.name}<span style="font-weight:500;opacity:.75">${it.beats}박</span>`;
+        blocks.appendChild(d);
+      }
+      if (total() < 4) { const g = document.createElement('div'); g.style.flex = `${4 - total()} 0 0`; blocks.appendChild(g); }
+      fillTxt.textContent = `${total()} / 4박${total() === 4 ? ' · 꽉 찼어요!' : ''}`;
+      root.querySelectorAll<HTMLButtonElement>('.val-btn').forEach(b => { b.disabled = total() + Number(b.dataset.beats) > 4; });
+    }
+    root.querySelectorAll<HTMLButtonElement>('.val-btn').forEach(b => b.addEventListener('click', () => {
+      if (total() + Number(b.dataset.beats) > 4) return;
+      items.push({ beats: Number(b.dataset.beats), rest: b.dataset.rest === '1', name: b.dataset.name! });
+      render();
+    }));
+    root.querySelector('.clear-btn')!.addEventListener('click', () => { stop(); items.length = 0; render(); });
+    render();
+
+    start = async () => {
+      const c = core!, spb = 60 / 90, t0 = c.ctx.currentTime + 0.1;
+      for (let b = 0; b < 4; b++) click(c, t0 + b * spb, b === 0 ? 'S' : 'w');
+      let pos = 0;
+      const els = blocks.querySelectorAll<HTMLElement>('.blk');
+      items.forEach((it, i) => {
+        if (!it.rest) playKey(c, 67, t0 + pos * spb, Math.max(0.25, it.beats * spb * 0.92), 0.28);
+        const at = pos;
+        later(100 + at * spb * 1000, () => els[i]?.classList.add('on'));
+        later(100 + (at + it.beats) * spb * 1000 - 40, () => els[i]?.classList.remove('on'));
+        pos += it.beats;
+      });
+      cursor.style.transition = 'none'; cursor.style.left = '0'; cursor.style.opacity = '1';
+      requestAnimationFrame(() => { cursor.style.transition = `left ${4 * spb}s linear`; cursor.style.left = 'calc(100% - 2px)'; });
+      later(100 + 4 * spb * 1000 + 80, stop);
+    };
+  }
+
+  // ── 박자 ──
+  if (mode === 'meter') {
+    let meter = root.dataset.meter || '4/4';
+    const beatsEl = root.querySelector('.beats') as HTMLElement;
+    const desc = root.querySelector('.meter-desc') as HTMLElement;
+    function render() {
+      beatsEl.innerHTML = '';
+      ACCENTS[meter].forEach((a, i) => { const d = document.createElement('div'); d.className = `dot ${a}`; d.textContent = a === 'S' ? '강' : a === 'M' ? '중강' : '약'; d.dataset.i = String(i); beatsEl.appendChild(d); });
+      desc.textContent = METER_DESC[meter];
+    }
+    render();
+    segSel('.meter-btn', b => { meter = b.dataset.v!; render(); if (playing) { stop(); playBtn.click(); } });
+    let next = 0, idx = 0;
+    start = async () => {
+      next = core!.ctx.currentTime + 0.1; idx = 0;
+      const tick = () => {
+        const c = core!, acc = ACCENTS[meter], spb = 60 / bpm;
+        while (next < c.ctx.currentTime + 0.12) {
+          const i = idx % acc.length, at = next;
+          click(c, at, acc[i]);
+          later(Math.max(0, (at - c.ctx.currentTime) * 1000), () => {
+            beatsEl.querySelectorAll('.dot').forEach(d => d.classList.remove('on'));
+            beatsEl.querySelector(`.dot[data-i="${i}"]`)?.classList.add('on');
+          });
+          next += spb; idx++;
+        }
+      };
+      tick(); timer = window.setInterval(tick, 25);
+    };
+  }
+
+  // ── 셈여림과 빠르기 ──
+  if (mode === 'expression') {
+    const now = root.querySelector('.expr-now') as HTMLElement, sub = root.querySelector('.expr-sub') as HTMLElement;
+    let tempo = { t: 'Moderato', kr: '보통 빠르게' }, dyn = { d: 'mf', kr: '메조 포르테', g: 0.3 };
+    const DYN_KR: Record<string, string> = { pp: '아주 여리게', p: '여리게', mp: '조금 여리게', mf: '조금 세게', f: '세게', ff: '아주 세게' };
+    const show = () => { now.textContent = `${tempo.t} · ${dyn.d}`; sub.textContent = `${tempo.kr} · ${DYN_KR[dyn.d]} — ♩ = ${bpm}`; };
+    segSel('.tempo-btn', b => { tempo = { t: b.dataset.v!, kr: b.dataset.kr! }; bpm = Number(b.dataset.bpm); if (bpmRange) { bpmRange.value = String(bpm); bpmVal!.textContent = String(bpm); setPct(bpmRange); } show(); });
+    segSel('.dyn-btn', b => { dyn = { d: b.dataset.v!, kr: b.dataset.kr!, g: Number(b.dataset.g) }; show(); });
+    onBpm = show;
+    start = async () => {
+      const c = core!, spb = 60 / bpm; let t = c.ctx.currentTime + 0.1, total = 0;
+      for (const [m, b] of MELODY) { playKey(c, m, t, Math.max(0.3, b * spb * 0.9), dyn.g); t += b * spb; total += b; }
+      later(100 + total * spb * 1000 + 200, stop);
+    };
+  }
+}
+
+document.querySelectorAll<HTMLElement>('.rhythm-widget').forEach(initRhythm);
+</script>

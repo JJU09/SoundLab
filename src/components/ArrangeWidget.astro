@@ -1,0 +1,233 @@
+---
+// 편곡 위젯 — C–G–Am–F 위에서 드럼·베이스·코드·아르페지오·멜로디 다섯 파트를 합성해 연주한다.
+// config.mode:
+//   'form'    : 곡 구조 타임라인(인트로→벌스→코러스…)을 따라 섹션마다 밀도가 바뀌며 재생
+//   'roles'   : 파트를 하나씩 켜고 끄며 역할 듣기
+//   'range'   : 음역이 겹치는 배치 vs 나눈 배치 비교
+//   'density' : 에너지 1~5 단계로 쌓기
+//   'genre'   : 같은 진행을 발라드·댄스 팝·록·로파이로 편곡
+interface Props { config?: Record<string, any>; }
+const { config = {} } = Astro.props;
+const mode: string = config.mode ?? 'roles';
+const TITLE: Record<string, string> = { form: '곡 구조', roles: '파트 역할', range: '음역 배치', density: '편곡 밀도', genre: '장르 레시피' };
+const PARTS: [string, string, string][] = [['drums', '드럼', '박과 그루브'], ['bass', '베이스', '화성의 바닥'], ['chords', '코드', '화성의 몸통'], ['arp', '아르페지오', '움직임과 반짝임'], ['melody', '멜로디', '주인공']];
+const FORM: [string, string, number][] = [['intro', '인트로', 2], ['verse', '벌스', 3], ['pre', '프리코러스', 4], ['chorus', '코러스', 5], ['bridge', '브리지', 2], ['chorus2', '코러스', 5], ['outro', '아웃트로', 1]];
+const GENRES: [string, string][] = [['ballad', '발라드'], ['dance', '댄스 팝'], ['rock', '록'], ['lofi', '로파이']];
+const seg = 'px-2 py-1.5 rounded-lg text-xs font-semibold transition-all text-[var(--color-ink-500)]';
+---
+<div class="arr-widget rounded-2xl border border-[var(--color-border)] bg-white overflow-hidden" data-mode={mode} data-form={JSON.stringify(FORM)}>
+  <div class="flex items-center justify-between px-5 py-4 border-b border-[var(--color-border)] bg-[var(--color-surface)]">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg flex items-center justify-center gradient-brand">
+        <svg class="text-white" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M4 6h10M4 12h16M4 18h7"/></svg>
+      </div>
+      <div>
+        <span class="font-bold text-base" style="font-family:'Space Grotesk','Pretendard',sans-serif">{TITLE[mode]}</span>
+        <span class="text-sm text-[var(--color-ink-300)] ml-2">Arrangement</span>
+      </div>
+    </div>
+    <button type="button" class="play-btn shrink-0 whitespace-nowrap gradient-brand text-white text-sm font-semibold px-4 py-1.5 rounded-full transition hover:opacity-90" style="font-family:'Space Grotesk','Pretendard',sans-serif">▶ 재생</button>
+  </div>
+  <div class="p-5 space-y-3.5">
+    {mode === 'form' && (
+      <div class="timeline flex gap-1">
+        {FORM.map(([id, name, e], i) => <div class="sec flex-1 rounded-lg border border-[var(--color-border)] px-0.5 py-2 text-center" data-i={i} style={`background:rgba(124,58,237,${0.05 + e * 0.05})`}>
+          <div class="text-[10px] font-bold text-[var(--color-ink-700)] leading-tight">{name}</div>
+          <div class="text-[9px] font-mono text-[var(--color-ink-300)]">{'▮'.repeat(e)}</div>
+        </div>)}
+      </div>
+    )}
+    <div class="now text-center text-sm font-semibold text-[var(--color-ink-700)] min-h-[1.5em]" aria-live="polite"></div>
+    <div class="parts space-y-1.5">
+      {PARTS.map(([id, name, role]) => (
+        <button type="button" class="part w-full flex items-center gap-2 rounded-xl border border-[var(--color-border)] px-3 py-2 text-left transition" data-p={id} aria-pressed="true" disabled={mode !== 'roles'}>
+          <span class="led w-2.5 h-2.5 rounded-full flex-none"></span>
+          <span class="text-sm font-bold text-[var(--color-ink-700)] w-20">{name}</span>
+          <span class="text-xs text-[var(--color-ink-500)] flex-1">{role}</span>
+          <span class="reg text-[10px] font-mono text-[var(--color-ink-300)]"></span>
+        </button>
+      ))}
+    </div>
+    {mode === 'density' && (
+      <div>
+        <div class="flex items-center justify-between mb-1">
+          <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Energy · 에너지</span>
+          <span class="en-val text-sm font-mono text-[var(--color-ink-700)]">3</span>
+        </div>
+        <input type="range" class="sl-range en-range" min="1" max="5" step="1" value="3" aria-label="에너지" />
+      </div>
+    )}
+    {mode === 'range' && (
+      <div class="grid grid-cols-2 gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" role="group">
+        <button type="button" class={`rg-btn ${seg}`} data-v="overlap" aria-pressed="true">음역이 겹친 배치</button>
+        <button type="button" class={`rg-btn ${seg}`} data-v="split" aria-pressed="false">음역을 나눈 배치</button>
+      </div>
+    )}
+    {mode === 'genre' && (
+      <div class="grid grid-cols-4 gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" role="group">
+        {GENRES.map(([v, t], i) => <button type="button" class={`gn-btn ${seg}`} data-v={v} aria-pressed={i === 0 ? 'true' : 'false'}>{t}</button>)}
+      </div>
+    )}
+    <p class="hint text-[11px] text-center text-[var(--color-ink-300)]">
+      {mode === 'roles' ? '파트를 눌러 켜고 끄며 각자의 역할을 들어 보세요 · 진행 C–G–Am–F'
+        : mode === 'form' ? '재생하면 섹션마다 파트와 밀도가 바뀌어요 (섹션당 2마디)'
+        : '진행 C–G–Am–F 반복'}
+    </p>
+  </div>
+</div>
+
+<style>
+  .arr-widget .part[aria-pressed="true"] { background: var(--color-violet-glow); border-color: var(--color-violet-light); }
+  .arr-widget .part[aria-pressed="true"] .led { background: var(--color-violet); }
+  .arr-widget .part[aria-pressed="false"] .led { background: var(--color-border); }
+  .arr-widget .part[aria-pressed="false"] { opacity: .55; }
+  .arr-widget .part:disabled { cursor: default; }
+  .arr-widget .part.hit .led { box-shadow: 0 0 0 4px rgba(124,58,237,.25); }
+  .arr-widget .sec.on { outline: 2px solid var(--color-violet); outline-offset: -1px; }
+</style>
+
+<script>
+import { AudioCore } from '../audio/core';
+import { playKey } from '../audio/keys';
+import { hit, PRESETS } from '../audio/drums';
+import { midiToFreq } from '../lib/music';
+
+// C G Am F — [근음 pc, 구성음 pc]
+const PROG: [number, number[], string][] = [[0, [0, 4, 7], 'C'], [7, [7, 11, 2], 'G'], [9, [9, 0, 4], 'Am'], [5, [5, 9, 0], 'F']];
+const PROG7: number[][] = [[0, 4, 7, 11], [7, 11, 2, 5], [9, 0, 4, 7], [5, 9, 0, 4]];
+// 멜로디(8분 16칸 = 2마디, MIDI, -1 쉼) — 두 마디짜리를 반복
+const MEL = [67, 67, 69, -1, 72, -1, 69, -1, 67, 67, 64, -1, 62, 64, 67, -1];
+
+type Cfg = { on: Record<string, boolean>; bpm: number; drums: string; swing: number; bassPat: 'whole' | 'quarter' | 'eighth' | 'off'; chordPat: 'pad' | 'block' | 'stab' | 'power' | 'arp8'; sevenths: boolean; arp: boolean; regs: Record<string, number>; label: string };
+
+function tone(core: AudioCore, type: OscillatorType, midi: number, t: number, dur: number, vol: number, attack = 0.01, cutoff = 0) {
+  const o = core.ctx.createOscillator(); o.type = type; o.frequency.value = midiToFreq(midi);
+  const g = core.gain(0.0001);
+  g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(vol, t + attack); g.gain.setTargetAtTime(0.0001, t + Math.max(attack, dur - 0.08), 0.06);
+  let last: AudioNode = o;
+  if (cutoff) { const f = core.ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = cutoff; o.connect(f); last = f; }
+  last.connect(g); g.connect(core.input); o.start(t); o.stop(t + dur + 0.4);
+  o.onended = () => { try { o.disconnect(); g.disconnect(); } catch (e) {} };
+}
+
+function initArr(root: HTMLElement) {
+  const mode = root.dataset.mode!;
+  const FORM: [string, string, number][] = JSON.parse(root.dataset.form!);
+  let core: AudioCore | null = null;
+  const nowEl = root.querySelector('.now') as HTMLElement;
+  const parts = root.querySelectorAll<HTMLButtonElement>('.part');
+  const partOn: Record<string, boolean> = { drums: true, bass: true, chords: true, arp: true, melody: true };
+  let energy = 3, range = 'overlap', genre = 'ballad';
+
+  function byEnergy(e: number): Cfg {
+    return {
+      on: { chords: true, bass: e >= 2, drums: e >= 3, melody: e >= 3, arp: e >= 5 },
+      bpm: 100, drums: e >= 5 ? 'pop16' : e >= 4 ? 'rock8' : 'ballad', swing: 0.5,
+      bassPat: e >= 5 ? 'eighth' : e >= 4 ? 'quarter' : 'whole', chordPat: e <= 2 ? 'pad' : e >= 5 ? 'stab' : 'block',
+      sevenths: false, arp: e >= 5, regs: { bass: 36, chords: 60, arp: 72, melody: 72 }, label: ['', '패드만 — 숨죽인 시작', '+ 베이스 — 바닥이 생김', '+ 드럼·멜로디 — 노래가 시작', '+ 하이햇 8분·베이스 4분 — 앞으로 나아감', '+ 16비트·아르페지오·스탭 — 터지는 코러스'][e],
+    };
+  }
+  function cfg(sectionEnergy?: number): Cfg {
+    if (mode === 'form') return byEnergy(sectionEnergy ?? 3);
+    if (mode === 'density') return byEnergy(energy);
+    if (mode === 'range') {
+      const c = byEnergy(4); c.on.arp = true; c.arp = true;
+      c.regs = range === 'overlap' ? { bass: 60, chords: 72, arp: 72, melody: 72 } : { bass: 36, chords: 55, arp: 84, melody: 72 };
+      c.label = range === 'overlap' ? '모든 파트가 비슷한 높이 — 뭉쳐서 멜로디가 묻힘' : '베이스 C2 · 코드 G3 · 멜로디 C5 · 아르페지오 C6 — 층이 분리됨';
+      return c;
+    }
+    if (mode === 'genre') {
+      const base = byEnergy(4);
+      const G: Record<string, Partial<Cfg>> = {
+        ballad: { bpm: 70, drums: 'ballad', bassPat: 'whole', chordPat: 'arp8', sevenths: false, arp: false, label: '발라드 — 70 BPM, 피아노 8분 분산화음, 베이스 온음표' },
+        dance: { bpm: 122, drums: 'house', bassPat: 'off', chordPat: 'stab', sevenths: false, arp: true, label: '댄스 팝 — 122 BPM, 포 온 더 플로어, 뒷박 베이스, 코드 스탭' },
+        rock: { bpm: 126, drums: 'rock8', bassPat: 'eighth', chordPat: 'power', sevenths: false, arp: false, label: '록 — 126 BPM, 8비트, 8분 베이스, 파워코드' },
+        lofi: { bpm: 80, drums: 'boombap', swing: 0.6, bassPat: 'quarter', chordPat: 'pad', sevenths: true, arp: false, label: '로파이 — 80 BPM, 스윙 붐뱁, 7화음 패드' },
+      };
+      const c = { ...base, ...G[genre] } as Cfg;
+      c.on = { drums: true, bass: true, chords: true, melody: true, arp: c.arp };
+      return c;
+    }
+    const c = byEnergy(5); c.on = { ...partOn }; c.label = '켠 파트: ' + Object.keys(partOn).filter(k => partOn[k]).map(k => ({ drums: '드럼', bass: '베이스', chords: '코드', arp: '아르페지오', melody: '멜로디' } as any)[k]).join(' · ');
+    return c;
+  }
+  function paintParts(c: Cfg) {
+    parts.forEach(p => { p.setAttribute('aria-pressed', c.on[p.dataset.p!] ? 'true' : 'false');
+      const r = (c.regs as any)[p.dataset.p!]; const reg = p.querySelector('.reg') as HTMLElement;
+      reg.textContent = r ? `C${Math.floor(r / 12) - 1}~` : p.dataset.p === 'drums' ? (PRESETS[c.drums]?.name ?? '') : ''; });
+    nowEl.textContent = c.label;
+  }
+  if (mode === 'roles') parts.forEach(p => p.addEventListener('click', () => { partOn[p.dataset.p!] = !partOn[p.dataset.p!]; paintParts(cfg()); }));
+  const segSel = (cls: string, cb: (v: string) => void) => {
+    const btns = root.querySelectorAll<HTMLButtonElement>(cls);
+    const paint = (b: HTMLButtonElement) => { b.style.background = 'white'; b.style.color = 'var(--color-violet)'; b.style.boxShadow = '0 1px 4px rgba(0,0,0,0.08)'; };
+    const clear = (b: HTMLButtonElement) => { b.style.background = ''; b.style.color = ''; b.style.boxShadow = ''; };
+    btns.forEach(b => { if (b.getAttribute('aria-pressed') === 'true') paint(b);
+      b.addEventListener('click', () => { btns.forEach(x => { x.setAttribute('aria-pressed', 'false'); clear(x); }); b.setAttribute('aria-pressed', 'true'); paint(b); cb(b.dataset.v!); }); });
+  };
+  segSel('.rg-btn', v => { range = v; paintParts(cfg()); });
+  segSel('.gn-btn', v => { genre = v; paintParts(cfg()); });
+  const enR = root.querySelector<HTMLInputElement>('.en-range');
+  if (enR) { const setPct = () => enR.style.setProperty('--sl-pct', ((+enR.value - 1) / 4 * 100) + '%'); setPct();
+    enR.addEventListener('input', () => { energy = +enR.value; (root.querySelector('.en-val') as HTMLElement).textContent = enR.value; setPct(); paintParts(cfg()); }); }
+  paintParts(cfg(FORM[0][2]));
+
+  // ── 스케줄러: 16분 단위, 한 마디 = 16스텝, 코드 1마디씩 ──
+  const playBtn = root.querySelector('.play-btn') as HTMLButtonElement;
+  let playing = false, timer = 0, step = 0, barStart = 0;
+  const flash = (p: string, at: number) => setTimeout(() => { const el = root.querySelector(`.part[data-p="${p}"]`); el?.classList.add('hit'); setTimeout(() => el?.classList.remove('hit'), 90); }, Math.max(0, (at - core!.ctx.currentTime) * 1000));
+  function tick() {
+    const c = core!;
+    while (true) {
+      const bar = Math.floor(step / 16), s = step % 16;
+      const secIdx = mode === 'form' ? Math.floor(bar / 2) : -1;
+      if (mode === 'form' && secIdx >= FORM.length) { stop(); return; }
+      const k = cfg(mode === 'form' ? FORM[secIdx][2] : undefined);
+      const spb = 60 / k.bpm, sw = k.swing;
+      const inBeat = s % 4, beat = Math.floor(s / 4);
+      const off = inBeat === 0 ? 0 : inBeat === 2 ? sw : inBeat === 1 ? sw / 2 : sw + (1 - sw) / 2;
+      const t = barStart + (beat + off) * spb;
+      if (t > c.ctx.currentTime + 0.12) break;
+      const ch = PROG[bar % 4], pcs = k.sevenths ? PROG7[bar % 4] : ch[1];
+      if (s === 0) {
+        if (mode === 'form') setTimeout(() => { root.querySelectorAll('.sec').forEach(e => e.classList.toggle('on', Number((e as HTMLElement).dataset.i) === secIdx)); paintParts(k); nowEl.textContent = `${FORM[secIdx][1]} · ${ch[2]} — ${k.label}`; }, Math.max(0, (t - c.ctx.currentTime) * 1000));
+      }
+      // 드럼
+      if (k.on.drums) { const p = PRESETS[k.drums]; for (const tr of Object.keys(p.tracks) as any[]) { const v = (p.tracks as any)[tr][s]; if (v && v !== '.') hit(c, tr, t, v === 'o' ? 0.4 : 0.85); } if (s % 4 === 0) flash('drums', t); }
+      // 베이스
+      if (k.on.bass) {
+        const bm = k.regs.bass + ch[0] - (ch[0] > 6 && k.regs.bass < 48 ? 12 : 0);
+        const hitB = k.bassPat === 'whole' ? s === 0 : k.bassPat === 'quarter' ? s % 4 === 0 : k.bassPat === 'eighth' ? s % 2 === 0 : s % 4 === 2;
+        const dur = k.bassPat === 'whole' ? 4 * spb : k.bassPat === 'quarter' ? spb * 0.9 : spb * 0.45;
+        if (hitB) { tone(c, 'triangle', bm, t, dur, 0.32, 0.005, 900); tone(c, 'sine', bm, t, dur, 0.25); flash('bass', t); }
+      }
+      // 코드
+      if (k.on.chords) {
+        const base = k.regs.chords; const voice = pcs.map(pc => base + ((pc - (base % 12) + 12) % 12));
+        if (k.chordPat === 'pad' && s === 0) { voice.forEach(m => tone(c, 'triangle', m, t, 4 * spb, 0.06, 0.35, 1800)); flash('chords', t); }
+        if (k.chordPat === 'block' && (s === 0 || s === 8)) { voice.forEach(m => playKey(c, m, t, 2 * spb, 0.11)); flash('chords', t); }
+        if (k.chordPat === 'stab' && [0, 3, 6, 10, 12].includes(s)) { voice.forEach(m => tone(c, 'sawtooth', m, t, spb * 0.35, 0.035, 0.005, 2600)); flash('chords', t); }
+        if (k.chordPat === 'power' && s % 2 === 0) { const r = base - 12 + ((ch[0] - (base % 12) + 12) % 12); [r, r + 7, r + 12].forEach(m => tone(c, 'sawtooth', m, t, spb * 0.45, 0.04, 0.003, 1400)); if (s % 4 === 0) flash('chords', t); }
+        if (k.chordPat === 'arp8' && s % 2 === 0) { const seq = [...voice, voice[0] + 12]; playKey(c, seq[(s / 2) % seq.length], t, spb * 1.2, 0.12); flash('chords', t); }
+      }
+      // 아르페지오
+      if (k.on.arp && s % 2 === 0) { const seqA = pcs.map(pc => k.regs.arp + ((pc - (k.regs.arp % 12) + 12) % 12)); tone(c, 'square', seqA[(s / 2) % seqA.length], t, spb * 0.3, 0.025, 0.003, 3000); flash('arp', t); }
+      // 멜로디
+      if (k.on.melody && s % 2 === 0) {
+        const i = ((bar % 2) * 8 + s / 2), m = MEL[i];
+        if (m > 0) { const mm = m + (k.regs.melody - 72); let len = 1; while (i + len < 16 && MEL[i + len] === -1 && len < 2) len++; playKey(c, mm, t, spb * 0.5 * len * 0.95, 0.24); flash('melody', t); }
+      }
+      step++;
+      if (step % 16 === 0) barStart += 4 * spb;
+    }
+  }
+  function stop() { playing = false; clearInterval(timer); playBtn.textContent = '▶ 재생'; root.querySelectorAll('.sec').forEach(e => e.classList.remove('on')); }
+  playBtn.addEventListener('click', async () => {
+    if (playing) return stop();
+    core ??= new AudioCore(); await core.resume();
+    playing = true; playBtn.textContent = '⏸ 정지'; step = 0; barStart = core.ctx.currentTime + 0.12;
+    tick(); timer = window.setInterval(tick, 25);
+  });
+}
+document.querySelectorAll<HTMLElement>('.arr-widget').forEach(initArr);
+</script>

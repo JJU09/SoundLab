@@ -2,13 +2,15 @@
 import Base from '../layouts/Base.astro';
 import HomePlay from '../components/HomePlay.astro';
 import { getCollection } from 'astro:content';
-import { HUB_META, HUBS } from '../content.config';
+import { HUB_META, hubsByArea } from '../content.config';
 const base = import.meta.env.BASE_URL;
 
 const all = (await getCollection('topics')).filter(t => !t.data.draft);
-const hubs = [...HUBS]
-  .sort((a, b) => HUB_META[a].order - HUB_META[b].order)
-  .map(h => ({ id: h, ...HUB_META[h], count: all.filter(t => t.data.hub === h).length }));
+const areas = hubsByArea().map(a => ({
+  ...a,
+  hubs: a.hubs.map(h => ({ id: h, ...HUB_META[h], count: all.filter(t => t.data.hub === h).length })),
+}));
+const hubTotal = areas.reduce((n, a) => n + a.hubs.length, 0);
 
 // 홈 쇼케이스 — 샌드박스/도구 (각 섹션 전체 보기로 연결)
 const sandboxes = [
@@ -68,15 +70,21 @@ const tools = [
     </div>
   </section>
 
-  <!-- 지식 허브 쇼케이스 -->
+  <!-- 지식 허브 쇼케이스 (영역별) -->
   <section class="max-w-6xl mx-auto px-4 sm:px-6 pb-20">
-    <div class="flex items-baseline gap-3 mb-8">
-      <h2 class="text-xl font-bold" style="font-family:'Space Grotesk','Pretendard',sans-serif">5가지 지식 허브</h2>
-      <span class="text-sm text-[var(--color-ink-300)] font-mono">소리 물리부터 믹싱까지 — 단계별로 듣고 만지며</span>
+    <div class="flex items-baseline gap-3 mb-8 flex-wrap">
+      <h2 class="text-xl font-bold" style="font-family:'Space Grotesk','Pretendard',sans-serif">작곡에 필요한 {hubTotal}가지 지식 허브</h2>
+      <span class="text-sm text-[var(--color-ink-300)] font-mono">무엇을 쓸까 · 어떤 소리로 · 어떻게 완성할까</span>
     </div>
-
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {hubs.map((h, i) => {
+    <div class="space-y-8">
+    {areas.map(a => (
+      <div>
+        <div class="flex items-baseline gap-2 mb-3">
+          <h3 class="text-base font-bold text-[var(--color-ink-700)]" style="font-family:'Space Grotesk','Pretendard',sans-serif">{a.kr}</h3>
+          <span class="text-xs text-[var(--color-ink-300)]">{a.desc}</span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {a.hubs.map(h => {
         const ready = h.count > 0;
         const inner = (
           <>
@@ -88,7 +96,7 @@ const tools = [
             </div>
             <div class="flex items-center gap-2 mb-1">
               <span class={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-mono font-bold text-white ${ready ? 'gradient-brand' : 'bg-[var(--color-ink-300)]'}`}>
-                {String(i + 1).padStart(2, '0')}
+                {String(h.order).padStart(2, '0')}
               </span>
               <h3 class={`font-bold text-lg ${ready ? 'group-hover:gradient-brand-text transition' : ''}`} style="font-family:'Space Grotesk','Pretendard',sans-serif">{h.kr}</h3>
             </div>
@@ -106,6 +114,9 @@ const tools = [
           <div class="p-5 rounded-2xl border border-dashed border-[var(--color-border)] bg-[var(--color-surface)] opacity-70">{inner}</div>
         );
       })}
+        </div>
+      </div>
+    ))}
     </div>
   </section>
 

@@ -1,18 +1,41 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 
-// 5대 지식 허브 — 디렉터리(src/content/topics/<hub>/)와 일치
-export const HUBS = ['acoustics', 'digital', 'synthesis', 'effects', 'mixing'] as const;
+// 3대 영역 — 작곡에 필요한 지식을 "무엇을 쓸까 → 어떤 소리로 → 어떻게 완성할까"로 묶음.
+// 계획: .claude/plan-composition-curriculum.md
+export const AREAS = ['music', 'sound', 'production'] as const;
+export type Area = (typeof AREAS)[number];
+export const AREA_META: Record<Area, { kr: string; label: string; order: number; desc: string }> = {
+  music:      { kr: '음악', label: 'Music', order: 1, desc: '무엇을 쓸까 — 악보·리듬·멜로디·화성·편곡' },
+  sound:      { kr: '소리', label: 'Sound', order: 2, desc: '어떤 소리로 — 파동·디지털 오디오·신디시스' },
+  production: { kr: '제작', label: 'Production', order: 3, desc: '어떻게 완성할까 — 이펙트·믹싱·마스터링' },
+};
+
+// 지식 허브 — 디렉터리(src/content/topics/<hub>/)와 일치. 토픽이 없는 허브는 "준비 중"으로 노출.
+export const HUBS = ['notation', 'rhythm', 'melody', 'harmony', 'arrangement', 'acoustics', 'digital', 'synthesis', 'effects', 'mixing'] as const;
 export type Hub = (typeof HUBS)[number];
 
-// 허브 메타 (내비·라벨·순서). 코드 단일 소스.
-export const HUB_META: Record<Hub, { kr: string; label: string; order: number; desc: string }> = {
-  acoustics: { kr: '소리와 파동', label: 'Acoustics', order: 1, desc: '소리의 본질을 눈으로 보다' },
-  digital:   { kr: '디지털오디오', label: 'Digital Audio', order: 2, desc: '컴퓨터가 소리를 다루는 법' },
-  synthesis: { kr: '신디시스', label: 'Synthesis', order: 3, desc: '무에서 소리를 창조하다' },
-  effects:   { kr: '이펙트', label: 'Effects', order: 4, desc: '소리를 빚고 가공하다' },
-  mixing:    { kr: '믹싱', label: 'Mixing', order: 5, desc: '여러 소리를 조화롭게 섞다' },
+// 허브 메타 (내비·라벨·순서·영역). 코드 단일 소스. order = 전체 추천 학습 순서.
+export const HUB_META: Record<Hub, { kr: string; label: string; order: number; area: Area; desc: string }> = {
+  notation:    { kr: '악보·기초', label: 'Notation', order: 1, area: 'music', desc: '건반과 오선보, 음표와 박자표 읽기' },
+  rhythm:      { kr: '리듬', label: 'Rhythm', order: 2, area: 'music', desc: '박과 템포, 리듬을 쪼개고 흔들기' },
+  melody:      { kr: '음계·멜로디', label: 'Melody', order: 3, area: 'music', desc: '음정과 음계로 선율을 만들다' },
+  harmony:     { kr: '화성', label: 'Harmony', order: 4, area: 'music', desc: '음을 쌓아 코드와 진행을 만들다' },
+  arrangement: { kr: '형식·편곡', label: 'Arrangement', order: 5, area: 'music', desc: '곡의 구조를 짜고 악기를 배치하다' },
+  acoustics:   { kr: '소리와 파동', label: 'Acoustics', order: 6, area: 'sound', desc: '소리의 본질을 눈으로 보다' },
+  digital:     { kr: '디지털오디오', label: 'Digital Audio', order: 7, area: 'sound', desc: '컴퓨터가 소리를 다루는 법' },
+  synthesis:   { kr: '신디시스', label: 'Synthesis', order: 8, area: 'sound', desc: '무에서 소리를 창조하다' },
+  effects:     { kr: '이펙트', label: 'Effects', order: 9, area: 'production', desc: '소리를 빚고 가공하다' },
+  mixing:      { kr: '믹싱·마스터링', label: 'Mix & Master', order: 10, area: 'production', desc: '여러 소리를 섞고 최종 음원으로 다듬다' },
 };
+
+// 영역별 허브 목록 (정렬 포함) — 홈·지식 허브·내비 공용
+export const hubsByArea = () => [...AREAS]
+  .sort((a, b) => AREA_META[a].order - AREA_META[b].order)
+  .map(area => ({
+    id: area, ...AREA_META[area],
+    hubs: [...HUBS].filter(h => HUB_META[h].area === area).sort((a, b) => HUB_META[a].order - HUB_META[b].order),
+  }));
 
 // 허브별 샌드박스 (경로는 base 제외 슬러그, name은 표시용). 샌드박스 완성 시 등록.
 // Base.astro 내비와 TopicLayout 크로스링크가 공유하는 단일 소스.

@@ -1,7 +1,7 @@
 ---
 import '../styles/global.css';
 import { getCollection } from 'astro:content';
-import { HUB_META, HUBS, SANDBOX_OF } from '../content.config';
+import { HUB_META, HUBS, SANDBOX_OF, AREA_META } from '../content.config';
 import { ADSENSE_ID } from '../ads.config';
 
 interface Props {
@@ -28,6 +28,7 @@ const topics = (await getCollection('topics')).filter(t => !t.data.draft);
 const hubsSorted = [...HUBS].sort((a, b) => HUB_META[a].order - HUB_META[b].order);
 const hubNav = hubsSorted.map(h => ({
   id: h, kr: HUB_META[h].kr, label: HUB_META[h].label,
+  area: HUB_META[h].area, areaKr: AREA_META[HUB_META[h].area].kr,
   ready: topics.some(t => t.data.hub === h),
   href: `${base}learn/${h}/`,
 }));
@@ -35,7 +36,7 @@ const sandboxNav = hubsSorted.map(h => ({
   id: h, kr: HUB_META[h].kr, label: HUB_META[h].label,
   href: SANDBOX_OF[h] ? `${base}${SANDBOX_OF[h]!.path}` : undefined,
   ready: !!SANDBOX_OF[h],
-}));
+})).filter(s => s.ready); // 샌드박스가 있는 허브만 노출
 ---
 <!doctype html>
 <html lang="ko">
@@ -122,7 +123,9 @@ const sandboxNav = hubsSorted.map(h => ({
             <svg class="nav-chev w-3 h-3 transition-transform" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
           </a>
           <div class="nav-panel">
-            {hubNav.map(h => h.ready ? (
+            {hubNav.map((h, i) => [
+              (i === 0 || hubNav[i - 1].area !== h.area) && <div class="nav-area">{h.areaKr}</div>,
+              h.ready ? (
               <a href={h.href} class="nav-item group">
                 <span class="text-[10px] font-mono text-[var(--color-ink-300)] w-20 group-hover:text-[var(--color-violet)]">{h.label}</span>
                 <span class="font-medium">{h.kr}</span>
@@ -133,7 +136,7 @@ const sandboxNav = hubsSorted.map(h => ({
                 <span class="font-medium">{h.kr}</span>
                 <span class="ml-auto text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-[var(--color-surface-2)]">준비 중</span>
               </div>
-            ))}
+            )])}
           </div>
         </div>
 
@@ -193,11 +196,13 @@ const sandboxNav = hubsSorted.map(h => ({
       <nav class="max-w-6xl mx-auto px-4 py-3 max-h-[calc(100dvh-3.5rem)] overflow-y-auto flex flex-col gap-0.5">
         <a href={`${base}learn/`} class="mm-head">지식 허브</a>
         <div class="mm-group">
-          {hubNav.map(h => h.ready ? (
+          {hubNav.map((h, i) => [
+            (i === 0 || hubNav[i - 1].area !== h.area) && <span class="mm-area">{h.areaKr}</span>,
+            h.ready ? (
             <a href={h.href} class="mm-sub"><span class="mm-en">{h.label}</span><span>{h.kr}</span></a>
           ) : (
             <span class="mm-sub mm-off"><span class="mm-en">{h.label}</span><span>{h.kr}</span><span class="mm-badge">준비 중</span></span>
-          ))}
+          )])}
         </div>
         <a href={`${base}sandbox/`} class="mm-head">샌드박스</a>
         <div class="mm-group">
@@ -283,6 +288,9 @@ const sandboxNav = hubsSorted.map(h => ({
   }
   .mm-head:active { background: var(--color-violet-glow); color: var(--color-violet); }
   .mm-group { display: flex; flex-direction: column; padding: 2px 0 6px 6px; }
+  .mm-area { font-size: 10px; font-weight: 700; letter-spacing: .08em; color: var(--color-ink-300); padding: 8px 10px 2px; }
+  .nav-area { font-size: 10px; font-weight: 700; letter-spacing: .08em; color: var(--color-ink-300); padding: 8px 12px 2px; }
+  .nav-area:first-child { padding-top: 2px; }
   .mm-sub {
     display: flex; align-items: center; gap: 10px;
     padding: 9px 12px; border-radius: 9px;
@@ -306,7 +314,7 @@ const sandboxNav = hubsSorted.map(h => ({
     top: 100%;
     left: 0;
     margin-top: 6px;
-    min-width: 248px;
+    min-width: 280px;
     padding: 6px;
     background: white;
     border: 1px solid var(--color-border);

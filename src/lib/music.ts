@@ -106,3 +106,64 @@ export function spellScale(root: { letter: Letter; acc: number }, sc: ScaleDef) 
     return { letter, acc, name: letter + (ACC_TXT[acc] ?? ''), kr: SOLFEGE[letter] + (ACC_TXT[acc] ?? ''), pc: (rootPc + st) % 12 };
   });
 }
+
+// ── 코드 ──
+// steps: 근음에서의 반음 거리, deg: 근음 기준 글자 간격(철자용: 3도=2, 5도=4, 7도=6, 9도=1, 11도=3, 13도=5)
+export interface ChordType { id: string; sym: string; kr: string; steps: number[]; deg: number[]; formula: string; }
+export const CHORD_TYPES: Record<string, ChordType> = {
+  maj:   { id: 'maj', sym: '', kr: '장3화음', steps: [0, 4, 7], deg: [0, 2, 4], formula: '1 · 3 · 5' },
+  min:   { id: 'min', sym: 'm', kr: '단3화음', steps: [0, 3, 7], deg: [0, 2, 4], formula: '1 · ♭3 · 5' },
+  dim:   { id: 'dim', sym: 'dim', kr: '감3화음', steps: [0, 3, 6], deg: [0, 2, 4], formula: '1 · ♭3 · ♭5' },
+  aug:   { id: 'aug', sym: 'aug', kr: '증3화음', steps: [0, 4, 8], deg: [0, 2, 4], formula: '1 · 3 · ♯5' },
+  sus2:  { id: 'sus2', sym: 'sus2', kr: '서스2', steps: [0, 2, 7], deg: [0, 1, 4], formula: '1 · 2 · 5' },
+  sus4:  { id: 'sus4', sym: 'sus4', kr: '서스4', steps: [0, 5, 7], deg: [0, 3, 4], formula: '1 · 4 · 5' },
+  maj7:  { id: 'maj7', sym: 'maj7', kr: '장7화음', steps: [0, 4, 7, 11], deg: [0, 2, 4, 6], formula: '1 · 3 · 5 · 7' },
+  '7':   { id: '7', sym: '7', kr: '딸림7화음', steps: [0, 4, 7, 10], deg: [0, 2, 4, 6], formula: '1 · 3 · 5 · ♭7' },
+  m7:    { id: 'm7', sym: 'm7', kr: '단7화음', steps: [0, 3, 7, 10], deg: [0, 2, 4, 6], formula: '1 · ♭3 · 5 · ♭7' },
+  m7b5:  { id: 'm7b5', sym: 'm7♭5', kr: '반감7화음', steps: [0, 3, 6, 10], deg: [0, 2, 4, 6], formula: '1 · ♭3 · ♭5 · ♭7' },
+  dim7:  { id: 'dim7', sym: 'dim7', kr: '감7화음', steps: [0, 3, 6, 9], deg: [0, 2, 4, 6], formula: '1 · ♭3 · ♭5 · ♭♭7(=6)' },
+  '7sus4': { id: '7sus4', sym: '7sus4', kr: '7서스4', steps: [0, 5, 7, 10], deg: [0, 3, 4, 6], formula: '1 · 4 · 5 · ♭7' },
+  add9:  { id: 'add9', sym: 'add9', kr: '애드9', steps: [0, 4, 7, 14], deg: [0, 2, 4, 1], formula: '1 · 3 · 5 · 9' },
+  maj9:  { id: 'maj9', sym: 'maj9', kr: '장9화음', steps: [0, 4, 7, 11, 14], deg: [0, 2, 4, 6, 1], formula: '1 · 3 · 5 · 7 · 9' },
+  m9:    { id: 'm9', sym: 'm9', kr: '단9화음', steps: [0, 3, 7, 10, 14], deg: [0, 2, 4, 6, 1], formula: '1 · ♭3 · 5 · ♭7 · 9' },
+  '9':   { id: '9', sym: '9', kr: '딸림9화음', steps: [0, 4, 7, 10, 14], deg: [0, 2, 4, 6, 1], formula: '1 · 3 · 5 · ♭7 · 9' },
+  '7b9': { id: '7b9', sym: '7(♭9)', kr: '7 ♭9', steps: [0, 4, 7, 10, 13], deg: [0, 2, 4, 6, 1], formula: '1 · 3 · 5 · ♭7 · ♭9' },
+  '13':  { id: '13', sym: '13', kr: '딸림13화음', steps: [0, 4, 10, 14, 21], deg: [0, 2, 6, 1, 5], formula: '1 · 3 · ♭7 · 9 · 13 (5 생략)' },
+};
+
+// 음이름 철자 (근음 글자·변화표 + 글자 간격 + 반음 거리)
+const ACC_SYM: Record<number, string> = { [-2]: '♭♭', [-1]: '♭', 0: '', 1: '♯', 2: '×' };
+export function spellFrom(root: { letter: Letter; acc: number }, deg: number, semis: number) {
+  const li = LETTERS.indexOf(root.letter);
+  const letter = LETTERS[(li + deg) % 7];
+  const rootPc = (LETTER_PC[root.letter] + root.acc + 12) % 12;
+  let acc = ((rootPc + semis) - LETTER_PC[letter]) % 12;
+  if (acc > 6) acc -= 12; if (acc < -6) acc += 12;
+  return { letter, acc, name: letter + (ACC_SYM[acc] ?? '') };
+}
+export function chordNotes(root: { letter: Letter; acc: number }, t: ChordType) {
+  return t.steps.map((st, i) => spellFrom(root, t.deg[i], st));
+}
+
+// 장조 안의 로마 숫자 코드. deg = 조의 몇 번째 글자, semi = 으뜸음에서 반음, fn = 화성 기능(T/S/D, 빌린 화음은 B)
+export interface Roman { deg: number; semi: number; type: string; fn: 'T' | 'S' | 'D' | 'B' | 'X'; }
+export const ROMAN: Record<string, Roman> = {
+  'I': { deg: 0, semi: 0, type: 'maj', fn: 'T' }, 'ii': { deg: 1, semi: 2, type: 'min', fn: 'S' }, 'iii': { deg: 2, semi: 4, type: 'min', fn: 'T' },
+  'IV': { deg: 3, semi: 5, type: 'maj', fn: 'S' }, 'V': { deg: 4, semi: 7, type: 'maj', fn: 'D' }, 'vi': { deg: 5, semi: 9, type: 'min', fn: 'T' },
+  'vii°': { deg: 6, semi: 11, type: 'dim', fn: 'D' },
+  'Imaj7': { deg: 0, semi: 0, type: 'maj7', fn: 'T' }, 'ii7': { deg: 1, semi: 2, type: 'm7', fn: 'S' }, 'iii7': { deg: 2, semi: 4, type: 'm7', fn: 'T' },
+  'IVmaj7': { deg: 3, semi: 5, type: 'maj7', fn: 'S' }, 'V7': { deg: 4, semi: 7, type: '7', fn: 'D' }, 'vi7': { deg: 5, semi: 9, type: 'm7', fn: 'T' },
+  'viiø7': { deg: 6, semi: 11, type: 'm7b5', fn: 'D' }, 'Vsus4': { deg: 4, semi: 7, type: 'sus4', fn: 'D' },
+  // 세컨더리 도미넌트 (목표 화음의 5도 위 딸림7화음)
+  'V7/ii': { deg: 5, semi: 9, type: '7', fn: 'X' }, 'V7/iii': { deg: 6, semi: 11, type: '7', fn: 'X' }, 'V7/IV': { deg: 0, semi: 0, type: '7', fn: 'X' },
+  'V7/V': { deg: 1, semi: 2, type: '7', fn: 'X' }, 'V7/vi': { deg: 2, semi: 4, type: '7', fn: 'X' },
+  // 같은으뜸음 단조에서 빌린 화음
+  'iv': { deg: 3, semi: 5, type: 'min', fn: 'B' }, '♭VI': { deg: 5, semi: 8, type: 'maj', fn: 'B' }, '♭VII': { deg: 6, semi: 10, type: 'maj', fn: 'B' },
+  '♭III': { deg: 2, semi: 3, type: 'maj', fn: 'B' }, 'iiø7': { deg: 1, semi: 2, type: 'm7b5', fn: 'B' },
+};
+export function romanChord(key: { letter: Letter; acc: number }, rn: string) {
+  const r = ROMAN[rn]; const t = CHORD_TYPES[r.type];
+  const root = spellFrom(key, r.deg, r.semi);
+  const keyPc = (LETTER_PC[key.letter] + key.acc + 12) % 12;
+  return { rn, fn: r.fn, type: t, root, name: root.name + t.sym, notes: chordNotes(root, t), rootPc: (keyPc + r.semi) % 12 };
+}

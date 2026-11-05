@@ -22,6 +22,8 @@ import RhythmWidget from './RhythmWidget.astro';
 import DrumWidget from './DrumWidget.astro';
 import CircleWidget from './CircleWidget.astro';
 import MelodyWidget from './MelodyWidget.astro';
+import ChordWidget from './ChordWidget.astro';
+import ProgressionWidget from './ProgressionWidget.astro';
 import { MODULE_MAP, type ModuleId } from '../lib/modules';
 
 interface Props {
@@ -54,3 +56,5 @@ const effectModule = widget === 'effect' && moduleId ? MODULE_MAP[moduleId] : nu
 {widget === 'drums' && <DrumWidget config={config} />}
 {widget === 'circle' && <CircleWidget config={config} />}
 {widget === 'melody' && <MelodyWidget config={config} />}
+{widget === 'chord' && <ChordWidget config={config} />}
+{widget === 'progression' && <ProgressionWidget config={config} />}

@@ -1,0 +1,68 @@
+---
+hub: harmony
+title: Secondary Dominants
+kr: 세컨더리 도미넌트
+order: 8
+color: violet
+tagline: 어떤 코드든 잠깐 주인공으로
+desc: 조 밖의 코드인데 이상하게 자연스러운 코드의 대부분은 세컨더리 도미넌트입니다. 목표 코드의 딸림화음을 앞에 끼워 그 코드를 잠깐 으뜸화음처럼 들리게 만드는 원리, V7/vi·V7/V 표기, 5도권으로 찾는 법을 익힙니다.
+widget: progression
+widgetConfig:
+  presets: [sec_vi, sec_chain, pop]
+  pool: [I, ii7, iii, IV, V7, vi, V7/ii, V7/iii, V7/IV, V7/V, V7/vi]
+  fn: true
+  title: 세컨더리 도미넌트
+quiz: secondary
+scaffold: true
+prereqs:
+  - harmony/functions
+  - melody/circle-of-fifths
+---
+import Level from '../../../components/doc/Level.astro';
+import DefList from '../../../components/doc/DefList.astro';
+import DefCard from '../../../components/doc/DefCard.astro';
+import Callout from '../../../components/doc/Callout.astro';
+
+{/* ───────── 초급 ───────── */}
+<Level show="easy">
+## 잠깐 다른 코드를 집처럼
+
+G7 → C처럼 **딸림7화음**은 다음 코드로 강하게 끌려가요. 이 힘을 다른 코드에도 빌려줄 수 있어요. 예를 들어 Am으로 가기 직전에 **E7**을 넣으면, Am이 잠깐 "집"처럼 들리며 더 극적으로 도착해요. E7은 C장조 가족이 아닌데도 전혀 어색하지 않아요.
+
+## 직접 해보기
+
+<Callout>
+오른쪽 위젯에서 **I–V7/vi–vi–IV**(C–E7–Am–F)를 재생해 보세요. 둘째 칸의 E7이 주황색 "세컨더리"로 표시돼요. 그 칸을 팔레트의 **iii**(Em)으로 바꿔 들어 보세요. 같은 자리인데 E7일 때 Am으로 넘어가는 힘이 훨씬 강해요.
+</Callout>
+</Level>
+
+{/* ───────── 중급 ───────── */}
+<Level show="normal">
+## "무엇의 V"인가
+
+세컨더리 도미넌트는 <b>"목표 코드의 5도 위에서 만든 딸림7화음"</b>입니다. 표기는 **V7/목표**로 씁니다. C장조 기준으로 정리하면 다음과 같습니다.
+
+<DefList>
+  <DefCard term="V7/ii = A7">Dm으로 가는 딸림화음</DefCard>
+  <DefCard term="V7/iii = B7">Em으로 가는 딸림화음</DefCard>
+  <DefCard term="V7/IV = C7">F로 가는 딸림화음 — I에 7음만 더한 것</DefCard>
+  <DefCard term="V7/V = D7">G로 가는 딸림화음 — "더블 도미넌트"</DefCard>
+  <DefCard term="V7/vi = E7">Am으로 가는 딸림화음 — 팝 발라드에서 가장 흔함</DefCard>
+</DefList>
+
+찾는 법은 [5도권](/learn/melody/circle-of-fifths/)에서 목표 코드의 **시계 방향 한 칸 위**를 보는 것입니다. Am의 한 칸 위는 E, 그래서 E7.
+
+<Callout>
+**세컨더리 연쇄**(C–A7–Dm7–D7–G7–C)를 재생해 보세요. A7 → Dm, D7 → G처럼 목표 코드마다 딸림화음을 앞세웠습니다. 다이어토닉 코드만 쓴 진행보다 훨씬 드라마틱하고, 근음이 계속 5도씩 내려가 끌려가는 흐름이 생깁니다.
+</Callout>
+</Level>
+
+{/* ───────── 고급 ───────── */}
+<Level show="hard">
+## 세컨더리 도미넌트의 확장
+
+- **조 밖의 음은 이끎음** — V7/vi(E7)의 G♯은 Am의 이끎음, V7/V(D7)의 F♯은 G의 이끎음입니다. 멜로디에 이 반음 올린 음이 나오면 세컨더리 도미넌트를 의심하면 됩니다.
+- **세컨더리 ii–V** — 목표 코드 앞에 V7만이 아니라 ii7–V7을 함께 끼울 수 있습니다. Dm으로 가려면 Em7♭5–A7–Dm7. 재즈 스탠더드의 대부분이 이 작은 ii–V들의 연속입니다.
+- **트라이톤 대리** — V7은 3음·7음(트라이톤)을 공유하는 반음 위 딸림7화음으로 바꿀 수 있습니다. G7 대신 D♭7 → C. 베이스가 반음으로 내려가는 세련된 해결이 됩니다.
+- **해결하지 않는 세컨더리** — V7/vi 다음에 vi 대신 IV가 오는 등, 기대를 비켜 가는 해결(거짓종지의 확장)도 팝에서 자주 씁니다. 긴장을 만든 뒤 어디로 풀지 고르는 것이 작곡가의 선택입니다.
+</Level>

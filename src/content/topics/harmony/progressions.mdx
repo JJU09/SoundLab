@@ -1,0 +1,64 @@
+---
+hub: harmony
+title: Common Progressions
+kr: 자주 쓰는 코드 진행
+order: 5
+color: violet
+tagline: 수많은 곡이 공유하는 뼈대
+desc: I–V–vi–IV, 캐논 진행, 4–5–3–6, ii–V–I처럼 장르를 넘어 반복해서 쓰이는 진행에는 이유가 있습니다. 대표 진행을 조를 바꿔 가며 직접 들어 보고, 기능과 베이스 라인으로 그 원리를 해부해 내 곡에 응용하는 법을 익힙니다.
+widget: progression
+widgetConfig:
+  presets: [pop, fifties, canon, royal, jazz251, circle]
+  pool: [I, ii, iii, IV, V, vi, Imaj7, ii7, iii7, IVmaj7, V7, vi7]
+  fn: true
+  title: 대표 진행
+quiz: progressions
+scaffold: true
+prereqs:
+  - harmony/functions
+  - harmony/sevenths
+---
+import Level from '../../../components/doc/Level.astro';
+import DefList from '../../../components/doc/DefList.astro';
+import DefCard from '../../../components/doc/DefCard.astro';
+import Callout from '../../../components/doc/Callout.astro';
+
+{/* ───────── 초급 ───────── */}
+<Level show="easy">
+## 같은 뼈대, 다른 노래
+
+신기하게도 수많은 노래가 **같은 코드 순서**를 써요. 멜로디와 가사, 리듬이 다르면 전혀 다른 노래가 되거든요. 코드 진행은 노래의 **뼈대**, 멜로디는 그 위에 입히는 **옷**이에요.
+
+## 직접 해보기
+
+<Callout>
+오른쪽 위젯에서 **I–V–vi–IV**(C–G–Am–F)를 재생해 보세요. 어디선가 들어 본 것 같죠? 정말 많은 팝 노래가 이 네 코드로 되어 있어요. **캐논 진행**도 눌러 보세요. 졸업식이나 결혼식 음악에서 자주 듣는 그 흐름이에요.
+</Callout>
+</Level>
+
+{/* ───────── 중급 ───────── */}
+<Level show="normal">
+## 대표 진행 해부
+
+<DefList>
+  <DefCard term="I–V–vi–IV (C G Am F)">T–D–T–S. V에서 vi로 가는 거짓종지가 반복되며 끝나지 않는 고양감. 시작점만 바꿔 vi–IV–I–V로도 씁니다.</DefCard>
+  <DefCard term="I–vi–IV–V (C Am F G)">T–T–S–D. 50년대 두왑에서 유행해 "50년대 진행"이라 불립니다. V로 끝나 다음 바퀴로 자연스럽게 이어집니다.</DefCard>
+  <DefCard term="캐논 진행 (C G Am Em F C F G)">베이스가 도–시–라–솔–파–미–파–솔로 차례로 내려가는 진행. 발라드·OST의 단골.</DefCard>
+  <DefCard term="4–5–3–6 (Fmaj7 G7 Em7 Am7)">IV에서 시작해 vi에서 쉬는 애틋한 진행. J-팝·K-팝 발라드에서 사랑받습니다.</DefCard>
+  <DefCard term="ii–V–I (Dm7 G7 Cmaj7)">S–D–T를 7화음으로. 근음이 5도씩 내려가 가장 강하게 해결되는 재즈의 기본 문장.</DefCard>
+</DefList>
+
+<Callout>
+**캐논 진행**을 재생하며 위젯의 미니 건반 대신 **베이스**(각 코드의 근음) 소리에 집중해 보세요. 한 칸씩 계단을 내려가는 베이스 라인이 진행 전체의 흐름을 만듭니다. 진행을 외울 때 코드 이름보다 베이스 라인을 함께 기억하면 응용이 쉬워집니다.
+</Callout>
+</Level>
+
+{/* ───────── 고급 ───────── */}
+<Level show="hard">
+## 진행을 내 것으로 만들기
+
+- **회전(로테이션)** — I–V–vi–IV를 vi–IV–I–V로 시작점만 옮기면 같은 네 코드가 단조 곡처럼 들립니다. 진행은 순환 구조라 어디서 시작·종지하느냐가 조성의 인상을 바꿉니다.
+- **베이스 라인 고정, 코드 교체** — 캐논 진행의 내려가는 베이스를 유지한 채 위의 코드를 전위(C/E, G/B)로 바꾸면 부드럽게 흐르는 발라드 진행이 됩니다(→ [전위와 보이스 리딩](/learn/harmony/voice-leading/)).
+- **하모닉 리듬** — 코드가 바뀌는 빈도. 벌스는 2마디에 한 번, 코러스는 1마디에 한 번 또는 반 마디에 한 번으로 빨라지면 같은 진행이라도 에너지가 올라갑니다.
+- **5도 연쇄의 확장** — vi–ii–V–I은 iii–vi–ii–V–I, 더 나아가 세컨더리 도미넌트로 바꾼 III7–VI7–II7–V7–I로 확장됩니다. 근음이 5도씩 내려가는 한, 코드 성질을 바꿔도 흐름이 유지됩니다(→ [세컨더리 도미넌트](/learn/harmony/secondary-dominants/)).
+</Level>

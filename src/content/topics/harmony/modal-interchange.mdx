@@ -1,0 +1,66 @@
+---
+hub: harmony
+title: Modal Interchange
+kr: 모달 인터체인지
+order: 9
+color: violet
+tagline: 같은 으뜸음의 단조에서 빌려 온 코드
+desc: 장조 곡에 갑자기 끼어드는 아련한 iv, 웅장한 ♭VI·♭VII은 같은 으뜸음의 단조(또는 다른 모드)에서 빌려 온 코드입니다. 빌린 화음이 만드는 감정의 그늘과, 팝·록·영화음악에서 쓰는 대표 패턴을 직접 바꿔 끼우며 익힙니다.
+widget: progression
+widgetConfig:
+  presets: [borrow_iv, borrow_67, pop]
+  pool: [I, ii, IV, V, vi, iv, ♭VI, ♭VII, ♭III, iiø7]
+  fn: true
+  title: 빌려 온 화음
+quiz: interchange
+scaffold: true
+prereqs:
+  - harmony/diatonic-chords
+  - melody/modes
+---
+import Level from '../../../components/doc/Level.astro';
+import DefList from '../../../components/doc/DefList.astro';
+import DefCard from '../../../components/doc/DefCard.astro';
+import Callout from '../../../components/doc/Callout.astro';
+
+{/* ───────── 초급 ───────── */}
+<Level show="easy">
+## 밝은 노래에 스미는 그늘
+
+C장조 노래에서 F 코드를 **Fm**으로 바꿔 쳐 보세요. 갑자기 마음이 찡해지는 그늘이 생겨요. Fm은 C장조 가족이 아니라 **C단조**에서 빌려 온 코드예요. 같은 "도"를 집으로 쓰는 단조 친척에게서 잠깐 코드를 빌려 오는 걸 **모달 인터체인지**라고 해요.
+
+## 직접 해보기
+
+<Callout>
+오른쪽 위젯에서 **IV–iv**(C–F–Fm–C)를 재생해 보세요. 셋째 칸 Fm에서 분위기가 아련하게 바뀌어요. 발라드에서 "눈물 버튼"이라고 불릴 만큼 자주 쓰이는 소리예요. 이번엔 **♭VI–♭VII–I**을 들어 보세요. 영화 속 주인공이 돌아오는 것 같은 웅장한 소리가 나요.
+</Callout>
+</Level>
+
+{/* ───────── 중급 ───────── */}
+<Level show="normal">
+## 자주 빌려 오는 코드들 (C장조 기준)
+
+<DefList>
+  <DefCard term="iv = Fm">IV의 3음을 반음 내림. IV → iv → I은 발라드의 대표적인 감정 장치.</DefCard>
+  <DefCard term="♭VI = A♭">웅장하고 어두운 장3화음. ♭VI → ♭VII → I은 록·영화음악의 영웅적 귀가.</DefCard>
+  <DefCard term="♭VII = B♭">믹솔리디안에서도 나오는 코드. I–♭VII–IV는 록의 단골 진행.</DefCard>
+  <DefCard term="♭III = E♭">단조의 나란한 장조 화음. 장조 곡에 강한 색 전환을 줍니다.</DefCard>
+  <DefCard term="iiø7 = Dm7♭5">ii7의 5음을 내림. 단조로 가는 ii–V처럼 쓸쓸한 연결.</DefCard>
+</DefList>
+
+빌려 온 코드에는 공통적으로 **♭3(미♭) · ♭6(라♭) · ♭7(시♭)** 중 하나 이상이 들어 있습니다. 장조의 밝은 3·6·7음을 잠깐 어둡게 바꾸는 것이 모달 인터체인지의 본질입니다.
+
+<Callout>
+**I–V–vi–IV**를 재생한 뒤 마지막 IV를 **iv**로 바꿔 보세요. 같은 진행의 끝에 그늘 한 방울을 떨어뜨린 것처럼 들립니다. 코러스 마지막 바퀴나 곡의 엔딩에서 이렇게 한 번만 바꿔 주면 듣는 사람이 확실히 기억하는 순간이 됩니다.
+</Callout>
+</Level>
+
+{/* ───────── 고급 ───────── */}
+<Level show="hard">
+## 빌려 오는 범위 넓히기
+
+- **다른 모드에서도 빌린다** — 자연 단음계(에올리안)뿐 아니라 같은 으뜸음의 다른 모드에서도 빌려 옵니다. 믹솔리디안의 ♭VII(B♭), 프리지안의 ♭II(D♭), 리디안의 II 장3화음(D)이 대표적입니다. ♭II는 나폴리 화음(♭II → V → I)으로 클래식에서 오래 쓰여 왔습니다.
+- **피카르디 3도** — 반대로 단조 곡의 마지막 으뜸화음을 장3화음으로 바꾸는 것도 같은 원리의 역방향입니다. 슬픈 곡이 희망으로 끝나는 장치입니다.
+- **멜로디와의 충돌** — iv(Fm)를 쓸 때 멜로디에 라(A)가 길게 있으면 라♭과 부딪힙니다. 빌린 화음을 쓰는 마디에서는 멜로디도 그 모드의 음(♭6)에 맞추거나 그 음을 피해야 합니다.
+- **전조와의 경계** — 빌린 화음을 한두 개 쓰면 모달 인터체인지, 그 조의 딸림화음까지 동원해 새 중심을 세우면 전조입니다. ♭VI이나 ♭III은 그대로 새 조의 으뜸화음이 되는 피벗으로도 자주 쓰입니다.
+</Level>

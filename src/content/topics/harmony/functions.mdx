@@ -1,0 +1,75 @@
+---
+hub: harmony
+title: Harmonic Function
+kr: 화성 기능
+order: 4
+color: violet
+tagline: 집, 나들이, 긴장 — 코드의 세 가지 역할
+desc: 다이어토닉 코드는 토닉(안정), 서브도미넌트(벗어남), 도미넌트(긴장) 세 가지 역할로 묶을 수 있습니다. 역할을 알면 왜 어떤 진행은 자연스럽고 어떤 진행은 어색한지, 코드를 어떻게 바꿔 끼울 수 있는지가 보입니다.
+widget: progression
+widgetConfig:
+  presets: [basic, pop, fifties]
+  pool: [I, ii, iii, IV, V, vi, vii°]
+  fn: true
+  title: 기능으로 보는 진행
+quiz: functions
+scaffold: true
+prereqs:
+  - harmony/diatonic-chords
+---
+import Level from '../../../components/doc/Level.astro';
+import DefList from '../../../components/doc/DefList.astro';
+import DefCard from '../../../components/doc/DefCard.astro';
+import Callout from '../../../components/doc/Callout.astro';
+
+{/* ───────── 초급 ───────── */}
+<Level show="easy">
+## 집 → 나들이 → 긴장 → 집
+
+코드에는 저마다 역할이 있어요. 이야기처럼 생각해 보세요.
+
+- **토닉 (집)** — 편안하게 쉬는 곳. C장조의 **C**.
+- **서브도미넌트 (나들이)** — 집을 나서 산책하는 느낌. **F**.
+- **도미넌트 (긴장)** — "이제 집에 가야지!" 하는 두근거림. **G**.
+
+그래서 C → F → G → C 진행은 "집을 나와 → 산책하다 → 서둘러 → 집에 도착"하는 이야기가 돼요. 노래가 끝날 때 G에서 C로 가면 "끝!" 하는 느낌이 나는 이유예요.
+
+## 직접 해보기
+
+<Callout>
+오른쪽 위젯의 **I–IV–V–I**를 재생해 보세요. 칸 아래에 초록(토닉), 파랑(서브도미넌트), 빨강(도미넌트) 라벨이 붙어 있어요. 마지막 칸을 **I** 대신 **V**로 바꿔 보세요. 이야기가 끝나지 않고 공중에 뜬 느낌이 나요.
+</Callout>
+</Level>
+
+{/* ───────── 중급 ───────── */}
+<Level show="normal">
+## 기능별 코드 묶음
+
+<DefList>
+  <DefCard term="토닉 (T) — I · vi · iii">안정. I이 대표이고, vi와 iii는 I과 음이 두 개씩 겹쳐 대신 쓸 수 있습니다.</DefCard>
+  <DefCard term="서브도미넌트 (S) — IV · ii">벗어남. 토닉에서 멀어지며 도미넌트로 가는 길을 엽니다. ii는 IV와 음이 두 개 겹칩니다.</DefCard>
+  <DefCard term="도미넌트 (D) — V · vii°">긴장. 이끎음(7음)을 포함해 토닉으로 강하게 끌립니다.</DefCard>
+</DefList>
+
+## 기능의 문법
+
+가장 자연스러운 흐름은 **T → S → D → T**입니다. 진행을 짤 때 같은 기능끼리는 바꿔 끼울 수 있습니다.
+
+- I–IV–V–I → **I–ii–V–I** (IV 대신 같은 S인 ii)
+- I–IV–V–I → **vi–IV–V–I** (I 대신 같은 T인 vi로 시작해 단조 같은 출발)
+- **D → S**(V → IV)는 긴장이 풀리지 않고 물러나는 느낌이라, 블루스·록에서 일부러 쓸 때 말고는 드뭅니다.
+
+<Callout>
+**I–V–vi–IV**를 재생하고 기능 라벨을 보세요. T–D–T–S. V 다음에 I 대신 vi(같은 토닉 기능이지만 단조)가 오면서 "기대한 집과 살짝 다른 곳에 도착"하는 효과가 납니다. 이것을 거짓종지(V → vi)라고 부르며, 팝이 이 진행을 사랑하는 이유이기도 합니다.
+</Callout>
+</Level>
+
+{/* ───────── 고급 ───────── */}
+<Level show="hard">
+## 종지와 기능의 확장
+
+- **종지의 종류** — 정격종지(V → I, 문장의 마침표), 변격종지(IV → I, "아멘" 종지), 반종지(→ V, 쉼표), 거짓종지(V → vi, 반전). 4마디 단위의 물음–대답 구조는 대개 반종지 → 정격종지로 짝을 이룹니다.
+- **iii의 이중성** — iii는 I과 음이 두 개(미·솔) 겹쳐 토닉 대리로 분류하지만, 이끎음(시)을 포함해 도미넌트 색도 띱니다. 그래서 iii → vi, iii → IV처럼 경과적으로 많이 씁니다.
+- **기능은 문맥** — 같은 코드도 다른 조에서는 다른 기능이 됩니다. 전조는 결국 "어떤 코드를 새 조의 기능으로 다시 듣게 만드는 것"이며, 공통 화음(피벗 코드)이 그 역할을 합니다.
+- **기능 화성 밖의 음악** — 모드 음악·록 리프·EDM 루프처럼 T–S–D의 긴장–해결 문법을 의도적으로 피하고 같은 코드 몇 개를 순환시키는 음악도 많습니다. 기능 화성은 강력한 도구이지 유일한 규칙은 아닙니다.
+</Level>

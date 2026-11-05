@@ -1,0 +1,67 @@
+---
+hub: harmony
+title: Seventh Chords
+kr: 7화음
+order: 2
+color: violet
+tagline: 3화음 위에 3도를 하나 더
+desc: 3화음 위에 3도를 한 번 더 쌓으면 네 음짜리 7화음이 됩니다. maj7·7·m7·m7♭5·dim7 다섯 가지가 어떻게 다르게 들리는지, 같은 "7"이라도 왜 이름이 다른지, 팝·R&B·재즈에서 7화음이 주는 색을 익힙니다.
+widget: chord
+widgetConfig:
+  types: [maj7, '7', m7, m7b5, dim7, maj, min]
+  root: C
+  title: 7화음 쌓기
+quiz: sevenths
+scaffold: true
+prereqs:
+  - harmony/triads
+---
+import Level from '../../../components/doc/Level.astro';
+import DefList from '../../../components/doc/DefList.astro';
+import DefCard from '../../../components/doc/DefCard.astro';
+import Callout from '../../../components/doc/Callout.astro';
+import Staff from '../../../components/doc/Staff.astro';
+
+{/* ───────── 초급 ───────── */}
+<Level show="easy">
+## 한 층 더 쌓아요
+
+도미솔 위에 **하나 건너 하나**를 한 번 더 하면 **시**가 올라가요. 도 · 미 · 솔 · 시, 네 음짜리 코드가 **7화음**이에요. 맨 위 음이 근음에서 7도 떨어져 있어서 이렇게 불러요.
+
+7화음은 3화음보다 **부드럽고 세련된** 소리가 나요. 카페 음악이나 R&B에서 많이 들리는 그 분위기예요.
+
+## 직접 해보기
+
+<Callout>
+오른쪽 위젯에서 C의 **장3화음**과 **장7화음**을 번갈아 눌러 보세요. 위에 시 하나가 얹혔을 뿐인데 소리가 확 몽글몽글해져요. 이번엔 **딸림7화음**(C7)을 눌러 보세요. 시 대신 시♭이 들어가 어딘가로 떠나고 싶은 긴장이 생겨요.
+</Callout>
+</Level>
+
+{/* ───────── 중급 ───────── */}
+<Level show="normal">
+## 다섯 가지 7화음
+
+<DefList>
+  <DefCard term="Cmaj7 (장7화음) — 장3화음 + 장7도">맑고 부드러운 안정. 발라드·시티팝·보사노바의 I, IV.</DefCard>
+  <DefCard term="C7 (딸림7화음) — 장3화음 + 단7도">강한 긴장, 다음 화음으로 가고 싶어 함. 블루스에서는 안정 화음처럼도 씁니다.</DefCard>
+  <DefCard term="Cm7 (단7화음) — 단3화음 + 단7도">부드러운 단조. R&B·네오소울·재즈의 ii, vi.</DefCard>
+  <DefCard term="Cm7♭5 (반감7화음, Cø) — 감3화음 + 단7도">어둡고 불안정. 단조의 ii화음.</DefCard>
+  <DefCard term="Cdim7 (감7화음, C°7) — 감3화음 + 감7도">단3도만 쌓은 대칭 화음. 극적인 긴장, 경과 화음.</DefCard>
+</DefList>
+
+<Staff notes="C4+E4+G4+B4/w | C4+E4+G4+Bb4/w | C4+Eb4+G4+Bb4/w | C4+Eb4+Gb4+Bb4/w" time="4/4" play caption="Cmaj7 · C7 · Cm7 · Cm7♭5 — 3음·5음·7음 중 무엇이 바뀌는지 비교" />
+
+<Callout>
+코드 이름의 "7"은 기본적으로 **단7도**를 뜻합니다. 장7도를 쓰려면 반드시 **maj7**(또는 M7, Δ7)이라고 적어야 합니다. C7과 Cmaj7은 맨 위 음 하나 차이지만 역할이 완전히 다르니, 코드표를 읽고 쓸 때 가장 많이 헷갈리는 부분입니다.
+</Callout>
+</Level>
+
+{/* ───────── 고급 ───────── */}
+<Level show="hard">
+## 7화음의 기능과 텐션
+
+- **트라이톤이 만드는 긴장** — 딸림7화음의 3음과 7음(C7이면 미와 시♭)은 트라이톤입니다. 이 두 음이 각각 반음씩 움직여 해결되는 힘 때문에 V7 → I가 가장 강한 종지가 됩니다.
+- **감7화음의 대칭** — Cdim7 = E♭dim7 = G♭dim7 = Adim7(같은 음 집합). 네 음 어느 것을 반음 내리면 네 가지 딸림7화음이 되어, 먼 조로 전조하는 경첩으로 쓰입니다.
+- **m(maj7)** — 단3화음 + 장7도. 가락 단음계의 으뜸화음으로, 영화음악·누아르 재즈의 서늘한 색을 냅니다.
+- **7화음의 생략형** — 피아노·기타에서는 5음을 빼고 1·3·7만 쳐도(셸 보이싱) 7화음의 성격이 충분히 전달됩니다. 3음과 7음이 화음의 정체성을 결정하는 "가이드 톤"이기 때문입니다.
+</Level>

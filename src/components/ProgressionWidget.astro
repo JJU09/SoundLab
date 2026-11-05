@@ -1,0 +1,201 @@
+---
+// 코드 진행 위젯 — 로마 숫자 진행을 조에 맞춰 연주. 칸을 골라 팔레트의 코드로 바꿔 볼 수 있다.
+// config:
+//   presets  : 진행 프리셋 id 목록 (아래 PRESETS)
+//   pool     : 팔레트에 보일 로마 숫자 목록 (lib/music.ts ROMAN 키)
+//   key      : 처음 조 (기본 C), keys: 고를 수 있는 조 목록
+//   fn       : true면 화성 기능(T·S·D) 색과 라벨 표시
+//   voicing  : true면 '기본형 / 가까운 자리' 보이싱 전환 표시
+//   title    : 헤더 제목
+import { ROMAN } from '../lib/music';
+interface Props { config?: Record<string, any>; }
+const { config = {} } = Astro.props;
+const PRESETS: Record<string, { name: string; rn: string[]; desc: string }> = {
+  basic:     { name: 'I–IV–V–I', rn: ['I', 'IV', 'V', 'I'], desc: '가장 기본 — 집 → 나들이 → 긴장 → 귀가' },
+  pop:       { name: 'I–V–vi–IV', rn: ['I', 'V', 'vi', 'IV'], desc: '수많은 팝 히트곡의 진행' },
+  fifties:   { name: 'I–vi–IV–V', rn: ['I', 'vi', 'IV', 'V'], desc: '50년대 두왑·올드팝의 진행' },
+  canon:     { name: '캐논 진행', rn: ['I', 'V', 'vi', 'iii', 'IV', 'I', 'IV', 'V'], desc: '파헬벨 「캐논」의 베이스 진행 — 발라드의 단골' },
+  royal:     { name: '4–5–3–6', rn: ['IVmaj7', 'V7', 'iii7', 'vi7'], desc: 'IV에서 시작해 vi로 — J-팝·K-팝 발라드에서 사랑받는 진행' },
+  jazz251:   { name: 'ii–V–I', rn: ['ii7', 'V7', 'Imaj7', 'Imaj7'], desc: '재즈의 기본 문장' },
+  circle:    { name: '5도 연쇄', rn: ['vi7', 'ii7', 'V7', 'Imaj7'], desc: '근음이 5도씩 내려가며 집으로' },
+  diatonic:  { name: '다이어토닉 7개', rn: ['I', 'ii', 'iii', 'IV', 'V', 'vi', 'vii°', 'I'], desc: '장음계 위에 쌓은 일곱 개의 3화음' },
+  sevenths:  { name: '7화음 7개', rn: ['Imaj7', 'ii7', 'iii7', 'IVmaj7', 'V7', 'vi7', 'viiø7', 'Imaj7'], desc: '장음계 위에 쌓은 일곱 개의 7화음' },
+  sec_vi:    { name: 'V7/vi', rn: ['I', 'V7/vi', 'vi', 'IV'], desc: 'vi로 가기 전에 그 딸림화음(E7)을 끼워 넣기' },
+  sec_chain: { name: '세컨더리 연쇄', rn: ['I', 'V7/ii', 'ii7', 'V7/V', 'V7', 'I'], desc: '목표 화음마다 딸림화음을 앞세운 진행' },
+  borrow_iv: { name: 'IV–iv', rn: ['I', 'IV', 'iv', 'I'], desc: 'IV를 단조로 바꿔 아련하게 — 발라드의 눈물 버튼' },
+  borrow_67: { name: '♭VI–♭VII–I', rn: ['I', '♭VI', '♭VII', 'I'], desc: '단조에서 빌린 화음으로 영웅적인 귀가 — 록·영화음악' },
+  sus:       { name: 'Vsus4–V', rn: ['I', 'IV', 'Vsus4', 'V'], desc: '4음을 걸어 긴장을 한 번 더 늘이기' },
+};
+const presetIds: string[] = (config.presets ?? ['pop']).filter((id: string) => PRESETS[id]);
+const pool: string[] = (config.pool ?? ['I', 'ii', 'iii', 'IV', 'V', 'vi', 'vii°']).filter((r: string) => ROMAN[r]);
+const keys: string[] = config.keys ?? ['C', 'G', 'D', 'F', 'B♭', 'E♭'];
+const key = config.key ?? keys[0];
+const showFn = !!config.fn, voicing = !!config.voicing;
+const title = config.title ?? '코드 진행';
+const seg = 'px-2 py-1.5 rounded-lg text-xs font-semibold transition-all text-[var(--color-ink-500)]';
+---
+<div class="prog-widget rounded-2xl border border-[var(--color-border)] bg-white overflow-hidden"
+  data-presets={JSON.stringify(presetIds.map(id => ({ id, ...PRESETS[id] })))} data-key={key} data-fn={showFn ? '1' : '0'}>
+  <div class="flex items-center justify-between px-5 py-4 border-b border-[var(--color-border)] bg-[var(--color-surface)]">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg flex items-center justify-center gradient-brand">
+        <svg class="text-white" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><rect x="3" y="6" width="5" height="12" rx="1"/><rect x="10" y="6" width="5" height="12" rx="1"/><rect x="17" y="6" width="4" height="12" rx="1"/></svg>
+      </div>
+      <div>
+        <span class="font-bold text-base" style="font-family:'Space Grotesk','Pretendard',sans-serif">{title}</span>
+        <span class="text-sm text-[var(--color-ink-300)] ml-2">Progression</span>
+      </div>
+    </div>
+    <button type="button" class="play-btn shrink-0 whitespace-nowrap gradient-brand text-white text-sm font-semibold px-4 py-1.5 rounded-full transition hover:opacity-90" style="font-family:'Space Grotesk','Pretendard',sans-serif">▶ 재생</button>
+  </div>
+  <div class="p-5 space-y-3.5">
+    {presetIds.length > 1 && (
+      <div class="grid gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" style={`grid-template-columns:repeat(${Math.min(presetIds.length, 3)},1fr)`} role="group">
+        {presetIds.map((id, i) => <button type="button" class={`pre-btn ${seg}`} data-v={id} aria-pressed={i === 0 ? 'true' : 'false'}>{PRESETS[id].name}</button>)}
+      </div>
+    )}
+    <div class="p-desc text-xs text-center text-[var(--color-ink-500)] min-h-[1.4em]"></div>
+    <div class="slots grid gap-1.5"></div>
+    <div class="pkb relative select-none" style="height:70px"></div>
+    <div>
+      <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">칸을 고른 뒤 바꿀 코드를 누르세요</div>
+      <div class="palette flex flex-wrap gap-1">
+        {pool.map(r => <button type="button" class="pal-btn px-2 py-1 rounded-lg border border-[var(--color-border)] bg-white text-xs font-bold hover:border-[var(--color-violet)] transition" data-v={r}></button>)}
+      </div>
+    </div>
+    <div class="grid gap-2" style={`grid-template-columns:${voicing ? '1fr 1fr' : '1fr'}`}>
+      <div>
+        <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">Key · 조</div>
+        <div class="grid gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" style={`grid-template-columns:repeat(${keys.length},1fr)`} role="group">
+          {keys.map(k => <button type="button" class={`key-btn ${seg}`} style="padding-left:0;padding-right:0" data-v={k} aria-pressed={k === key ? 'true' : 'false'}>{k}</button>)}
+        </div>
+      </div>
+      {voicing && (
+        <div>
+          <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">Voicing · 보이싱</div>
+          <div class="grid grid-cols-2 gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" role="group">
+            <button type="button" class={`voi-btn ${seg}`} data-v="root" aria-pressed="true">기본형</button>
+            <button type="button" class={`voi-btn ${seg}`} data-v="smooth" aria-pressed="false">가까운 자리</button>
+          </div>
+        </div>
+      )}
+    </div>
+  </div>
+</div>
+
+<style>
+  .prog-widget :global(.slot) { border-radius: 10px; border: 1.5px solid var(--color-border); background: #fff; padding: 6px 2px; text-align: center; cursor: pointer; transition: all .08s; }
+  .prog-widget :global(.slot .rn) { font-size: 10px; font-family: 'JetBrains Mono', monospace; color: var(--color-ink-300); }
+  .prog-widget :global(.slot .nm) { font-size: 14px; font-weight: 800; color: var(--color-ink-700); font-family: 'Space Grotesk', 'Pretendard', sans-serif; line-height: 1.2; }
+  .prog-widget :global(.slot .fn) { font-size: 9px; font-weight: 700; margin-top: 1px; }
+  .prog-widget :global(.slot.sel) { border-color: var(--color-violet); box-shadow: 0 0 0 2px var(--color-violet-glow); }
+  .prog-widget :global(.slot.now) { background: var(--color-violet-glow); border-color: var(--color-violet); transform: translateY(-2px); }
+  .prog-widget :global(.pk) { position: absolute; top: 0; }
+  .prog-widget :global(.pk.w) { height: 100%; background: #fff; border: 1px solid var(--color-border); border-radius: 0 0 5px 5px; z-index: 1; }
+  .prog-widget :global(.pk.b) { height: 60%; background: #23232f; border-radius: 0 0 3px 3px; z-index: 2; }
+  .prog-widget :global(.pk.w.hl) { background: #c4b5fd; }
+  .prog-widget :global(.pk.b.hl) { background: #7c3aed; }
+</style>
+
+<script>
+import { AudioCore } from '../audio/core';
+import { playKey } from '../audio/keys';
+import { ROOTS, romanChord, isBlack } from '../lib/music';
+
+const FN: Record<string, [string, string]> = { T: ['토닉', '#16a34a'], S: ['서브도미넌트', '#2563eb'], D: ['도미넌트', '#dc2626'], X: ['세컨더리', '#d97706'], B: ['빌린 화음', '#7c3aed'] };
+
+function initProg(root: HTMLElement) {
+  const presets: { id: string; name: string; rn: string[]; desc: string }[] = JSON.parse(root.dataset.presets!);
+  const showFn = root.dataset.fn === '1';
+  let keyN = root.dataset.key || 'C', prog = [...presets[0].rn], sel = -1, voice = 'root';
+  let core: AudioCore | null = null;
+  const slots = root.querySelector('.slots') as HTMLElement, desc = root.querySelector('.p-desc') as HTMLElement, pkb = root.querySelector('.pkb') as HTMLElement;
+
+  // 미니 건반 C3–B5
+  const keysM = Array.from({ length: 36 }, (_, i) => 48 + i), whites = keysM.filter(m => !isBlack(m)), W = 100 / whites.length;
+  pkb.innerHTML = whites.map((m, i) => `<span class="pk w" data-m="${m}" style="left:${i * W}%;width:${W}%"></span>`).join('') +
+    keysM.filter(isBlack).map(m => `<span class="pk b" data-m="${m}" style="left:${(whites.indexOf(m - 1) + 1) * W - W * 0.3}%;width:${W * 0.6}%"></span>`).join('');
+
+  const keyObj = () => ROOTS.find(r => r.name === keyN)!;
+  // 보이싱: 위 성부(3~4음) — 기본형은 근음부터 쌓기, 가까운 자리는 앞 화음과 가장 가까운 자리바꿈
+  function voicings() {
+    let prev: number[] | null = null;
+    return prog.map(rn => {
+      const c = romanChord(keyObj(), rn);
+      const steps = c.type.steps.map(s => s % 12);
+      const base = 60 + c.rootPc - (c.rootPc > 7 ? 12 : 0);
+      const rootPos = c.type.steps.map(s => base + (s > 12 ? s - 12 : s));
+      let up = rootPos;
+      if (voice === 'smooth' && prev) {
+        let best = rootPos, bestCost = Infinity;
+        for (let inv = 0; inv < steps.length; inv++) for (const shift of [-12, 0, 12]) {
+          let v = [...rootPos]; for (let k = 0; k < inv; k++) { const lo = v.shift()!; v.push(lo + 12); }
+          v = v.map(x => x + shift);
+          if (Math.min(...v) < 52 || Math.max(...v) > 79) continue;
+          const a = [...v].sort((x, y) => x - y), b = [...prev].sort((x, y) => x - y);
+          const n = Math.min(a.length, b.length); let cost = 0; for (let i = 0; i < n; i++) cost += Math.abs(a[i] - b[i]);
+          if (cost < bestCost) { bestCost = cost; best = v; }
+        }
+        up = best;
+      }
+      prev = up;
+      return { c, up, bass: 36 + c.rootPc + (c.rootPc < 4 ? 12 : 0) };
+    });
+  }
+  function render() {
+    const v = voicings();
+    slots.style.gridTemplateColumns = `repeat(${Math.min(prog.length, 4)},1fr)`;
+    slots.innerHTML = v.map(({ c }, i) => `<div class="slot${i === sel ? ' sel' : ''}" data-i="${i}"><div class="rn">${c.rn}</div><div class="nm">${c.name}</div>${showFn ? `<div class="fn" style="color:${FN[c.fn][1]}">${FN[c.fn][0]}</div>` : ''}</div>`).join('');
+    slots.querySelectorAll<HTMLElement>('.slot').forEach(s => s.addEventListener('click', () => { const i = Number(s.dataset.i); sel = sel === i ? -1 : i; render(); preview(i); }));
+    root.querySelectorAll<HTMLButtonElement>('.pal-btn').forEach(b => { const c = romanChord(keyObj(), b.dataset.v!); b.innerHTML = `<span style="color:var(--color-ink-300);font-weight:500">${c.rn}</span> ${c.name}`; if (showFn) b.style.borderColor = FN[c.fn][1] + '55'; });
+    showKeys(v[Math.max(0, sel)]);
+  }
+  function showKeys(x?: { up: number[]; bass: number }) {
+    pkb.querySelectorAll('.pk').forEach(k => k.classList.remove('hl'));
+    x?.up.forEach(m => pkb.querySelector(`.pk[data-m="${m}"]`)?.classList.add('hl'));
+  }
+  async function preview(i: number) {
+    core ??= new AudioCore(); await core.resume();
+    const x = voicings()[i], t = core.ctx.currentTime + 0.03;
+    playKey(core, x.bass, t, 1.2, 0.2); x.up.forEach(m => playKey(core!, m, t, 1.2, 0.14));
+  }
+  root.querySelectorAll<HTMLButtonElement>('.pal-btn').forEach(b => b.addEventListener('click', () => {
+    if (sel < 0) { sel = 0; }
+    prog[sel] = b.dataset.v!; render(); preview(sel);
+  }));
+  const segSel = (cls: string, cb: (v: string) => void) => {
+    const btns = root.querySelectorAll<HTMLButtonElement>(cls);
+    const paint = (b: HTMLButtonElement) => { b.style.background = 'white'; b.style.color = 'var(--color-violet)'; b.style.boxShadow = '0 1px 4px rgba(0,0,0,0.08)'; };
+    const clear = (b: HTMLButtonElement) => { b.style.background = ''; b.style.color = ''; b.style.boxShadow = ''; };
+    btns.forEach(b => { if (b.getAttribute('aria-pressed') === 'true') paint(b);
+      b.addEventListener('click', () => { btns.forEach(x => { x.setAttribute('aria-pressed', 'false'); clear(x); }); b.setAttribute('aria-pressed', 'true'); paint(b); cb(b.dataset.v!); }); });
+  };
+  const loadPreset = (id: string) => { const p = presets.find(x => x.id === id)!; prog = [...p.rn]; sel = -1; desc.textContent = p.desc; render(); };
+  segSel('.pre-btn', loadPreset);
+  segSel('.key-btn', v => { keyN = v; render(); });
+  segSel('.voi-btn', v => { voice = v; render(); });
+  loadPreset(presets[0].id);
+
+  // 재생: 코드당 4박, 1박 베이스 + 화음, 3박 화음 재타격
+  const playBtn = root.querySelector('.play-btn') as HTMLButtonElement;
+  let playing = false, timer = 0, idx = 0, next = 0;
+  const bpm = 84, spb = 60 / bpm;
+  function tick() {
+    const c = core!;
+    while (next < c.ctx.currentTime + 0.12) {
+      const v = voicings(), i = idx % prog.length, x = v[i], at = next;
+      playKey(c, x.bass, at, spb * 3.8, 0.22);
+      x.up.forEach(m => { playKey(c, m, at, spb * 1.9, 0.13); playKey(c, m, at + 2 * spb, spb * 1.9, 0.1); });
+      setTimeout(() => { slots.querySelectorAll('.slot').forEach(s => s.classList.remove('now')); slots.querySelector(`.slot[data-i="${i}"]`)?.classList.add('now'); showKeys(x); }, Math.max(0, (at - c.ctx.currentTime) * 1000));
+      next += 4 * spb; idx++;
+    }
+  }
+  playBtn.addEventListener('click', async () => {
+    if (playing) { playing = false; clearInterval(timer); playBtn.textContent = '▶ 재생'; slots.querySelectorAll('.slot').forEach(s => s.classList.remove('now')); return; }
+    core ??= new AudioCore(); await core.resume();
+    playing = true; playBtn.textContent = '⏸ 정지'; idx = 0; next = core.ctx.currentTime + 0.1;
+    tick(); timer = window.setInterval(tick, 30);
+  });
+}
+document.querySelectorAll<HTMLElement>('.prog-widget').forEach(initProg);
+</script>

@@ -12,7 +12,7 @@ interface Props {
   breadcrumbs?: { name: string; url: string }[]; // BreadcrumbList JSON-LD용 (url은 사이트 절대경로)
 }
 const SITE_NAME = 'SoundLab';
-// GA4 측정 ID(G-XXXXXXX). 비워두면 분석 스크립트 미출력(자리만 확보). 발급 후 채우면 자동 활성.
+// GA4 측정 ID. 비워두면 분석 스크립트 미출력(자리만 확보). 발급 후 채우면 자동 활성.
 const GA_ID = 'G-XE8CLT7CER';
 // 피드백 폼(노션) URL. 비워두면 헤더 피드백 버튼 미노출. 노션 폼 공유 링크를 붙여넣으면 자동 활성.
 const FEEDBACK_URL = 'https://outgoing-crayfish-491.notion.site/38285182bf2b804b97dbe266e0f9b9e7?pvs=105';
@@ -64,7 +64,7 @@ const sandboxNav = hubsSorted.map(h => ({
   <meta name="twitter:image" content={ogImage} />
 
   <!-- 구조화 데이터 -->
-  <script type="application/ld+json" set:html={JSON.stringify({
+  <script is:inline type="application/ld+json" set:html={JSON.stringify({
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     name: SITE_NAME,
@@ -74,7 +74,7 @@ const sandboxNav = hubsSorted.map(h => ({
   })} />
 
   {breadcrumbs && breadcrumbs.length > 0 && (
-    <script type="application/ld+json" set:html={JSON.stringify({
+    <script is:inline type="application/ld+json" set:html={JSON.stringify({
       '@context': 'https://schema.org',
       '@type': 'BreadcrumbList',
       itemListElement: breadcrumbs.map((b, i) => ({
@@ -112,7 +112,7 @@ const sandboxNav = hubsSorted.map(h => ({
             <path d="M2 12h3l2-7 3 14 3-10 2 6h7"/>
           </svg>
         </div>
-        <span class="font-bold text-[15px] tracking-tight gradient-brand-text" style="font-family:'Space Grotesk','Pretendard',sans-serif">SoundLab</span>
+        <span class="font-bold text-[15px] tracking-tight gradient-brand-text font-display">SoundLab</span>
       </a>
 
       <nav class="hidden sm:flex items-center gap-1">
@@ -173,15 +173,14 @@ const sandboxNav = hubsSorted.map(h => ({
       <div class="flex items-center gap-2">
         {FEEDBACK_URL && (
           <a href={FEEDBACK_URL} target="_blank" rel="noopener noreferrer"
-            class="inline-flex items-center justify-center gap-1.5 text-sm font-semibold px-3 py-1.5 min-h-[40px] rounded-full border border-[var(--color-border)] text-[var(--color-ink-500)] hover:border-[var(--color-violet)] hover:text-[var(--color-violet)] transition"
-            style="font-family:'Space Grotesk','Pretendard',sans-serif" title="의견·버그 제보">
+            class="inline-flex items-center justify-center gap-1.5 text-sm font-semibold px-3 py-1.5 min-h-[40px] rounded-full border border-[var(--color-border)] text-[var(--color-ink-500)] hover:border-[var(--color-violet)] hover:text-[var(--color-violet)] transition font-display"
+            title="의견·버그 제보">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
             <span class="hidden sm:inline">피드백</span>
           </a>
         )}
         <a href={`${base}path/first-song/`}
-          class="inline-flex items-center gradient-brand text-white text-sm font-semibold px-4 py-1.5 min-h-[40px] rounded-full transition hover:opacity-90"
-          style="font-family:'Space Grotesk','Pretendard',sans-serif">
+          class="inline-flex items-center gradient-brand text-white text-sm font-semibold px-4 py-1.5 min-h-[40px] rounded-full transition hover:opacity-90 font-display">
           시작하기
         </a>
         <button id="mobile-menu-btn" type="button" aria-label="메뉴 열기" aria-expanded="false" aria-controls="mobile-menu"
@@ -232,7 +231,7 @@ const sandboxNav = hubsSorted.map(h => ({
             <path d="M2 12h3l2-7 3 14 3-10 2 6h7"/>
           </svg>
         </div>
-        <span class="text-sm font-semibold gradient-brand-text" style="font-family:'Space Grotesk','Pretendard',sans-serif">SoundLab</span>
+        <span class="text-sm font-semibold gradient-brand-text font-display">SoundLab</span>
       </div>
       <p class="text-xs text-[var(--color-ink-300)] font-mono">Web Audio API · 헤드폰 착용 권장</p>
       <div class="flex items-center gap-2">

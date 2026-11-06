@@ -28,7 +28,7 @@ const CATS = [
 <div class="max-w-4xl mx-auto px-4 sm:px-6 py-12">
   <div class="mb-10">
     <span class="text-xs font-mono px-2.5 py-1 rounded-full border border-[var(--color-violet-light)] text-[var(--color-violet)] bg-[var(--color-violet-glow)]">TOOLS</span>
-    <h1 class="text-3xl font-bold mt-3 mb-2" style="font-family:'Space Grotesk','Pretendard',sans-serif">음악·오디오 도구</h1>
+    <h1 class="text-3xl font-bold mt-3 mb-2 font-display">음악·오디오 도구</h1>
     <p class="text-[var(--color-ink-500)]">연주·연습부터 프로듀싱·믹싱까지 — 설치 없이 브라우저에서 바로 쓰는 무료 도구.</p>
   </div>
 
@@ -36,7 +36,7 @@ const CATS = [
     <section class="mb-10">
       <div class="mb-4">
         <div class="flex items-baseline gap-2.5">
-          <h2 class="text-lg font-bold text-[var(--color-ink-700)]" style="font-family:'Space Grotesk','Pretendard',sans-serif">{c.label}</h2>
+          <h2 class="text-lg font-bold text-[var(--color-ink-700)] font-display">{c.label}</h2>
           <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)]">{c.en}</span>
         </div>
         <p class="text-sm text-[var(--color-ink-500)] mt-1">{c.sub}</p>
@@ -51,7 +51,7 @@ const CATS = [
               </div>
               <div class="min-w-0">
                 <div class="flex items-center gap-2">
-                  <span class="font-bold text-[var(--color-ink-700)] group-hover:text-[var(--color-violet)] transition" style="font-family:'Space Grotesk','Pretendard',sans-serif">{t.name}</span>
+                  <span class="font-bold text-[var(--color-ink-700)] group-hover:text-[var(--color-violet)] transition font-display">{t.name}</span>
                   <span class="text-[10px] font-mono text-[var(--color-ink-300)]">{t.en}</span>
                 </div>
                 <p class="text-sm text-[var(--color-ink-500)] mt-1">{t.desc}</p>
@@ -64,7 +64,7 @@ const CATS = [
               </div>
               <div class="min-w-0">
                 <div class="flex items-center gap-2 flex-wrap">
-                  <span class="font-bold text-[var(--color-ink-600)]" style="font-family:'Space Grotesk','Pretendard',sans-serif">{t.name}</span>
+                  <span class="font-bold text-[var(--color-ink-600)] font-display">{t.name}</span>
                   <span class="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-[var(--color-surface-2)] text-[var(--color-ink-300)]">준비 중</span>
                 </div>
                 <p class="text-sm text-[var(--color-ink-500)] mt-1">{t.desc}</p>

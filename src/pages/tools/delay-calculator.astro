@@ -28,7 +28,7 @@ const cols: { key: string; label: string; en: string }[] = [
 
   <div class="mb-6">
     <span class="text-xs font-mono px-2.5 py-1 rounded-full border border-[var(--color-violet-light)] text-[var(--color-violet)] bg-[var(--color-violet-glow)]">TOOLS</span>
-    <h1 class="text-3xl font-bold mt-3 mb-2" style="font-family:'Space Grotesk','Pretendard',sans-serif">BPM 딜레이 계산기</h1>
+    <h1 class="text-3xl font-bold mt-3 mb-2 font-display">BPM 딜레이 계산기</h1>
     <p class="text-[var(--color-ink-500)]">BPM에 맞는 딜레이·리버브 타임을 음표별로 계산합니다. 값을 눌러 실제 타이밍을 들어보세요.</p>
   </div>
 
@@ -37,7 +37,7 @@ const cols: { key: string; label: string; en: string }[] = [
       <!-- BPM 표시 -->
       <div class="text-center">
         <div class="flex items-end justify-center gap-2">
-          <span class="bpm-num text-6xl font-bold tabular-nums leading-none" style="font-family:'Space Grotesk','Pretendard',sans-serif">120</span>
+          <span class="bpm-num text-6xl font-bold tabular-nums leading-none font-display">120</span>
           <span class="text-sm font-mono text-[var(--color-ink-300)] mb-1.5">BPM</span>
         </div>
         <div class="text-xs font-mono text-[var(--color-violet)] mt-1.5">1/4 = <span class="quarter-ms">500</span> ms</div>
@@ -53,10 +53,10 @@ const cols: { key: string; label: string; en: string }[] = [
       <!-- 단위 토글 + 탭 템포 -->
       <div class="flex items-center justify-between gap-3 flex-wrap">
         <div class="flex gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" role="group" aria-label="단위">
-          <button class="unit-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-[var(--color-ink-500)]" data-unit="ms" aria-pressed="true" style="font-family:'Space Grotesk','Pretendard',sans-serif">ms</button>
-          <button class="unit-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-[var(--color-ink-500)]" data-unit="hz" aria-pressed="false" style="font-family:'Space Grotesk','Pretendard',sans-serif">Hz</button>
+          <button class="unit-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-[var(--color-ink-500)] font-display" data-unit="ms" aria-pressed="true" >ms</button>
+          <button class="unit-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-[var(--color-ink-500)] font-display" data-unit="hz" aria-pressed="false" >Hz</button>
         </div>
-        <button class="tap-btn px-4 py-2 rounded-xl border border-[var(--color-border)] text-sm font-semibold text-[var(--color-ink-500)] hover:border-[var(--color-violet)] hover:text-[var(--color-violet)] transition" style="font-family:'Space Grotesk','Pretendard',sans-serif">탭 템포</button>
+        <button class="tap-btn px-4 py-2 rounded-xl border border-[var(--color-border)] text-sm font-semibold text-[var(--color-ink-500)] hover:border-[var(--color-violet)] hover:text-[var(--color-violet)] transition font-display">탭 템포</button>
       </div>
 
       <!-- 표 -->
@@ -71,7 +71,7 @@ const cols: { key: string; label: string; en: string }[] = [
           {noteRows.map(r => (
             <tr class="border-t border-[var(--color-border)]">
               <th scope="row" class="text-left py-1.5 pl-1">
-                <span class="font-bold text-sm tabular-nums" style="font-family:'Space Grotesk','Pretendard',sans-serif">{r.label}</span>
+                <span class="font-bold text-sm tabular-nums font-display">{r.label}</span>
                 <span class="block text-[10px] text-[var(--color-ink-300)] -mt-0.5">{r.sub}</span>
               </th>
               {cols.map(c => (

@@ -21,21 +21,21 @@ const total = all.length;
 <div class="max-w-4xl mx-auto px-4 sm:px-6 py-12">
   <div class="mb-8">
     <span class="text-xs font-mono px-2.5 py-1 rounded-full border border-[var(--color-violet-light)] text-[var(--color-violet)] bg-[var(--color-violet-glow)]">DICTIONARY</span>
-    <h1 class="text-3xl font-bold mt-3 mb-2" style="font-family:'Space Grotesk','Pretendard',sans-serif">사운드 사전</h1>
+    <h1 class="text-3xl font-bold mt-3 mb-2 font-display">사운드 사전</h1>
     <p class="text-[var(--color-ink-500)]">"이게 무슨 뜻이지?" 싶은 용어를 한 줄 정의 + 직접 들어보는 데모로. 총 {total}개.</p>
   </div>
 
   {groups.map(g => (
     <section class="mb-10">
       <div class="flex items-baseline gap-2 mb-3">
-        <h2 class="text-lg font-bold text-[var(--color-ink-700)]" style="font-family:'Space Grotesk','Pretendard',sans-serif">{g.meta.kr}</h2>
+        <h2 class="text-lg font-bold text-[var(--color-ink-700)] font-display">{g.meta.kr}</h2>
         <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)]">{g.meta.label}</span>
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {g.terms.map(t => (
           <a href={`${base}glossary/${t.id}/`} class="group p-4 rounded-xl border border-[var(--color-border)] bg-white hover:border-[var(--color-violet)] hover:shadow-lg transition-all">
             <div class="flex items-center gap-2">
-              <span class="font-bold text-[var(--color-ink-700)] group-hover:text-[var(--color-violet)] transition" style="font-family:'Space Grotesk','Pretendard',sans-serif">{t.data.term}</span>
+              <span class="font-bold text-[var(--color-ink-700)] group-hover:text-[var(--color-violet)] transition font-display">{t.data.term}</span>
               <span class="text-[10px] font-mono text-[var(--color-ink-300)]">{t.data.en}</span>
             </div>
             <p class="text-sm text-[var(--color-ink-500)] mt-1 line-clamp-2">{t.data.definition}</p>

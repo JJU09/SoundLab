@@ -49,6 +49,8 @@
 }
 
 @layer utilities {
+  /* 제목·버튼용 디스플레이 서체 (영문 Space Grotesk + 한글 Pretendard) */
+  .font-display { font-family: 'Space Grotesk', 'Pretendard', sans-serif; }
   .neon-violet {
     box-shadow: 0 0 0 1px rgba(124,58,237,0.4),
                 0 0 16px rgba(124,58,237,0.2),

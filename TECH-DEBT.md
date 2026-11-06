@@ -3,6 +3,25 @@
 > 작성일: 2026-06-16 · 대상: `soundlab-astro` (`main`, 배포 완료 — soundlab.jjuapp.com)
 > 우선순위 점수 = (Impact + Risk) × (6 − Effort) — 각 항목 1~5점, Effort는 낮을수록 빠름
 
+## 현황 업데이트 (2026-11-06)
+
+| # | 항목 | 상태 |
+|---|---|---|
+| 1 | CI 품질 게이트 | ✅ 해결 — 배포 전 `npm run check` 실행, 실패 시 배포 중단 |
+| 2 | 테스트 인프라 | ⏳ 미착수 (테스트 0개) |
+| 3 | 노브/드래그 로직 중복 | ⏳ 미착수 |
+| 4 | `as any` | ⏳ 미착수 — 위젯 추가로 12곳 → 19곳 |
+| 5 | README 데모 링크 | ✅ 해결 — 커스텀 도메인. 2026-11-06 README 전체를 현재 구조(로드맵·레슨 59개·연습실·사전)로 갱신 |
+| 6 | 의존성 마이너 | ⚠️ 보류 — `npm update`(astro 6.4.8·tailwind 4.3.4) 시 vite 버전이 갈려 빌드 실패. astro·tailwind·vite를 함께 맞춰 올려야 함. 6.4.8은 표현식 안 HTML 주석도 오류로 처리하므로 EffectPlayer는 미리 수정해 둠 |
+| 7 | 대형 파일 | ⏳ 미착수 |
+| 8 | GA4 측정 ID | ✅ 해결 — 측정 ID 설정됨 |
+
+**2026-11-06 정리 내역:** `astro check` 경고 54개 → 0개로 정리(힌트 4개는 아래 lofi ScriptProcessor 관련)(`z`를 `astro/zod`에서 import, 미사용 변수 제거, JSON-LD `is:inline` 명시), 반복되던 인라인 제목 서체 스타일 193곳을 `.font-display` 유틸리티로 통합, `midiToFreq` 중복 정의를 `lib/music.ts`로 일원화, 레슨 레이아웃의 중복 콘텐츠 조회 통합, 페달보드 "링크 복사" 버튼 복구(복원 로직만 남고 생성 버튼이 빠져 있었음).
+
+**새로 발견:**
+- `sandbox/lofi`가 deprecated `ScriptProcessorNode`를 사용 — AudioWorklet 이전이 필요하나 동작 변경이라 별도 작업으로 둠.
+- `npm audit`: sharp·esbuild 등 **빌드 도구** 취약점 4건. 배포물(정적 HTML/JS)에는 포함되지 않음. 해결하려면 Astro 7 메이저 업그레이드 필요.
+
 ## 요약
 
 코드 베이스는 전반적으로 건강한 편입니다. 오디오 엔진은 이미 `lib/` → `audio/` 레이어로 분리됐고(`lib/engine.ts`는 하위 호환 shim만 남음), `console.*` 누수나 `TODO/FIXME` 흔적이 거의 없고, 콘텐츠(MDX 25개)와 위젯(23개) 구조도 깔끔합니다.

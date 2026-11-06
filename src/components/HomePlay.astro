@@ -19,16 +19,16 @@
 <script>
 import { AudioCore } from '../audio/core';
 import { SynthVoice } from '../audio/synth';
+import { midiToFreq } from '../lib/music';
 
 function initHomePlay(root: HTMLElement) {
-  let core: AudioCore | null = null, voice: SynthVoice | null = null, raf = 0;
+  let core: AudioCore | null = null, voice: SynthVoice | null = null;
   const scope = root.querySelector('.hp-scope') as HTMLCanvasElement;
   const hint = root.querySelector('.hp-hint') as HTMLElement;
   const ctx2d = scope.getContext('2d')!;
   const fit = () => { const r = scope.getBoundingClientRect(); scope.width = Math.max(1, r.width * devicePixelRatio); scope.height = Math.max(1, r.height * devicePixelRatio); };
   fit(); addEventListener('resize', fit);
 
-  const midiToFreq = (m: number) => 440 * Math.pow(2, (m - 69) / 12);
 
   function ensure() {
     if (core) return;
@@ -39,7 +39,7 @@ function initHomePlay(root: HTMLElement) {
   }
 
   function draw() {
-    raf = requestAnimationFrame(draw);
+    requestAnimationFrame(draw);
     if (!core) return;
     const td = core.getScope(), W = scope.width, H = scope.height;
     ctx2d.clearRect(0, 0, W, H);

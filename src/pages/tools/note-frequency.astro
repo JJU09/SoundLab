@@ -17,7 +17,7 @@ const octaves = [0, 1, 2, 3, 4, 5, 6, 7, 8];
 
   <div class="mb-6">
     <span class="text-xs font-mono px-2.5 py-1 rounded-full border border-[var(--color-violet-light)] text-[var(--color-violet)] bg-[var(--color-violet-glow)]">TOOLS</span>
-    <h1 class="text-3xl font-bold mt-3 mb-2" style="font-family:'Space Grotesk','Pretendard',sans-serif">노트 주파수 변환기</h1>
+    <h1 class="text-3xl font-bold mt-3 mb-2 font-display">노트 주파수 변환기</h1>
     <p class="text-[var(--color-ink-500)]">음이름과 주파수(Hz)를 변환합니다. 음을 눌러 소리를 들어보세요.</p>
   </div>
 
@@ -47,7 +47,7 @@ const octaves = [0, 1, 2, 3, 4, 5, 6, 7, 8];
       <div class="grid grid-cols-2 gap-2">
         {NOTES.map(n => (
           <button class="note-cell flex items-center justify-between gap-2 min-h-[48px] px-3.5 rounded-xl border border-[var(--color-border)] hover:border-[var(--color-violet)] hover:bg-[var(--color-violet-glow)] active:scale-95 transition" data-note={n}>
-            <span class="note-name font-bold text-sm" style="font-family:'Space Grotesk','Pretendard',sans-serif">{n}<span class="oct-label text-[var(--color-ink-300)]">4</span></span>
+            <span class="note-name font-bold text-sm font-display">{n}<span class="oct-label text-[var(--color-ink-300)]">4</span></span>
             <span class="note-hz text-sm font-mono tabular-nums text-[var(--color-ink-500)]">—</span>
           </button>
         ))}
@@ -62,7 +62,7 @@ const octaves = [0, 1, 2, 3, 4, 5, 6, 7, 8];
             <span class="text-sm font-mono text-[var(--color-ink-300)]">Hz</span>
           </div>
           <div class="rev-out text-right min-w-[96px]">
-            <span class="rev-note font-bold text-lg" style="font-family:'Space Grotesk','Pretendard',sans-serif">A4</span>
+            <span class="rev-note font-bold text-lg font-display">A4</span>
             <span class="rev-cent block text-[11px] font-mono text-[var(--color-ink-300)] -mt-0.5">±0 cent</span>
           </div>
         </div>

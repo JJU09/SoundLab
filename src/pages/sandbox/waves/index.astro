@@ -25,12 +25,12 @@ const related = [
   <div class="waves rounded-2xl border border-[var(--color-border)] bg-white overflow-hidden">
     <!-- 트랜스포트 + 모드 -->
     <div class="flex items-center gap-4 flex-wrap px-5 py-4 border-b border-[var(--color-border)] bg-[var(--color-surface)]">
-      <button class="play-btn gradient-brand text-white text-sm font-semibold px-5 py-2 rounded-full transition hover:opacity-90 flex items-center gap-2" style="font-family:'Space Grotesk','Pretendard',sans-serif">
+      <button class="play-btn gradient-brand text-white text-sm font-semibold px-5 py-2 rounded-full transition hover:opacity-90 flex items-center gap-2 font-display">
         <span class="play-dot w-2 h-2 rounded-full bg-white"></span><span class="play-label">재생</span>
       </button>
       <div class="mode-tabs flex gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" role="group" aria-label="모드">
         {[['harmonic','배음 합성'],['beats','맥놀이'],['phase','위상 간섭']].map(([m,t]) => (
-          <button class="mode-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all text-[var(--color-ink-500)]" data-mode={m} style="font-family:'Space Grotesk','Pretendard',sans-serif">{t}</button>
+          <button class="mode-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all text-[var(--color-ink-500)] font-display" data-mode={m} >{t}</button>
         ))}
       </div>
     </div>
@@ -50,7 +50,7 @@ const related = [
       <div class="panel-harmonic space-y-3">
         <div class="flex gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" role="group" aria-label="파형 프리셋">
           {[['sine','사인'],['saw','톱니'],['square','사각']].map(([v,t]) => (
-            <button class="hpreset-btn flex-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-[var(--color-ink-500)]" data-preset={v} style="font-family:'Space Grotesk','Pretendard',sans-serif">{t}</button>
+            <button class="hpreset-btn flex-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-[var(--color-ink-500)] font-display" data-preset={v} >{t}</button>
           ))}
         </div>
         <div>

@@ -15,7 +15,7 @@ const desc = '빗소리·파도·바람·집중 앰비언트 사운드와 화이
 
   <div class="mb-6">
     <span class="text-xs font-mono px-2.5 py-1 rounded-full border border-[var(--color-violet-light)] text-[var(--color-violet)] bg-[var(--color-violet-glow)]">TOOLS</span>
-    <h1 class="text-3xl font-bold mt-3 mb-2" style="font-family:'Space Grotesk','Pretendard',sans-serif">노이즈 제너레이터</h1>
+    <h1 class="text-3xl font-bold mt-3 mb-2 font-display">노이즈 제너레이터</h1>
     <p class="text-[var(--color-ink-500)]">비·파도·바람·집중 사운드로 공부·수면·이명 완화에. 원하는 분위기를 고르고 재생하세요. 자동 종료 타이머 내장.</p>
   </div>
 
@@ -27,7 +27,7 @@ const desc = '빗소리·파도·바람·집중 앰비언트 사운드와 화이
         <div class="grid grid-cols-4 gap-2 mt-2">
           {[['focus','집중','묵직·잔잔'],['rain','비','부드러운 쉭'],['ocean','파도','밀물·썰물'],['wind','바람','일렁이는']].map(([k,t,d]) => (
             <button class="preset-btn p-3 rounded-xl border border-[var(--color-border)] bg-white text-center transition hover:border-[var(--color-violet)]" data-preset={k} aria-pressed={k==='focus'?'true':'false'}>
-              <div class="text-sm font-bold text-[var(--color-ink-700)]" style="font-family:'Space Grotesk','Pretendard',sans-serif">{t}</div>
+              <div class="text-sm font-bold text-[var(--color-ink-700)] font-display">{t}</div>
               <div class="text-[9px] text-[var(--color-ink-300)] mt-0.5">{d}</div>
             </button>
           ))}
@@ -35,7 +35,7 @@ const desc = '빗소리·파도·바람·집중 앰비언트 사운드와 화이
       </div>
 
       <!-- 재생 -->
-      <button class="play-btn w-full gradient-brand text-white font-semibold py-4 rounded-xl text-lg flex items-center justify-center gap-2 transition hover:opacity-90" style="font-family:'Space Grotesk','Pretendard',sans-serif">
+      <button class="play-btn w-full gradient-brand text-white font-semibold py-4 rounded-xl text-lg flex items-center justify-center gap-2 transition hover:opacity-90 font-display">
         <span class="play-dot w-2.5 h-2.5 rounded-full bg-white"></span><span class="play-label">▶ 재생</span>
       </button>
 
@@ -63,7 +63,7 @@ const desc = '빗소리·파도·바람·집중 앰비언트 사운드와 화이
         <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)]">원본 노이즈</span>
         <div class="grid grid-cols-3 gap-2 mt-2">
           {[['white','화이트'],['pink','핑크'],['brown','브라운']].map(([v,t]) => (
-            <button class="type-btn px-3 py-2 rounded-xl border border-[var(--color-border)] bg-white text-center text-sm font-semibold text-[var(--color-ink-700)] transition hover:border-[var(--color-violet)]" data-type={v} aria-pressed="false" style="font-family:'Space Grotesk','Pretendard',sans-serif">{t}</button>
+            <button class="type-btn px-3 py-2 rounded-xl border border-[var(--color-border)] bg-white text-center text-sm font-semibold text-[var(--color-ink-700)] transition hover:border-[var(--color-violet)] font-display" data-type={v} aria-pressed="false" >{t}</button>
           ))}
         </div>
       </div>
@@ -76,7 +76,7 @@ const desc = '빗소리·파도·바람·집중 앰비언트 사운드와 화이
         </div>
         <div class="flex gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" role="group" aria-label="타이머">
           {[['0','끄기'],['15','15분'],['30','30분'],['60','60분']].map(([v,t]) => (
-            <button class="timer-btn flex-1 px-2 py-1.5 rounded-lg text-xs font-semibold transition-all text-[var(--color-ink-500)]" data-min={v} aria-pressed={v==='0'?'true':'false'} style="font-family:'Space Grotesk','Pretendard',sans-serif">{t}</button>
+            <button class="timer-btn flex-1 px-2 py-1.5 rounded-lg text-xs font-semibold transition-all text-[var(--color-ink-500)] font-display" data-min={v} aria-pressed={v==='0'?'true':'false'} >{t}</button>
           ))}
         </div>
       </div>

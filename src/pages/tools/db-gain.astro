@@ -16,7 +16,7 @@ const refs: number[] = [-12, -6, -3, 0, 3, 6, 12];
 
   <div class="mb-6">
     <span class="text-xs font-mono px-2.5 py-1 rounded-full border border-[var(--color-violet-light)] text-[var(--color-violet)] bg-[var(--color-violet-glow)]">TOOLS</span>
-    <h1 class="text-3xl font-bold mt-3 mb-2" style="font-family:'Space Grotesk','Pretendard',sans-serif">데시벨(dB) ↔ 배수 계산기</h1>
+    <h1 class="text-3xl font-bold mt-3 mb-2 font-display">데시벨(dB) ↔ 배수 계산기</h1>
     <p class="text-[var(--color-ink-500)]">데시벨을 진폭 배수·퍼센트로, 또는 그 반대로 변환합니다. 레벨 차이를 직접 들어보세요.</p>
   </div>
 
@@ -25,7 +25,7 @@ const refs: number[] = [-12, -6, -3, 0, 3, 6, 12];
       <!-- dB 대형 표시 -->
       <div class="text-center">
         <div class="flex items-end justify-center gap-2">
-          <span class="db-num text-6xl font-bold tabular-nums leading-none" style="font-family:'Space Grotesk','Pretendard',sans-serif">0</span>
+          <span class="db-num text-6xl font-bold tabular-nums leading-none font-display">0</span>
           <span class="text-sm font-mono text-[var(--color-ink-300)] mb-1.5">dB</span>
         </div>
         <div class="text-xs font-mono text-[var(--color-violet)] mt-1.5"><span class="ratio-lbl">1.000</span>배 · <span class="pct-lbl">100</span>%</div>
@@ -54,7 +54,7 @@ const refs: number[] = [-12, -6, -3, 0, 3, 6, 12];
       </div>
 
       <!-- A/B 들어보기 -->
-      <button class="ab-btn w-full gradient-brand text-white font-semibold py-3.5 rounded-xl text-base flex items-center justify-center gap-2 transition hover:opacity-90" style="font-family:'Space Grotesk','Pretendard',sans-serif">
+      <button class="ab-btn w-full gradient-brand text-white font-semibold py-3.5 rounded-xl text-base flex items-center justify-center gap-2 transition hover:opacity-90 font-display">
         ▶ 0 dB ↔ 현재 레벨 들어보기
       </button>
     </div>

@@ -21,7 +21,7 @@ const presetRow2 = starterPresets.slice(3);
     <div class="flex items-center gap-2 mb-3">
       <span class="text-xs font-mono px-2.5 py-1 rounded-full border border-[var(--color-violet-light)] text-[var(--color-violet)] bg-[var(--color-violet-glow)]">PRACTICE ROOM</span>
     </div>
-    <h1 class="text-3xl font-bold mb-2" style="font-family:'Space Grotesk','Pretendard',sans-serif">모듈러 페달보드</h1>
+    <h1 class="text-3xl font-bold mb-2 font-display">모듈러 페달보드</h1>
     <p class="text-[var(--color-ink-500)]"><b class="text-[var(--color-ink-700)]">창고</b>에서 이펙터를 눌러 랙에 추가하세요. 같은 이펙터를 여러 개 놓을 수 있고, <b class="text-[var(--color-ink-700)]">순서를 바꾸면</b> 소리가 흐르는 경로가 실시간으로 재구성됩니다.</p>
   </div>
 
@@ -44,7 +44,7 @@ const presetRow2 = starterPresets.slice(3);
               draggable="true" data-type={m.id} title={`${m.name} 추가 (클릭 또는 드래그)`}>
               <span class="w-6 h-6 flex-none rounded-lg flex items-center justify-center text-[10px] font-mono font-bold text-white gradient-brand">{m.num}</span>
               <span class="min-w-0">
-                <span class="block text-xs font-bold text-[var(--color-ink-700)] group-hover:text-[var(--color-violet)] truncate" style="font-family:'Space Grotesk','Pretendard',sans-serif">{m.name}</span>
+                <span class="block text-xs font-bold text-[var(--color-ink-700)] group-hover:text-[var(--color-violet)] truncate font-display">{m.name}</span>
                 <span class="block text-[10px] text-[var(--color-ink-300)] truncate">{m.kr}</span>
               </span>
               <span class="ml-auto text-[var(--color-ink-300)] group-hover:text-[var(--color-violet)] text-lg leading-none">+</span>
@@ -63,9 +63,9 @@ const presetRow2 = starterPresets.slice(3);
             <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-2">Source · 음원</div>
             <div class="flex gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" role="group">
               {[['tone','지속음'],['pluck','플럭'],['noise','노이즈']].map(([v,t]) => (
-                <button class="src-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-[var(--color-ink-500)]"
+                <button class="src-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-[var(--color-ink-500)] font-display"
                   data-src={v} aria-pressed={v === 'tone' ? 'true' : 'false'}
-                  style="font-family:'Space Grotesk','Pretendard',sans-serif">{t}</button>
+                  >{t}</button>
               ))}
             </div>
           </div>
@@ -77,15 +77,20 @@ const presetRow2 = starterPresets.slice(3);
                 <span class="text-sm font-mono text-[var(--color-ink-700)] w-8" id="masterVolVal">70%</span>
               </div>
             </div>
+            <button id="shareBtn" type="button"
+              class="border border-[var(--color-border)] text-[var(--color-ink-500)] font-semibold px-4 py-2.5 rounded-xl text-sm flex items-center gap-2 transition hover:border-[var(--color-violet)] hover:text-[var(--color-violet)] font-display"
+              title="지금 페달보드 구성을 링크로 복사">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>
+              <span id="shareLabel">링크 복사</span>
+            </button>
             <button id="bypassBtn"
-              class="border border-[var(--color-border)] text-[var(--color-ink-500)] font-semibold px-4 py-2.5 rounded-xl text-sm flex items-center gap-2 transition hover:border-[var(--color-ink-700)] hover:text-[var(--color-ink-700)]"
-              style="font-family:'Space Grotesk','Pretendard',sans-serif" aria-pressed="false" title="모든 이펙터를 통과시켜 원음과 비교">
+              class="border border-[var(--color-border)] text-[var(--color-ink-500)] font-semibold px-4 py-2.5 rounded-xl text-sm flex items-center gap-2 transition hover:border-[var(--color-ink-700)] hover:text-[var(--color-ink-700)] font-display"
+              aria-pressed="false" title="모든 이펙터를 통과시켜 원음과 비교">
               <span id="bypassDot" class="w-2 h-2 rounded-full bg-[var(--color-border)]"></span>
               <span id="bypassLabel">원음 비교</span>
             </button>
             <button id="playBtn"
-              class="gradient-brand text-white font-semibold px-5 py-2.5 rounded-xl text-sm flex items-center gap-2 transition hover:opacity-90"
-              style="font-family:'Space Grotesk','Pretendard',sans-serif">
+              class="gradient-brand text-white font-semibold px-5 py-2.5 rounded-xl text-sm flex items-center gap-2 transition hover:opacity-90 font-display">
               <span id="playDot" class="w-2 h-2 rounded-full bg-white"></span>
               <span id="playLabel">소리 켜기</span>
             </button>
@@ -101,7 +106,7 @@ const presetRow2 = starterPresets.slice(3);
             <svg class="w-9 h-9 mb-3 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12h3l2-6 4 12 4-9 2 3h3"/>
             </svg>
-            <p class="text-sm font-semibold text-[var(--color-ink-500)]" style="font-family:'Space Grotesk','Pretendard',sans-serif">빈 페달보드</p>
+            <p class="text-sm font-semibold text-[var(--color-ink-500)] font-display">빈 페달보드</p>
             <p class="text-xs mt-1 text-[var(--color-ink-300)]">창고에서 이펙터를 클릭하거나 드래그해 추가하세요</p>
           </div>
           <!-- 구분선 -->
@@ -116,7 +121,7 @@ const presetRow2 = starterPresets.slice(3);
               {presetRow1.map(p => (
                 <button class="preset-btn group flex flex-col items-center gap-2 px-4 py-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-violet)] hover:bg-[var(--color-violet-glow)] transition-all text-center"
                   data-preset={p.id}>
-                  <span class="text-xs font-semibold text-[var(--color-ink-600)] group-hover:text-[var(--color-violet)] transition leading-none" style="font-family:'Space Grotesk','Pretendard',sans-serif">{p.name}</span>
+                  <span class="text-xs font-semibold text-[var(--color-ink-600)] group-hover:text-[var(--color-violet)] transition leading-none font-display">{p.name}</span>
                   <span class="flex items-center gap-1">
                     {p.state.instances?.map((inst, i) => (
                       <>
@@ -132,7 +137,7 @@ const presetRow2 = starterPresets.slice(3);
               {presetRow2.map(p => (
                 <button class="preset-btn group flex flex-col items-center gap-2 px-4 py-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-violet)] hover:bg-[var(--color-violet-glow)] transition-all text-center"
                   data-preset={p.id}>
-                  <span class="text-xs font-semibold text-[var(--color-ink-600)] group-hover:text-[var(--color-violet)] transition leading-none" style="font-family:'Space Grotesk','Pretendard',sans-serif">{p.name}</span>
+                  <span class="text-xs font-semibold text-[var(--color-ink-600)] group-hover:text-[var(--color-violet)] transition leading-none font-display">{p.name}</span>
                   <span class="flex items-center gap-1">
                     {p.state.instances?.map((inst, i) => (
                       <>
@@ -198,7 +203,7 @@ const presetRow2 = starterPresets.slice(3);
             </button>
           </div>
           <div class="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-mono font-bold text-white gradient-brand">{m.num}</div>
-          <span class="font-bold text-sm" style="font-family:'Space Grotesk','Pretendard',sans-serif">{m.name}</span>
+          <span class="font-bold text-sm font-display">{m.name}</span>
           <span class="text-xs text-[var(--color-ink-300)]">{m.kr}</span>
         </div>
         <div class="flex items-center gap-1.5">
@@ -529,8 +534,11 @@ function applyFullState(state: EngineState) {
 }
 
 // ── URL 직렬화 + 구버전 마이그레이션 ──
+// UTF-8 ↔ base64 (기존 btoa(unescape(encodeURIComponent())) 방식과 같은 결과 — 옛 공유 링크 호환)
+const toB64 = (str: string) => btoa(String.fromCharCode(...new TextEncoder().encode(str)));
+const fromB64 = (b64: string) => new TextDecoder().decode(Uint8Array.from(atob(b64), ch => ch.charCodeAt(0)));
 function encodeState(state: EngineState): string {
-  return btoa(unescape(encodeURIComponent(JSON.stringify(state))));
+  return toB64(JSON.stringify(state));
 }
 // 구버전(modules 맵 + chain) → 신버전(instances 배열) 변환
 function migrate(obj: any): any {
@@ -545,7 +553,7 @@ function migrate(obj: any): any {
 }
 function decodeState(s: string): EngineState | null {
   try {
-    let obj = JSON.parse(decodeURIComponent(escape(atob(s))));
+    let obj = JSON.parse(fromB64(s));
     obj = migrate(obj);
     if (obj && obj.src && Array.isArray(obj.instances)) return obj as EngineState;
   } catch (e) {}
@@ -617,6 +625,19 @@ document.querySelectorAll<HTMLElement>('.preset-btn').forEach(btn => {
     applyFullState(mergePreset(preset.state as any));
     btn.animate([{ transform: 'scale(1)' }, { transform: 'scale(0.97)' }, { transform: 'scale(1)' }], { duration: 180, easing: 'ease-out' });
   });
+});
+
+// 공유 링크 — 현재 구성을 ?p=로 직렬화해 복사 (서버 저장 없음)
+const shareBtn = document.getElementById('shareBtn')!;
+const shareLabel = document.getElementById('shareLabel')!;
+shareBtn.addEventListener('click', async () => {
+  const url = new URL(location.href);
+  url.searchParams.set('p', encodeState(readStateFromDOM()));
+  history.replaceState(null, '', url);
+  let ok = false;
+  try { await navigator.clipboard.writeText(url.toString()); ok = true; } catch (e) {}
+  shareLabel.textContent = ok ? '복사됨 ✓' : '주소창 링크를 복사하세요';
+  setTimeout(() => { shareLabel.textContent = '링크 복사'; }, 2000);
 });
 
 

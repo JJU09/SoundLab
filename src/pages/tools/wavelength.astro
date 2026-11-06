@@ -16,7 +16,7 @@ const chips: number[] = [50, 100, 250, 500, 1000, 4000, 8000];
 
   <div class="mb-6">
     <span class="text-xs font-mono px-2.5 py-1 rounded-full border border-[var(--color-violet-light)] text-[var(--color-violet)] bg-[var(--color-violet-glow)]">TOOLS</span>
-    <h1 class="text-3xl font-bold mt-3 mb-2" style="font-family:'Space Grotesk','Pretendard',sans-serif">주파수·파장 계산기</h1>
+    <h1 class="text-3xl font-bold mt-3 mb-2 font-display">주파수·파장 계산기</h1>
     <p class="text-[var(--color-ink-500)]">주파수로 음파의 파장을 계산합니다. 흡음재 두께·정재파·룸 모드 잡을 때 쓰세요.</p>
   </div>
 
@@ -25,7 +25,7 @@ const chips: number[] = [50, 100, 250, 500, 1000, 4000, 8000];
       <!-- 주파수 대형 표시 -->
       <div class="text-center">
         <div class="flex items-end justify-center gap-2">
-          <span class="freq-num text-6xl font-bold tabular-nums leading-none" style="font-family:'Space Grotesk','Pretendard',sans-serif">343</span>
+          <span class="freq-num text-6xl font-bold tabular-nums leading-none font-display">343</span>
           <span class="text-sm font-mono text-[var(--color-ink-300)] mb-1.5">Hz</span>
         </div>
         <div class="text-xs font-mono text-[var(--color-violet)] mt-1.5">파장 λ = <span class="lambda-lbl">1.00 m</span></div>
@@ -38,7 +38,7 @@ const chips: number[] = [50, 100, 250, 500, 1000, 4000, 8000];
           <input type="number" class="freq-in w-full px-3 py-2.5 rounded-xl border border-[var(--color-border)] text-sm font-mono tabular-nums focus:border-[var(--color-violet)] focus:outline-none" value="343" min="20" max="20000" step="1" aria-label="주파수 입력" />
           <span class="text-sm font-mono text-[var(--color-ink-300)]">Hz</span>
         </div>
-        <button class="play-btn px-4 py-2.5 rounded-xl border border-[var(--color-border)] text-sm font-semibold text-[var(--color-ink-500)] hover:border-[var(--color-violet)] hover:text-[var(--color-violet)] transition whitespace-nowrap" style="font-family:'Space Grotesk','Pretendard',sans-serif">▶ 듣기</button>
+        <button class="play-btn px-4 py-2.5 rounded-xl border border-[var(--color-border)] text-sm font-semibold text-[var(--color-ink-500)] hover:border-[var(--color-violet)] hover:text-[var(--color-violet)] transition whitespace-nowrap font-display">▶ 듣기</button>
       </div>
 
       <!-- 파장 분해 -->
@@ -46,7 +46,7 @@ const chips: number[] = [50, 100, 250, 500, 1000, 4000, 8000];
         {[['full','전체 λ','정재파 길이'],['half','½ λ','룸 모드·축'],['quarter','¼ λ','흡음재 두께']].map(([k,t,d]) => (
           <div class="p-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
             <div class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)]">{t}</div>
-            <div class={`wl-${k} text-base font-bold tabular-nums text-[var(--color-ink-700)] mt-1`} style="font-family:'Space Grotesk','Pretendard',sans-serif">—</div>
+            <div class={`wl-${k} text-base font-bold tabular-nums text-[var(--color-ink-700)] mt-1 font-display`}>—</div>
             <div class="text-[9px] text-[var(--color-ink-300)] mt-0.5">{d}</div>
           </div>
         ))}

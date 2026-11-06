@@ -38,16 +38,15 @@ const hasWidget = data.widget && data.widget !== 'none';
 const quiz = data.quiz ? QUIZZES[data.quiz] : null;
 const num = String(data.order).padStart(2, '0');
 // 먼저 알면 좋은 개념 — 존재하는 토픽만 링크 (아직 없는 토픽은 이름 없이 건너뜀)
-const allTopics = data.prereqs?.length ? await getCollection('topics') : [];
+const allTopics = await getCollection('topics'); // prereq·로드맵 링크 공용 (빌드 시 캐시됨)
 const prereqLinks = (data.prereqs ?? []).map(id => {
   const t = allTopics.find(x => x.id === id && !x.data.draft);
   return t ? { href: `${base}learn/${id}/`, title: t.data.title, kr: t.data.kr } : null;
 }).filter((x): x is { href: string; title: string; kr: string } => !!x);
 // 학습 경로 위치 — 이 레슨이 경로의 핵심 레슨이면 "경로에서 다음 레슨" 카드 표시
 const topicId = Astro.url.pathname.replace(base, '').replace(/^learn\//, '').replace(/\/$/, '');
-const pathTopics = await getCollection('topics');
 const positions = pathPositions(topicId).map(p => {
-  const n = p.next ? pathTopics.find(t => t.id === p.next) : null;
+  const n = p.next ? allTopics.find(t => t.id === p.next) : null;
   return { ...p, nextInfo: n ? { href: `${base}learn/${p.next}/`, title: n.data.title, kr: n.data.kr } : null };
 });
 const accent = data.color === 'violet'
@@ -95,7 +94,7 @@ const accent = data.color === 'violet'
           </span>
         </div>
 
-        <h1 class="text-3xl sm:text-4xl font-bold mb-2 leading-tight" style="font-family:'Space Grotesk','Pretendard',sans-serif">
+        <h1 class="text-3xl sm:text-4xl font-bold mb-2 leading-tight font-display">
           {data.title}
           <span class="text-[var(--color-ink-300)] font-medium text-2xl ml-2">{data.kr}</span>
         </h1>
@@ -137,13 +136,13 @@ const accent = data.color === 'violet'
               <a href={p.nextInfo.href} class="group flex items-center justify-between gap-3">
                 <div class="min-w-0">
                   <div class="text-xs text-[var(--color-ink-500)]">{p.nextStage ? `다음 단계 · ${p.nextStage.title}` : '로드맵 다음 레슨'}</div>
-                  <div class="font-bold text-[var(--color-ink-700)] group-hover:text-[var(--color-violet)] transition" style="font-family:'Space Grotesk','Pretendard',sans-serif">{p.nextInfo.kr} <span class="font-medium text-[var(--color-ink-300)]">{p.nextInfo.title}</span></div>
+                  <div class="font-bold text-[var(--color-ink-700)] group-hover:text-[var(--color-violet)] transition font-display">{p.nextInfo.kr} <span class="font-medium text-[var(--color-ink-300)]">{p.nextInfo.title}</span></div>
                 </div>
                 <span class="shrink-0 whitespace-nowrap gradient-brand text-white text-sm font-semibold px-4 py-2 rounded-xl">다음 →</span>
               </a>
             ) : (
               <a href={`${base}path/${p.path.id}/`} class="group flex items-center justify-between gap-3">
-                <div class="font-bold text-[var(--color-ink-700)]" style="font-family:'Space Grotesk','Pretendard',sans-serif">로드맵의 마지막 레슨이에요. 단계별 체크리스트로 곡을 점검해 보세요.</div>
+                <div class="font-bold text-[var(--color-ink-700)] font-display">로드맵의 마지막 레슨이에요. 단계별 체크리스트로 곡을 점검해 보세요.</div>
                 <span class="shrink-0 whitespace-nowrap gradient-brand text-white text-sm font-semibold px-4 py-2 rounded-xl">로드맵 보기</span>
               </a>
             )}
@@ -159,7 +158,7 @@ const accent = data.color === 'violet'
             </div>
             <div class="min-w-0 flex-1">
               <div class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)]">연습실 · 직접 실험</div>
-              <div class="font-bold text-[var(--color-ink-700)] group-hover:text-[var(--color-violet)] transition" style="font-family:'Space Grotesk','Pretendard',sans-serif">{sandbox.name}에서 자유롭게 실험해보기</div>
+              <div class="font-bold text-[var(--color-ink-700)] group-hover:text-[var(--color-violet)] transition font-display">{sandbox.name}에서 자유롭게 실험해보기</div>
               <p class="text-sm text-[var(--color-ink-500)] mt-0.5">{hub.kr} 레슨에서 배운 요소를 직접 조합하며 소리를 만들어 보세요.</p>
             </div>
             <svg class="w-5 h-5 flex-none text-[var(--color-ink-300)] group-hover:text-[var(--color-violet)] group-hover:translate-x-0.5 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>

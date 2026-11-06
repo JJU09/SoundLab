@@ -15,14 +15,14 @@ const base = import.meta.env.BASE_URL;
 
     <div class="mb-10">
       <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Lessons</span>
-      <h1 class="text-3xl sm:text-4xl font-bold mt-2 mb-2" style="font-family:'Space Grotesk','Pretendard',sans-serif">레슨</h1>
+      <h1 class="text-3xl sm:text-4xl font-bold mt-2 mb-2 font-display">레슨</h1>
       <p class="text-lg text-[var(--color-ink-500)]">작곡에 필요한 지식을 세 영역으로 나눴어요 — 무엇을 쓸까, 어떤 소리로, 어떻게 완성할까</p>
     </div>
 
     <a href={`${base}path/first-song/`} class="group flex items-center justify-between gap-4 p-5 mb-10 rounded-2xl border border-[var(--color-violet-light)] bg-[var(--color-violet-glow)] hover:shadow-md transition">
       <div class="min-w-0">
         <div class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)]">처음이라면</div>
-        <div class="font-bold text-[var(--color-ink-700)]" style="font-family:'Space Grotesk','Pretendard',sans-serif">어디서부터 볼지 모르겠다면, 곡 하나 만들기 로드맵을 따라가 보세요</div>
+        <div class="font-bold text-[var(--color-ink-700)] font-display">어디서부터 볼지 모르겠다면, 곡 하나 만들기 로드맵을 따라가 보세요</div>
         <div class="text-sm text-[var(--color-ink-500)]">리듬 → 코드 → 멜로디 → 편곡 → 사운드 → 믹스, 핵심 레슨만 순서대로</div>
       </div>
       <span class="shrink-0 whitespace-nowrap gradient-brand text-white text-sm font-semibold px-4 py-2 rounded-xl">로드맵 보기 →</span>
@@ -32,7 +32,7 @@ const base = import.meta.env.BASE_URL;
       {areas.map(a => (
         <section>
           <div class="flex items-baseline gap-3 mb-4 flex-wrap">
-            <h2 class="text-xl font-bold" style="font-family:'Space Grotesk','Pretendard',sans-serif">{a.kr}</h2>
+            <h2 class="text-xl font-bold font-display">{a.kr}</h2>
             <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">{a.label}</span>
             <span class="text-sm text-[var(--color-ink-500)]">{a.desc.split(' — ')[0]}</span>
           </div>
@@ -47,7 +47,7 @@ const base = import.meta.env.BASE_URL;
                       ? <span class="text-[10px] font-mono text-[var(--color-violet)]">{h.count}개 토픽</span>
                       : <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[var(--color-surface-2)] text-[var(--color-ink-300)]">준비 중</span>}
                   </div>
-                  <h3 class="flex items-center gap-2 font-bold text-xl mb-1" style="font-family:'Space Grotesk','Pretendard',sans-serif">
+                  <h3 class="flex items-center gap-2 font-bold text-xl mb-1 font-display">
                     <span class={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-mono font-bold flex-none ${ready ? 'gradient-brand text-white' : 'bg-[var(--color-surface-2)] text-[var(--color-ink-300)]'}`}>{String(h.order).padStart(2, '0')}</span>
                     {h.kr}
                   </h3>

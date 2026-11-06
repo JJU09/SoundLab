@@ -1,7 +1,6 @@
 ---
 // 5도권 위젯 — 12개 조를 완전5도 간격으로 둘러놓은 원. 조를 누르면 조표·나란한조·이웃 조를 보여 주고 으뜸화음을 들려준다.
-interface Props { config?: Record<string, any>; }
-const { config = {} } = Astro.props;
+interface Props { config?: Record<string, any>; } // 설정 없음 (TopicWidget 공통 시그니처)
 // 시계 방향 = 5도 위. [장조, 나란한 단조, 조표(양수 ♯, 음수 ♭), 장조 으뜸음 pc]
 const KEYS: [string, string, number, number][] = [
   ['C', 'Am', 0, 0], ['G', 'Em', 1, 7], ['D', 'Bm', 2, 2], ['A', 'F♯m', 3, 9], ['E', 'C♯m', 4, 4], ['B', 'G♯m', 5, 11],
@@ -17,7 +16,7 @@ const pos = (i: number, r: number) => { const a = (i * 30 - 90) * Math.PI / 180;
         <svg class="text-white" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>
       </div>
       <div>
-        <span class="font-bold text-base" style="font-family:'Space Grotesk','Pretendard',sans-serif">5도권</span>
+        <span class="font-bold text-base font-display">5도권</span>
         <span class="text-sm text-[var(--color-ink-300)] ml-2">Circle of Fifths</span>
       </div>
     </div>
@@ -30,16 +29,16 @@ const pos = (i: number, r: number) => { const a = (i * 30 - 90) * Math.PI / 180;
         const [x1, y1] = pos(i, R1), [x2, y2] = pos(i, R2);
         return <g class="ck" data-i={i} style="cursor:pointer">
           <circle class="ck-maj" cx={x1} cy={y1} r="19" fill="white" stroke="#d6d1f5" />
-          <text x={x1} y={y1 + 4} text-anchor="middle" font-size={maj.length > 2 ? 9 : 13} font-weight="800" fill="#2d2d4a" style="font-family:'Space Grotesk','Pretendard',sans-serif">{maj}</text>
+          <text x={x1} y={y1 + 4} text-anchor="middle" font-size={maj.length > 2 ? 9 : 13} font-weight="800" fill="#2d2d4a" class="font-display">{maj}</text>
           <circle class="ck-min" cx={x2} cy={y2} r="15" fill="white" stroke="#e5e2f7" />
-          <text x={x2} y={y2 + 3.5} text-anchor="middle" font-size={min.length > 4 ? 7 : 10} font-weight="600" fill="#6b6b8e" style="font-family:'Space Grotesk','Pretendard',sans-serif">{min}</text>
+          <text x={x2} y={y2 + 3.5} text-anchor="middle" font-size={min.length > 4 ? 7 : 10} font-weight="600" fill="#6b6b8e" class="font-display">{min}</text>
         </g>;
       })}
       <text x={cx} y={cy - 4} text-anchor="middle" font-size="10" fill="#a0a0c0">시계 방향 = 5도 위</text>
       <text x={cx} y={cy + 10} text-anchor="middle" font-size="10" fill="#a0a0c0">안쪽 = 나란한 단조</text>
     </svg>
     <div class="info rounded-xl bg-[var(--color-surface-2)] border border-[var(--color-border)] px-4 py-3 text-center" aria-live="polite">
-      <div class="info-key text-2xl font-bold text-[var(--color-ink-700)]" style="font-family:'Space Grotesk','Pretendard',sans-serif">C 장조</div>
+      <div class="info-key text-2xl font-bold text-[var(--color-ink-700)] font-display">C 장조</div>
       <div class="info-sig text-sm text-[var(--color-violet)] font-semibold mt-0.5">조표 없음 · 나란한 단조 Am</div>
       <div class="info-nb text-xs text-[var(--color-ink-500)] mt-1">이웃 조(가장 가까운 조): F · G</div>
     </div>

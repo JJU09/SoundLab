@@ -29,7 +29,7 @@ const first = core.find((_, i) => !stages[0].optional || i >= stages[0].L.length
     </nav>
 
     <span class="text-xs font-mono px-2.5 py-1 rounded-full border border-[var(--color-violet-light)] text-[var(--color-violet)] bg-[var(--color-violet-glow)]">ROADMAP · {path.genre}</span>
-    <h1 class="text-3xl sm:text-4xl font-bold mt-4 mb-3 leading-tight" style="font-family:'Space Grotesk','Pretendard',sans-serif">
+    <h1 class="text-3xl sm:text-4xl font-bold mt-4 mb-3 leading-tight font-display">
       {path.kr} <span class="hidden sm:inline text-[var(--color-ink-300)] font-medium text-2xl ml-1">{path.title}</span>
     </h1>
     <p class="text-[var(--color-ink-700)] leading-relaxed mb-6">{path.desc}</p>
@@ -43,8 +43,7 @@ const first = core.find((_, i) => !stages[0].optional || i >= stages[0].L.length
           <div class="text-xs text-[var(--color-ink-500)] mt-1">{stages.some(s => s.optional) ? `준비 + ${stages.filter(s => !s.optional).length}단계` : `${stages.length}단계`} · 핵심 레슨 {core.length}개</div>
         </div>
         <a id="path-cta" href={first.href} data-core={JSON.stringify(core.map(l => l.id))} data-hrefs={JSON.stringify(core.map(l => l.href))}
-          class="shrink-0 whitespace-nowrap gradient-brand text-white font-semibold px-5 py-2.5 rounded-xl text-sm text-center transition hover:opacity-90"
-          style="font-family:'Space Grotesk','Pretendard',sans-serif">첫 레슨 시작하기 →</a>
+          class="shrink-0 whitespace-nowrap gradient-brand text-white font-semibold px-5 py-2.5 rounded-xl text-sm text-center transition hover:opacity-90 font-display">첫 레슨 시작하기 →</a>
       </div>
       <div class="mt-4">
         <div class="h-2 rounded-full bg-[var(--color-surface-2)] overflow-hidden"><div id="path-bar" class="h-full gradient-brand" style="width:0%"></div></div>
@@ -60,7 +59,7 @@ const first = core.find((_, i) => !stages[0].optional || i >= stages[0].L.length
           <span class="path-dot absolute left-0 top-0 w-10 h-10 sm:w-12 sm:h-12 rounded-xl gradient-brand text-white flex items-center justify-center font-mono font-bold text-sm" data-stage={JSON.stringify(s.lessons)}>{i}</span>
           <div class="p-5 rounded-2xl border border-[var(--color-border)] bg-white">
             <div class="flex items-baseline gap-2 flex-wrap mb-1">
-              <h2 class="text-xl font-bold" style="font-family:'Space Grotesk','Pretendard',sans-serif">{s.title}</h2>
+              <h2 class="text-xl font-bold font-display">{s.title}</h2>
               {s.optional && <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[var(--color-surface-2)] text-[var(--color-ink-500)]">선택 · 건반을 안다면 건너뛰기</span>}
             </div>
             <p class="text-sm text-[var(--color-ink-500)] mb-4">{s.goal}</p>

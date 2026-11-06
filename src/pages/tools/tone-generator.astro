@@ -15,7 +15,7 @@ const desc = '20Hz~20kHz 임의 주파수를 재생하는 무료 온라인 톤 �
 
   <div class="mb-6">
     <span class="text-xs font-mono px-2.5 py-1 rounded-full border border-[var(--color-violet-light)] text-[var(--color-violet)] bg-[var(--color-violet-glow)]">TOOLS</span>
-    <h1 class="text-3xl font-bold mt-3 mb-2" style="font-family:'Space Grotesk','Pretendard',sans-serif">톤 제너레이터 · 청력 테스트</h1>
+    <h1 class="text-3xl font-bold mt-3 mb-2 font-display">톤 제너레이터 · 청력 테스트</h1>
     <p class="text-[var(--color-ink-500)]">원하는 주파수의 순음을 재생합니다. 가청주파수·청력 테스트, 스피커 점검에. 볼륨을 낮게 시작하세요.</p>
   </div>
 
@@ -27,7 +27,7 @@ const desc = '20Hz~20kHz 임의 주파수를 재생하는 무료 온라인 톤 �
         <div class="hear-hint text-xs font-mono text-[var(--color-ink-300)] mt-2 h-4"></div>
       </div>
 
-      <button class="play-btn w-full gradient-brand text-white font-semibold py-4 rounded-xl text-lg flex items-center justify-center gap-2 transition hover:opacity-90" style="font-family:'Space Grotesk','Pretendard',sans-serif">
+      <button class="play-btn w-full gradient-brand text-white font-semibold py-4 rounded-xl text-lg flex items-center justify-center gap-2 transition hover:opacity-90 font-display">
         <span class="play-dot w-2.5 h-2.5 rounded-full bg-white"></span><span class="play-label">▶ 재생</span>
       </button>
 
@@ -101,7 +101,6 @@ function initToneGen(root: HTMLElement) {
   // 슬라이더 0..1000 ↔ 로그 20..20000Hz
   const posToHz = (p: number) => Math.round(20 * Math.pow(1000, p / 1000));
   const hzToPos = (hz: number) => Math.log(hz / 20) / Math.log(1000) * 1000;
-  const fmtHz = (hz: number) => hz >= 1000 ? (hz / 1000).toFixed(hz % 1000 === 0 ? 0 : 1) + 'kHz' : hz + 'Hz';
 
   const $ = <T extends HTMLElement>(s: string) => root.querySelector(s) as T;
   const display = $('.freq-display'), hint = $('.hear-hint');

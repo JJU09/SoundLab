@@ -1,8 +1,9 @@
-import { defineCollection, z } from 'astro:content';
+import { defineCollection } from 'astro:content';
+import { z } from 'astro/zod';
 import { glob } from 'astro/loaders';
 
 // 3대 영역 — 작곡에 필요한 지식을 "무엇을 쓸까 → 어떤 소리로 → 어떻게 완성할까"로 묶음.
-// 계획: .claude/plan-composition-curriculum.md
+// 계획: CURRICULUM.md
 export const AREAS = ['music', 'sound', 'production'] as const;
 export type Area = (typeof AREAS)[number];
 export const AREA_META: Record<Area, { kr: string; label: string; order: number; desc: string }> = {

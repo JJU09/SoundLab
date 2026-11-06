@@ -22,12 +22,12 @@ const related = [
   <div class="lofi rounded-2xl border border-[var(--color-border)] bg-white overflow-hidden">
     <!-- 트랜스포트 + 소스 -->
     <div class="flex items-center gap-4 flex-wrap px-5 py-4 border-b border-[var(--color-border)] bg-[var(--color-surface)]">
-      <button class="play-btn gradient-brand text-white text-sm font-semibold px-5 py-2 rounded-full transition hover:opacity-90 flex items-center gap-2" style="font-family:'Space Grotesk','Pretendard',sans-serif">
+      <button class="play-btn gradient-brand text-white text-sm font-semibold px-5 py-2 rounded-full transition hover:opacity-90 flex items-center gap-2 font-display">
         <span class="play-dot w-2 h-2 rounded-full bg-white"></span><span class="play-label">재생</span>
       </button>
       <div class="src-tabs flex gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" role="group" aria-label="소스">
         {[['pluck','멜로디'],['tone','톤'],['noise','노이즈']].map(([m,t]) => (
-          <button class="src-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all text-[var(--color-ink-500)]" data-src={m} style="font-family:'Space Grotesk','Pretendard',sans-serif">{t}</button>
+          <button class="src-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all text-[var(--color-ink-500)] font-display" data-src={m} >{t}</button>
         ))}
       </div>
       <div class="flex items-center gap-2 flex-1 min-w-[150px] justify-end">
@@ -53,7 +53,7 @@ const related = [
       <div class="flex items-center gap-2 flex-wrap">
         <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)] mr-1">프리셋</span>
         {[['clean','깨끗'],['vintage','8비트'],['phone','전화 음질'],['tape','테이프']].map(([k,t]) => (
-          <button class="preset-btn text-xs font-semibold px-3 py-1.5 rounded-lg border border-[var(--color-border)] text-[var(--color-ink-500)] hover:border-[var(--color-violet)] hover:text-[var(--color-violet)] transition" data-preset={k} style="font-family:'Space Grotesk','Pretendard',sans-serif">{t}</button>
+          <button class="preset-btn text-xs font-semibold px-3 py-1.5 rounded-lg border border-[var(--color-border)] text-[var(--color-ink-500)] hover:border-[var(--color-violet)] hover:text-[var(--color-violet)] transition font-display" data-preset={k} >{t}</button>
         ))}
       </div>
 
@@ -96,7 +96,6 @@ function initLofi(root: HTMLElement) {
   const core = new AudioCore();
   const src = new SignalSource(core);
   src.wave = 'sawtooth'; // 톤 소스는 톱니(에일리어싱 잘 보임)
-  let srcMode: SrcMode = 'pluck';
   let playing = false;
 
   const R = core.ctx.sampleRate; // 실제 출력 레이트
@@ -167,7 +166,6 @@ function initLofi(root: HTMLElement) {
   const toneFreq = $('.tone-freq');
   const srcBtns = [...root.querySelectorAll<HTMLElement>('.src-btn')];
   function setSrc(m: SrcMode) {
-    srcMode = m;
     toneFreq.classList.toggle('hidden', m !== 'tone');
     srcBtns.forEach(b => {
       const on = b.dataset.src === m;

@@ -35,7 +35,6 @@ function ranSuffix(s: string) {
   return '이란'; // 영문·숫자 등은 기본 '이란'
 }
 const heading = `${data.term}${ranSuffix(data.term)}?`;
-const fullTitle = `${heading} — ${hub.kr} 용어`;
 const topicHref = data.relatedTopic ? `${base}learn/${data.relatedTopic}/` : null;
 ---
 <Base title={heading} description={data.definition} type="article"
@@ -58,7 +57,7 @@ const topicHref = data.relatedTopic ? `${base}learn/${data.relatedTopic}/` : nul
       {hub.label.toUpperCase()} · 용어
     </span>
 
-    <h1 class="text-3xl sm:text-4xl font-bold mt-3 mb-2 leading-tight" style="font-family:'Space Grotesk','Pretendard',sans-serif">
+    <h1 class="text-3xl sm:text-4xl font-bold mt-3 mb-2 leading-tight font-display">
       {heading}
       <span class="text-[var(--color-ink-300)] font-medium text-2xl ml-2">{data.en}</span>
     </h1>
@@ -88,7 +87,7 @@ const topicHref = data.relatedTopic ? `${base}learn/${data.relatedTopic}/` : nul
           <a href={topicHref} class="group flex items-center gap-3 p-4 rounded-xl border border-[var(--color-border)] bg-white hover:border-[var(--color-violet)] hover:shadow-lg transition-all">
             <div class="min-w-0">
               <div class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)]">Learn · 더 깊이</div>
-              <div class="font-bold text-[var(--color-ink-700)] group-hover:text-[var(--color-violet)] transition text-sm" style="font-family:'Space Grotesk','Pretendard',sans-serif">{hub.kr} 허브에서 자세히 →</div>
+              <div class="font-bold text-[var(--color-ink-700)] group-hover:text-[var(--color-violet)] transition text-sm font-display">{hub.kr} 허브에서 자세히 →</div>
             </div>
           </a>
         )}
@@ -96,7 +95,7 @@ const topicHref = data.relatedTopic ? `${base}learn/${data.relatedTopic}/` : nul
           <a href={`${base}${data.relatedTool.path}`} class="group flex items-center gap-3 p-4 rounded-xl border border-[var(--color-border)] bg-white hover:border-[var(--color-violet)] hover:shadow-lg transition-all">
             <div class="min-w-0">
               <div class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)]">Tool · 도구</div>
-              <div class="font-bold text-[var(--color-ink-700)] group-hover:text-[var(--color-violet)] transition text-sm" style="font-family:'Space Grotesk','Pretendard',sans-serif">{data.relatedTool.name} 써보기 →</div>
+              <div class="font-bold text-[var(--color-ink-700)] group-hover:text-[var(--color-violet)] transition text-sm font-display">{data.relatedTool.name} 써보기 →</div>
             </div>
           </a>
         )}
@@ -104,7 +103,7 @@ const topicHref = data.relatedTopic ? `${base}learn/${data.relatedTopic}/` : nul
           <a href={`${base}${sandbox!.path}`} class="group flex items-center gap-3 p-4 rounded-xl border border-[var(--color-border)] bg-white hover:border-[var(--color-violet)] hover:shadow-lg transition-all">
             <div class="min-w-0">
               <div class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)]">연습실 · 실험</div>
-              <div class="font-bold text-[var(--color-ink-700)] group-hover:text-[var(--color-violet)] transition text-sm" style="font-family:'Space Grotesk','Pretendard',sans-serif">{sandbox!.name}에서 만져보기 →</div>
+              <div class="font-bold text-[var(--color-ink-700)] group-hover:text-[var(--color-violet)] transition text-sm font-display">{sandbox!.name}에서 만져보기 →</div>
             </div>
           </a>
         )}
@@ -130,7 +129,7 @@ const topicHref = data.relatedTopic ? `${base}learn/${data.relatedTopic}/` : nul
     <AdUnit />
   </div>
 
-  <script type="application/ld+json" set:html={JSON.stringify({
+  <script is:inline type="application/ld+json" set:html={JSON.stringify({
     '@context': 'https://schema.org',
     '@type': 'DefinedTerm',
     name: data.term,

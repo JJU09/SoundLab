@@ -37,7 +37,7 @@ const related = [
     <!-- 상단: 마스터 + 비주얼라이저 -->
     <div class="px-5 py-4 border-b border-[var(--color-border)] bg-[var(--color-surface)] space-y-3">
       <div class="flex items-center gap-4 flex-wrap">
-        <span class="text-sm font-bold text-[var(--color-ink-700)]" style="font-family:'Space Grotesk','Pretendard',sans-serif">건반을 누르거나 클릭해 연주하세요</span>
+        <span class="text-sm font-bold text-[var(--color-ink-700)] font-display">건반을 누르거나 클릭해 연주하세요</span>
         <div class="flex items-center gap-2 flex-1 min-w-[160px] justify-end">
           <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Master</span>
           <input type="range" class="sl-range master-range w-40" min="0" max="100" step="1" value="70" aria-label="마스터 볼륨" />
@@ -61,7 +61,7 @@ const related = [
       <div class="flex items-center gap-2 flex-wrap">
         <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)] mr-1">프리셋</span>
         {[['bass','두꺼운 베이스'],['pluck','플럭'],['pad','패드'],['lead','리드'],['reset','초기화']].map(([k,t]) => (
-          <button class="preset-btn text-xs font-semibold px-3 py-1.5 rounded-lg border border-[var(--color-border)] text-[var(--color-ink-500)] hover:border-[var(--color-violet)] hover:text-[var(--color-violet)] transition" data-preset={k} style="font-family:'Space Grotesk','Pretendard',sans-serif">{t}</button>
+          <button class="preset-btn text-xs font-semibold px-3 py-1.5 rounded-lg border border-[var(--color-border)] text-[var(--color-ink-500)] hover:border-[var(--color-violet)] hover:text-[var(--color-violet)] transition font-display" data-preset={k} >{t}</button>
         ))}
       </div>
 
@@ -230,7 +230,7 @@ function initSynth(root: HTMLElement) {
   }
   const id = (p: number) => p; // 선형 패스스루
 
-  const cMaster = mkSlider('.master-range', { toVal: id, toPos: id, fmt: v => v + '%', apply: v => core.setMaster(v) });
+  mkSlider('.master-range', { toVal: id, toPos: id, fmt: v => v + '%', apply: v => core.setMaster(v) });
   const cOct = mkSlider('.octave', { toVal: id, toPos: id, fmt: v => (v > 0 ? '+' : '') + v, apply: v => synth.octave = v });
   const cCut = mkSlider('.cutoff', { toVal: cutoffVal, toPos: cutoffPos, fmt: fmtHz, apply: v => synth.setCutoff(v) });
   const cReso = mkSlider('.reso', { toVal: resoVal, toPos: resoPos, fmt: v => v.toFixed(1), apply: v => synth.setResonance(v) });

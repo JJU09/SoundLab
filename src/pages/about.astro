@@ -49,7 +49,7 @@ const sections = [
     <!-- 헤더 -->
     <div class="mb-10">
       <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">About</span>
-      <h1 class="text-3xl sm:text-4xl font-bold mt-2 mb-3" style="font-family:'Space Grotesk','Pretendard',sans-serif">SoundLab 소개</h1>
+      <h1 class="text-3xl sm:text-4xl font-bold mt-2 mb-3 font-display">SoundLab 소개</h1>
       <p class="text-[var(--color-ink-500)] leading-relaxed">
         소리를 <b class="text-[var(--color-ink-700)]">직접 만들며</b> 배우는 음악의 원리 —
         설치도, 회원가입도 없이 브라우저에서 바로.
@@ -64,7 +64,7 @@ const sections = [
             <span class="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-mono font-bold text-white gradient-brand">
               {String(i + 1).padStart(2, '0')}
             </span>
-            <h2 class="text-base font-bold" style="font-family:'Space Grotesk','Pretendard',sans-serif">{s.title}</h2>
+            <h2 class="text-base font-bold font-display">{s.title}</h2>
           </div>
 
           {s.body && (
@@ -89,7 +89,7 @@ const sections = [
 
     <!-- CTA -->
     <div class="mt-8 flex flex-wrap gap-3">
-      <a href={`${base}path/first-song/`} class="gradient-brand text-white text-sm font-semibold px-5 py-2.5 rounded-full transition hover:opacity-90" style="font-family:'Space Grotesk','Pretendard',sans-serif">첫 곡 만들기 시작 →</a>
+      <a href={`${base}path/first-song/`} class="gradient-brand text-white text-sm font-semibold px-5 py-2.5 rounded-full transition hover:opacity-90 font-display">첫 곡 만들기 시작 →</a>
       <a href={`${base}sandbox/`} class="text-sm font-semibold px-5 py-2.5 rounded-full border border-[var(--color-border)] text-[var(--color-ink-500)] hover:border-[var(--color-violet)] hover:text-[var(--color-violet)] transition">연습실 열기</a>
     </div>
   </div>

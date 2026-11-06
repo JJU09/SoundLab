@@ -11,10 +11,24 @@ const accent = color === 'violet' ? 'var(--color-violet)' : 'var(--color-blue)';
 // 평면 배열 → 레벨 무관 단일 그룹 / 레벨 객체 → 레벨별 그룹(.lvl 래핑)
 const isArray = Array.isArray(questions);
 const order: ('easy' | 'normal' | 'hard')[] = ['easy', 'normal', 'hard'];
-const groups = isArray
+// 보기 순서 섞기 — 원본 데이터는 정답이 B에 몰려 있어 위치로 맞힐 수 있음.
+// 문항 텍스트로 시드를 만든 결정적 셔플이라 빌드마다 같은 순서(정적 HTML·캐시 안정).
+const seeded = (text: string) => {
+  let h = 2166136261;
+  for (let i = 0; i < text.length; i++) { h ^= text.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return () => { h ^= h << 13; h ^= h >>> 17; h ^= h << 5; return ((h >>> 0) % 1_000_000) / 1_000_000; };
+};
+const shuffled = (item: QuizQuestion): QuizQuestion => {
+  const rnd = seeded(item.q);
+  const idx = item.options.map((_, i) => i);
+  for (let i = idx.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [idx[i], idx[j]] = [idx[j], idx[i]]; }
+  return { ...item, options: idx.map(i => item.options[i]), answer: idx.indexOf(item.answer) };
+};
+const groups = (isArray
   ? [{ level: null as string | null, items: questions as QuizQuestion[] }]
   : order.filter(l => (questions as LevelQuizzes)[l]?.length)
-      .map(l => ({ level: l as string, items: (questions as LevelQuizzes)[l]! }));
+      .map(l => ({ level: l as string, items: (questions as LevelQuizzes)[l]! })))
+  .map(g => ({ ...g, items: g.items.map(shuffled) }));
 ---
 
 {groups.map(group => (

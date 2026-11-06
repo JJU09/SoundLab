@@ -33,7 +33,7 @@ interface Props {
 const { data, prev, next } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const hub = HUB_META[data.hub];
-const sandbox = SANDBOX_OF[data.hub]; // 허브 샌드박스 크로스링크 (학습→자유 실험 동선)
+const sandbox = SANDBOX_OF[data.hub]; // 허브 연습실 크로스링크 (학습→자유 실험 동선)
 const hasWidget = data.widget && data.widget !== 'none';
 const quiz = data.quiz ? QUIZZES[data.quiz] : null;
 const num = String(data.order).padStart(2, '0');
@@ -128,7 +128,7 @@ const accent = data.color === 'violet'
           <div class="mt-10 p-5 rounded-2xl border border-[var(--color-violet-light)] bg-[var(--color-violet-glow)]">
             <div class="flex items-center justify-between gap-3 flex-wrap mb-3">
               <a href={`${base}path/${p.path.id}/`} class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)] hover:underline">
-                학습 경로 · {p.path.kr} · {p.stageIdx}단계 {p.stage.title}
+                로드맵 · {p.path.kr} · {p.stageIdx}단계 {p.stage.title}
               </a>
               <span class="text-[10px] font-mono text-[var(--color-ink-500)]">{p.step} / {p.total}</span>
             </div>
@@ -136,15 +136,15 @@ const accent = data.color === 'violet'
             {p.nextInfo ? (
               <a href={p.nextInfo.href} class="group flex items-center justify-between gap-3">
                 <div class="min-w-0">
-                  <div class="text-xs text-[var(--color-ink-500)]">{p.nextStage ? `다음 단계 · ${p.nextStage.title}` : '경로에서 다음 레슨'}</div>
+                  <div class="text-xs text-[var(--color-ink-500)]">{p.nextStage ? `다음 단계 · ${p.nextStage.title}` : '로드맵 다음 레슨'}</div>
                   <div class="font-bold text-[var(--color-ink-700)] group-hover:text-[var(--color-violet)] transition" style="font-family:'Space Grotesk','Pretendard',sans-serif">{p.nextInfo.kr} <span class="font-medium text-[var(--color-ink-300)]">{p.nextInfo.title}</span></div>
                 </div>
                 <span class="shrink-0 whitespace-nowrap gradient-brand text-white text-sm font-semibold px-4 py-2 rounded-xl">다음 →</span>
               </a>
             ) : (
               <a href={`${base}path/${p.path.id}/`} class="group flex items-center justify-between gap-3">
-                <div class="font-bold text-[var(--color-ink-700)]" style="font-family:'Space Grotesk','Pretendard',sans-serif">경로의 마지막 레슨이에요. 단계별 체크리스트로 곡을 점검해 보세요.</div>
-                <span class="shrink-0 whitespace-nowrap gradient-brand text-white text-sm font-semibold px-4 py-2 rounded-xl">경로 보기</span>
+                <div class="font-bold text-[var(--color-ink-700)]" style="font-family:'Space Grotesk','Pretendard',sans-serif">로드맵의 마지막 레슨이에요. 단계별 체크리스트로 곡을 점검해 보세요.</div>
+                <span class="shrink-0 whitespace-nowrap gradient-brand text-white text-sm font-semibold px-4 py-2 rounded-xl">로드맵 보기</span>
               </a>
             )}
           </div>
@@ -158,9 +158,9 @@ const accent = data.color === 'violet'
               <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M5 3v18M5 12h14M19 3v18M9 7h.01M15 17h.01"/></svg>
             </div>
             <div class="min-w-0 flex-1">
-              <div class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)]">Sandbox · 직접 실험</div>
+              <div class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)]">연습실 · 직접 실험</div>
               <div class="font-bold text-[var(--color-ink-700)] group-hover:text-[var(--color-violet)] transition" style="font-family:'Space Grotesk','Pretendard',sans-serif">{sandbox.name}에서 자유롭게 실험해보기</div>
-              <p class="text-sm text-[var(--color-ink-500)] mt-0.5">{hub.kr} 허브의 요소를 직접 조합하며 소리를 만들어 보세요.</p>
+              <p class="text-sm text-[var(--color-ink-500)] mt-0.5">{hub.kr} 레슨에서 배운 요소를 직접 조합하며 소리를 만들어 보세요.</p>
             </div>
             <svg class="w-5 h-5 flex-none text-[var(--color-ink-300)] group-hover:text-[var(--color-violet)] group-hover:translate-x-0.5 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
           </a>

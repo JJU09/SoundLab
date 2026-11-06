@@ -26,7 +26,7 @@ const base = import.meta.env.BASE_URL;
 const hub = HUB_META[data.hub];
 const sandbox = SANDBOX_OF[data.hub];
 const hasWidget = data.widget && data.widget !== 'none';
-const showSandbox = sandbox && data.relatedTopic; // 도구 전용 용어엔 무관한 샌드박스 카드 숨김
+const showSandbox = sandbox && data.relatedTopic; // 도구 전용 용어엔 무관한 연습실 카드 숨김
 
 // "X란?" 조사 — 마지막 한글 음절에 받침 있으면 "이란", 없으면 "란".
 function ranSuffix(s: string) {
@@ -41,7 +41,7 @@ const topicHref = data.relatedTopic ? `${base}learn/${data.relatedTopic}/` : nul
 <Base title={heading} description={data.definition} type="article"
   breadcrumbs={[
     { name: '홈', url: base },
-    { name: '용어집', url: `${base}glossary/` },
+    { name: '사전', url: `${base}glossary/` },
     { name: data.term, url: Astro.url.pathname },
   ]}>
 
@@ -50,7 +50,7 @@ const topicHref = data.relatedTopic ? `${base}learn/${data.relatedTopic}/` : nul
     <!-- 브레드크럼 -->
     <nav class="flex items-center gap-2 text-xs font-mono text-[var(--color-ink-300)] mb-8">
       <a href={base} class="hover:text-[var(--color-violet)] transition">홈</a><span>/</span>
-      <a href={`${base}glossary/`} class="hover:text-[var(--color-violet)] transition">용어집</a><span>/</span>
+      <a href={`${base}glossary/`} class="hover:text-[var(--color-violet)] transition">사전</a><span>/</span>
       <span class="text-[var(--color-ink-700)]">{data.term}</span>
     </nav>
 
@@ -103,7 +103,7 @@ const topicHref = data.relatedTopic ? `${base}learn/${data.relatedTopic}/` : nul
         {showSandbox && (
           <a href={`${base}${sandbox!.path}`} class="group flex items-center gap-3 p-4 rounded-xl border border-[var(--color-border)] bg-white hover:border-[var(--color-violet)] hover:shadow-lg transition-all">
             <div class="min-w-0">
-              <div class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)]">Sandbox · 실험</div>
+              <div class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)]">연습실 · 실험</div>
               <div class="font-bold text-[var(--color-ink-700)] group-hover:text-[var(--color-violet)] transition text-sm" style="font-family:'Space Grotesk','Pretendard',sans-serif">{sandbox!.name}에서 만져보기 →</div>
             </div>
           </a>
@@ -124,7 +124,7 @@ const topicHref = data.relatedTopic ? `${base}learn/${data.relatedTopic}/` : nul
     )}
 
     <div class="mt-8">
-      <a href={`${base}glossary/`} class="text-sm font-medium text-[var(--color-ink-500)] hover:text-[var(--color-violet)] transition">← 용어집 전체 보기</a>
+      <a href={`${base}glossary/`} class="text-sm font-medium text-[var(--color-ink-500)] hover:text-[var(--color-violet)] transition">← 사전 전체 보기</a>
     </div>
 
     <AdUnit />
@@ -136,6 +136,6 @@ const topicHref = data.relatedTopic ? `${base}learn/${data.relatedTopic}/` : nul
     name: data.term,
     alternateName: data.en,
     description: data.definition,
-    inDefinedTermSet: { '@type': 'DefinedTermSet', name: `SoundLab ${hub.kr} 용어집` },
+    inDefinedTermSet: { '@type': 'DefinedTermSet', name: `SoundLab ${hub.kr} 사전` },
   })} />
 </Base>

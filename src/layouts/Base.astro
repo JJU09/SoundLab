@@ -36,7 +36,7 @@ const sandboxNav = hubsSorted.map(h => ({
   id: h, kr: HUB_META[h].kr, label: HUB_META[h].label,
   href: SANDBOX_OF[h] ? `${base}${SANDBOX_OF[h]!.path}` : undefined,
   ready: !!SANDBOX_OF[h],
-})).filter(s => s.ready); // 샌드박스가 있는 허브만 노출
+})).filter(s => s.ready); // 연습실이 있는 허브만 노출
 ---
 <!doctype html>
 <html lang="ko">
@@ -116,11 +116,11 @@ const sandboxNav = hubsSorted.map(h => ({
       </a>
 
       <nav class="hidden sm:flex items-center gap-1">
-        <a href={`${base}path/first-song/`} class="nav-link">곡 만들기</a>
+        <a href={`${base}path/first-song/`} class="nav-link">로드맵</a>
         <!-- 지식 허브 드롭다운 -->
         <div class="nav-dd relative">
           <a href={`${base}learn/`} class="nav-link inline-flex items-center gap-1">
-            지식 허브
+            레슨
             <svg class="nav-chev w-3 h-3 transition-transform" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
           </a>
           <div class="nav-panel">
@@ -144,7 +144,7 @@ const sandboxNav = hubsSorted.map(h => ({
         <!-- 샌드박스 드롭다운 -->
         <div class="nav-dd relative">
           <a href={`${base}sandbox/`} class="nav-link inline-flex items-center gap-1">
-            샌드박스
+            연습실
             <svg class="nav-chev w-3 h-3 transition-transform" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
           </a>
           <div class="nav-panel">
@@ -167,7 +167,7 @@ const sandboxNav = hubsSorted.map(h => ({
         <a href={`${base}tools/`} class="nav-link">도구</a>
 
         <!-- 용어집 -->
-        <a href={`${base}glossary/`} class="nav-link">용어집</a>
+        <a href={`${base}glossary/`} class="nav-link">사전</a>
       </nav>
 
       <div class="flex items-center gap-2">
@@ -195,8 +195,8 @@ const sandboxNav = hubsSorted.map(h => ({
     <!-- 모바일 메뉴 패널 (sm 미만에서만) -->
     <div id="mobile-menu" class="sm:hidden hidden border-t border-[var(--color-border)] bg-white/95 backdrop-blur-md">
       <nav class="max-w-6xl mx-auto px-4 py-3 max-h-[calc(100dvh-3.5rem)] overflow-y-auto flex flex-col gap-0.5">
-        <a href={`${base}path/first-song/`} class="mm-head">곡 하나 만들기</a>
-        <a href={`${base}learn/`} class="mm-head">지식 허브</a>
+        <a href={`${base}path/first-song/`} class="mm-head">로드맵</a>
+        <a href={`${base}learn/`} class="mm-head">레슨</a>
         <div class="mm-group">
           {hubNav.map((h, i) => [
             (i === 0 || hubNav[i - 1].area !== h.area) && <span class="mm-area">{h.areaKr}</span>,
@@ -206,7 +206,7 @@ const sandboxNav = hubsSorted.map(h => ({
             <span class="mm-sub mm-off"><span class="mm-en">{h.label}</span><span>{h.kr}</span><span class="mm-badge">준비 중</span></span>
           )])}
         </div>
-        <a href={`${base}sandbox/`} class="mm-head">샌드박스</a>
+        <a href={`${base}sandbox/`} class="mm-head">연습실</a>
         <div class="mm-group">
           {sandboxNav.map(s => s.ready ? (
             <a href={s.href} class="mm-sub"><span class="mm-en">{s.label}</span><span>{s.kr}</span></a>
@@ -215,7 +215,7 @@ const sandboxNav = hubsSorted.map(h => ({
           ))}
         </div>
         <a href={`${base}tools/`} class="mm-head">도구</a>
-        <a href={`${base}glossary/`} class="mm-head">용어집</a>
+        <a href={`${base}glossary/`} class="mm-head">사전</a>
       </nav>
     </div>
   </header>

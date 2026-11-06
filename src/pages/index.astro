@@ -66,12 +66,12 @@ const tools = [
         <a href={`${base}learn/`}
           class="border border-[var(--color-border)] text-[var(--color-ink-700)] font-semibold px-7 py-3 rounded-xl text-[15px] transition hover:border-[var(--color-violet)] hover:text-[var(--color-violet)] bg-white"
           style="font-family:'Space Grotesk','Pretendard',sans-serif">
-          지식 허브 둘러보기
+          레슨 둘러보기
         </a>
         <a href={`${base}sandbox/`}
           class="border border-[var(--color-border)] text-[var(--color-ink-700)] font-semibold px-7 py-3 rounded-xl text-[15px] transition hover:border-[var(--color-violet)] hover:text-[var(--color-violet)] bg-white"
           style="font-family:'Space Grotesk','Pretendard',sans-serif">
-          샌드박스 열기
+          연습실 열기
         </a>
       </div>
     </div>
@@ -82,11 +82,11 @@ const tools = [
     <a href={`${base}path/first-song/`} class="group block p-6 sm:p-8 rounded-3xl border border-[var(--color-violet-light)] bg-[var(--color-violet-glow)] hover:shadow-lg transition-all">
       <div class="flex flex-col md:flex-row md:items-end gap-4 justify-between mb-6">
         <div>
-          <div class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)] mb-1">Learning Path · 처음이라면 여기서</div>
+          <div class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)] mb-1">Roadmap · 처음이라면 여기서</div>
           <h2 class="text-2xl font-bold mb-1" style="font-family:'Space Grotesk','Pretendard',sans-serif">곡 하나 만들기</h2>
           <p class="text-sm text-[var(--color-ink-500)] max-w-xl">{firstSong.desc}</p>
         </div>
-        <span class="shrink-0 whitespace-nowrap self-start md:self-auto gradient-brand text-white text-sm font-semibold px-5 py-2.5 rounded-xl">경로 보기 →</span>
+        <span class="shrink-0 whitespace-nowrap self-start md:self-auto gradient-brand text-white text-sm font-semibold px-5 py-2.5 rounded-xl">로드맵 보기 →</span>
       </div>
       <ol class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
         {firstSong.stages.map((st, i) => (
@@ -103,7 +103,7 @@ const tools = [
   <!-- 지식 허브 쇼케이스 (영역별) -->
   <section class="max-w-6xl mx-auto px-4 sm:px-6 pb-20">
     <div class="flex items-baseline gap-3 mb-8 flex-wrap">
-      <h2 class="text-xl font-bold" style="font-family:'Space Grotesk','Pretendard',sans-serif">작곡에 필요한 {hubTotal}가지 지식 허브</h2>
+      <h2 class="text-xl font-bold" style="font-family:'Space Grotesk','Pretendard',sans-serif">작곡에 필요한 {hubTotal}가지 분야</h2>
       <span class="text-sm text-[var(--color-ink-300)] font-mono">무엇을 쓸까 · 어떤 소리로 · 어떻게 완성할까</span>
     </div>
     <div class="space-y-8">
@@ -154,7 +154,7 @@ const tools = [
   <section class="max-w-6xl mx-auto px-4 sm:px-6 pb-20">
     <div class="flex items-baseline justify-between gap-3 mb-8 flex-wrap">
       <div class="flex items-baseline gap-3 flex-wrap">
-        <h2 class="text-xl font-bold" style="font-family:'Space Grotesk','Pretendard',sans-serif">직접 만지는 샌드박스</h2>
+        <h2 class="text-xl font-bold" style="font-family:'Space Grotesk','Pretendard',sans-serif">직접 만지는 연습실</h2>
         <span class="text-sm text-[var(--color-ink-300)] font-mono">배운 걸 자유롭게 실험하는 5개 공간</span>
       </div>
       <a href={`${base}sandbox/`} class="text-sm font-medium text-[var(--color-violet)] hover:underline whitespace-nowrap" style="font-family:'Space Grotesk','Pretendard',sans-serif">전체 보기 →</a>

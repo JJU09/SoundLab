@@ -18,12 +18,12 @@ const { title, en, desc, related = [], relatedNote } = Astro.props;
 <div class="max-w-5xl mx-auto px-4 sm:px-6 py-10">
   <nav class="flex items-center gap-2 text-xs font-mono text-[var(--color-ink-300)] mb-6">
     <a href={base} class="hover:text-[var(--color-violet)] transition">홈</a><span>/</span>
-    <a href={`${base}sandbox/`} class="hover:text-[var(--color-violet)] transition">샌드박스</a><span>/</span>
+    <a href={`${base}sandbox/`} class="hover:text-[var(--color-violet)] transition">연습실</a><span>/</span>
     <span class="text-[var(--color-ink-700)]">{title}</span>
   </nav>
 
   <div class="mb-6">
-    <span class="text-xs font-mono px-2.5 py-1 rounded-full border border-[var(--color-violet-light)] text-[var(--color-violet)] bg-[var(--color-violet-glow)]">SANDBOX</span>
+    <span class="text-xs font-mono px-2.5 py-1 rounded-full border border-[var(--color-violet-light)] text-[var(--color-violet)] bg-[var(--color-violet-glow)]">PRACTICE ROOM</span>
     <h1 class="text-3xl font-bold mt-3 mb-2" style="font-family:'Space Grotesk','Pretendard',sans-serif">{title} <span class="text-base font-normal text-[var(--color-ink-300)] ml-1">{en}</span></h1>
     <p class="text-[var(--color-ink-500)]">{desc}</p>
   </div>

@@ -19,16 +19,16 @@ const stages = path.stages.map(s => ({ ...s, L: s.lessons.map(info), D: (s.deepe
 const core = stages.flatMap(s => s.L);
 const first = core.find((_, i) => !stages[0].optional || i >= stages[0].L.length) ?? core[0];
 ---
-<Base title={`${path.kr} — 학습 경로`} description={path.desc}>
+<Base title={`${path.kr} — 로드맵`} description={path.desc}>
   <div class="max-w-4xl mx-auto px-4 sm:px-6 py-12">
 
     <nav class="flex items-center gap-2 text-xs font-mono text-[var(--color-ink-300)] mb-8">
       <a href={base} class="hover:text-[var(--color-violet)] transition">홈</a><span>/</span>
-      <a href={`${base}path/`} class="hover:text-[var(--color-violet)] transition">학습 경로</a><span>/</span>
+      <a href={`${base}path/`} class="hover:text-[var(--color-violet)] transition">로드맵</a><span>/</span>
       <span class="text-[var(--color-ink-700)]">{path.kr}</span>
     </nav>
 
-    <span class="text-xs font-mono px-2.5 py-1 rounded-full border border-[var(--color-violet-light)] text-[var(--color-violet)] bg-[var(--color-violet-glow)]">LEARNING PATH · {path.genre}</span>
+    <span class="text-xs font-mono px-2.5 py-1 rounded-full border border-[var(--color-violet-light)] text-[var(--color-violet)] bg-[var(--color-violet-glow)]">ROADMAP · {path.genre}</span>
     <h1 class="text-3xl sm:text-4xl font-bold mt-4 mb-3 leading-tight" style="font-family:'Space Grotesk','Pretendard',sans-serif">
       {path.kr} <span class="hidden sm:inline text-[var(--color-ink-300)] font-medium text-2xl ml-1">{path.title}</span>
     </h1>
@@ -98,7 +98,7 @@ const first = core.find((_, i) => !stages[0].optional || i >= stages[0].L.length
     </ol>
 
     <p class="text-sm text-[var(--color-ink-500)] mt-10 text-center">
-      주제별로 찾아보고 싶다면 <a href={`${base}learn/`} class="text-[var(--color-violet)] hover:underline">지식 허브</a>에서 전체 {all.length}개 레슨을 둘러보세요.
+      주제별로 찾아보고 싶다면 <a href={`${base}learn/`} class="text-[var(--color-violet)] hover:underline">레슨</a>에서 전체 {all.length}개 레슨을 둘러보세요.
     </p>
   </div>
 

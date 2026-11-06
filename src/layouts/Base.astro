@@ -116,6 +116,7 @@ const sandboxNav = hubsSorted.map(h => ({
       </a>
 
       <nav class="hidden sm:flex items-center gap-1">
+        <a href={`${base}path/first-song/`} class="nav-link">곡 만들기</a>
         <!-- 지식 허브 드롭다운 -->
         <div class="nav-dd relative">
           <a href={`${base}learn/`} class="nav-link inline-flex items-center gap-1">
@@ -178,7 +179,7 @@ const sandboxNav = hubsSorted.map(h => ({
             <span class="hidden sm:inline">피드백</span>
           </a>
         )}
-        <a href={`${base}learn/`}
+        <a href={`${base}path/first-song/`}
           class="inline-flex items-center gradient-brand text-white text-sm font-semibold px-4 py-1.5 min-h-[40px] rounded-full transition hover:opacity-90"
           style="font-family:'Space Grotesk','Pretendard',sans-serif">
           시작하기
@@ -194,6 +195,7 @@ const sandboxNav = hubsSorted.map(h => ({
     <!-- 모바일 메뉴 패널 (sm 미만에서만) -->
     <div id="mobile-menu" class="sm:hidden hidden border-t border-[var(--color-border)] bg-white/95 backdrop-blur-md">
       <nav class="max-w-6xl mx-auto px-4 py-3 max-h-[calc(100dvh-3.5rem)] overflow-y-auto flex flex-col gap-0.5">
+        <a href={`${base}path/first-song/`} class="mm-head">곡 하나 만들기</a>
         <a href={`${base}learn/`} class="mm-head">지식 허브</a>
         <div class="mm-group">
           {hubNav.map((h, i) => [

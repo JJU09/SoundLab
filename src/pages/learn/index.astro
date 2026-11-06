@@ -19,6 +19,15 @@ const base = import.meta.env.BASE_URL;
       <p class="text-lg text-[var(--color-ink-500)]">작곡에 필요한 지식을 세 영역으로 나눴어요 — 무엇을 쓸까, 어떤 소리로, 어떻게 완성할까</p>
     </div>
 
+    <a href={`${base}path/first-song/`} class="group flex items-center justify-between gap-4 p-5 mb-10 rounded-2xl border border-[var(--color-violet-light)] bg-[var(--color-violet-glow)] hover:shadow-md transition">
+      <div class="min-w-0">
+        <div class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)]">처음이라면</div>
+        <div class="font-bold text-[var(--color-ink-700)]" style="font-family:'Space Grotesk','Pretendard',sans-serif">어디서부터 볼지 모르겠다면, 곡 하나 만들기 경로를 따라가 보세요</div>
+        <div class="text-sm text-[var(--color-ink-500)]">리듬 → 코드 → 멜로디 → 편곡 → 사운드 → 믹스, 핵심 레슨만 순서대로</div>
+      </div>
+      <span class="shrink-0 whitespace-nowrap gradient-brand text-white text-sm font-semibold px-4 py-2 rounded-xl">경로 보기 →</span>
+    </a>
+
     <div class="space-y-10">
       {areas.map(a => (
         <section>

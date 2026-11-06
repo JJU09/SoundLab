@@ -1,0 +1,22 @@
+---
+import Base from '../../layouts/Base.astro';
+import { PATHS } from '../../lib/paths';
+const base = import.meta.env.BASE_URL;
+---
+<Base title="학습 경로" description="허브를 가로질러 곡 하나를 완성하는 순서대로 배우는 SoundLab 학습 경로.">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 py-12">
+    <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Learning Path</span>
+    <h1 class="text-3xl sm:text-4xl font-bold mt-2 mb-2" style="font-family:'Space Grotesk','Pretendard',sans-serif">학습 경로</h1>
+    <p class="text-lg text-[var(--color-ink-500)] mb-10">지식 허브가 주제별 백과라면, 경로는 곡 하나를 완성하는 순서예요.</p>
+    <div class="grid gap-4">
+      {PATHS.map(p => (
+        <a href={`${base}path/${p.id}/`} class="group p-6 rounded-2xl border border-[var(--color-border)] bg-white hover:border-[var(--color-violet)] hover:-translate-y-0.5 transition-all">
+          <div class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)] mb-1">{p.genre} · {p.stages.filter(s => !s.optional).length}단계</div>
+          <h2 class="text-xl font-bold mb-1" style="font-family:'Space Grotesk','Pretendard',sans-serif">{p.kr}</h2>
+          <p class="text-sm text-[var(--color-ink-500)] mb-3">{p.desc}</p>
+          <div class="flex flex-wrap gap-1.5">{p.stages.map((s, i) => <span class="text-[11px] font-mono px-2 py-0.5 rounded-full bg-[var(--color-surface-2)] text-[var(--color-ink-500)]">{i}. {s.title}</span>)}</div>
+        </a>
+      ))}
+    </div>
+  </div>
+</Base>

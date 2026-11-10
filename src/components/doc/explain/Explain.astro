@@ -60,7 +60,7 @@ if (message.length > 60) console.warn(`[Explain] 핵심 문장이 깁니다(${me
   .ex-q { font-size: 13px; color: #6b6b8e; }
   .ex-panels { display: grid; grid-template-columns: 1fr; gap: 10px; }
   @media (min-width: 640px) { .ex-panels:not(.one) { grid-template-columns: 1fr 1fr; } }
-  .ex-panel { position: relative; border-radius: 12px; padding: 30px 8px 8px; }
+  .ex-panel { position: relative; border-radius: 12px; padding: 30px 8px 8px; display: flex; flex-direction: column; justify-content: center; } /* 두 칸 높이가 다르면 그림을 세로 가운데로 */
   .ex-panel.meta { background: #fff8ee; border: 1px solid #f3dfc2; }
   .ex-panel.tech { background-color: #fff; border: 1px solid #e2e2f0;
     background-image: linear-gradient(#f1f2f8 1px, transparent 1px), linear-gradient(90deg, #f1f2f8 1px, transparent 1px); background-size: 16px 16px; }

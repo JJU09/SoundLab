@@ -1,0 +1,10 @@
+---
+// 라벨 — 할로(바탕색 테두리)로 선 위에서도 읽힌다. 크기는 TYPE 4단만.
+import { TYPE, INK } from '../tokens';
+interface Props { x: number; y: number; size?: keyof typeof TYPE; color?: string; anchor?: 'start' | 'middle' | 'end';
+  weight?: number; halo?: string | false; num?: boolean; rotate?: number; }
+const { x, y, size = 'label', color = INK.ink, anchor = 'start', weight = 600, halo = '#ffffff', num = false, rotate } = Astro.props;
+---
+<text x={x} y={y} text-anchor={anchor} font-size={TYPE[size]} font-weight={weight} fill={color} class={num ? 'num' : undefined}
+  transform={rotate ? `rotate(${rotate} ${x} ${y})` : undefined}
+  {...(halo ? { stroke: halo, 'stroke-width': 3, 'stroke-linejoin': 'round', 'paint-order': 'stroke', 'data-halo': '1' } : {})}><slot /></text>

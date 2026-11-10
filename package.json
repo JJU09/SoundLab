@@ -10,7 +10,8 @@
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",
-    "astro": "astro"
+    "astro": "astro",
+    "fig:qa": "node scripts/fig-qa.cjs fig-qa-out"
   },
   "dependencies": {
     "@astrojs/mdx": "^6.0.3",

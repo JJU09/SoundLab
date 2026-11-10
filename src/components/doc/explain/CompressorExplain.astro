@@ -1,36 +1,46 @@
 ---
 // 파일럿 ② 작동 원리형 — 컴프레서: 문지기 비유 + 입력·출력 전달 곡선 (Threshold −20 dB, 4:1)
+// 문 높이(인방 아래 끝) = 기준선 y 를 한 값(DOOR)으로 공유해 비유와 기준이 정확히 맞는다.
 import Explain from './Explain.astro';
-import { INK, META, TECH } from './tokens';
+import Label from './parts/Label.astro';
+import Arrow from './parts/Arrow.astro';
+import { INK, META, TECH, FILL, STROKE, DASH } from './tokens';
+import { capsule } from './parts/geo';
 interface Props { simple?: boolean; }
 const { simple = false } = Astro.props;
-const uid = 'cmp' + Math.random().toString(36).slice(2, 7);
 
-// ── 비유: 문 높이(=Threshold)보다 큰 사람만 눌러서 통과. 넘은 키는 4분의 1만 남음(4:1)
-const FLOOR = 196, DOOR = 86;
+// ── 비유: 문 높이보다 큰 사람만 눌러서 통과. 넘은 키는 4분의 1만 남음(4:1)
+const FLOOR = 192, DOOR = 92;
 const squash = (top: number) => (top < DOOR ? DOOR - (DOOR - top) / 4 : top);
-const before = [{ x: 26, top: 150, c: META.sky }, { x: 56, top: 112, c: META.leaf }, { x: 90, top: 40, c: META.coral }];
-const after = [{ x: 232, top: 150, c: META.sky }, { x: 262, top: 112, c: META.leaf }, { x: 294, top: squash(40), c: META.coral }];
-const W = 24;
-const people = [...before, ...after].map(p => ({ ...p, h: FLOOR - p.top, eyeY: p.top + 12 }));
-const ghostTop = 40, tallAfter = after[2];
+const P = (cx: number, w: number, top: number, c: string) => ({ cx, w, top, c, d: capsule(cx, FLOOR, w, FLOOR - top) });
+const before = [P(22, 22, 142, META.sky), P(50, 24, 110, META.leaf), P(80, 26, 40, META.coral)];
+const after = [P(222, 22, 142, META.sky), P(250, 24, 110, META.leaf), P(284, 26, squash(40), META.coral)];
+const tallTop = squash(40), GR = 13;
+const ghost = `M${284 - GR},${tallTop + GR} V${40 + GR} A${GR},${GR} 0 0 1 ${284 + GR},${40 + GR} V${tallTop + GR}`; // 깎인 부분만(바뀐 구간만 유령으로)
+const keeper = P(148, 20, 130, META.sun);
+const kc = keeper.cx, kt = keeper.top;
+const cap = `M${kc - 13},${kt + 8} H${kc + 13} L${kc + 9},${kt + 2} Q${kc},${kt - 6} ${kc - 9},${kt + 2} Z`;
+// 두 팔을 비스듬히 벌려 "잠깐!" — 손바닥(원)은 문기둥과 4 이상 떨어짐
+const arms = [`M${kc - 9},${kt + 30} L${kc - 17},${kt + 16}`, `M${kc + 9},${kt + 30} L${kc + 17},${kt + 16}`];
+const hands = [kc - 17, kc + 17];
+const calm = [...before, ...after.slice(0, 2), keeper];
+const tall = after[2];
 
-// ── 원리: 전달 곡선
-const x0 = 52, x1 = 304, y0 = 34, y1 = 170;
-const LO = -40;   // 축 범위 −40 ~ 0 dB (기준선 위 구간을 넉넉히)
-const X = (d: number) => x0 + (d - LO) / -LO * (x1 - x0);
-const Y = (d: number) => y1 - (d - LO) / -LO * (y1 - y0);
+// ── 원리: 전달 곡선 (−40 ~ 0 dB, 가로 5 · 세로 4 단위/dB)
+const x0 = 46, x1 = 246, y0 = 40, y1 = 200, LO = -40;
+const X = (d: number) => x0 + (d - LO) * 5;
+const Y = (d: number) => y1 - (d - LO) * 4;
 const TH = -20, R = 4;
 const out = (d: number) => (d <= TH ? d : TH + (d - TH) / R);
-const ex = -4, exOut = out(ex);               // 입력 −4 dB → 출력 −16 dB
-const ticks = [-40, -30, -20, -10, 0];
-const curve = `M${X(LO)} ${Y(LO)} L${X(TH)} ${Y(TH)} L${X(0)} ${Y(out(0))}`;
-// ③ 시간에 따른 소리 크기 막대 — 입력(파랑) vs 출력(보라), 줄어든 부분 빗금
-const SB = 316, SS = 2.1;                       // 막대 바닥 y, dB당 px (−40 dB = 0)
+const EX = -4;                                  // 입력 −4 dB → 출력 −16 dB, 게인 감소 12 dB
+const xt = [-40, -30, -20, -10, 0], yt = [-30, -20, -10, 0];
+const curve = `M${X(LO)},${Y(LO)} L${X(TH)},${Y(TH)} L${X(0)},${Y(out(0))}`;
+// ③ 시간에 따른 막대: 입력(파랑) · 출력(보라) · 줄어든 양(주황)
+const SB = 340, SS = 1.8;
 const hOf = (d: number) => (d - LO) * SS;
 const IN = [-30, -24, -6, -28, -12, -33];
-const bars = IN.map((d, i) => { const o = out(d); const gx = 64 + i * 40;
-  return { gx, inY: SB - hOf(d), inH: hOf(d), outY: SB - hOf(o), outH: hOf(o), cut: d > TH, cutH: hOf(d) - hOf(o) }; });
+const bars = IN.map((d, i) => { const o = out(d), gx = 56 + i * 42;
+  return { gx, inY: SB - hOf(d), inH: hOf(d), outY: SB - hOf(o), outH: hOf(o), cut: d > TH }; });
 const thY = SB - hOf(TH);
 ---
 <Explain simple={simple} title="컴프레서" question="큰 소리만 골라서 어떻게 줄일까?"
@@ -38,76 +48,81 @@ const thY = SB - hOf(TH);
   map={[['문지기', '컴프레서'], ['문 높이', 'Threshold'], ['넘은 키의 ¼만 남김', 'Ratio 4:1'], ['꾹 누른 만큼', '게인 감소 (Gain Reduction)']]}
   message="기준선을 넘은 만큼만 비율대로 줄여, 큰 소리와 작은 소리의 차이를 좁힌다."
   caption="예시는 Threshold −20 dB · Ratio 4:1. 실제 컴프레서는 어택·릴리즈 시간에 맞춰 서서히 반응하고, 줄어든 전체 음량은 메이크업 게인으로 되돌립니다.">
-  <svg slot="metaphor" viewBox="0 0 320 222" role="img" aria-label="문 높이보다 큰 사람만 문지기가 눌러, 나간 뒤에는 넘었던 키의 4분의 1만 남는다">
-    <defs><marker id={`${uid}m`} viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill={META.motion} /></marker></defs>
-    <!-- 문 높이 -->
-    <line x1="8" x2="312" y1={DOOR} y2={DOOR} stroke="#b45309" stroke-width="1.5" stroke-dasharray="5 4" />
-    <text x="10" y={DOOR - 6} font-size="11" font-weight="600" fill="#b45309">문 높이</text>
+  <svg slot="metaphor" viewBox="0 0 320 222" role="img" aria-label="문 높이보다 큰 사람만 문지기가 눌러, 나간 뒤에는 문 높이를 넘은 키가 4분의 1만 남는다">
     <!-- 바닥 -->
-    <line x1="8" x2="312" y1={FLOOR} y2={FLOOR} stroke={META.outline} stroke-width="2" stroke-linecap="round" />
-    <!-- 문과 문지기 -->
-    <rect x="140" y={DOOR} width="44" height={FLOOR - DOOR} fill={META.cream} stroke={META.outline} stroke-width="2" />
-    <rect x="134" y={DOOR - 9} width="56" height="10" rx="3" fill={META.coral} stroke={META.outline} stroke-width="2" />
-    <rect x="151" y="124" width="22" height={FLOOR - 124} rx="11" fill={META.sun} stroke={META.outline} stroke-width="2" />
-    <rect x="149" y="118" width="26" height="9" rx="3" fill={META.outline} />
-    <circle cx="158" cy="136" r="1.8" fill={META.outline} /><circle cx="166" cy="136" r="1.8" fill={META.outline} />
-    <path d="M151 150 L132 140 M173 150 L194 140" stroke={META.outline} stroke-width="2.2" stroke-linecap="round" />
-    <text x="162" y="214" text-anchor="middle" font-size="11" font-weight="600" fill={META.outline}>문지기</text>
-    <!-- 소리들 (키 = 소리 크기) -->
-    {people.map(p => <rect x={p.x - W / 2} y={p.top} width={W} height={p.h} rx={W / 2} fill={p.c} stroke={META.outline} stroke-width="2" />)}
-    {people.map(p => <circle cx={p.x - 4} cy={p.eyeY} r="1.8" fill={META.outline} />)}
-    {people.map(p => <circle cx={p.x + 4} cy={p.eyeY} r="1.8" fill={META.outline} />)}
-    <!-- 원래 키(점선)와 줄어든 만큼 -->
-    <rect x={tallAfter.x - W / 2} y={ghostTop} width={W} height={tallAfter.top - ghostTop + 10} rx={W / 2} fill="none" stroke={META.motion} stroke-width="1.5" stroke-dasharray="4 3" />
-    <path d={`M${tallAfter.x - 16} ${ghostTop + 6} L${tallAfter.x - 16} ${tallAfter.top - 4}`} stroke={META.motion} stroke-width="2" marker-end={`url(#${uid}m)`} />
-    <text x={tallAfter.x - 20} y={ghostTop + 22} text-anchor="end" font-size="11" font-weight="600" fill={META.motion}>꾹</text>
-    <text x={tallAfter.x - 20} y={ghostTop + 35} text-anchor="end" font-size="10" fill={META.motion}>(누른 만큼)</text>
-    <!-- 이동 -->
-    <path d="M112 186 L130 186" stroke={META.motion} stroke-width="2.5" stroke-linecap="round" marker-end={`url(#${uid}m)`} />
-    <path d="M196 186 L214 186" stroke={META.motion} stroke-width="2.5" stroke-linecap="round" marker-end={`url(#${uid}m)`} />
-    <text x="58" y="214" text-anchor="middle" font-size="11" font-weight="600" fill={META.outline}>들어오기 전</text>
-    <text x="262" y="214" text-anchor="middle" font-size="11" font-weight="600" fill={META.outline}>나간 뒤</text>
+    <rect x="0" y={FLOOR} width="320" height="8" fill={META.shade} />
+    <line x1="0" x2="320" y1={FLOOR} y2={FLOOR} stroke={META.outline} stroke-width={STROKE.base} data-qa="ground" />
+    <!-- 문 높이 = 기준선 (인방 아래 끝과 같은 y) -->
+    <line x1="4" x2="316" y1={DOOR} y2={DOOR} stroke={META.chip} stroke-width={STROKE.base} stroke-dasharray={DASH.ref} />
+    <Label x={4} y={DOOR - 7} color={META.chip} weight={700} halo={META.bg}>문 높이</Label>
+    <!-- 문: 기둥 두 개 + 인방(아래 끝 = DOOR) -->
+    <rect x="116" y={DOOR} width="8" height={FLOOR - DOOR} fill={META.sand} stroke={META.outline} stroke-width={STROKE.base} />
+    <rect x="172" y={DOOR} width="8" height={FLOOR - DOOR} fill={META.sand} stroke={META.outline} stroke-width={STROKE.base} />
+    <rect x="110" y={DOOR - 10} width="76" height="10" rx="2" fill={META.coral} stroke={META.outline} stroke-width={STROKE.base} />
+    <!-- 줄어들기 전 키(유령) — 바탕색으로 칠해 기준선이 비치지 않게 -->
+    <path d={ghost} fill={META.bg} stroke={META.coral} stroke-width={STROKE.base} stroke-dasharray={DASH.prev} />
+    <!-- 사람들 -->
+    {[...calm, tall].map(p => <path d={p.d} fill={p.c} stroke={META.outline} stroke-width={STROKE.base} />)}
+    {calm.map(p => <circle cx={p.cx - 4} cy={p.top + 13} r="2" fill={META.outline} />)}
+    {calm.map(p => <circle cx={p.cx + 4} cy={p.top + 13} r="2" fill={META.outline} />)}
+    <!-- 눌린 사람: 질끈 감은 눈 -->
+    <path d={`M${tall.cx - 7},${tall.top + 10} l3,2.5 l-3,2.5 M${tall.cx + 7},${tall.top + 10} l-3,2.5 l3,2.5`} fill="none" stroke={META.outline} stroke-width={STROKE.hair} stroke-linecap="round" stroke-linejoin="round" />
+    <!-- 문지기: 모자는 머리에 얹혀 붙고, 두 팔은 문 안쪽에서 들어 올림 -->
+    <path d={cap} data-qa="on" fill={META.outline} stroke={META.outline} stroke-width={STROKE.hair} stroke-linejoin="round" />
+    {arms.map(a => <path d={a} fill="none" stroke={META.outline} stroke-width={STROKE.base} stroke-linecap="round" />)}
+    {hands.map(x => <circle cx={x} cy={kt + 14} r="3.5" fill={META.sun} stroke={META.outline} stroke-width={STROKE.hair} />)}
+    <!-- 흐름 -->
+    <Arrow from={[96, 172]} to={[110, 172]} color={META.motion} w="bold" />
+    <Arrow from={[186, 172]} to={[206, 172]} color={META.motion} w="bold" />
+    <!-- 꾹: 유령 안에서 눌린 만큼 -->
+    <Arrow from={[tall.cx, 46]} to={[tall.cx, tall.top - 5]} color={META.motion} w="base" size={7} />
+    <Label x={266} y={66} size="title" anchor="end" color={META.motion} weight={700} halo={META.bg}>꾹</Label>
+    <!-- 이름표 -->
+    <Label x={52} y={216} anchor="middle" color={META.outline} halo={false}>들어오기 전</Label>
+    <Label x={148} y={216} anchor="middle" color={META.outline} halo={false}>문지기</Label>
+    <Label x={254} y={216} anchor="middle" color={META.outline} halo={false}>나간 뒤</Label>
   </svg>
-  <svg slot="principle" viewBox="0 0 320 344" role="img" aria-label="전달 곡선: −20 dB까지는 1:1로 그대로, 그 위로는 4:1로 줄어든다. 입력 −4 dB는 출력 −16 dB로 12 dB 게인 감소. 아래 막대는 시간에 따른 입력과 출력 크기로, 기준선을 넘은 소리만 줄어든다">
-    <defs><pattern id={`${uid}h`} width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="5" stroke={TECH.change} stroke-width="2" /></pattern></defs>
-    <!-- 구간 띠 -->
-    <rect x={x0} y={y0} width={X(TH) - x0} height={y1 - y0} fill={TECH.input} opacity="0.06" />
-    <rect x={X(TH)} y={y0} width={x1 - X(TH)} height={y1 - y0} fill={TECH.output} opacity="0.09" />
-    <text x={(x0 + X(TH)) / 2} y={y0 - 8} text-anchor="middle" font-size="11" font-weight="700" fill={TECH.input}>① 1:1 구간 · 그대로</text>
-    <text x={(X(TH) + x1) / 2} y={y0 - 8} text-anchor="middle" font-size="11" font-weight="700" fill={TECH.output}>② 4:1 구간 · 줄임</text>
+  <svg slot="principle" viewBox="0 0 320 362" role="img" aria-label="전달 곡선: −20 dB까지는 1:1로 그대로 나가고, 넘은 뒤에는 4:1로 줄어 입력 −4 dB가 출력 −16 dB가 된다. 아래 막대는 시간에 따라 기준선을 넘은 소리만 줄어드는 모습">
+    <!-- 구간 배경(불투명 연한 색, 겹치지 않음) -->
+    <rect x={x0} y={y0} width={X(TH) - x0} height={y1 - y0} fill={FILL.input} />
+    <rect x={X(TH)} y={y0} width={x1 - X(TH)} height={y1 - y0} fill={FILL.output} />
+    <Label x={(x0 + X(TH)) / 2} y={30} anchor="middle" color={TECH.input} weight={700} halo={false}>① 1:1 · 그대로</Label>
+    <Label x={(X(TH) + x1) / 2} y={30} anchor="middle" color={TECH.output} weight={700} halo={false}>② 4:1 · 줄임</Label>
     <!-- 축 -->
-    <line x1={x0} x2={x1} y1={y1} y2={y1} stroke={TECH.axis} />
-    <line x1={x0} x2={x0} y1={y0} y2={y1} stroke={TECH.axis} />
-    {ticks.map(t => <text x={X(t)} y={y1 + 13} text-anchor="middle" font-size="10.5" class="num" fill={INK.sub}>{t}</text>)}
-    {ticks.map(t => <text x={x0 - 5} y={Y(t) + 4} text-anchor="end" font-size="10.5" class="num" fill={INK.sub}>{t}</text>)}
-    <text x={(x0 + x1) / 2} y={y1 + 27} text-anchor="middle" font-size="11" fill={INK.sub}>입력 크기 (dB) →</text>
-    <text x="12" y={(y0 + y1) / 2} text-anchor="middle" font-size="11" fill={INK.sub} transform={`rotate(-90 12 ${(y0 + y1) / 2})`}>출력 크기 (dB) →</text>
-    <!-- 1:1 기준선과 Threshold -->
-    <line x1={X(LO)} y1={Y(LO)} x2={X(0)} y2={Y(0)} stroke={TECH.input} stroke-width="1.5" stroke-dasharray="4 4" opacity="0.6" />
-    <line x1={X(TH)} x2={X(TH)} y1={y0} y2={y1} stroke={TECH.limit} stroke-width="1.5" stroke-dasharray="5 4" />
-    <text x={X(TH) - 4} y={y1 - 6} text-anchor="end" font-size="11" font-weight="600" fill={TECH.limit}>Threshold −20</text>
-    <!-- 전달 곡선 -->
-    <path d={curve} fill="none" stroke={TECH.output} stroke-width="2.5" stroke-linejoin="round" />
-    <!-- 예: 입력 −4 → 출력 −16 -->
-    <rect x={X(ex) - 6} y={Y(ex)} width="12" height={Y(exOut) - Y(ex)} fill={`url(#${uid}h)`} />
-    <circle cx={X(ex)} cy={Y(ex)} r="4" fill={TECH.input} />
-    <circle cx={X(ex)} cy={Y(exOut)} r="4" fill={TECH.output} />
-    <text x={X(ex) - 10} y={Y(ex) + 4} text-anchor="end" font-size="11" class="num" fill={TECH.input}>입력 −4</text>
-    <text x={X(ex) - 10} y={(Y(ex) + Y(exOut)) / 2 + 4} text-anchor="end" font-size="11" font-weight="700" fill={TECH.change}>게인 감소 12 dB</text>
-    <text x={X(ex) - 10} y={Y(exOut) + 4} text-anchor="end" font-size="11" class="num" fill={TECH.output}>출력 −16</text>
-    <!-- ③ 소리로 보면 -->
-    <line x1="8" x2="312" y1="208" y2="208" stroke={INK.line} />
-    <text x="20" y="226" font-size="11" font-weight="700" fill={INK.ink}>③ 시간에 따라 보면</text>
-    <rect x="160" y="217" width="9" height="9" rx="2" fill={TECH.input} /><text x="173" y="225" font-size="10.5" fill={INK.sub}>입력</text>
-    <rect x="203" y="217" width="9" height="9" rx="2" fill={TECH.output} /><text x="216" y="225" font-size="10.5" fill={INK.sub}>출력</text>
-    <rect x="246" y="217" width="9" height="9" fill={`url(#${uid}h)`} stroke={TECH.change} stroke-width="0.5" /><text x="259" y="225" font-size="10.5" fill={INK.sub}>게인 감소</text>
-    <line x1="56" x2="306" y1={thY} y2={thY} stroke={TECH.limit} stroke-width="1.2" stroke-dasharray="5 4" />
-    <text x="52" y={thY + 4} text-anchor="end" font-size="10" fill={TECH.limit}>−20</text>
-    {bars.map(b => <rect x={b.gx} y={b.inY} width="12" height={b.inH} rx="2" fill={TECH.input} opacity="0.85" />)}
-    {bars.map(b => <rect x={b.gx + 14} y={b.outY} width="12" height={b.outH} rx="2" fill={TECH.output} opacity="0.9" />)}
-    {bars.filter(b => b.cut).map(b => <rect x={b.gx + 14} y={b.inY} width="12" height={b.cutH} fill={`url(#${uid}h)`} />)}
-    <line x1="56" x2="306" y1={SB} y2={SB} stroke={TECH.axis} />
-    <text x="306" y="334" text-anchor="end" font-size="10.5" fill={INK.sub}>시간 →</text>
-    <text x="56" y="334" font-size="10.5" fill={INK.sub}>기준선 아래 소리는 그대로</text>
+    <line x1={x0} x2={x1} y1={y1} y2={y1} stroke={TECH.axis} stroke-width={STROKE.hair} data-qa="axis" />
+    <line x1={x0} x2={x0} y1={y0} y2={y1} stroke={TECH.axis} stroke-width={STROKE.hair} data-qa="axis" />
+    {xt.map(d => <text x={X(d)} y={y1 + 14} text-anchor="middle" font-size="10" class="num" fill={INK.sub}>{d}</text>)}
+    {yt.map(d => <text x={x0 - 6} y={Y(d) + 3.5} text-anchor="end" font-size="10" class="num" fill={INK.sub}>{d}</text>)}
+    <Label x={x1} y={y1 + 30} size="note" anchor="end" color={INK.sub} weight={400} halo={false}>입력 크기 (dB) →</Label>
+    <Label x={12} y={120} size="note" anchor="middle" color={INK.sub} weight={400} rotate={-90} halo={false}>출력 크기 (dB) →</Label>
+    <!-- 기준선 -->
+    <line x1={X(TH)} x2={X(TH)} y1={y0} y2={y1} stroke={TECH.limit} stroke-width={STROKE.base} stroke-dasharray={DASH.ref} />
+    <Label x={X(TH) + 6} y={y1 - 8} size="note" color={TECH.limit} weight={700} halo={FILL.output}>Threshold −20</Label>
+    <!-- 1:1이었다면(유령선) — 바뀌는 ② 구간에만 -->
+    <line x1={X(TH)} y1={Y(TH)} x2={X(0)} y2={Y(0)} stroke={TECH.input} stroke-width={STROKE.hair} stroke-dasharray={DASH.prev} data-qa="ghost" />
+    <!-- 실제 출력 -->
+    <path d={curve} fill="none" stroke={TECH.output} stroke-width={STROKE.bold} stroke-linejoin="round" stroke-linecap="round" />
+    <!-- 예시: −4 dB 입력 → 눌려서 −16 dB -->
+    <Arrow from={[X(EX), Y(EX) + 6]} to={[X(EX), Y(out(EX)) - 6]} color={TECH.change} w="bold" />
+    <circle cx={X(EX)} cy={Y(EX)} r="3.5" fill={TECH.input} />
+    <circle cx={X(EX)} cy={Y(out(EX))} r="4" fill={TECH.output} stroke="#ffffff" stroke-width={STROKE.hair} />
+    <Label x={252} y={60} color={TECH.input} halo={false}>입력 −4</Label>
+    <Label x={252} y={82} color={TECH.change} weight={700} halo={false}>게인 감소</Label>
+    <Label x={252} y={96} color={TECH.change} weight={700} halo={false}>12 dB</Label>
+    <Label x={252} y={120} color={TECH.output} halo={false}>출력 −16</Label>
+    <!-- ③ 시간에 따라 보면 -->
+    <line x1="8" x2="312" y1="240" y2="240" stroke={INK.line} stroke-width={STROKE.hair} />
+    <Label x={8} y={264} size="title" weight={700} halo={false}>③ 시간에 따라 보면</Label>
+    <rect x="168" y="255" width="8" height="8" rx="1.5" fill={TECH.input} /><Label x={180} y={263} size="note" color={INK.sub} weight={500} halo={false}>입력</Label>
+    <rect x="212" y="255" width="8" height="8" rx="1.5" fill={TECH.output} /><Label x={224} y={263} size="note" color={INK.sub} weight={500} halo={false}>출력</Label>
+    <rect x="256" y="255" width="8" height="8" rx="1.5" fill={FILL.change} stroke={TECH.change} stroke-width={STROKE.hair} /><Label x={268} y={263} size="note" color={INK.sub} weight={500} halo={false}>줄어든 양</Label>
+    {bars.map(b => <rect x={b.gx} y={b.inY} width="12" height={b.inH} rx="1.5" fill={TECH.input} />)}
+    {bars.map(b => <rect x={b.gx + 14} y={b.outY} width="12" height={b.outH} rx="1.5" fill={TECH.output} />)}
+    {bars.filter(b => b.cut).map(b => <rect x={b.gx + 14} y={b.inY} width="12" height={b.outY - b.inY - 1} rx="1.5" fill={FILL.change} stroke={TECH.change} stroke-width={STROKE.hair} />)}
+    <line x1="50" x2="306" y1={thY} y2={thY} stroke={TECH.limit} stroke-width={STROKE.base} stroke-dasharray={DASH.ref} />
+    <text x="46" y={thY + 3.5} text-anchor="end" font-size="10" class="num" fill={TECH.limit}>−20</text>
+    <line x1="50" x2="306" y1={SB} y2={SB} stroke={TECH.axis} stroke-width={STROKE.hair} data-qa="axis" />
+    <Label x={50} y={SB + 16} size="note" color={INK.sub} weight={400} halo={false}>기준선 아래 소리는 그대로</Label>
+    <Label x={306} y={SB + 16} size="note" anchor="end" color={INK.sub} weight={400} halo={false}>시간 →</Label>
   </svg>
 </Explain>

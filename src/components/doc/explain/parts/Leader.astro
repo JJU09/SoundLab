@@ -1,0 +1,12 @@
+---
+// 지시선 — 라벨 쪽 끝과 대상 쪽 끝에 간격을 두고, 대상에는 작은 점.
+import { pull, type Pt } from './geo';
+import { STROKE, GAP } from '../tokens';
+interface Props { from: Pt; to: Pt; color: string; dot?: boolean; }
+const { from, to, color, dot = true } = Astro.props;
+const a = pull(to, from, GAP.label), b = pull(from, to, dot ? 3.5 : GAP.label);
+---
+<g>
+  <line x1={a[0]} y1={a[1]} x2={b[0]} y2={b[1]} stroke={color} stroke-width={STROKE.hair} stroke-linecap="round" />
+  {dot && <circle cx={to[0]} cy={to[1]} r="2.5" fill={color} />}
+</g>

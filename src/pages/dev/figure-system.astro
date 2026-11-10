@@ -56,11 +56,11 @@ const fnSw = [sw('토닉', FN.T, '안정'), sw('서브도미넌트', FN.S, '벗�
     <h2 class="text-xl font-bold font-display mb-3">3. 글자 위계</h2>
     <div class="p-4 rounded-2xl border border-[var(--color-border)] bg-white">
       <svg viewBox="0 0 640 150" class="w-full h-auto" role="img" aria-label="글자 위계 견본">
-        <text x="0" y="22" font-size="15" font-weight="700" fill={INK.ink} font-family="Space Grotesk, Pretendard, sans-serif">개념 이름 15 · Bold</text><text x="330" y="22" font-size="12" fill={INK.sub}>틀 머리 — 한 그림에 하나</text>
-        <text x="0" y="56" font-size="13" font-weight="600" fill={INK.ink}>그림 안 이름표 13 · SemiBold</text><text x="330" y="56" font-size="12" fill={INK.sub}>요소 이름 — 1~3단어</text>
-        <text x="0" y="88" font-size="11" fill={INK.sub}>주석 11 · Regular</text><text x="330" y="88" font-size="12" fill={INK.sub}>화살표 뜻 · 짧은 설명</text>
-        <text x="0" y="120" font-size="11" fill={INK.sub} font-family="ui-monospace, monospace">−12 dB · 4:1 · 440 Hz  수치 11 · Mono</text><text x="330" y="120" font-size="12" fill={INK.sub}>숫자와 단위는 고정폭</text>
-        <text x="0" y="146" font-size="12" fill={INK.faint}>한국어 먼저, 영어 용어는 괄호로 한 번 — 예) 기준선(Threshold). 문장은 그림 밖(핵심·캡션)에.</text>
+        <text x="0" y="22" font-size="16" font-weight="800" fill={INK.ink}>큰 말 16 · display</text><text x="330" y="22" font-size="11" fill={INK.sub}>비유 속 대사 ("웅웅웅!!")</text>
+        <text x="0" y="54" font-size="13" font-weight="700" fill={INK.ink}>제목 13 · title</text><text x="330" y="54" font-size="11" fill={INK.sub}>장면 이름 · 그래프 제목 · 표 머리</text>
+        <text x="0" y="84" font-size="11" font-weight="600" fill={INK.ink}>이름표 11 · label</text><text x="330" y="84" font-size="11" fill={INK.sub}>요소 이름 · 단계 ①~⑤</text>
+        <text x="0" y="112" font-size="10" fill={INK.sub} font-family="ui-monospace, monospace">−12 dB · 440 Hz  주석·눈금 10 · note</text><text x="330" y="112" font-size="11" fill={INK.sub}>숫자는 고정폭</text>
+        <text x="0" y="142" font-size="11" fill={INK.faint}>글자 크기는 이 4단만 (tokens.ts TYPE) — 다른 값은 scripts/fig-qa.cjs 가 잡아냄</text>
       </svg>
     </div>
   </section>
@@ -122,11 +122,14 @@ const fnSw = [sw('토닉', FN.T, '안정'), sw('서브도미넌트', FN.S, '벗�
         <li>복잡한 개념은 핵심 원리와 세부 원리를 나눠 별도 그림으로 (예: 컴프레서 어택·릴리즈)</li>
         <li>위젯이 이미 그리는 것(파형·스펙트럼)은 다시 그리지 않음 — 그림은 '왜'를, 위젯은 '직접'을</li>
       </ul></div>
-      <div class="p-4 rounded-2xl border border-[var(--color-border)] bg-white"><div class="font-bold mb-2">모양</div><ul class="list-disc pl-5 space-y-1 text-[var(--color-ink-500)]">
-        <li>모든 화살표에 뜻 이름표 (보냄·줄임·반사 등)</li>
-        <li>요소는 8px 격자에 정렬, 칸 안 여백 12px 이상</li>
-        <li>칸당 이름표 6개 이하, 주석 3개 이하</li>
-        <li>장식·그림자·3D·그라디언트 없음, 의미색 3개 이하</li>
+      <div class="p-4 rounded-2xl border border-[var(--color-border)] bg-white"><div class="font-bold mb-2">모양 (v2 — 검사 가능한 규칙)</div><ul class="list-disc pl-5 space-y-1 text-[var(--color-ink-500)]">
+        <li>선 굵기 3단 1·2·3 / 점선 3종: 기준선 6 4 · 이전 상태 2 3 · 걸어온 길 0 6 (tokens.ts)</li>
+        <li>닿는 것은 정확히(공–언덕, 사람–바닥, 문–기준선: parts/geo.ts 계산), 떨어지는 것은 4 이상</li>
+        <li>라벨–선 간격 2.5 이상, 지시선은 곡선을 가로지르지 않음</li>
+        <li>반투명 겹치기 금지 — 연한 면은 FILL(불투명)로 한 겹. "이전 상태"는 바뀐 구간에만</li>
+        <li>그래프 선 3개 이하 권장(절대 아님) — 넘으면 굵기·색으로 주/보조 위계</li>
+        <li>비유 표현은 자유(베지어·복합 경로·그라데이션) — 공통은 선·글자·색·화살표·라벨·캐릭터 기본형만</li>
+        <li>검수: <code>node scripts/fig-qa.cjs &lt;폴더&gt;</code> → 수치 검사 0건 + 실제 크기·모바일·3배 확대 캡처를 눈으로</li>
         <li>SVG는 role="img" + aria-label, 파일 없이 코드로만(제로 에셋)</li>
       </ul></div>
     </div>

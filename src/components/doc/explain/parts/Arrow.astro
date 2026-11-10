@@ -1,0 +1,22 @@
+---
+// 화살표 — 경로(직선·곡선)와 화살촉을 한 부품으로. 끝점(to)이 화살촉 끝과 정확히 일치한다.
+//   pts: 지나는 점들(2개면 직선). bend 를 주면 from→to 2차 곡선.
+import { smooth, head, arc, pull, type Pt } from './geo';
+import { STROKE, INK } from '../tokens';
+interface Props { pts?: Pt[]; from?: Pt; to?: Pt; bend?: number; color?: string; w?: keyof typeof STROKE; size?: number; both?: boolean; dash?: string; }
+const { from, to, bend = 0, color = INK.ink, w = 'base', size, both = false, dash } = Astro.props;
+const pts: Pt[] = Astro.props.pts ?? (bend ? arc(from!, to!, bend) : [from!, to!]);
+const hs = size ?? (w === 'hair' ? 6 : w === 'bold' ? 10 : 8);
+const n = pts.length;
+const tip = pts[n - 1], prev = pts[n - 2];
+const ang = Math.atan2(tip[1] - prev[1], tip[0] - prev[0]);
+const body = [...pts]; body[n - 1] = pull(prev, tip, hs * 0.7);
+let ang0 = 0;
+if (both) { ang0 = Math.atan2(pts[0][1] - pts[1][1], pts[0][0] - pts[1][0]); body[0] = pull(pts[1], pts[0], hs * 0.7); }
+const d = n === 2 ? `M${body[0][0]},${body[0][1]} L${body[1][0]},${body[1][1]}` : smooth(body);
+---
+<g>
+  <path d={d} fill="none" stroke={color} stroke-width={STROKE[w]} stroke-linecap="round" stroke-dasharray={dash} />
+  <polygon points={head(tip, ang, hs)} fill={color} stroke={color} stroke-width={STROKE.hair} stroke-linejoin="round" />
+  {both && <polygon points={head(pts[0], ang0, hs)} fill={color} stroke={color} stroke-width={STROKE.hair} stroke-linejoin="round" />}
+</g>

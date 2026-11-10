@@ -1,0 +1,74 @@
+---
+// 설명 그림 틀 — 하나의 개념을 ① 비유 ② 실제 원리 ③ 핵심 메시지로 설명한다.
+//   비유와 원리는 배경·선·글자 모양으로 시각적으로 분리하고, 둘 사이의 대응(map)을 명시한다.
+//   simple: 초급용 — 원리 칸을 접고 비유 + 메시지만 보여 줌.
+// 사용: 개념별 컴포넌트(예: CompressorExplain)가 이 틀에 slot="metaphor" · slot="principle" SVG를 넣는다.
+interface Props {
+  title: string;                 // 개념 이름
+  question?: string;             // 그림이 답하는 질문
+  map?: [string, string][];      // [비유의 요소, 실제 요소]
+  message: string;               // 기억할 한 문장
+  caption?: string;              // 정확성 보충(단순화한 부분 밝히기)
+  label: string;                 // 스크린리더용 전체 설명
+  simple?: boolean;
+}
+const { title, question, map = [], message, caption, label, simple = false } = Astro.props;
+---
+<figure class="ex not-prose my-6" role="group" aria-label={label}>
+  <div class="ex-card">
+    <header class="ex-head">
+      <span class="ex-title">{title}</span>
+      {question && <span class="ex-q">{question}</span>}
+    </header>
+
+    <div class={`ex-panels ${simple ? 'one' : ''}`}>
+      <section class="ex-panel meta" aria-label="비유">
+        <span class="ex-chip meta">비유 · 이렇게 상상해 보세요</span>
+        <slot name="metaphor" />
+      </section>
+      {!simple && (
+        <section class="ex-panel tech" aria-label="실제 원리">
+          <span class="ex-chip tech">실제 원리</span>
+          <slot name="principle" />
+        </section>
+      )}
+    </div>
+
+    {map.length > 0 && (
+      <div class="ex-map" aria-label="비유와 실제의 대응">
+        <span class="ex-map-k">대응</span>
+        {map.map(([a, b]) => <span class="ex-pair"><span class="a">{a}</span><span class="eq">=</span><span class="b">{b}</span></span>)}
+      </div>
+    )}
+
+    <p class="ex-msg"><span class="ex-msg-k">핵심</span>{message}</p>
+  </div>
+  {caption && <figcaption class="ex-cap">{caption}</figcaption>}
+</figure>
+
+<style is:global>
+  .ex { max-width: 720px; }
+  .ex-card { border: 1px solid #e2e2f0; border-radius: 16px; background: #fff; padding: 14px; }
+  .ex-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin: 0 2px 10px; }
+  .ex-title { font-family: 'Space Grotesk','Pretendard',sans-serif; font-weight: 700; font-size: 15px; color: #2d2d4a; }
+  .ex-q { font-size: 13px; color: #6b6b8e; }
+  .ex-panels { display: grid; grid-template-columns: 1fr; gap: 10px; }
+  @media (min-width: 640px) { .ex-panels:not(.one) { grid-template-columns: 1fr 1fr; } }
+  .ex-panel { position: relative; border-radius: 12px; padding: 30px 8px 8px; }
+  .ex-panel.meta { background: #fff8ee; border: 1px solid #f3dfc2; }
+  .ex-panel.tech { background-color: #fff; border: 1px solid #e2e2f0;
+    background-image: linear-gradient(#f1f2f8 1px, transparent 1px), linear-gradient(90deg, #f1f2f8 1px, transparent 1px); background-size: 16px 16px; }
+  .ex-chip { position: absolute; top: 8px; left: 10px; font-size: 11px; font-weight: 700; letter-spacing: .02em; }
+  .ex-chip.meta { color: #b45309; }
+  .ex-chip.tech { color: #2563eb; font-family: ui-monospace, monospace; }
+  .ex-panel svg { display: block; width: 100%; height: auto; }
+  .ex-panel svg text { font-family: 'Pretendard', sans-serif; }
+  .ex-panel svg .num { font-family: ui-monospace, 'SFMono-Regular', monospace; }
+  .ex-map { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 10px 2px 0; font-size: 12px; }
+  .ex-map-k { font-size: 11px; font-weight: 700; color: #a0a0c0; margin-right: 2px; }
+  .ex-pair { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 999px; background: #f8f8fc; border: 1px solid #e2e2f0; }
+  .ex-pair .a { color: #b45309; font-weight: 600; } .ex-pair .b { color: #2563eb; font-weight: 600; } .ex-pair .eq { color: #a0a0c0; }
+  .ex-msg { margin: 10px 0 0; padding: 10px 12px; border-radius: 10px; background: rgba(124,58,237,.08); border-left: 3px solid #7c3aed; font-size: 14px; font-weight: 600; color: #2d2d4a; line-height: 1.5; }
+  .ex-msg-k { font-size: 11px; font-weight: 700; color: #7c3aed; margin-right: 8px; }
+  .ex-cap { font-size: 12px; color: #a0a0c0; margin-top: 6px; text-align: center; }
+</style>

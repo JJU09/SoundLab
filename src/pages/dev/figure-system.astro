@@ -1,0 +1,131 @@
+---
+// 검토용(배포 안 함): 설명 그림 디자인 시스템 시트
+import Base from '../../layouts/Base.astro';
+import Explain from '../../components/doc/explain/Explain.astro';
+import { INK, META, TECH, FN } from '../../components/doc/explain/tokens';
+const sw = (name: string, hex: string, use: string) => ({ name, hex, use });
+const metaSw = [sw('배경', META.bg, '비유 칸 바탕'), sw('외곽선', META.outline, '일러스트 윤곽 2px'), sw('해', META.sun, '주인공·강조 사물'), sw('산호', META.coral, '두 번째 사물·대비'), sw('하늘', META.sky, '배경 요소'), sw('잎', META.leaf, '좋은 상태·통과'), sw('모래', META.sand, '바닥·중립 면'), sw('움직임', META.motion, '움직임 화살표')];
+const techSw = [sw('입력', TECH.input, '원래 신호·들어오는 것'), sw('출력', TECH.output, '처리 후·나가는 것'), sw('기준·한계', TECH.limit, '문턱·천장 (점선)'), sw('바뀐 양', TECH.change, '줄어든·늘어난 부분 (빗금)'), sw('축', TECH.axis, '축·눈금'), sw('격자', INK.grid, '원리 칸 배경 격자')];
+const fnSw = [sw('토닉', FN.T, '안정'), sw('서브도미넌트', FN.S, '벗어남'), sw('도미넌트', FN.D, '긴장'), sw('빌린 화음', FN.B, '모달 인터체인지'), sw('세컨더리', FN.X, '임시 딸림')];
+---
+<Base title="설명 그림 디자인 시스템 (검토용)" description="검토용">
+<div class="max-w-5xl mx-auto px-4 sm:px-6 py-10 space-y-10 text-[var(--color-ink-700)]">
+  <header>
+    <span class="text-xs font-mono px-2.5 py-1 rounded-full border border-[var(--color-violet-light)] text-[var(--color-violet)] bg-[var(--color-violet-glow)]">DESIGN SYSTEM · 검토용</span>
+    <h1 class="text-3xl font-bold mt-3 font-display">설명 그림 디자인 시스템</h1>
+    <p class="text-[var(--color-ink-500)] mt-1">목표: 음악을 잘 모르는 사람이 그림을 보고 "아, 이게 그런 원리였구나!" 하게 만드는 것.</p>
+  </header>
+
+  <!-- 1. 구조 -->
+  <section>
+    <h2 class="text-xl font-bold font-display mb-1">1. 한 개념 = 비유 · 실제 원리 · 핵심 메시지</h2>
+    <p class="text-sm text-[var(--color-ink-500)] mb-3">비유 칸(따뜻한 바탕·둥근 일러스트)과 원리 칸(흰 바탕·격자·가는 선)을 겉모양부터 다르게 해서 섞이지 않게 합니다. 둘 사이는 <b>대응</b> 줄이 이어 주고, 맨 아래 <b>핵심</b> 한 문장이 결론입니다. 아래는 레이아웃 견본(회색 상자는 그림 자리)입니다.</p>
+    <Explain title="컴프레서" question="큰 소리만 어떻게 줄일까?" label="컴프레서 설명 그림 레이아웃 견본"
+      map={[["문지기", "컴프레서"], ["문의 높이", "Threshold"], ["누르는 세기", "Ratio"]]}
+      message="기준선(Threshold)을 넘은 부분만 비율(Ratio)만큼 줄여, 큰 소리와 작은 소리의 차이를 좁힌다."
+      caption="캡션: 단순화한 부분을 밝히는 자리 — 예) 실제로는 어택·릴리즈 시간 동안 서서히 반응합니다">
+      <svg slot="metaphor" viewBox="0 0 320 190"><rect x="10" y="10" width="300" height="170" rx="10" fill="#f3e1c7" opacity=".5" /><text x="160" y="100" text-anchor="middle" font-size="13" fill="#b45309">비유 일러스트 자리 (320 × 190)</text></svg>
+      <svg slot="principle" viewBox="0 0 320 190"><rect x="10" y="10" width="300" height="170" rx="10" fill="#e6eefc" opacity=".6" /><text x="160" y="100" text-anchor="middle" font-size="13" fill="#2563eb">원리 도식 자리 (320 × 190)</text></svg>
+    </Explain>
+    <ul class="text-sm text-[var(--color-ink-500)] list-disc pl-5 space-y-1 mt-2">
+      <li>데스크톱 레슨 본문(약 680px)에서는 두 칸이 나란히, 640px 미만(모바일)에서는 비유 → 원리 순서로 위아래.</li>
+      <li>각 칸의 그림은 <b>320 × 190</b> 좌표로 그려 실제 화면에서 거의 1:1 — 글자가 작아지지 않음.</li>
+      <li>초급 단계에는 <code>simple</code> 모드(비유 + 핵심만), 중급·고급에는 전체를 넣습니다.</li>
+    </ul>
+  </section>
+
+  <!-- 2. 색 -->
+  <section>
+    <h2 class="text-xl font-bold font-display mb-3">2. 색상 팔레트</h2>
+    <div class="grid md:grid-cols-3 gap-4">
+      {[['① 비유 영역 — 따뜻하게', metaSw], ['② 원리 영역 — 신호의 역할별 색', techSw], ['공통 의미색 — 화성 기능 (사이트 전체 공통)', fnSw]].map(([t, list]) => (
+        <div class="p-4 rounded-2xl border border-[var(--color-border)] bg-white">
+          <div class="text-sm font-bold mb-3">{t}</div>
+          <div class="space-y-2">{(list as any[]).map(s => (
+            <div class="flex items-center gap-3 text-sm"><span class="w-8 h-8 rounded-lg border border-[var(--color-border)] flex-none" style={`background:${s.hex}`}></span>
+              <span class="font-semibold w-20">{s.name}</span><span class="text-xs text-[var(--color-ink-500)] flex-1">{s.use}</span><code class="text-[10px] text-[var(--color-ink-300)]">{s.hex}</code></div>
+          ))}</div>
+        </div>
+      ))}
+    </div>
+    <p class="text-sm text-[var(--color-ink-500)] mt-3">규칙: 한 그림에서 의미를 가진 색은 3개 이하. 입력은 언제나 파랑, 출력은 보라, 기준선은 빨강 점선 — 그림이 바뀌어도 같은 역할은 같은 색.</p>
+  </section>
+
+  <!-- 3. 글자 -->
+  <section>
+    <h2 class="text-xl font-bold font-display mb-3">3. 글자 위계</h2>
+    <div class="p-4 rounded-2xl border border-[var(--color-border)] bg-white">
+      <svg viewBox="0 0 640 150" class="w-full h-auto" role="img" aria-label="글자 위계 견본">
+        <text x="0" y="22" font-size="15" font-weight="700" fill={INK.ink} font-family="Space Grotesk, Pretendard, sans-serif">개념 이름 15 · Bold</text><text x="330" y="22" font-size="12" fill={INK.sub}>틀 머리 — 한 그림에 하나</text>
+        <text x="0" y="56" font-size="13" font-weight="600" fill={INK.ink}>그림 안 이름표 13 · SemiBold</text><text x="330" y="56" font-size="12" fill={INK.sub}>요소 이름 — 1~3단어</text>
+        <text x="0" y="88" font-size="11" fill={INK.sub}>주석 11 · Regular</text><text x="330" y="88" font-size="12" fill={INK.sub}>화살표 뜻 · 짧은 설명</text>
+        <text x="0" y="120" font-size="11" fill={INK.sub} font-family="ui-monospace, monospace">−12 dB · 4:1 · 440 Hz  수치 11 · Mono</text><text x="330" y="120" font-size="12" fill={INK.sub}>숫자와 단위는 고정폭</text>
+        <text x="0" y="146" font-size="12" fill={INK.faint}>한국어 먼저, 영어 용어는 괄호로 한 번 — 예) 기준선(Threshold). 문장은 그림 밖(핵심·캡션)에.</text>
+      </svg>
+    </div>
+  </section>
+
+  <!-- 4. 선과 화살표 -->
+  <section>
+    <h2 class="text-xl font-bold font-display mb-3">4. 선과 화살표</h2>
+    <div class="grid md:grid-cols-2 gap-4">
+      <div class="p-4 rounded-2xl border" style="background:#fff8ee;border-color:#f3dfc2">
+        <div class="text-sm font-bold mb-2" style="color:#b45309">비유 영역</div>
+        <svg viewBox="0 0 320 170" class="w-full h-auto" role="img" aria-label="비유 영역의 선 견본">
+          <defs><marker id="m-mo" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill={META.motion} /></marker></defs>
+          <path d="M20 40 C 80 0, 140 0, 190 36" fill="none" stroke={META.motion} stroke-width="2.5" stroke-linecap="round" marker-end="url(#m-mo)" />
+          <text x="205" y="40" font-size="11" fill={INK.sub}>움직임 — 곡선 2.5px</text>
+          <circle cx="40" cy="104" r="20" fill={META.sun} stroke={META.outline} stroke-width="2" />
+          <rect x="80" y="84" width="44" height="40" rx="8" fill={META.sky} stroke={META.outline} stroke-width="2" />
+          <path d="M146 124 L168 84 L190 124 Z" fill={META.coral} stroke={META.outline} stroke-width="2" stroke-linejoin="round" />
+          <text x="205" y="100" font-size="11" fill={INK.sub}>사물 — 플랫 면 + 둥근 윤곽</text>
+          <text x="205" y="116" font-size="11" fill={INK.sub}>그림자·3D·질감 없음</text>
+          <line x1="20" y1="150" x2="190" y2="150" stroke={META.outline} stroke-width="2" stroke-linecap="round" />
+          <text x="205" y="154" font-size="11" fill={INK.sub}>바닥선 — 장면의 기준</text>
+        </svg>
+      </div>
+      <div class="p-4 rounded-2xl border border-[var(--color-border)] bg-white">
+        <div class="text-sm font-bold mb-2" style="color:#2563eb">원리 영역</div>
+        <svg viewBox="0 0 320 170" class="w-full h-auto" role="img" aria-label="원리 영역의 선 견본">
+          <defs>
+            <marker id="m-ink" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill={INK.ink} /></marker>
+            <pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke={TECH.change} stroke-width="2" /></pattern>
+          </defs>
+          <line x1="20" y1="22" x2="150" y2="22" stroke={INK.ink} stroke-width="1.75" marker-end="url(#m-ink)" />
+          <text x="85" y="15" text-anchor="middle" font-size="11" fill={INK.sub}>보냄</text>
+          <text x="165" y="26" font-size="11" fill={INK.sub}>신호 흐름 — 직선 + 뜻</text>
+          <path d="M20 70 Q 45 40 70 70 T 120 70 T 170 70" fill="none" stroke={TECH.input} stroke-width="2" />
+          <text x="185" y="66" font-size="11" fill={INK.sub}>입력 신호 — 파랑 2px</text>
+          <path d="M20 96 Q 45 80 70 96 T 120 96 T 170 96" fill="none" stroke={TECH.output} stroke-width="2" />
+          <text x="185" y="100" font-size="11" fill={INK.sub}>출력 신호 — 보라 2px</text>
+          <line x1="20" y1="122" x2="170" y2="122" stroke={TECH.limit} stroke-width="1.5" stroke-dasharray="5 4" />
+          <text x="185" y="126" font-size="11" fill={INK.sub}>기준선·한계 — 빨강 점선</text>
+          <rect x="20" y="136" width="150" height="16" fill="url(#hatch)" opacity=".7" />
+          <text x="185" y="148" font-size="11" fill={INK.sub}>바뀐 양 — 주황 빗금</text>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. 규칙 -->
+  <section>
+    <h2 class="text-xl font-bold font-display mb-3">5. 제작 규칙</h2>
+    <div class="grid md:grid-cols-2 gap-4 text-sm">
+      <div class="p-4 rounded-2xl border border-[var(--color-border)] bg-white"><div class="font-bold mb-2">내용</div><ul class="list-disc pl-5 space-y-1 text-[var(--color-ink-500)]">
+        <li>그림 하나에 주장 하나 — 핵심 메시지 한 문장으로 말할 수 있어야 함</li>
+        <li>비유는 보조, 원리는 정확하게 — 원리 칸만 봐도 틀린 곳이 없어야 함</li>
+        <li>비유와 실제의 대응은 그림 아래 <b>대응</b> 줄에 명시</li>
+        <li>단순화한 부분은 캡션에서 밝힘 (예: 어택·릴리즈 생략)</li>
+        <li>위젯이 이미 그리는 것(파형·스펙트럼)은 다시 그리지 않음 — 그림은 '왜'를, 위젯은 '직접'을</li>
+      </ul></div>
+      <div class="p-4 rounded-2xl border border-[var(--color-border)] bg-white"><div class="font-bold mb-2">모양</div><ul class="list-disc pl-5 space-y-1 text-[var(--color-ink-500)]">
+        <li>모든 화살표에 뜻 이름표 (보냄·줄임·반사 등)</li>
+        <li>요소는 8px 격자에 정렬, 칸 안 여백 12px 이상</li>
+        <li>칸당 이름표 6개 이하, 주석 3개 이하</li>
+        <li>장식·그림자·3D·그라디언트 없음, 의미색 3개 이하</li>
+        <li>SVG는 role="img" + aria-label, 파일 없이 코드로만(제로 에셋)</li>
+      </ul></div>
+    </div>
+  </section>
+</div>
+</Base>

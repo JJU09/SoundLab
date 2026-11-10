@@ -85,6 +85,13 @@ const first = core.find((_, i) => !stages[0].optional || i >= stages[0].L.length
               </ul>
             </div>
 
+            {s.sketch && (
+              <a href={`${base}sandbox/sketch/?tab=${s.sketch.tab}`} class="mt-4 flex items-center justify-between gap-3 p-3 rounded-xl border border-[var(--color-violet-light)] bg-[var(--color-violet-glow)] hover:border-[var(--color-violet)] transition group">
+                <span class="text-sm font-semibold text-[var(--color-violet)] font-display">🎼 {s.sketch.label}</span>
+                <span class="text-xs text-[var(--color-ink-500)] group-hover:text-[var(--color-violet)] whitespace-nowrap">곡 스케치 →</span>
+              </a>
+            )}
+
             {s.D.length > 0 && (
               <div class="flex flex-wrap items-center gap-2 mt-4 text-sm">
                 <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">더 깊이</span>

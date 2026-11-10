@@ -46,6 +46,7 @@ export const SANDBOX_OF: Partial<Record<Hub, { path: string; name: string }>> = 
   synthesis: { path: 'sandbox/synth/', name: '신디사이저' },
   effects:   { path: 'sandbox/effects/', name: '모듈러 페달보드' },
   mixing:    { path: 'sandbox/mixer/', name: '미니 믹서' },
+  arrangement: { path: 'sandbox/sketch/', name: '곡 스케치' },
 };
 
 // 위젯 타입 — MDX가 어떤 인터랙티브 컴포넌트를 띄울지 결정

@@ -16,11 +16,11 @@ const hubTotal = areas.reduce((n, a) => n + a.hubs.length, 0);
 
 // 홈 쇼케이스 — 샌드박스/도구 (각 섹션 전체 보기로 연결)
 const sandboxes = [
+  { name: '곡 스케치', hub: '형식·편곡', path: 'sandbox/sketch/', desc: '8마디 곡 만들고 WAV 저장', icon: 'M9 18V5l12-2v13 M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0z M21 16a3 3 0 1 1-6 0 3 3 0 0 1 6 0z' },
   { name: '모듈러 페달보드', hub: '이펙트', path: 'sandbox/effects/', desc: '이펙터를 쌓고 순서 바꾸기', icon: 'M5 8h2.5l2 8 2.5-12 2 8 2-4H19' },
   { name: '미니 믹서', hub: '믹싱', path: 'sandbox/mixer/', desc: '트랙 밸런스·EQ·컴프', icon: 'M6 4v16 M12 4v16 M18 4v16 M3.5 9h5 M9.5 14h5 M15.5 7h5' },
   { name: '신디사이저', hub: '신디시스', path: 'sandbox/synth/', desc: '건반으로 연주하는 신스', icon: 'M4 14a8 8 0 0 1 16 0 M8 14v4 M11 14v4 M14 14v4 M17 14v4' },
   { name: '파동 실험실', hub: '소리와 파동', path: 'sandbox/waves/', desc: '배음·맥놀이·위상 간섭', icon: 'M3 12c2-6 4-6 6 0s4 6 6 0 4-6 6 0' },
-  { name: '로파이 실험실', hub: '디지털', path: 'sandbox/lofi/', desc: '샘플레이트·비트 열화', icon: 'M4 16h3v-4h3v6h3V8h3v8h3' },
 ];
 const tools = [
   { name: '메트로놈', path: 'tools/metronome/', desc: 'BPM·박자표·탭템포', icon: 'M9 3h6l4 18H5z M12 18l1.8-9' },

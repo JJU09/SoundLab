@@ -11,6 +11,7 @@ export interface PathStage {
   output: string;     // 이 단계의 결과물
   checklist: string[];
   optional?: boolean; // 건너뛰어도 되는 단계
+  sketch?: { tab: 'drums' | 'chords' | 'bass' | 'melody' | 'mix' | 'structure'; label: string }; // 곡 스케치 연습실에서 해 보기
 }
 
 export interface LearningPath {
@@ -49,6 +50,7 @@ export const PATHS: LearningPath[] = [
         lessons: ['rhythm/beat-tempo', 'rhythm/drum-patterns'],
         deeper: ['rhythm/subdivision', 'rhythm/syncopation', 'rhythm/swing-groove'],
         output: '4마디 드럼 루프',
+        sketch: { tab: 'drums', label: '스케치에서 드럼 찍기' },
         checklist: ['곡의 BPM을 정했다 (팝은 보통 90–120)', '킥·스네어·하이햇 자리를 정한 4마디 패턴이 있다'],
       },
       {
@@ -58,6 +60,7 @@ export const PATHS: LearningPath[] = [
         lessons: ['harmony/triads', 'harmony/diatonic-chords', 'harmony/progressions'],
         deeper: ['harmony/functions', 'harmony/sevenths', 'harmony/voice-leading'],
         output: '4코드 진행 하나',
+        sketch: { tab: 'chords', label: '스케치에서 코드 고르기' },
         checklist: ['곡의 조를 정했다 (처음엔 C장조 추천)', '4개 코드를 고르고 2번 반복해 8마디를 채웠다'],
       },
       {
@@ -67,6 +70,7 @@ export const PATHS: LearningPath[] = [
         lessons: ['melody/major-scale', 'melody/pentatonic', 'melody/melody-writing'],
         deeper: ['melody/intervals', 'melody/circle-of-fifths'],
         output: '8마디 멜로디',
+        sketch: { tab: 'melody', label: '스케치에서 멜로디 찍기' },
         checklist: ['짧은 모티브 하나를 만들고 반복·변형했다', '강박에서 코드 구성음에 착지한다', '마지막 음이 으뜸음(도)으로 끝난다'],
       },
       {
@@ -76,6 +80,7 @@ export const PATHS: LearningPath[] = [
         lessons: ['arrangement/song-form', 'arrangement/instrument-roles', 'arrangement/density'],
         deeper: ['arrangement/voicing-range', 'arrangement/genre-recipes'],
         output: '벌스 · 코러스 섹션 지도',
+        sketch: { tab: 'structure', label: '스케치에서 섹션 짜기' },
         checklist: ['벌스 4마디 · 코러스 4마디로 나눴다', '베이스 · 코드 · 멜로디 음역이 겹치지 않는다', '코러스가 벌스보다 파트가 많다'],
       },
       {
@@ -85,7 +90,8 @@ export const PATHS: LearningPath[] = [
         lessons: ['acoustics/tone', 'synthesis/adsr', 'synthesis/subtractive'],
         deeper: ['synthesis/modulation', 'effects/filter', 'effects/reverb'],
         output: '베이스 · 패드 음색',
-        checklist: ['짧게 끊기는 베이스 음색(짧은 릴리스)을 만들었다', '천천히 피어오르는 패드 음색(긴 어택)을 만들었다'],
+        sketch: { tab: 'mix', label: '스케치에서 음색 고르기' },
+        checklist: ['짧게 끊기는 음색(짧은 릴리스)과 천천히 피어오르는 음색(긴 어택)의 차이를 들어 봤다', '곡 스케치에서 파트마다 어울리는 음색을 골랐다'],
       },
       {
         id: 'mix',
@@ -94,7 +100,8 @@ export const PATHS: LearningPath[] = [
         lessons: ['mixing/balance', 'mixing/eq-masking', 'mixing/loudness', 'mixing/export'],
         deeper: ['mixing/pan', 'mixing/compressor', 'mixing/mastering-chain'],
         output: 'WAV로 저장한 완성곡',
-        checklist: ['보컬(멜로디)이 가장 잘 들린다', '킥과 베이스가 서로 가리지 않는다', '피크가 0dBFS를 넘지 않는다', 'WAV로 먼저 저장했다'],
+        sketch: { tab: 'mix', label: '스케치에서 믹스하고 WAV 저장' },
+        checklist: ['보컬(멜로디)이 가장 잘 들린다', '킥과 베이스가 서로 가리지 않는다', '피크가 0dBFS를 넘지 않는다', '곡 스케치에서 WAV로 저장했다'],
       },
     ],
   },

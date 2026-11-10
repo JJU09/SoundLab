@@ -1,0 +1,384 @@
+---
+import Base from '../../../layouts/Base.astro';
+import SandboxShell from '../../../components/sandbox/SandboxShell.astro';
+const base = import.meta.env.BASE_URL;
+const tabs = [
+  ['drums', '드럼'], ['chords', '코드'], ['bass', '베이스'], ['melody', '멜로디'], ['mix', '소리·믹스'],
+];
+---
+<Base title="곡 스케치" description="드럼·코드·베이스·멜로디를 직접 찍어 벌스와 코러스 8마디 곡을 만들고 WAV로 저장하는 작곡 연습실. 설치 없이 브라우저에서."
+  breadcrumbs={[{ name: '홈', url: base }, { name: '연습실', url: `${base}sandbox/` }, { name: '곡 스케치', url: Astro.url.pathname }]}>
+<SandboxShell title="곡 스케치" en="Song Sketch"
+  desc="드럼 → 코드 → 베이스 → 멜로디 순서로 벌스와 코러스 8마디를 채우고, 소리를 골라 WAV로 저장하세요. 예시 곡을 고쳐 가며 시작해도 좋아요."
+  related={[
+    { href: `${base}path/first-song/`, label: '로드맵 · 곡 하나 만들기' },
+    { href: `${base}learn/rhythm/drum-patterns/`, label: '장르별 드럼 패턴' },
+    { href: `${base}learn/harmony/progressions/`, label: '자주 쓰는 코드 진행' },
+    { href: `${base}learn/melody/melody-writing/`, label: '멜로디 만들기' },
+    { href: `${base}learn/arrangement/density/`, label: '편곡 밀도와 다이내믹' },
+  ]}
+  relatedNote="막히면 레슨으로 — 각 단계의 원리를 듣고 만지며 익힐 수 있어요.">
+
+<div id="sk" class="sk space-y-4">
+
+  <!-- 곡 설정 + 재생 -->
+  <section class="p-4 rounded-2xl border border-[var(--color-border)] bg-white space-y-4">
+    <div class="flex flex-wrap items-center gap-2">
+      <input id="skTitle" class="font-display text-lg font-bold text-[var(--color-ink-700)] bg-transparent border-b border-dashed border-[var(--color-border)] focus:border-[var(--color-violet)] outline-none min-w-0 flex-1 basis-40 py-1" maxlength="40" aria-label="곡 제목" />
+      <div class="flex flex-wrap gap-1.5" role="group" aria-label="예시 곡">
+        <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)] self-center mr-1">시작</span>
+        <button type="button" class="sk-chip" data-ex="pop">팝</button>
+        <button type="button" class="sk-chip" data-ex="ballad">발라드</button>
+        <button type="button" class="sk-chip" data-ex="lofi">로파이</button>
+        <button type="button" class="sk-chip" data-ex="blank">빈 스케치</button>
+      </div>
+    </div>
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 items-end">
+      <label class="sk-field"><span>조</span>
+        <div class="flex gap-1.5"><select id="skKey" class="sk-select flex-1" aria-label="으뜸음"></select>
+        <select id="skMode" class="sk-select" aria-label="장조 단조"><option value="major">장조</option><option value="minor">단조</option></select></div>
+      </label>
+      <label class="sk-field"><span>빠르기 <b id="skBpmVal" class="font-mono"></b></span><input id="skBpm" type="range" class="sl-range" min="50" max="180" step="1" aria-label="BPM" /></label>
+      <label class="sk-field"><span>스윙 <b id="skSwingVal" class="font-mono"></b></span><input id="skSwing" type="range" class="sl-range" min="50" max="67" step="1" aria-label="스윙" /></label>
+      <div class="flex gap-1.5 col-span-2 sm:col-span-1 justify-end">
+        <button id="skPlay" type="button" class="flex-1 gradient-brand text-white font-semibold px-3 py-2.5 rounded-xl text-sm font-display whitespace-nowrap">▶ 전체 재생</button>
+        <button id="skLoop" type="button" class="sk-btn whitespace-nowrap" title="편집 중인 섹션만 반복">🔁 <span id="skLoopLabel">벌스</span></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 구조: 섹션 × 마디 + 파트 켜기 -->
+  <section class="p-4 rounded-2xl border border-[var(--color-border)] bg-white" id="skStructure">
+    <div class="flex items-center justify-between mb-3 gap-2 flex-wrap">
+      <h2 class="text-sm font-bold font-display text-[var(--color-ink-700)]">곡 구조 <span class="font-normal text-[var(--color-ink-300)] text-xs">— 섹션을 눌러 편집, 파트를 눌러 켜고 끄기</span></h2>
+      <span id="skKeyName" class="text-xs font-mono text-[var(--color-ink-500)]"></span>
+    </div>
+    <div id="skOverview" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+  </section>
+
+  <!-- 편집기 -->
+  <section class="rounded-2xl border border-[var(--color-border)] bg-white overflow-hidden">
+    <div class="flex items-center gap-1 p-2 border-b border-[var(--color-border)] bg-[var(--color-surface)] overflow-x-auto" role="tablist">
+      {tabs.map(([id, label]) => <button type="button" role="tab" class="sk-tab" data-tab={id}>{label}</button>)}
+      <span class="ml-auto text-xs text-[var(--color-ink-500)] whitespace-nowrap pl-2">편집 중: <b id="skSecName" class="text-[var(--color-violet)]"></b></span>
+    </div>
+    <div id="skPanel" class="p-4"></div>
+  </section>
+
+  <!-- 저장 -->
+  <section class="p-4 rounded-2xl border border-[var(--color-border)] bg-white flex flex-wrap items-center gap-2">
+    <button id="skWav" type="button" class="gradient-brand text-white font-semibold px-4 py-2.5 rounded-xl text-sm font-display">⬇ WAV로 저장</button>
+    <button id="skShare" type="button" class="sk-btn">🔗 <span id="skShareLabel">링크 복사</span></button>
+    <p class="text-xs text-[var(--color-ink-300)] basis-full sm:basis-auto sm:ml-2">작업은 이 브라우저에 자동 저장돼요. 링크에는 곡 전체가 담겨 서버에 저장되지 않아요.</p>
+  </section>
+</div>
+</SandboxShell>
+</Base>
+
+<style is:global>
+  .sk .sk-chip { font-size: 12px; font-weight: 600; padding: 5px 11px; border-radius: 999px; border: 1px solid var(--color-border); color: var(--color-ink-500); background: white; transition: all .15s; }
+  .sk .sk-chip:hover { border-color: var(--color-violet); color: var(--color-violet); }
+  .sk .sk-chip.on { background: var(--color-violet); border-color: var(--color-violet); color: white; }
+  .sk .sk-btn { font-size: 13px; font-weight: 600; padding: 9px 12px; border-radius: 12px; border: 1px solid var(--color-border); color: var(--color-ink-500); background: white; transition: all .15s; }
+  .sk .sk-btn:hover, .sk .sk-btn.on { border-color: var(--color-violet); color: var(--color-violet); }
+  .sk .sk-field { display: flex; flex-direction: column; gap: 6px; font-size: 11px; color: var(--color-ink-500); }
+  .sk .sk-select { font-size: 13px; padding: 7px 8px; border-radius: 10px; border: 1px solid var(--color-border); background: white; color: var(--color-ink-700); }
+  .sk .sk-tab { font-size: 13px; font-weight: 600; padding: 7px 12px; border-radius: 10px; color: var(--color-ink-500); white-space: nowrap; }
+  .sk .sk-tab.on { background: white; color: var(--color-violet); box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+  .sk .sk-seg { display: inline-flex; flex-wrap: wrap; gap: 4px; padding: 4px; border-radius: 12px; background: var(--color-surface-2); }
+  .sk .sk-seg button { font-size: 12px; font-weight: 600; padding: 6px 11px; border-radius: 9px; color: var(--color-ink-500); }
+  .sk .sk-seg button.on { background: white; color: var(--color-violet); box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+  .sk .sk-label { font-size: 10px; font-family: ui-monospace, monospace; text-transform: uppercase; letter-spacing: .06em; color: var(--color-ink-300); }
+  /* 구조 */
+  .sk .ov { border: 1px solid var(--color-border); border-radius: 14px; padding: 10px; cursor: pointer; transition: border-color .15s; }
+  .sk .ov.sel { border-color: var(--color-violet); box-shadow: 0 0 0 3px var(--color-violet-glow); }
+  .sk .ov-bars { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin: 8px 0; }
+  .sk .ov-bar { font-size: 12px; font-weight: 700; text-align: center; padding: 6px 2px; border-radius: 8px; background: var(--color-surface); color: var(--color-ink-700); transition: background .08s; }
+  .sk .ov-bar.now { background: var(--color-violet); color: white; }
+  .sk .ov-parts { display: flex; gap: 4px; flex-wrap: wrap; }
+  .sk .ov-part { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--color-border); color: var(--color-ink-300); background: white; }
+  .sk .ov-part.on { border-color: var(--color-violet-light); background: var(--color-violet-glow); color: var(--color-violet); }
+  /* 격자 공통 */
+  .sk .grid-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 4px; }
+  .sk .gr { display: grid; gap: 2px; min-width: max-content; justify-content: start; }
+  .sk .cell { width: 26px; height: 26px; border-radius: 5px; background: var(--color-surface-2); border: 0; padding: 0; transition: background .06s; }
+  .sk .cell.beat { background: #e9e6f5; }
+  .sk .cell.bar0 { margin-left: 6px; }
+  .sk .cell.x { background: var(--color-violet); }
+  .sk .cell.o { background: var(--color-violet-light); }
+  .sk .cell.now { outline: 2px solid var(--color-blue); outline-offset: -2px; }
+  .sk .grid-wrap .rowlab { position: sticky; left: 0; z-index: 1; background: white; }
+  .sk .rowlab { font-size: 11px; font-weight: 600; color: var(--color-ink-500); display: flex; align-items: center; gap: 4px; padding-right: 6px; white-space: nowrap; background: none; border: 0; }
+  .sk .mcell { width: 26px; height: 20px; border-radius: 4px; background: var(--color-surface-2); border: 0; padding: 0; }
+  .sk .mcell.ct { background: #ddeee3; }
+  .sk .mcell.dim { opacity: .35; }
+  .sk .mcell.n { background: var(--color-violet); }
+  .sk .mcell.h { background: var(--color-violet-light); }
+  .sk .mcell.now { outline: 2px solid var(--color-blue); outline-offset: -2px; }
+  .sk .mcell.bar0 { margin-left: 6px; }
+  .sk .slot { border: 1px solid var(--color-border); border-radius: 12px; padding: 8px 4px; text-align: center; background: white; }
+  .sk .slot.sel { border-color: var(--color-violet); box-shadow: 0 0 0 3px var(--color-violet-glow); }
+  .sk .slot.now { background: var(--color-violet-glow); }
+  .sk .pal { font-size: 12px; font-weight: 700; padding: 6px 10px; border-radius: 10px; border: 1px solid var(--color-border); background: white; color: var(--color-ink-700); min-width: 52px; }
+  .sk .pal small { display: block; font-weight: 500; font-size: 10px; color: var(--color-ink-300); }
+  .sk .pal:hover { border-color: var(--color-violet); }
+  .sk .fn-T { border-bottom: 3px solid #16a34a; } .sk .fn-S { border-bottom: 3px solid #2563eb; } .sk .fn-D { border-bottom: 3px solid #dc2626; }
+  .sk .fn-B { border-bottom: 3px solid #9333ea; } .sk .fn-X { border-bottom: 3px solid #ea580c; }
+</style>
+
+<script>
+import { EXAMPLES, cloneSong, blankSong, validate, encodeSong, decodeSong, keyOptions, keyName, chordInfo, rowLabels, rowMidi, PALETTE, FN_LABEL,
+  PARTS, PART_LABEL, SECTIONS, SECTION_LABEL, DRUM_TRACKS, BARS, STEPS, MEL_CELLS, MEL_ROWS, SEC_STEPS, REST, HOLD, PENTA_DEG, voice,
+  type Song, type SectionId, type PartId } from '../../../lib/sketch';
+import { SketchPlayer, renderWav } from '../../../audio/sketch';
+import { PRESETS, TRACK_LABEL } from '../../../audio/drums';
+import { midiName } from '../../../lib/music';
+
+const STORE = 'sl-sketch-v1';
+const $ = <T extends HTMLElement = HTMLElement>(s: string) => document.querySelector(s) as T;
+const esc = (s: string) => s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!));
+
+// ── 상태 ──
+const params = new URLSearchParams(location.search);
+let song: Song = (params.get('s') && decodeSong(params.get('s')!)) || (() => { try { const v = localStorage.getItem(STORE); return v ? validate(JSON.parse(v)) : null; } catch (e) { return null; } })() || cloneSong(EXAMPLES.pop.song);
+let cur: SectionId = 'verse';
+let tab = (['drums', 'chords', 'bass', 'melody', 'mix'] as const).includes(params.get('tab') as any) ? params.get('tab')! : 'drums';
+let chordSlot = 0, pentaOnly = false, showCT = true, nowStep = -1;
+let saveT = 0;
+const changed = (redrawAll = false) => {
+  clearTimeout(saveT); saveT = window.setTimeout(() => { try { localStorage.setItem(STORE, JSON.stringify(song)); } catch (e) {} }, 300);
+  if (redrawAll) renderAll(); else { renderOverview(); }
+};
+
+const player = new SketchPlayer(() => song, g => { if (g >= 0 && !player.playing) return; nowStep = g; paintNow(); });
+
+// ── 곡 설정 ──
+const titleEl = $<HTMLInputElement>('#skTitle'), keyEl = $<HTMLSelectElement>('#skKey'), modeEl = $<HTMLSelectElement>('#skMode');
+const bpmEl = $<HTMLInputElement>('#skBpm'), swEl = $<HTMLInputElement>('#skSwing');
+const setPct = (el: HTMLInputElement) => el.style.setProperty('--sl-pct', ((+el.value - +el.min) / (+el.max - +el.min) * 100) + '%');
+function renderHeader() {
+  titleEl.value = song.title;
+  keyEl.innerHTML = keyOptions(song.mode).map(k => `<option value="${k.pc}">${k.name}</option>`).join('');
+  keyEl.value = String(song.key); modeEl.value = song.mode;
+  bpmEl.value = String(song.bpm); $('#skBpmVal').textContent = song.bpm + ' BPM'; setPct(bpmEl);
+  swEl.value = String(Math.round(song.swing * 100)); $('#skSwingVal').textContent = Math.round(song.swing * 100) + '%'; setPct(swEl);
+  $('#skKeyName').textContent = keyName(song);
+}
+titleEl.addEventListener('input', () => { song.title = titleEl.value.slice(0, 40); changed(); });
+keyEl.addEventListener('change', () => { song.key = +keyEl.value; $('#skKeyName').textContent = keyName(song); changed(true); });
+modeEl.addEventListener('change', () => {
+  const m = modeEl.value as Song['mode'];
+  if (m === song.mode) return;
+  // 장↔단 전환: 팔레트가 달라지므로 코드를 기본 진행으로 바꾸고 나란한조로 이동
+  song.mode = m; song.key = (song.key + (m === 'minor' ? 9 : 3)) % 12;
+  for (const id of SECTIONS) song.sections[id].chords = m === 'major' ? ['I', 'vi', 'IV', 'V'] : ['i', '♭VI', '♭III', '♭VII'];
+  changed(true); renderHeader();
+});
+bpmEl.addEventListener('input', () => { song.bpm = +bpmEl.value; $('#skBpmVal').textContent = song.bpm + ' BPM'; setPct(bpmEl); changed(); });
+swEl.addEventListener('input', () => { song.swing = +swEl.value / 100; $('#skSwingVal').textContent = swEl.value + '%'; setPct(swEl); changed(); });
+document.querySelectorAll<HTMLElement>('[data-ex]').forEach(b => b.addEventListener('click', () => {
+  const ex = b.dataset.ex!;
+  song = ex === 'blank' ? blankSong() : cloneSong(EXAMPLES[ex].song);
+  cur = 'verse'; chordSlot = 0; renderHeader(); changed(true);
+}));
+
+// ── 구조 개요 ──
+function renderOverview() {
+  $('#skOverview').innerHTML = SECTIONS.map(id => {
+    const sec = song.sections[id];
+    return `<div class="ov ${id === cur ? 'sel' : ''}" data-sec="${id}">
+      <div class="flex items-center justify-between"><b class="text-sm font-display">${SECTION_LABEL[id]}</b><span class="sk-label">${id === 'verse' ? '1–4마디' : '5–8마디'}</span></div>
+      <div class="ov-bars">${sec.chords.map((rn, i) => `<div class="ov-bar" data-bar="${id}-${i}">${rn ? esc(chordInfo(song, rn)?.name ?? rn) : '—'}</div>`).join('')}</div>
+      <div class="ov-parts">${PARTS.map(p => `<button type="button" class="ov-part ${sec.on[p] ? 'on' : ''}" data-tog="${id}:${p}" aria-pressed="${sec.on[p]}">${PART_LABEL[p]}</button>`).join('')}</div>
+    </div>`;
+  }).join('');
+  $('#skSecName').textContent = SECTION_LABEL[cur];
+  $('#skLoopLabel').textContent = SECTION_LABEL[cur];
+  paintNow();
+}
+$('#skOverview').addEventListener('click', e => {
+  const t = e.target as HTMLElement;
+  const tog = t.closest<HTMLElement>('[data-tog]');
+  if (tog) { const [id, p] = tog.dataset.tog!.split(':') as [SectionId, PartId]; song.sections[id].on[p] = !song.sections[id].on[p]; changed(); return; }
+  const ov = t.closest<HTMLElement>('[data-sec]');
+  if (ov && ov.dataset.sec !== cur) { cur = ov.dataset.sec as SectionId; if (player.playing && player.range !== 'song') player.start(cur); renderOverview(); renderPanel(); }
+});
+
+// ── 탭 ──
+document.querySelectorAll<HTMLElement>('.sk-tab').forEach(b => b.addEventListener('click', () => { tab = b.dataset.tab!; renderPanel(); }));
+
+const seg = (name: string, opts: [string, string][], val: string) =>
+  `<div class="sk-seg" data-seg="${name}">${opts.map(([v, l]) => `<button type="button" data-v="${v}" class="${v === val ? 'on' : ''}">${l}</button>`).join('')}</div>`;
+const tip = (html: string) => `<p class="mt-4 text-xs leading-relaxed text-[var(--color-ink-500)] p-3 rounded-xl bg-[var(--color-surface)]">${html}</p>`;
+const L = (path: string, label: string) => `<a class="text-[var(--color-violet)] font-semibold hover:underline" href="${import.meta.env.BASE_URL}learn/${path}/">${label}</a>`;
+
+function renderPanel() {
+  document.querySelectorAll<HTMLElement>('.sk-tab').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
+  const sec = song.sections[cur];
+  const SUBJ: Record<PartId, string> = { drums: '드럼이', bass: '베이스가', chords: '코드가', melody: '멜로디가' };
+  const off = (p: PartId) => !sec.on[p] ? `<p class="mb-3 text-xs text-[var(--color-ink-500)]">⚠ ${SECTION_LABEL[cur]}에서 ${SUBJ[p]} 꺼져 있어요. 위 곡 구조에서 켜면 들려요.</p>` : '';
+  let h = '';
+  if (tab === 'drums') {
+    const pre = ['rock8', 'pop16', 'ballad', 'house', 'boombap', 'shuffle'];
+    h = off('drums') + `<div class="flex flex-wrap gap-1.5 mb-4"><span class="sk-label self-center mr-1">패턴</span>${pre.map(id => `<button type="button" class="sk-chip" data-preset="${id}">${PRESETS[id].name}</button>`).join('')}</div>
+      <div class="grid-wrap"><div class="gr" style="grid-template-columns:auto repeat(16, 26px)">
+      ${DRUM_TRACKS.map(tr => `<button type="button" class="rowlab" data-hear="${tr}" title="소리 듣기">🔈 ${TRACK_LABEL[tr]}</button>` +
+        Array.from({ length: STEPS }, (_, s) => { const c = sec.drums[tr][s]; return `<button type="button" class="cell ${s % 4 === 0 ? 'beat' : ''} ${s && s % 4 === 0 ? '' : ''} ${c === 'x' ? 'x' : c === 'o' ? 'o' : ''}" data-d="${tr}:${s}" data-col="${s}" aria-label="${TRACK_LABEL[tr]} ${s + 1}번째 칸"></button>`; }).join('')).join('')}
+      </div></div>
+      <p class="mt-2 text-[11px] text-[var(--color-ink-300)]">한 마디 패턴이 4마디 동안 반복돼요. 칸을 누르면 침 → 약하게 → 쉼 순서로 바뀌어요.</p>`
+      + tip(`처음엔 <b>스네어를 2·4박</b>(5번째·13번째 칸)에 두고, 킥으로 그루브를 만드세요. 코러스는 벌스보다 하이햇을 촘촘하게 하면 에너지가 올라가요. → ${L('rhythm/drum-patterns', '장르별 드럼 패턴')}`);
+  } else if (tab === 'chords') {
+    const ch = (rn: string) => rn ? chordInfo(song, rn) : null;
+    h = off('chords') + `<div class="grid grid-cols-4 gap-2 mb-4">${sec.chords.map((rn, i) => { const c = ch(rn); return `<button type="button" class="slot ${i === chordSlot ? 'sel' : ''}" data-slot="${i}" data-barslot="${cur}-${i}">
+        <div class="sk-label">${(cur === 'verse' ? 0 : 4) + i + 1}마디</div><div class="text-lg font-bold font-display ${c ? 'fn-' + c.fn : ''} inline-block px-1">${c ? esc(c.name) : '쉼'}</div><div class="text-[11px] text-[var(--color-ink-500)]">${c ? esc(rn) + ' · ' + FN_LABEL[c.fn] : '—'}</div></button>`; }).join('')}</div>
+      <div class="sk-label mb-2">${(cur === 'verse' ? 0 : 4) + chordSlot + 1}마디에 넣을 코드 고르기</div>
+      <div class="space-y-1.5 mb-4">${PALETTE[song.mode].map(row => `<div class="flex flex-wrap gap-1.5">${row.map(rn => { const c = ch(rn)!; return `<button type="button" class="pal fn-${c.fn}" data-rn="${esc(rn)}">${esc(c.name)}<small>${esc(rn)}</small></button>`; }).join('')}${row === PALETTE[song.mode][PALETTE[song.mode].length - 1] ? `<button type="button" class="pal" data-rn="">쉼<small>—</small></button>` : ''}</div>`).join('')}</div>
+      <div class="flex flex-wrap items-center gap-2"><span class="sk-label">치는 방식</span>${seg('chordStyle', [['block', '블록'], ['arp', '분산화음'], ['stab', '스탭'], ['pad', '패드']], sec.chordStyle)}</div>
+      <p class="mt-3 text-[11px] text-[var(--color-ink-300)]">밑줄 색: <span class="fn-T px-1">토닉</span> <span class="fn-S px-1">서브도미넌트</span> <span class="fn-D px-1">도미넌트</span> <span class="fn-B px-1">빌린 화음</span> <span class="fn-X px-1">세컨더리</span></p>`
+      + tip(`토닉에서 시작해 도미넌트를 거쳐 돌아오면 안정적이고, 벌스와 코러스의 첫 코드를 다르게 하면 단락이 바뀌는 느낌이 나요. → ${L('harmony/progressions', '자주 쓰는 코드 진행')} · ${L('harmony/functions', '화성 기능')}`);
+  } else if (tab === 'bass') {
+    h = off('bass') + `<div class="flex flex-wrap items-center gap-2 mb-4"><span class="sk-label">리듬</span>${seg('bass', [['whole', '온음표'], ['eighth', '8분음표'], ['kick', '킥 따라가기'], ['octave', '옥타브']], sec.bass)}</div>
+      <div class="grid grid-cols-4 gap-2">${sec.chords.map((rn, i) => { const c = rn ? chordInfo(song, rn) : null; return `<div class="slot" data-barslot="${cur}-${i}"><div class="sk-label">${(cur === 'verse' ? 0 : 4) + i + 1}마디</div><div class="text-base font-bold font-display">${c ? midiName(36 + c.rootPc, song.mode === 'minor' || [1, 3, 8, 10].includes(song.key) ? 'flat' : 'sharp', false) : '—'}</div><div class="text-[11px] text-[var(--color-ink-500)]">${c ? esc(c.name) + '의 근음' : '쉼'}</div></div>`; }).join('')}</div>`
+      + tip(`베이스는 코드의 <b>근음</b>을 자동으로 따라가요. 리듬만 고르면 돼요. <b>킥 따라가기</b>는 킥이 치는 자리에 베이스를 맞춰 저음을 단단하게 붙여요. → ${L('arrangement/instrument-roles', '악기별 역할')}`);
+  } else if (tab === 'melody') {
+    const labels = rowLabels(song);
+    const cells = BARS * MEL_CELLS;
+    const penta = PENTA_DEG[song.mode];
+    let grid = `<div class="gr" style="grid-template-columns:auto repeat(${cells}, 26px)">`;
+    grid += `<span></span>` + Array.from({ length: cells }, (_, c) => { const bar = Math.floor(c / MEL_CELLS); const rn = sec.chords[bar]; const nm = rn && c % MEL_CELLS === 0 ? esc(chordInfo(song, rn)?.name ?? '') : ''; return `<span class="text-[10px] font-bold text-[var(--color-ink-500)] whitespace-nowrap ${c % MEL_CELLS === 0 && c ? 'pl-1.5' : ''}" style="${nm ? 'grid-column:span 1' : ''}">${nm}</span>`; }).join('');
+    for (let r = MEL_ROWS - 1; r >= 0; r--) {
+      const lab = labels[r];
+      grid += `<button type="button" class="rowlab" data-hearrow="${r}">${lab.kr}<span class="text-[var(--color-ink-300)] font-mono text-[10px]">${lab.name}${"'".repeat(lab.oct)}</span></button>`;
+      for (let c = 0; c < cells; c++) {
+        const v = sec.melody[c];
+        let owner = -1; if (v >= 0) owner = v; else if (v === HOLD) { let k = c; while (k > 0 && sec.melody[k] === HOLD) k--; owner = sec.melody[k]; }
+        const bar = Math.floor(c / MEL_CELLS), rn = sec.chords[bar], ci = rn ? chordInfo(song, rn) : null;
+        const strong = c % 4 === 0;
+        const ct = showCT && strong && ci && ci.pcs.includes(rowMidi(song, r) % 12);
+        const dim = pentaOnly && !penta.includes(r % 7);
+        const cls = owner === r ? (v >= 0 ? 'n' : 'h') : (ct ? 'ct' : '');
+        grid += `<button type="button" class="mcell ${cls} ${dim && owner !== r ? 'dim' : ''} ${c % MEL_CELLS === 0 && c ? 'bar0' : ''}" data-m="${r}:${c}" data-col="${c * 2}" aria-label="${lab.kr} ${c + 1}번째 칸"></button>`;
+      }
+    }
+    grid += '</div>';
+    h = off('melody') + `<div class="flex flex-wrap items-center gap-2 mb-3">
+        <button type="button" class="sk-chip ${pentaOnly ? 'on' : ''}" data-opt="penta">펜타토닉만</button>
+        <button type="button" class="sk-chip ${showCT ? 'on' : ''}" data-opt="ct">센 박 코드 톤 표시</button>
+        <button type="button" class="sk-chip" data-opt="copy">${SECTION_LABEL[cur === 'verse' ? 'chorus' : 'verse']} 멜로디 복사</button>
+        <button type="button" class="sk-chip" data-opt="clear">지우기</button></div>
+      <div class="grid-wrap">${grid}</div>
+      <p class="mt-2 text-[11px] text-[var(--color-ink-300)]">칸 = 8분음표. 빈 칸을 누르면 음이 생기고, 바로 오른쪽 칸을 누르면 길게 이어져요. 음을 다시 누르면 지워져요. 연한 초록 칸은 센 박의 코드 구성음이에요.</p>`
+      + tip(`짧은 모티브를 만들고 반복·변형하세요. 센 박에는 초록 칸(코드 톤)을, 마지막 음은 <b>${labels[0].kr}</b>(으뜸음)로 끝내면 "끝났다"는 느낌이 나요. → ${L('melody/melody-writing', '멜로디 만들기')} · ${L('melody/pentatonic', '펜타토닉')}`);
+  } else {
+    const instRow = (p: 'chords' | 'bass' | 'melody', opts: [string, string][]) =>
+      `<div class="flex flex-wrap items-center gap-2"><span class="w-14 text-sm font-semibold text-[var(--color-ink-700)]">${PART_LABEL[p]}</span>${seg('inst-' + p, opts, song.inst[p])}</div>`;
+    h = `<div class="grid gap-6 md:grid-cols-2">
+      <div class="space-y-3"><div class="sk-label">음색</div>
+        ${instRow('chords', [['keys', '피아노'], ['pad', '패드'], ['pluck', '플럭']])}
+        ${instRow('bass', [['sub', '서브'], ['synth', '신스'], ['pluck', '퉁기기']])}
+        ${instRow('melody', [['soft', '부드럽게'], ['bright', '밝게'], ['bell', '벨']])}
+      </div>
+      <div class="space-y-3"><div class="sk-label">볼륨</div>
+        ${PARTS.map(p => `<label class="flex items-center gap-3 text-sm"><span class="w-14 font-semibold text-[var(--color-ink-700)]">${PART_LABEL[p]}</span><input type="range" class="sl-range flex-1" min="0" max="100" value="${song.vol[p]}" data-vol="${p}" aria-label="${PART_LABEL[p]} 볼륨"/><span class="w-8 text-right font-mono text-xs text-[var(--color-ink-500)]" data-volval="${p}">${song.vol[p]}</span></label>`).join('')}
+      </div></div>`
+      + tip(`멜로디가 가장 잘 들리게, 킥과 베이스는 서로 가리지 않게 맞춰 보세요. 마스터에는 컴프레서와 리미터가 걸려 있어 저장한 WAV가 0dBFS를 넘지 않아요. → ${L('mixing/balance', '볼륨 밸런스')} · ${L('synthesis/subtractive', '감산합성')} · ${L('mixing/export', '내보내기와 포맷')}`);
+  }
+  $('#skPanel').innerHTML = h;
+  $('#skPanel').querySelectorAll<HTMLInputElement>('input[type=range]').forEach(setPct);
+  paintNow();
+}
+
+// ── 패널 이벤트 (위임) ──
+const panel = $('#skPanel');
+panel.addEventListener('click', e => {
+  const t = (e.target as HTMLElement).closest<HTMLElement>('button');
+  if (!t) return;
+  const sec = song.sections[cur];
+  if (t.dataset.preset) { const p = PRESETS[t.dataset.preset]; for (const tr of DRUM_TRACKS) sec.drums[tr] = (p.tracks as any)[tr] ?? '................'; if (p.swing) { song.swing = p.swing; renderHeader(); } changed(); renderPanel(); return; }
+  if (t.dataset.d) { const [tr, s] = t.dataset.d.split(':'); const row = sec.drums[tr as keyof typeof sec.drums]; const c = row[+s]; const nx = c === '.' ? 'x' : c === 'x' ? 'o' : '.'; sec.drums[tr as keyof typeof sec.drums] = row.slice(0, +s) + nx + row.slice(+s + 1); t.classList.toggle('x', nx === 'x'); t.classList.toggle('o', nx === 'o'); if (nx !== '.') player.previewDrum(tr as any); changed(); return; }
+  if (t.dataset.hear) { player.previewDrum(t.dataset.hear as any); return; }
+  if (t.dataset.slot) { chordSlot = +t.dataset.slot; renderPanel(); return; }
+  if (t.dataset.rn !== undefined) {
+    sec.chords[chordSlot] = t.dataset.rn; const c = chordInfo(song, t.dataset.rn);
+    if (c) voice(c.pcs).forEach((m, i) => setTimeout(() => player.preview('chords', m), i * 25));
+    chordSlot = (chordSlot + 1) % BARS; changed(); renderPanel(); return;
+  }
+  if (t.dataset.hearrow) { player.preview('melody', rowMidi(song, +t.dataset.hearrow)); return; }
+  if (t.dataset.m) {
+    const [r, c] = t.dataset.m.split(':').map(Number); const m = sec.melody;
+    const ownerOf = (k: number) => { if (m[k] >= 0) return m[k]; if (m[k] === HOLD) { let j = k; while (j > 0 && m[j] === HOLD) j--; return m[j]; } return REST; };
+    const clearFrom = (k: number) => { m[k] = REST; let j = k + 1; while (j < m.length && m[j] === HOLD) { m[j] = REST; j++; } };
+    if (m[c] === r) clearFrom(c);                                  // 시작 칸을 다시 누름 → 삭제
+    else if (m[c] === HOLD && ownerOf(c) === r) clearFrom(c);      // 이어진 칸을 누름 → 거기부터 자름
+    else if (c > 0 && m[c] === REST && ownerOf(c - 1) === r) m[c] = HOLD; // 바로 오른쪽 → 이어 붙이기
+    else { if (m[c] === HOLD || m[c] >= 0) clearFrom(c); m[c] = r; let j = c + 1; while (j < m.length && m[j] === HOLD) { m[j] = REST; j++; } player.preview('melody', rowMidi(song, r)); }
+    if (m[c] === HOLD && c === 0) m[c] = REST;
+    changed(); renderPanel(); return;
+  }
+  if (t.dataset.opt === 'penta') { pentaOnly = !pentaOnly; renderPanel(); return; }
+  if (t.dataset.opt === 'ct') { showCT = !showCT; renderPanel(); return; }
+  if (t.dataset.opt === 'copy') { sec.melody = [...song.sections[cur === 'verse' ? 'chorus' : 'verse'].melody]; changed(); renderPanel(); return; }
+  if (t.dataset.opt === 'clear') { sec.melody = Array(BARS * MEL_CELLS).fill(REST); changed(); renderPanel(); return; }
+  const sg = t.closest<HTMLElement>('[data-seg]');
+  if (sg && t.dataset.v) {
+    const name = sg.dataset.seg!, v = t.dataset.v;
+    if (name === 'chordStyle') sec.chordStyle = v as any;
+    else if (name === 'bass') sec.bass = v as any;
+    else if (name.startsWith('inst-')) { const p = name.slice(5) as 'chords' | 'bass' | 'melody'; (song.inst as any)[p] = v; const mid = p === 'bass' ? 40 : p === 'chords' ? 64 : 72; player.preview(p, mid); }
+    sg.querySelectorAll('button').forEach(b => b.classList.toggle('on', b === t));
+    changed(); return;
+  }
+});
+panel.addEventListener('input', e => {
+  const t = e.target as HTMLInputElement;
+  if (t.dataset.vol) { song.vol[t.dataset.vol as PartId] = +t.value; setPct(t); panel.querySelector(`[data-volval="${t.dataset.vol}"]`)!.textContent = t.value; changed(); }
+});
+
+// ── 재생 위치 표시 ──
+function paintNow() {
+  document.querySelectorAll('.now').forEach(el => el.classList.remove('now'));
+  if (nowStep < 0) return;
+  const id = SECTIONS[Math.floor(nowStep / SEC_STEPS)], local = nowStep % SEC_STEPS, bar = Math.floor(local / STEPS), s = local % STEPS;
+  document.querySelector(`.ov-bar[data-bar="${id}-${bar}"]`)?.classList.add('now');
+  document.querySelector(`.slot[data-barslot="${id}-${bar}"]`)?.classList.add('now');
+  if (id !== cur) return;
+  if (tab === 'drums') document.querySelectorAll(`.cell[data-col="${s}"]`).forEach(el => el.classList.add('now'));
+  if (tab === 'melody' && s % 2 === 0) document.querySelectorAll(`.mcell[data-col="${bar * 16 + s}"]`).forEach(el => el.classList.add('now'));
+}
+
+// ── 재생 버튼 ──
+const playBtn = $('#skPlay'), loopBtn = $('#skLoop');
+const syncBtns = () => {
+  playBtn.textContent = player.playing && player.range === 'song' ? '■ 정지' : '▶ 전체 재생';
+  loopBtn.classList.toggle('on', player.playing && player.range !== 'song');
+};
+playBtn.addEventListener('click', async () => { if (player.playing && player.range === 'song') player.stop(); else await player.start('song'); syncBtns(); });
+loopBtn.addEventListener('click', async () => { if (player.playing && player.range !== 'song') player.stop(); else await player.start(cur); syncBtns(); });
+document.addEventListener('keydown', e => { if (e.code === 'Space' && !(e.target as HTMLElement).closest('input,select,textarea')) { e.preventDefault(); playBtn.click(); } });
+
+// ── 저장 · 공유 ──
+const wavBtn = $<HTMLButtonElement>('#skWav');
+wavBtn.addEventListener('click', async () => {
+  wavBtn.disabled = true; const old = wavBtn.textContent; wavBtn.textContent = '만드는 중…';
+  try {
+    const blob = await renderWav(song);
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = `${(song.title || '내 스케치').replace(/[\\/:*?"<>|]/g, '_')}_${song.bpm}bpm.wav`;
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    try { (window as any).gtag?.('event', 'sketch_wav', { bpm: song.bpm }); } catch (e) {}
+    wavBtn.textContent = '저장됨 ✓';
+  } catch (e) { wavBtn.textContent = '저장 실패 — 다시 시도'; }
+  setTimeout(() => { wavBtn.textContent = old; wavBtn.disabled = false; }, 1800);
+});
+$('#skShare').addEventListener('click', async () => {
+  const url = new URL(location.href); url.search = ''; url.searchParams.set('s', encodeSong(song));
+  history.replaceState(null, '', url);
+  let ok = false; try { await navigator.clipboard.writeText(url.toString()); ok = true; } catch (e) {}
+  const lab = $('#skShareLabel'); lab.textContent = ok ? '복사됨 ✓' : '주소창 링크를 복사하세요';
+  setTimeout(() => { lab.textContent = '링크 복사'; }, 2000);
+});
+
+function renderAll() { renderOverview(); renderPanel(); }
+renderHeader(); renderAll(); syncBtns();
+if (params.get('tab') === 'structure') $('#skStructure').scrollIntoView({ block: 'center' });
+</script>

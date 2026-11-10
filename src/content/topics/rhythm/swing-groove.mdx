@@ -20,12 +20,15 @@ import Level from '../../../components/doc/Level.astro';
 import DefList from '../../../components/doc/DefList.astro';
 import DefCard from '../../../components/doc/DefCard.astro';
 import Callout from '../../../components/doc/Callout.astro';
+import SwingFig from '../../../components/doc/fig/SwingFig.astro';
 
 {/* ───────── 초급 ───────── */}
 <Level show="easy">
 ## 똑, 딱 대신 또—옥 딱
 
 8분음표 두 개를 똑같은 길이로 치면 "똑딱 똑딱" 기계처럼 단단해요. 그런데 앞 음을 길게, 뒤 음을 짧게 치면 "또—옥딱 또—옥딱" 하고 말이 걷는 것처럼 출렁여요. 이 흔들림이 **스윙**이에요. 재즈와 블루스, 많은 힙합이 이렇게 흔들려요.
+
+<SwingFig rows={[{pct:50,label:"똑딱 — 똑같이"},{pct:67,label:"또—옥딱 — 셔플"}]} caption="보라 점 = 박, 파란 점 = 뒤 8분음표. 스윙은 뒤 음을 늦춰요" />
 
 ## 직접 해보기
 
@@ -46,6 +49,8 @@ import Callout from '../../../components/doc/Callout.astro';
   <DefCard term="약 67% — 셋잇단 셔플">앞뒤가 2:1. 셋잇단의 첫째·셋째 칸에 치는 것과 같습니다. 블루스·셔플.</DefCard>
   <DefCard term="70% 이상 — 강한 스윙">점8분 + 16분(3:1)에 가까워집니다. 재즈 스윙은 템포에 따라 이 사이를 오갑니다.</DefCard>
 </DefList>
+
+<SwingFig caption="뒤 8분음표(파란 점)의 위치 — 67%는 셋잇단의 셋째 칸(파란 세로선)과 같습니다" />
 
 ## 그루브는 타이밍 + 강약
 

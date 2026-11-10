@@ -22,12 +22,16 @@ import Level from '../../../components/doc/Level.astro';
 import DefList from '../../../components/doc/DefList.astro';
 import DefCard from '../../../components/doc/DefCard.astro';
 import Callout from '../../../components/doc/Callout.astro';
+import ChordFlow from '../../../components/doc/fig/ChordFlow.astro';
+import Staff from '../../../components/doc/Staff.astro';
 
 {/* ───────── 초급 ───────── */}
 <Level show="easy">
 ## 같은 뼈대, 다른 노래
 
 신기하게도 수많은 노래가 **같은 코드 순서**를 써요. 멜로디와 가사, 리듬이 다르면 전혀 다른 노래가 되거든요. 코드 진행은 노래의 **뼈대**, 멜로디는 그 위에 입히는 **옷**이에요.
+
+<ChordFlow items={[{name:"C",sub:"I",fn:"T"},{name:"G",sub:"V",fn:"D"},{name:"Am",sub:"vi",fn:"T"},{name:"F",sub:"IV",fn:"S"}]} loop="처음으로 돌아가 반복" caption="I–V–vi–IV — 수많은 팝 노래의 뼈대" />
 
 ## 직접 해보기
 
@@ -51,6 +55,10 @@ import Callout from '../../../components/doc/Callout.astro';
 <Callout>
 **캐논 진행**을 재생하며 **베이스**(맨 아래 음)에 집중해 보세요. 위젯은 기본형으로 치기 때문에 근음이 도–솔–라–미–파–도–파–솔로 오르내립니다. 이것을 G/B, Em/G, C/E처럼 전위하면 베이스가 도–시–라–솔–파–미–파–솔 계단으로 바뀌어 훨씬 매끄럽게 흐릅니다(→ [전위와 보이스 리딩](/learn/harmony/voice-leading/)). 진행을 외울 때 코드 이름과 함께 베이스 라인을 기억하면 응용이 쉬워집니다.
 </Callout>
+
+<Staff clef="bass" notes="C3/q G2/q A2/q E2/q | F2/q C3/q F2/q G2/q" time="4/4" labels play caption="캐논 진행의 베이스 — 기본형(근음): 도 솔 라 미 파 도 파 솔" />
+
+<Staff clef="bass" notes="C3/q B2/q A2/q G2/q | F2/q E2/q F2/q G2/q" time="4/4" labels play caption="전위를 섞으면(G/B · Em/G · C/E) — 도 시 라 솔 파 미 파 솔, 한 칸씩 내려가는 계단" />
 </Level>
 
 {/* ───────── 고급 ───────── */}

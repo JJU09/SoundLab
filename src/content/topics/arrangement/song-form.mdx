@@ -19,6 +19,7 @@ import Level from '../../../components/doc/Level.astro';
 import DefList from '../../../components/doc/DefList.astro';
 import DefCard from '../../../components/doc/DefCard.astro';
 import Callout from '../../../components/doc/Callout.astro';
+import FormFig from '../../../components/doc/fig/FormFig.astro';
 
 {/* ───────── 초급 ───────── */}
 <Level show="easy">
@@ -32,6 +33,8 @@ import Callout from '../../../components/doc/Callout.astro';
 - **아웃트로** — "안녕히 가세요" 하며 마무리.
 
 여러분이 흥얼거리는 부분은 대부분 **코러스**예요. 코러스가 몇 번씩 반복되기 때문에 기억에 남는 거예요.
+
+<FormFig sections={[{name:"인트로",bars:4,energy:2,kind:"intro"},{name:"벌스",bars:8,energy:2,kind:"verse"},{name:"코러스",bars:8,energy:4,kind:"chorus"},{name:"벌스",bars:8,energy:2,kind:"verse"},{name:"코러스",bars:8,energy:5,kind:"chorus"},{name:"아웃트로",bars:4,energy:1,kind:"outro"}]} caption="노래의 목차 — 막대 높이는 에너지(얼마나 꽉 차고 신나는지)" />
 
 ## 직접 해보기
 
@@ -56,6 +59,8 @@ import Callout from '../../../components/doc/Callout.astro';
 ## 대표적인 팝 구조
 
 > 인트로 – 벌스 – 프리코러스 – 코러스 – 벌스 – 프리코러스 – 코러스 – 브리지 – 코러스 – 아웃트로
+
+<FormFig sections={[{name:"인트로",bars:4,energy:2,kind:"intro"},{name:"벌스",bars:8,energy:2,kind:"verse"},{name:"프리",bars:4,energy:3,kind:"pre"},{name:"코러스",bars:8,energy:4,kind:"chorus"},{name:"벌스",bars:8,energy:2,kind:"verse"},{name:"프리",bars:4,energy:3,kind:"pre"},{name:"코러스",bars:8,energy:4,kind:"chorus"},{name:"브리지",bars:8,energy:2,kind:"bridge"},{name:"코러스",bars:8,energy:5,kind:"chorus"},{name:"아웃트로",bars:4,energy:1,kind:"outro"}]} caption="계단식으로 오르다 브리지에서 내려앉고, 마지막 코러스에서 가장 높이 — 마디 수는 흔한 예" />
 
 에너지 곡선을 그려 보면 계단식으로 오르다(벌스 → 프리 → 코러스), 브리지에서 한 번 내려앉고, 마지막 코러스에서 가장 높이 올라갑니다. 마지막 코러스는 전조하거나 애드리브를 더해 첫 코러스보다 크게 만드는 경우가 많습니다.
 

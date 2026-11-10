@@ -19,6 +19,8 @@ import Level from '../../../components/doc/Level.astro';
 import DefList from '../../../components/doc/DefList.astro';
 import DefCard from '../../../components/doc/DefCard.astro';
 import Callout from '../../../components/doc/Callout.astro';
+import BeatsFig from '../../../components/doc/fig/BeatsFig.astro';
+import AxisRanges from '../../../components/doc/fig/AxisRanges.astro';
 
 {/* ───────── 초급 ───────── */}
 <Level show="easy">
@@ -29,6 +31,8 @@ import Callout from '../../../components/doc/Callout.astro';
 ## 박이 얼마나 빠른가: 템포
 
 박이 얼마나 빠르게 뛰는지를 **템포**라고 하고, **1분에 몇 번** 뛰는지로 적어요. 이 숫자가 **BPM**(Beats Per Minute)이에요. BPM 60은 1초에 한 번, 시계 초침과 같은 빠르기예요.
+
+<BeatsFig rows={[{bpm:60,label:"1초에 한 번"},{bpm:90,label:"조금 빠르게"},{bpm:120,label:"1초에 두 번"}]} caption="같은 4초 동안 BPM이 클수록 박이 촘촘해요 — 진한 점은 마디의 첫 박" />
 
 ## 직접 해보기
 
@@ -49,6 +53,8 @@ import Callout from '../../../components/doc/Callout.astro';
   <DefCard term="100–130 BPM">댄스 팝, 록, 하우스(120–128) — 몸이 움직이는 빠르기</DefCard>
   <DefCard term="140 BPM 이상">드럼앤베이스·펑크 록 등. 힙합의 트랩은 140 근처를 반으로 느끼는(하프타임) 경우가 많습니다.</DefCard>
 </DefList>
+
+<AxisRanges label="장르별 흔한 BPM 범위" min={50} max={190} step={20} items={[{label:"발라드·R&B",from:60,to:80},{label:"힙합·미디엄 팝",from:85,to:100},{label:"댄스 팝·록",from:100,to:130},{label:"하우스",from:120,to:128},{label:"드럼앤베이스",from:160,to:180,note:"140 이상 장르의 예"}]} caption="장르별로 흔히 쓰는 BPM 범위 — 대략적인 기준입니다" />
 
 ## 박을 지키는 연습
 

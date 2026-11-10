@@ -1,0 +1,28 @@
+---
+// 곡 구조 타임라인 — 단락 블록(폭 = 마디 수, 높이 = 에너지 1~5) + 에너지 곡선
+import Fig from './Fig.astro'; import { C } from './colors';
+type Kind = 'intro' | 'verse' | 'pre' | 'chorus' | 'bridge' | 'outro';
+interface Sec { name: string; bars: number; energy: number; kind?: Kind; }
+interface Props { sections: Sec[]; caption?: string; }
+const { sections, caption } = Astro.props as Props;
+const COL: Record<Kind, string> = { intro: C.ink3, verse: C.blue, pre: C.B, chorus: C.violet, bridge: C.X, outro: C.ink3 };
+const total = sections.reduce((n, s) => n + s.bars, 0);
+const L = 26, W = 620, R = W - 8, base = 150, unit = 24;
+let acc = 0;
+const blocks = sections.map(s => { const x = L + (acc / total) * (R - L); const w = (s.bars / total) * (R - L); acc += s.bars;
+  return { ...s, x, w, cx: x + w / 2, h: s.energy * unit, fill: COL[s.kind ?? 'verse'], op: 0.22 + s.energy * 0.1, py: base - s.energy * unit - 10 }; });
+const pts = blocks.map(b => `${b.cx},${b.py}`).join(' ');
+const grid = [1, 2, 3, 4, 5].map(e => ({ e, y: base - e * unit }));
+---
+<Fig caption={caption} minW={540} label={`곡 구조와 에너지: ${sections.map(s => `${s.name} ${s.energy}`).join(', ')}`}>
+  <svg viewBox={`0 0 ${W} 190`}>
+    {grid.map(g => <line x1={L} x2={R} y1={g.y} y2={g.y} stroke={C.line} stroke-dasharray="2 4" />)}
+    {grid.map(g => <text x={L - 8} y={g.y + 4} font-size="10" fill={C.ink3} text-anchor="end" class="mono">{g.e}</text>)}
+    <text x="2" y="12" font-size="10" fill={C.ink3}>에너지</text>
+    {blocks.map(b => <rect x={b.x + 1.5} y={base - b.h} width={b.w - 3} height={b.h} rx="6" fill={b.fill} opacity={b.op} />)}
+    {blocks.map(b => <text x={b.cx} y={base + 16} text-anchor="middle" font-size="11" class="fd" fill={C.ink}>{b.name}</text>)}
+    {blocks.map(b => <text x={b.cx} y={base + 30} text-anchor="middle" font-size="9" fill={C.ink3} class="mono">{b.bars}마디</text>)}
+    <polyline points={pts} fill="none" stroke={C.ink} stroke-width="1.6" stroke-linejoin="round" />
+    {blocks.map(b => <circle cx={b.cx} cy={b.py} r="3.5" fill={C.ink} />)}
+  </svg>
+</Fig>

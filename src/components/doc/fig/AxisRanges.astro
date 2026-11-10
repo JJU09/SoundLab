@@ -1,0 +1,28 @@
+---
+// 숫자 축 위의 범위 막대 (BPM 범위 등). to가 없으면 점.
+import Fig from './Fig.astro'; import { C } from './colors';
+interface Item { label: string; from: number; to?: number; note?: string; }
+interface Props { items: Item[]; min: number; max: number; step: number; unit?: string; caption?: string; label: string; }
+const { items, min, max, step, unit = '', caption, label } = Astro.props as Props;
+const L = 112, R = 548, W = 560, RH = 30, top = 8;
+const x = (v: number) => L + (v - min) / (max - min) * (R - L);
+const H = top + items.length * RH + 26;
+const pal = [C.violet, C.blue, C.T, C.X, C.B, C.D];
+const ticks = Array.from({ length: Math.floor((max - min) / step) + 1 }, (_, i) => ({ v: min + i * step, x: x(min + i * step) }));
+const rows = items.map((it, i) => {
+  const to = it.to ?? it.from, isRange = to - it.from > 0, flip = x(to) - (R - 80) > 0;
+  return { label: it.label, y: top + i * RH + RH / 2, col: pal[i % pal.length], isRange, x0: x(it.from), x1: x(to),
+    tx: flip ? x(it.from) - 10 : x(to) + 10, anchor: flip ? 'end' : 'start',
+    txt: (it.note ?? (isRange ? `${it.from}–${to}` : `약 ${it.from}`)) + unit };
+});
+---
+<Fig caption={caption} minW={430} label={label}>
+  <svg viewBox={`0 0 ${W} ${H}`}>
+    {ticks.map(t => <line x1={t.x} x2={t.x} y1={top} y2={H - 22} stroke={C.line} stroke-dasharray="3 3" />)}
+    {ticks.map(t => <text x={t.x} y={H - 8} font-size="11" fill={C.ink3} text-anchor="middle" class="mono">{t.v}</text>)}
+    {rows.map(r => <text x="4" y={r.y + 4} font-size="12" class="fd" fill={C.ink}>{r.label}</text>)}
+    {rows.filter(r => r.isRange).map(r => <rect x={r.x0} y={r.y - 7} width={r.x1 - r.x0} height="14" rx="7" fill={r.col} opacity="0.85" />)}
+    {rows.filter(r => !r.isRange).map(r => <circle cx={r.x0} cy={r.y} r="6" fill={r.col} />)}
+    {rows.map(r => <text x={r.tx} y={r.y + 4} font-size="11" fill={C.ink5} text-anchor={r.anchor}>{r.txt}</text>)}
+  </svg>
+</Fig>

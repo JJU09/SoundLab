@@ -1,0 +1,32 @@
+---
+// 16칸 드럼 격자 (한 마디) — 프리셋 id 목록
+import Fig from './Fig.astro'; import { C } from './colors';
+import { PRESETS, TRACK_LABEL, type DrumTrack } from '../../../audio/drums';
+interface Props { presets: string[]; caption?: string; }
+const { presets, caption } = Astro.props as Props;
+const ORDER: DrumTrack[] = ['hat', 'open', 'clap', 'snare', 'kick'];
+const CW = 24, L = 70, W = L + 16 * CW + 8;
+let y = 4;
+const heads: { y: number; name: string; meta: string }[] = [], nums: { x: number; y: number; n: number }[] = [], labs: { y: number; t: string }[] = [], cells: { x: number; y: number; fill: string }[] = [];
+for (const id of presets) {
+  const p = PRESETS[id]; const tracks = ORDER.filter(t => p.tracks[t] && /[xo]/.test(p.tracks[t]!));
+  heads.push({ y: y + 14, name: p.name, meta: `${p.bpm} BPM${p.swing ? ` · 스윙 ${Math.round(p.swing * 100)}%` : ''}` });
+  for (let b = 0; b < 4; b++) nums.push({ x: L + b * 4 * CW + CW / 2 - 2, y: y + 28, n: b + 1 });
+  tracks.forEach((t, r) => {
+    const yy = y + 32 + r * (CW - 2); const pat = p.tracks[t]!;
+    labs.push({ y: yy + 14, t: TRACK_LABEL[t] });
+    for (let s = 0; s < 16; s++) cells.push({ x: L + s * CW + 1, y: yy, fill: pat[s] === 'x' ? C.violet : pat[s] === 'o' ? C.violetL : s % 4 === 0 ? '#e9e6f5' : C.surf });
+  });
+  y += 28 + tracks.length * (CW - 2) + 14;
+}
+const H = y;
+---
+<Fig caption={caption} minW={420} label={`드럼 패턴 격자: ${presets.map(id => PRESETS[id].name).join(', ')}`}>
+  <svg viewBox={`0 0 ${W} ${H}`}>
+    {heads.map(h => <text x="4" y={h.y} font-size="13" class="fd" fill={C.ink}>{h.name}</text>)}
+    {heads.map(h => <text x={W - 6} y={h.y} font-size="11" fill={C.ink5} text-anchor="end" class="mono">{h.meta}</text>)}
+    {nums.map(n => <text x={n.x} y={n.y} font-size="10" fill={C.ink3} text-anchor="middle" class="mono">{n.n}</text>)}
+    {labs.map(l => <text x="4" y={l.y} font-size="11" fill={C.ink5}>{l.t}</text>)}
+    {cells.map(c => <rect x={c.x} y={c.y} width={CW - 4} height={CW - 6} rx="4" fill={c.fill} />)}
+  </svg>
+</Fig>

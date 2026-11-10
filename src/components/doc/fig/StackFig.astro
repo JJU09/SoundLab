@@ -1,0 +1,18 @@
+---
+// 역할 쌓기 — 위에서 아래로 층을 쌓은 그림 (주인공 → 바닥)
+import Fig from './Fig.astro'; import { C } from './colors';
+interface Layer { name: string; role: string; ex: string; color: keyof typeof C; width?: number; }
+interface Props { layers: Layer[]; caption?: string; }
+const { layers, caption } = Astro.props as Props;
+const W = 560, RH = 44, top = 6, H = top + layers.length * (RH + 6);
+const rows = layers.map((l, i) => { const w = (l.width ?? 1) * (W - 8); return { ...l, w, x: (W - w) / 2, y: top + i * (RH + 6), fill: C[l.color] }; });
+---
+<Fig caption={caption} minW={430} label={`파트의 역할: ${layers.map(l => `${l.name} — ${l.role}`).join(', ')}`}>
+  <svg viewBox={`0 0 ${W} ${H}`}>
+    {rows.map(r => <rect x={r.x} y={r.y} width={r.w} height={RH} rx="10" fill={r.fill} opacity="0.14" />)}
+    {rows.map(r => <rect x={r.x} y={r.y} width="6" height={RH} rx="3" fill={r.fill} />)}
+    {rows.map(r => <text x={r.x + 18} y={r.y + 19} font-size="14" class="fd" fill={C.ink}>{r.name}</text>)}
+    {rows.map(r => <text x={r.x + 18} y={r.y + 35} font-size="11" fill={C.ink5}>{r.ex}</text>)}
+    {rows.map(r => <text x={r.x + r.w - 14} y={r.y + 27} text-anchor="end" font-size="12" font-weight="600" fill={r.fill}>{r.role}</text>)}
+  </svg>
+</Fig>

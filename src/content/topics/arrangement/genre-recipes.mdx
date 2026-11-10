@@ -19,6 +19,7 @@ import Level from '../../../components/doc/Level.astro';
 import DefList from '../../../components/doc/DefList.astro';
 import DefCard from '../../../components/doc/DefCard.astro';
 import Callout from '../../../components/doc/Callout.astro';
+import AxisRanges from '../../../components/doc/fig/AxisRanges.astro';
 
 {/* ───────── 초급 ───────── */}
 <Level show="easy">
@@ -43,6 +44,8 @@ import Callout from '../../../components/doc/Callout.astro';
   <DefCard term="록 — 100–140 BPM">8비트 드럼, 8분 베이스, 근음 + 5도 파워코드의 디스토션 기타. 코러스에서 크래시 심벌과 기타 더블링.</DefCard>
   <DefCard term="로파이 힙합 — 70–90 BPM">스윙한 붐뱁 드럼, 7화음 패드(maj7·m7), 따뜻하게 깎은 고음, 테이프·바이닐 질감.</DefCard>
 </DefList>
+
+<AxisRanges label="장르별 편곡 레시피의 BPM" min={50} max={150} step={10} items={[{label:"발라드",from:60,to:80},{label:"로파이 힙합",from:70,to:90},{label:"록",from:100,to:140},{label:"댄스 팝",from:115,to:128}]} caption="네 장르의 흔한 BPM 범위 — 발라드와 로파이는 템포가 겹쳐 리듬의 흔들림과 코드 색으로 갈려요" />
 
 ## 장르를 바꾸는 다섯 가지 스위치
 

@@ -19,6 +19,7 @@ import Level from '../../../components/doc/Level.astro';
 import DefList from '../../../components/doc/DefList.astro';
 import DefCard from '../../../components/doc/DefCard.astro';
 import Callout from '../../../components/doc/Callout.astro';
+import RangeFig from '../../../components/doc/fig/RangeFig.astro';
 
 {/* ───────── 초급 ───────── */}
 <Level show="easy">
@@ -29,6 +30,8 @@ import Callout from '../../../components/doc/Callout.astro';
 - **낮은 층** — 베이스, 킥 드럼
 - **가운데 층** — 피아노·기타 코드
 - **높은 층** — 멜로디, 반짝이는 장식
+
+<RangeFig parts={[{name:"멜로디",from:"C5",to:"A5",color:"violet",note:"높은 층"},{name:"장식",from:"C6",to:"C7",color:"B"},{name:"코드",from:"G3",to:"E4",color:"blue",note:"가운데 층"},{name:"베이스 · 킥",from:"C1",to:"G2",color:"T",note:"낮은 층"}]} caption="케이크처럼 층을 나누면 하나하나 잘 들려요" />
 
 ## 직접 해보기
 
@@ -47,6 +50,10 @@ import Callout from '../../../components/doc/Callout.astro';
   <DefCard term="중음역 (약 C4–C5)">코드 몸통과 보컬 멜로디가 만나는 가장 붐비는 자리. 멜로디가 있을 때는 반주를 한 칸 비켜 줍니다.</DefCard>
   <DefCard term="고음역 (C5 이상)">아르페지오, 스트링 하이 라인, 벨·신스 장식. 공기감과 반짝임을 줍니다.</DefCard>
 </DefList>
+
+<RangeFig title="겹친 배치" parts={[{name:"아르페지오",from:"C5",to:"C6",color:"B"},{name:"멜로디",from:"C5",to:"A5",color:"violet"},{name:"코드",from:"C5",to:"G5",color:"blue"},{name:"베이스",from:"C4",to:"G4",color:"T",note:"너무 높음"}]} />
+
+<RangeFig title="나눈 배치" parts={[{name:"아르페지오",from:"C6",to:"C7",color:"B"},{name:"멜로디",from:"C5",to:"A5",color:"violet"},{name:"코드",from:"G3",to:"E4",color:"blue"},{name:"베이스",from:"C2",to:"G2",color:"T"}]} caption="위젯의 두 배치 — 겹치면 C5 근처에 파트가 몰려 멜로디가 묻히고, 나누면 층마다 한 파트씩" />
 
 ## 저음은 넓게, 고음은 좁게
 

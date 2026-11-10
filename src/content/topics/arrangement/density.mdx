@@ -18,12 +18,16 @@ import Level from '../../../components/doc/Level.astro';
 import DefList from '../../../components/doc/DefList.astro';
 import DefCard from '../../../components/doc/DefCard.astro';
 import Callout from '../../../components/doc/Callout.astro';
+import LayerFig from '../../../components/doc/fig/LayerFig.astro';
+import FormFig from '../../../components/doc/fig/FormFig.astro';
 
 {/* ───────── 초급 ───────── */}
 <Level show="easy">
 ## 조용한 곳이 있어야 큰 곳이 커요
 
 처음부터 끝까지 모든 악기가 꽉 차 있으면 금방 지쳐요. 좋은 노래는 **조용히 시작해서 점점 쌓다가, 코러스에서 터뜨리고, 다시 비워요.** 작은 부분이 있어야 큰 부분이 더 크게 느껴져요.
+
+<LayerFig label="에너지 단계별 파트 구성" cols={["에너지 1","2","3","4","5"]} rows={[{name:"코드",cells:["패드","패드","블록","블록","스탭"]},{name:"베이스",cells:[null,"온음표","온음표","4분","8분"]},{name:"드럼",cells:[null,null,"발라드","8비트","16비트"]},{name:"멜로디",cells:[null,null,"노래","노래","노래"]},{name:"아르페지오",cells:[null,null,null,null,"8분"]}]} caption="에너지가 오를수록 파트가 하나씩 들어와요" />
 
 ## 직접 해보기
 
@@ -44,6 +48,8 @@ import Callout from '../../../components/doc/Callout.astro';
   <DefCard term="음색의 밝기">필터를 열고, 패드를 스탭으로, 피아노를 신스로 바꾸면 같은 음도 더 밝고 세게 들립니다.</DefCard>
 </DefList>
 
+<LayerFig label="에너지 단계별 파트 구성" cols={["에너지 1","2","3","4","5"]} rows={[{name:"코드",cells:["패드","패드","블록","블록","스탭"]},{name:"베이스",cells:[null,"온음표","온음표","4분","8분"]},{name:"드럼",cells:[null,null,"발라드","8비트","16비트"]},{name:"멜로디",cells:[null,null,"노래","노래","노래"]},{name:"아르페지오",cells:[null,null,null,null,"8분"]}]} caption="위젯의 에너지 1–5 — 파트를 더하고(세로), 같은 파트도 더 촘촘하게(가로)" />
+
 ## 빌드업과 브레이크
 
 - **빌드업** — 코러스 직전 2–4마디 동안 스네어를 4분 → 8분 → 16분으로 쪼개고, 필터를 열고, 상승음(라이저)을 더해 긴장을 쌓습니다.
@@ -57,6 +63,8 @@ import Callout from '../../../components/doc/Callout.astro';
 {/* ───────── 고급 ───────── */}
 <Level show="hard">
 ## 에너지 곡선 설계
+
+<FormFig sections={[{name:"인트로",bars:4,energy:2,kind:"intro"},{name:"벌스",bars:8,energy:2,kind:"verse"},{name:"프리",bars:4,energy:3,kind:"pre"},{name:"코러스",bars:8,energy:4,kind:"chorus"},{name:"벌스",bars:8,energy:2,kind:"verse"},{name:"프리",bars:4,energy:3,kind:"pre"},{name:"코러스",bars:8,energy:4,kind:"chorus"},{name:"브레이크",bars:4,energy:1,kind:"bridge"},{name:"코러스",bars:8,energy:5,kind:"chorus"},{name:"아웃트로",bars:4,energy:1,kind:"outro"}]} caption="첫 코러스는 4로 아껴 두고, 브레이크다운(브레이크)으로 비운 뒤 마지막 코러스를 5로" />
 
 - **곡 전체를 한 장의 그래프로** — 단락마다 에너지를 1–5로 매겨 그려 보면 편곡의 문제가 보입니다. 첫 코러스가 이미 5라면 마지막 코러스가 올라갈 곳이 없습니다. 첫 코러스는 4, 마지막 코러스는 5로 아껴 두는 것이 정석입니다.
 - **역방향 대비** — 마지막 코러스 직전에 모든 파트를 빼고 보컬과 피아노만 남기는(브레이크다운) 기법은, 밀도를 극단적으로 내렸다가 올리는 대비로 클라이맥스를 만듭니다.

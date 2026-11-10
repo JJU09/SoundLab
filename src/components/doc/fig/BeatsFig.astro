@@ -1,0 +1,22 @@
+---
+// 같은 시간(초) 동안 BPM별로 박이 몇 번 오는지 — 템포 = 1분에 박 수
+import Fig from './Fig.astro'; import { C } from './colors';
+interface Props { rows: { bpm: number; label: string }[]; seconds?: number; caption?: string; }
+const { rows, seconds = 4, caption } = Astro.props as Props;
+const L = 118, R = 548, W = 560, RH = 38, top = 26;
+const x = (t: number) => L + (t / seconds) * (R - L);
+const H = top + rows.length * RH + 6;
+const ticks = Array.from({ length: seconds + 1 }, (_, s) => ({ x: x(s), s }));
+const lanes = rows.map((r, i) => ({ ...r, y: top + i * RH + RH / 2 }));
+const dots = lanes.flatMap(r => Array.from({ length: Math.floor(seconds * r.bpm / 60 + 1e-9) + 1 }, (_, k) => ({ x: x(k * 60 / r.bpm), y: r.y, big: k % 4 === 0 })));
+---
+<Fig caption={caption} minW={430} label={`템포별 박의 간격: ${rows.map(r => r.bpm + ' BPM').join(', ')}`}>
+  <svg viewBox={`0 0 ${W} ${H}`}>
+    {ticks.map(t => <line x1={t.x} x2={t.x} y1={top - 6} y2={H - 6} stroke={C.line} stroke-dasharray={t.s ? '3 3' : ''} />)}
+    {ticks.map(t => <text x={t.x} y={top - 11} text-anchor="middle" font-size="11" fill={C.ink3} class="mono">{t.s}초</text>)}
+    {lanes.map(r => <text x="4" y={r.y - 2} font-size="13" fill={C.ink} class="fd">{r.bpm} BPM</text>)}
+    {lanes.map(r => <text x="4" y={r.y + 13} font-size="11" fill={C.ink5}>{r.label}</text>)}
+    {lanes.map(r => <line x1={L} x2={R} y1={r.y} y2={r.y} stroke={C.surf} stroke-width="8" stroke-linecap="round" />)}
+    {dots.map(d => <circle cx={d.x} cy={d.y} r={d.big ? 6.5 : 5} fill={d.big ? C.violet : C.violetL} />)}
+  </svg>
+</Fig>

@@ -21,6 +21,7 @@ import Level from '../../../components/doc/Level.astro';
 import DefList from '../../../components/doc/DefList.astro';
 import DefCard from '../../../components/doc/DefCard.astro';
 import Callout from '../../../components/doc/Callout.astro';
+import ChordFlow from '../../../components/doc/fig/ChordFlow.astro';
 
 {/* ───────── 초급 ───────── */}
 <Level show="easy">
@@ -31,6 +32,8 @@ import Callout from '../../../components/doc/Callout.astro';
 - **토닉 (집)** — 편안하게 쉬는 곳. C장조의 **C**.
 - **서브도미넌트 (나들이)** — 집을 나서 산책하는 느낌. **F**.
 - **도미넌트 (긴장)** — "이제 집에 가야지!" 하는 두근거림. **G**.
+
+<ChordFlow items={[{name:"C",sub:"집",fn:"T"},{name:"F",sub:"나들이",fn:"S"},{name:"G",sub:"긴장",fn:"D"},{name:"C",sub:"집",fn:"T"}]} links={["나서기","서둘러","도착!"]} legend caption="토닉(초록) → 서브도미넌트(파랑) → 도미넌트(빨강) → 토닉" />
 
 그래서 C → F → G → C 진행은 "집을 나와 → 산책하다 → 서둘러 → 집에 도착"하는 이야기가 돼요. 노래가 끝날 때 G에서 C로 가면 "끝!" 하는 느낌이 나는 이유예요.
 
@@ -53,7 +56,9 @@ import Callout from '../../../components/doc/Callout.astro';
 
 ## 기능의 문법
 
-가장 자연스러운 흐름은 **T → S → D → T**입니다. 진행을 짤 때 같은 기능끼리는 바꿔 끼울 수 있습니다.
+가장 자연스러운 흐름은 **T → S → D → T**입니다.
+
+<ChordFlow boxW={118} items={[{name:"토닉",sub:"I · vi · iii",fn:"T"},{name:"서브도미넌트",sub:"IV · ii",fn:"S"},{name:"도미넌트",sub:"V · vii°",fn:"D"},{name:"토닉",sub:"I",fn:"T"}]} links={["벗어남","긴장","해결"]} caption="같은 상자 안의 코드끼리는 바꿔 끼울 수 있어요" /> 진행을 짤 때 같은 기능끼리는 바꿔 끼울 수 있습니다.
 
 - I–IV–V–I → **I–ii–V–I** (IV 대신 같은 S인 ii)
 - I–IV–V–I → **vi–IV–V–I** (I 대신 같은 T인 vi로 시작해 단조 같은 출발)

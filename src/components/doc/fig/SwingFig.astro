@@ -1,0 +1,27 @@
+---
+// 스트레이트 vs 스윙 — 한 박 안에서 뒤 8분음표가 오는 위치
+import Fig from './Fig.astro'; import { C } from './colors';
+interface Props { rows?: { pct: number; label: string }[]; caption?: string; }
+const { rows = [{ pct: 50, label: '스트레이트 1 : 1' }, { pct: 60, label: '가벼운 스윙' }, { pct: 67, label: '셔플 2 : 1' }], caption } = Astro.props as Props;
+const L = 128, BW = 200, W = L + 2 * BW + 12, RH = 40, top = 30, H = top + rows.length * RH + 4;
+const beats = [0, 1].map(b => ({ x: L + b * BW, half: L + b * BW + BW / 2, t1: L + b * BW + BW / 3, t2: L + b * BW + BW * 2 / 3, n: b + 1 }));
+const lanes = rows.map((r, i) => ({ ...r, y: top + i * RH + RH / 2, f: r.pct / 100 }));
+const segs = lanes.flatMap(r => beats.map(b => ({ y: r.y, x0: b.x, f: r.f })));
+---
+<Fig caption={caption} minW={420} label="스트레이트와 스윙에서 뒤 8분음표의 위치 비교">
+  <svg viewBox={`0 0 ${W} ${H}`}>
+    {[0, 1, 2].map(b => <line x1={L + b * BW} x2={L + b * BW} y1={top - 8} y2={H - 4} stroke={C.ink3} />)}
+    {beats.map(b => <line x1={b.half} x2={b.half} y1={top - 6} y2={H - 4} stroke={C.line} stroke-dasharray="3 3" />)}
+    {beats.map(b => <line x1={b.t1} x2={b.t1} y1={top - 6} y2={H - 4} stroke={C.blueG} stroke-width="2" />)}
+    {beats.map(b => <line x1={b.t2} x2={b.t2} y1={top - 6} y2={H - 4} stroke={C.blueG} stroke-width="2" />)}
+    {beats.map(b => <text x={b.x + 4} y={top - 14} font-size="11" fill={C.ink5} class="mono">{b.n}박</text>)}
+    <text x={beats[0].half} y={top - 14} font-size="10" fill={C.ink3} text-anchor="middle">반 박</text>
+    <text x={beats[0].t2 + 3} y={top - 2} font-size="10" fill={C.blue}>셋잇단 ⅔</text>
+    {lanes.map(r => <text x="4" y={r.y - 1} font-size="13" class="fd" fill={C.ink}>{r.pct}%</text>)}
+    {lanes.map(r => <text x="4" y={r.y + 14} font-size="11" fill={C.ink5}>{r.label}</text>)}
+    {segs.map(s => <rect x={s.x0 + 4} y={s.y - 6} width={BW * s.f - 10} height="12" rx="6" fill={C.violetG} />)}
+    {segs.map(s => <rect x={s.x0 + BW * s.f + 2} y={s.y - 6} width={BW * (1 - s.f) - 8} height="12" rx="6" fill={C.blueG} />)}
+    {segs.map(s => <circle cx={s.x0 + 4} cy={s.y} r="7" fill={C.violet} />)}
+    {segs.map(s => <circle cx={s.x0 + BW * s.f} cy={s.y} r="6" fill={C.blue} />)}
+  </svg>
+</Fig>

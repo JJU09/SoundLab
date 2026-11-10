@@ -1,0 +1,19 @@
+---
+// 파트 레이어 표 — 열(단계·단락)마다 어떤 파트가 어떤 모양으로 들어오는지
+import Fig from './Fig.astro'; import { C } from './colors';
+interface Props { cols: string[]; rows: { name: string; cells: (string | null)[] }[]; caption?: string; label: string; }
+const { cols, rows, caption, label } = Astro.props as Props;
+const L = 84, CW = 92, RH = 30, top = 28, W = L + cols.length * CW + 6, H = top + rows.length * RH + 6;
+const heads = cols.map((c, j) => ({ c, x: L + j * CW + CW / 2 }));
+const names = rows.map((r, i) => ({ name: r.name, y: top + i * RH + RH / 2 + 4 }));
+const cells = rows.flatMap((r, i) => r.cells.map((c, j) => ({ c, x: L + j * CW + 3, cx: L + j * CW + CW / 2, y: top + i * RH,
+  fill: c ? C.violet : C.surf, op: c ? 0.16 + 0.4 * (j / Math.max(1, cols.length - 1)) : 1 })));
+---
+<Fig caption={caption} minW={520} label={label}>
+  <svg viewBox={`0 0 ${W} ${H}`}>
+    {heads.map(h => <text x={h.x} y="16" text-anchor="middle" font-size="12" class="fd" fill={C.ink}>{h.c}</text>)}
+    {names.map(n => <text x="4" y={n.y} font-size="12" fill={C.ink5}>{n.name}</text>)}
+    {cells.map(c => <rect x={c.x} y={c.y + 3} width={CW - 6} height={RH - 6} rx="6" fill={c.fill} opacity={c.op} />)}
+    {cells.filter(c => c.c).map(c => <text x={c.cx} y={c.y + RH / 2 + 4} text-anchor="middle" font-size="10.5" fill={C.ink}>{c.c}</text>)}
+  </svg>
+</Fig>

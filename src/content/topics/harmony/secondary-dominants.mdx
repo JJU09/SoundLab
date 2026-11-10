@@ -22,12 +22,15 @@ import Level from '../../../components/doc/Level.astro';
 import DefList from '../../../components/doc/DefList.astro';
 import DefCard from '../../../components/doc/DefCard.astro';
 import Callout from '../../../components/doc/Callout.astro';
+import ChordFlow from '../../../components/doc/fig/ChordFlow.astro';
 
 {/* ───────── 초급 ───────── */}
 <Level show="easy">
 ## 잠깐 다른 코드를 집처럼
 
 G7 → C처럼 **딸림7화음**은 다음 코드로 강하게 끌려가요. 이 힘을 다른 코드에도 빌려줄 수 있어요. 예를 들어 Am으로 가기 직전에 **E7**을 넣으면, Am이 잠깐 "집"처럼 들리며 더 극적으로 도착해요. E7은 C장조 가족이 아닌데도 전혀 어색하지 않아요.
+
+<ChordFlow items={[{name:"C",sub:"I",fn:"T"},{name:"E7",sub:"V7/vi",fn:"X"},{name:"Am",sub:"vi",fn:"T"},{name:"F",sub:"IV",fn:"S"}]} links={["","강하게 끌림",""]} caption="주황 = 세컨더리 도미넌트. E7이 Am을 잠깐 집처럼 만들어요" />
 
 ## 직접 해보기
 
@@ -51,6 +54,8 @@ G7 → C처럼 **딸림7화음**은 다음 코드로 강하게 끌려가요. 이
 </DefList>
 
 찾는 법은 [5도권](/learn/melody/circle-of-fifths/)에서 목표 코드의 **시계 방향 한 칸 위**를 보는 것입니다. Am의 한 칸 위는 E, 그래서 E7.
+
+<ChordFlow items={[{name:"C",sub:"I",fn:"T"},{name:"A7",sub:"V7/ii",fn:"X"},{name:"Dm7",sub:"ii7",fn:"S"},{name:"D7",sub:"V7/V",fn:"X"},{name:"G7",sub:"V7",fn:"D"},{name:"C",sub:"I",fn:"T"}]} links={["","5도 아래","","5도 아래","5도 아래"]} legend caption="세컨더리 연쇄 — 목표 코드마다 딸림화음을 앞세움" />
 
 <Callout>
 **세컨더리 연쇄**(C–A7–Dm7–D7–G7–C)를 재생해 보세요. A7 → Dm, D7 → G처럼 목표 코드마다 딸림화음을 앞세웠습니다. 다이어토닉 코드만 쓴 진행보다 훨씬 드라마틱하고, A → D, D → G → C처럼 근음이 5도 아래로 끌려 내려가는 흐름이 생깁니다.

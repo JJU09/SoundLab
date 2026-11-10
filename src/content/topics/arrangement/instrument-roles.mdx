@@ -19,6 +19,7 @@ import Level from '../../../components/doc/Level.astro';
 import DefList from '../../../components/doc/DefList.astro';
 import DefCard from '../../../components/doc/DefCard.astro';
 import Callout from '../../../components/doc/Callout.astro';
+import StackFig from '../../../components/doc/fig/StackFig.astro';
 
 {/* ───────── 초급 ───────── */}
 <Level show="easy">
@@ -32,6 +33,8 @@ import Callout from '../../../components/doc/Callout.astro';
 - **멜로디(보컬)** — 노래의 주인공.
 
 모두가 주인공처럼 크게 연주하면 오히려 아무것도 안 들려요. 각자 자기 자리를 지킬 때 가장 멋진 소리가 나요.
+
+<StackFig layers={[{name:"멜로디",role:"주인공",ex:"보컬 · 리드",color:"violet",width:0.7},{name:"코드",role:"분위기를 채움",ex:"피아노 · 기타",color:"blue",width:0.85},{name:"베이스",role:"바닥을 받침",ex:"가장 낮은 소리",color:"T",width:0.95},{name:"드럼",role:"박자를 지킴",ex:"킥 · 스네어 · 하이햇",color:"D",width:1}]} caption="밴드는 한 팀 — 아래 층이 단단해야 위의 주인공이 빛나요" />
 
 ## 직접 해보기
 
@@ -51,6 +54,8 @@ import Callout from '../../../components/doc/Callout.astro';
   <DefCard term="리듬 화성 / 움직임 (아르페지오·기타 리프)">화성을 잘게 쪼개 움직임과 반짝임을 더합니다. 너무 많으면 멜로디와 부딪힙니다.</DefCard>
   <DefCard term="멜로디 · 카운터 멜로디">주인공(보컬·리드)과, 멜로디가 쉬는 틈을 채우는 대선율(필인, 스트링 라인).</DefCard>
 </DefList>
+
+<StackFig layers={[{name:"멜로디 · 카운터 멜로디",role:"주인공 · 대답",ex:"보컬 · 리드 · 필인 · 스트링 라인",color:"violet",width:0.66},{name:"움직임",role:"반짝임",ex:"아르페지오 · 기타 리프",color:"B",width:0.76},{name:"화성 패드",role:"코드의 몸통",ex:"피아노 · 기타 · 신스 패드",color:"blue",width:0.86},{name:"베이스",role:"근음 · 저음 바닥",ex:"코드를 확정하고 킥과 짝",color:"T",width:0.94},{name:"리듬",role:"박 · 그루브 · 에너지",ex:"드럼 · 퍼커션",color:"D",width:1}]} caption="다섯 가지 역할 — 움직이는 파트(위 두 층)는 동시에 하나만 주인공으로" />
 
 ## 질문과 대답
 

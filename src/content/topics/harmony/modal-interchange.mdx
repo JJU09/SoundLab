@@ -22,12 +22,16 @@ import Level from '../../../components/doc/Level.astro';
 import DefList from '../../../components/doc/DefList.astro';
 import DefCard from '../../../components/doc/DefCard.astro';
 import Callout from '../../../components/doc/Callout.astro';
+import ChordFlow from '../../../components/doc/fig/ChordFlow.astro';
+import KeyboardFig from '../../../components/doc/fig/KeyboardFig.astro';
 
 {/* ───────── 초급 ───────── */}
 <Level show="easy">
 ## 밝은 노래에 스미는 그늘
 
 C장조 노래에서 F 코드를 **Fm**으로 바꿔 쳐 보세요. 갑자기 마음이 찡해지는 그늘이 생겨요. Fm은 C장조 가족이 아니라 **C단조**에서 빌려 온 코드예요. 같은 "도"를 집으로 쓰는 단조 친척에게서 잠깐 코드를 빌려 오는 걸 **모달 인터체인지**라고 해요.
+
+<ChordFlow items={[{name:"C",sub:"I",fn:"T"},{name:"F",sub:"IV",fn:"S"},{name:"Fm",sub:"iv · 빌린 화음",fn:"B"},{name:"C",sub:"I",fn:"T"}]} caption="보라 = 같은 으뜸음 단조(C단조)에서 빌려 온 코드" boxW={96} />
 
 ## 직접 해보기
 
@@ -49,6 +53,8 @@ C장조 노래에서 F 코드를 **Fm**으로 바꿔 쳐 보세요. 갑자기 �
 </DefList>
 
 빌려 온 코드에는 공통적으로 **♭3(미♭) · ♭6(라♭) · ♭7(시♭)** 중 하나 이상이 들어 있습니다. 장조의 밝은 3·6·7음을 잠깐 어둡게 바꾸는 것이 모달 인터체인지의 본질입니다.
+
+<KeyboardFig from={60} to={72} label="C장조 음과 C단조에서 빌린 E♭·A♭·B♭" groups={[{notes:[60,62,64,65,67,69,71,72],color:"blue",label:"C장조의 음"},{notes:[63,68,70],color:"B",label:"빌려 오는 ♭3 · ♭6 · ♭7",names:{63:"E♭",68:"A♭",70:"B♭"}}]} caption="미 · 라 · 시가 반음 내려간 미♭ · 라♭ · 시♭ — 빌린 화음은 이 중 하나 이상을 품습니다" />
 
 <Callout>
 **I–V–vi–IV**를 재생한 뒤 마지막 IV를 **iv**로 바꿔 보세요. 같은 진행의 끝에 그늘 한 방울을 떨어뜨린 것처럼 들립니다. 코러스 마지막 바퀴나 곡의 엔딩에서 이렇게 한 번만 바꿔 주면 듣는 사람이 확실히 기억하는 순간이 됩니다.

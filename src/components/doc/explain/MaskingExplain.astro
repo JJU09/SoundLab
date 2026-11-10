@@ -1,0 +1,113 @@
+---
+// 파일럿 ③ 현상 비교형 — 주파수 마스킹: 목소리 높이·크기 장면 / EQ 전후 스펙트럼과 마스킹 경계
+import Explain from './Explain.astro';
+import { INK, META, TECH } from './tokens';
+interface Props { simple?: boolean; }
+const { simple = false } = Astro.props;
+const uid = 'msk' + Math.random().toString(36).slice(2, 7);
+
+// ── 원리 그래프 계산 (개념 곡선 — 실제 측정값 아님)
+const BASS = '#2563eb', MEL = '#d97706';                 // 위젯과 같은 역할 색: 베이스 파랑, 멜로디 노랑 계열
+const F0 = 50, F1 = 5000, GW = 270, GH = 132, GT = 40;
+const lg = (f: number) => Math.log2(f);
+const g = (d: number, s: number) => Math.exp(-(d * d) / (2 * s * s));
+const bass = (f: number) => Math.max(0.95 * g(lg(f / 100), 0.75), 0.56 * g(lg(f / 420), 0.75)); // 기음(100 Hz) + 배음 대역
+const notch = (f: number) => 1 - 0.65 * g(lg(f / 550), 0.5);                  // EQ: 베이스를 550 Hz 근처에서 깎음
+const mel = (f: number) => 0.34 * g(lg(f / 550), 0.42);                          // 멜로디(작은 소리)
+const spread = (d: number) => g(d, d < 0 ? 0.3 : 0.75);                           // 마스킹 확산: 높은 쪽으로 더 넓게
+const SRC = Array.from({ length: 121 }, (_, i) => F0 * Math.pow(F1 / F0, i / 120));
+const maskOf = (b: (f: number) => number) => (f: number) => Math.max(0, Math.max(...SRC.map(fs => b(fs) * spread(lg(f) - lg(fs)))) - 0.06);
+const N = 90;
+const freqs = Array.from({ length: N + 1 }, (_, i) => F0 * Math.pow(F1 / F0, i / N));
+function graph(ox: number, eq: boolean) {
+  const X = (f: number) => ox + (lg(f) - lg(F0)) / (lg(F1) - lg(F0)) * GW;
+  const Y = (v: number) => GT + GH - v * GH;
+  const pts = (fn: (f: number) => number) => freqs.map(f => `${X(f).toFixed(1)},${Y(fn(f)).toFixed(1)}`).join(' ');
+  const b = (f: number) => bass(f) * (eq ? notch(f) : 1);
+  const m = maskOf(b);   // 경계는 (EQ 뒤) 베이스 스펙트럼에서 계산
+  const melPeak = { x: X(550), y: Y(mel(550)) };
+  return {
+    ox, X, base: Y(0),
+    bassArea: `${X(F0)},${Y(0)} ${pts(b)} ${X(F1)},${Y(0)}`,
+    bassLine: pts(b), maskLine: pts(m), melLine: pts(mel),
+    melArea: `${X(F0)},${Y(0)} ${pts(mel)} ${X(F1)},${Y(0)}`,
+    cut: eq ? `${pts(bass)} ${freqs.slice().reverse().map(f => `${X(f).toFixed(1)},${Y(b(f)).toFixed(1)}`).join(' ')}` : '',
+    melPeak, maskAtMel: { x: X(550), y: Y(m(550)) }, maskAt: (f: number) => Y(Math.max(m(f), b(f))),
+    ticks: [50, 100, 200, 500, 1000, 2000, 5000].map(f => ({ x: X(f), t: f >= 1000 ? `${f / 1000}k` : String(f) })),
+  };
+}
+const A = graph(42, false), B = graph(352, true);
+const panels = [A, B];
+---
+<Explain simple={simple} layout="stack" title="주파수 마스킹" question="분명 재생되는데 왜 멜로디가 안 들릴까?"
+  label="주파수 마스킹 설명 그림: 같은 높이로 말하면 큰 목소리가 작은 목소리를 덮고, 높이를 달리하면 둘 다 들린다. 베이스가 멜로디 대역을 크게 차지하면 멜로디가 마스킹 경계 아래로 묻히고, EQ로 베이스의 그 대역을 깎으면 멜로디가 경계 위로 올라와 들린다."
+  map={[['목소리 높이', '주파수 대역'], ['목소리 크기', '레벨'], ['큰 목소리에 묻힘', '마스킹'], ['높이 비키기', 'EQ로 대역 나누기']]}
+  message="대역이 겹치고 레벨 차가 크면 작은 소리가 묻힌다. EQ로 자리를 나누면 둘 다 들린다."
+  caption="그래프는 개념을 보여 주는 단순화입니다. 마스킹은 가리는 소리보다 높은 주파수 쪽으로 더 넓게 퍼지고, 레벨 차가 클수록 강해집니다.">
+  <svg slot="metaphor" viewBox="0 0 640 214" role="img" aria-label="왼쪽: 두 사람이 같은 높이로 말하면 큰 목소리의 말풍선이 작은 목소리를 덮는다. 오른쪽: 작은 사람이 다른 높이로 말하면 둘 다 들린다">
+    <defs><marker id={`${uid}m`} viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill={META.motion} /></marker></defs>
+    <!-- 목소리 높이 축 -->
+    <path d="M20 168 V30" stroke={META.outline} stroke-width="1.5" marker-end={`url(#${uid}m)`} />
+    <text x="14" y="100" text-anchor="middle" font-size="11" font-weight="600" fill={META.outline} transform="rotate(-90 14 100)">목소리 높이</text>
+    <line x1="30" x2="610" y1="190" y2="190" stroke={META.outline} stroke-width="2" stroke-linecap="round" />
+    <line x1="320" x2="320" y1="20" y2="182" stroke={META.border} stroke-width="2" stroke-dasharray="4 4" />
+    <!-- 장면 A: 같은 높이 -->
+    <rect x="66" y="104" width="40" height="86" rx="20" fill={META.coral} stroke={META.outline} stroke-width="2" />
+    <circle cx="80" cy="122" r="2" fill={META.outline} /><circle cx="92" cy="122" r="2" fill={META.outline} />
+    <ellipse cx="86" cy="138" rx="7" ry="5" fill={META.outline} />
+    <rect x="232" y="138" width="26" height="52" rx="13" fill={META.sky} stroke={META.outline} stroke-width="2" />
+    <circle cx="241" cy="152" r="1.8" fill={META.outline} /><circle cx="249" cy="152" r="1.8" fill={META.outline} />
+    <ellipse cx="248" cy="104" rx="34" ry="16" fill={META.cream} stroke={META.outline} stroke-width="1.5" opacity="0.8" />
+    <text x="260" y="108" text-anchor="middle" font-size="11" fill={META.outline} opacity="0.45">안녕?</text>
+    <ellipse cx="166" cy="112" rx="64" ry="30" fill={META.cream} stroke={META.outline} stroke-width="2" />
+    <path d="M112 124 L104 136 L124 128" fill={META.cream} stroke={META.outline} stroke-width="2" stroke-linejoin="round" />
+    <text x="166" y="118" text-anchor="middle" font-size="16" font-weight="700" fill={META.outline}>웅웅웅!!</text>
+    <text x="175" y="208" text-anchor="middle" font-size="11" font-weight="600" fill={META.outline}>같은 높이 · 큰 목소리 → 작은 목소리가 묻힘</text>
+    <!-- 이동 화살표 -->
+    <path d="M300 60 C 312 50, 328 50, 340 60" fill="none" stroke={META.motion} stroke-width="2.5" stroke-linecap="round" marker-end={`url(#${uid}m)`} />
+    <text x="320" y="40" text-anchor="middle" font-size="11" font-weight="600" fill={META.motion}>높이 비키기</text>
+    <!-- 장면 B: 다른 높이 -->
+    <rect x="376" y="104" width="40" height="86" rx="20" fill={META.coral} stroke={META.outline} stroke-width="2" />
+    <circle cx="390" cy="122" r="2" fill={META.outline} /><circle cx="402" cy="122" r="2" fill={META.outline} />
+    <ellipse cx="396" cy="138" rx="7" ry="5" fill={META.outline} />
+    <rect x="542" y="138" width="26" height="52" rx="13" fill={META.sky} stroke={META.outline} stroke-width="2" />
+    <circle cx="551" cy="152" r="1.8" fill={META.outline} /><circle cx="559" cy="152" r="1.8" fill={META.outline} />
+    <path d="M553 168 q 4 4 8 0" fill="none" stroke={META.outline} stroke-width="1.5" />
+    <ellipse cx="476" cy="128" rx="64" ry="30" fill={META.cream} stroke={META.outline} stroke-width="2" />
+    <path d="M422 140 L414 152 L434 144" fill={META.cream} stroke={META.outline} stroke-width="2" stroke-linejoin="round" />
+    <text x="476" y="134" text-anchor="middle" font-size="16" font-weight="700" fill={META.outline}>웅웅웅!!</text>
+    <ellipse cx="560" cy="52" rx="38" ry="18" fill={META.cream} stroke={META.outline} stroke-width="2" />
+    <path d="M554 68 L556 82 L566 69" fill={META.cream} stroke={META.outline} stroke-width="2" stroke-linejoin="round" />
+    <text x="560" y="57" text-anchor="middle" font-size="13" font-weight="700" fill={META.outline}>안녕?</text>
+    <text x="490" y="208" text-anchor="middle" font-size="11" font-weight="600" fill={META.outline}>다른 높이 → 둘 다 들림</text>
+  </svg>
+  <svg slot="principle" viewBox="0 0 640 214" role="img" aria-label="두 스펙트럼 그래프. EQ 전: 베이스의 마스킹 경계가 550 Hz 멜로디보다 높아 멜로디가 묻힌다. EQ 후: 베이스를 550 Hz 근처에서 깎자 경계가 내려가 멜로디가 위로 드러난다">
+    <defs><pattern id={`${uid}h`} width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="5" stroke={TECH.change} stroke-width="2" /></pattern></defs>
+    <text x={A.ox} y="16" font-size="13" font-weight="700" fill={INK.ink}>EQ 전</text>
+    <text x={B.ox} y="16" font-size="13" font-weight="700" fill={INK.ink}>EQ 후 — 베이스의 550 Hz 근처를 깎음</text>
+    {panels.map(p => <line x1={p.ox} x2={p.ox + GW} y1={p.base} y2={p.base} stroke={TECH.axis} />)}
+    {panels.map(p => <line x1={p.ox} x2={p.ox} y1={GT - 4} y2={p.base} stroke={TECH.axis} />)}
+    {panels.flatMap(p => p.ticks).map(t => <text x={t.x} y={GT + GH + 14} text-anchor="middle" font-size="10.5" class="num" fill={INK.sub}>{t.t}</text>)}
+    {panels.map(p => <text x={p.ox + GW} y={GT + GH + 28} text-anchor="end" font-size="11" fill={INK.sub}>주파수 (Hz) →</text>)}
+    {panels.map(p => <text x={p.ox - 6} y={GT + 6} text-anchor="end" font-size="11" fill={INK.sub}>크기</text>)}
+    {panels.map(p => <polygon points={p.bassArea} fill={BASS} opacity="0.16" />)}
+    {panels.map(p => <polyline points={p.bassLine} fill="none" stroke={BASS} stroke-width="2" />)}
+    <polygon points={B.cut} fill={`url(#${uid}h)`} opacity="0.8" />
+    {panels.map(p => <polyline points={p.maskLine} fill="none" stroke={TECH.limit} stroke-width="1.6" stroke-dasharray="5 4" />)}
+    <polygon points={A.melArea} fill={MEL} opacity="0.12" />
+    <polyline points={A.melLine} fill="none" stroke={MEL} stroke-width="2" stroke-dasharray="3 3" opacity="0.7" />
+    <polygon points={B.melArea} fill={MEL} opacity="0.28" />
+    <polyline points={B.melLine} fill="none" stroke={MEL} stroke-width="2.5" />
+    <!-- 이름표 -->
+    <text x={A.X(160)} y={GT + 8} font-size="11" font-weight="600" fill={BASS}>베이스 (큰 소리)</text>
+    <line x1={A.X(1100)} y1={A.maskAt(1100) - 3} x2={A.X(1300)} y2={GT + 40} stroke={TECH.limit} stroke-width="1" />
+    <text x={A.X(1300)} y={GT + 24} text-anchor="middle" font-size="11" font-weight="600" fill={TECH.limit}>가려지는 경계</text>
+    <text x={A.X(1300)} y={GT + 37} text-anchor="middle" font-size="10.5" fill={TECH.limit}>높은 쪽으로 넓게 퍼짐</text>
+    <line x1={A.X(700)} y1={A.melPeak.y + 12} x2={A.X(1500)} y2={GT + GH - 18} stroke={MEL} stroke-width="1" />
+    <text x={A.X(1550)} y={GT + GH - 8} font-size="11" font-weight="600" fill={MEL}>멜로디 — 묻힘</text>
+    <line x1={B.melPeak.x} y1={B.melPeak.y - 4} x2={B.X(900)} y2={GT + 30} stroke={MEL} stroke-width="1" />
+    <text x={B.X(900)} y={GT + 24} font-size="11" font-weight="600" fill={MEL}>멜로디 — 들림 (경계 위)</text>
+    <line x1={B.X(750)} y1={B.maskAt(750) - 8} x2={B.X(1500)} y2={GT + 70} stroke={TECH.change} stroke-width="1" />
+    <text x={B.X(1550)} y={GT + 74} font-size="11" font-weight="600" fill={TECH.change}>EQ로 깎은 부분</text>
+  </svg>
+</Explain>

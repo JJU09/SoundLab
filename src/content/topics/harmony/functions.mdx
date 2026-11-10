@@ -22,6 +22,7 @@ import DefList from '../../../components/doc/DefList.astro';
 import DefCard from '../../../components/doc/DefCard.astro';
 import Callout from '../../../components/doc/Callout.astro';
 import ChordFlow from '../../../components/doc/fig/ChordFlow.astro';
+import FunctionsExplain from '../../../components/doc/explain/FunctionsExplain.astro';
 
 {/* ───────── 초급 ───────── */}
 <Level show="easy">
@@ -33,7 +34,7 @@ import ChordFlow from '../../../components/doc/fig/ChordFlow.astro';
 - **서브도미넌트 (나들이)** — 집을 나서 산책하는 느낌. **F**.
 - **도미넌트 (긴장)** — "이제 집에 가야지!" 하는 두근거림. **G**.
 
-<ChordFlow items={[{name:"C",sub:"집",fn:"T"},{name:"F",sub:"나들이",fn:"S"},{name:"G",sub:"긴장",fn:"D"},{name:"C",sub:"집",fn:"T"}]} links={["나서기","서둘러","도착!"]} legend caption="토닉(초록) → 서브도미넌트(파랑) → 도미넌트(빨강) → 토닉" />
+<FunctionsExplain simple />
 
 그래서 C → F → G → C 진행은 "집을 나와 → 산책하다 → 서둘러 → 집에 도착"하는 이야기가 돼요. 노래가 끝날 때 G에서 C로 가면 "끝!" 하는 느낌이 나는 이유예요.
 
@@ -53,6 +54,8 @@ import ChordFlow from '../../../components/doc/fig/ChordFlow.astro';
   <DefCard term="서브도미넌트 (S) — IV · ii">벗어남. 토닉에서 멀어지며 도미넌트로 가는 길을 엽니다. ii는 IV와 음이 두 개 겹칩니다.</DefCard>
   <DefCard term="도미넌트 (D) — V · vii°">긴장. 이끎음(7음)을 포함해 토닉으로 강하게 끌립니다.</DefCard>
 </DefList>
+
+<FunctionsExplain />
 
 ## 기능의 문법
 

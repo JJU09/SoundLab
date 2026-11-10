@@ -5,7 +5,7 @@ kr: 컴프레서와 다이내믹스
 order: 4
 color: violet
 tagline: 들쭉날쭉한 음량을 다듬어 단단하게
-desc: 컴프레서는 화려한 효과음이 아니라 음량의 들쭉날쭉함(다이내믹 레인지)을 관리하는 도구입니다. 튀는 피크를 눌러 클리핑을 막고, 메이크업 게인으로 전체를 끌어올려 믹스를 단단하게 만드는 법을 배웁니다.
+desc: 컴프레서는 화려한 효과음이 아니라 음량의 들쭉날쭉함(다이내믹 레인지)을 관리하는 도구입니다. 기준보다 큰 소리만 골라 줄여 크기 차이를 좁히고, 메이크업 게인으로 전체를 끌어올려 믹스를 단단하게 만드는 법을 배웁니다.
 widget: mixer
 widgetConfig:
   controls: [fader, comp]
@@ -20,12 +20,15 @@ import Level from '../../../components/doc/Level.astro';
 import DefList from '../../../components/doc/DefList.astro';
 import DefCard from '../../../components/doc/DefCard.astro';
 import Callout from '../../../components/doc/Callout.astro';
+import CompressorExplain from '../../../components/doc/explain/CompressorExplain.astro';
 
 {/* ───────── 초급 ───────── */}
 <Level show="easy">
 ## 너무 크게 튀는 소리 누르기
 
-손으로 라디오 볼륨을 잡고 있다고 상상해 보세요. 갑자기 큰 소리가 나오면 얼른 줄이고, 조용해지면 다시 올리고 — 이렇게 음량을 자동으로 다듬어 주는 기계가 **컴프레서**예요. 들쭉날쭉하게 튀는 소리를 눌러서, 전체가 더 고르고 단단하게 들리게 합니다.
+문 앞에 문지기가 서 있다고 상상해 보세요. 문보다 키가 작은 사람은 그냥 지나가고, 문보다 큰 사람만 머리를 살짝 눌러서 통과시켜요. **컴프레서**도 똑같아요. 정해 둔 기준보다 큰 소리만 골라 줄여서, 들쭉날쭉하던 소리가 더 고르고 단단하게 들리게 합니다.
+
+<CompressorExplain simple />
 
 컴프레서는 메아리나 떨림 같은 **효과음이 아니에요**. 귀에 띄게 "달라진" 소리를 내는 게 아니라, 음량의 균형을 보이지 않게 정리해 주는 도구입니다.
 
@@ -34,7 +37,7 @@ import Callout from '../../../components/doc/Callout.astro';
 <Callout>
 **소리 켜기**를 눌러 보세요 — 드럼 킥이 너무 세게 튀어서 마스터 미터가 빨갛게 **CLIP**까지 닿습니다. 소리가 거칠게 찌그러지죠?
 
-컴프레서의 **THRESHOLD 슬라이더를 왼쪽(-)으로** 내려 보세요. 킥이 튈 때마다 위 **GR(리덕션) 미터**가 움직이며 음량을 눌러 줍니다. 임계점을 충분히 내리면 CLIP이 사라지고 소리가 단단해져요!
+컴프레서의 **THRESHOLD 슬라이더를 왼쪽(-)으로** 내려 보세요. 킥이 튈 때마다 위 **GR(리덕션) 미터**가 움직이며 음량을 눌러 줍니다. 임계점을 충분히 내리면 이 믹서에서는 CLIP이 사라지고 소리가 단단해져요! (어떤 소리든 천장을 확실히 지켜 주는 건 다음에 배울 **리미터**의 몫이에요.)
 </Callout>
 </Level>
 
@@ -42,7 +45,9 @@ import Callout from '../../../components/doc/Callout.astro';
 <Level show="normal">
 ## 다이내믹 레인지를 좁힌다
 
-컴프레서는 가장 큰 소리와 가장 작은 소리의 차이 — **다이내믹 레인지**(dynamic range)를 좁히는 장치입니다. 설정한 임계점(threshold)을 넘는 신호만 골라 정해진 비율(ratio)로 눌러, 튀는 피크를 평탄하게 만듭니다.
+컴프레서는 가장 큰 소리와 가장 작은 소리의 차이 — **다이내믹 레인지**(dynamic range)를 좁히는 장치입니다. 설정한 임계점(threshold)을 넘는 신호만 골라 정해진 비율(ratio)로 줄여, 튀는 피크를 낮추고 크기 차이를 좁힙니다.
+
+<CompressorExplain />
 
 <DefList>
   <DefCard term="임계점 (Threshold)">압축이 시작되는 음량 기준선. 이 레벨을 넘는 부분만 눌립니다. 내릴수록 더 많은 신호가 압축 대상이 됩니다.</DefCard>

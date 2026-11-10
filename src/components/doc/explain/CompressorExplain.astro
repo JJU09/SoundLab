@@ -1,0 +1,89 @@
+---
+// 파일럿 ② 작동 원리형 — 컴프레서: 문지기 비유 + 입력·출력 전달 곡선 (Threshold −20 dB, 4:1)
+import Explain from './Explain.astro';
+import { INK, META, TECH } from './tokens';
+interface Props { simple?: boolean; }
+const { simple = false } = Astro.props;
+const uid = 'cmp' + Math.random().toString(36).slice(2, 7);
+
+// ── 비유: 문 높이(=Threshold)보다 큰 사람만 눌러서 통과. 넘은 키는 4분의 1만 남음(4:1)
+const FLOOR = 196, DOOR = 86;
+const squash = (top: number) => (top < DOOR ? DOOR - (DOOR - top) / 4 : top);
+const before = [{ x: 26, top: 150, c: META.sky }, { x: 56, top: 112, c: META.leaf }, { x: 90, top: 40, c: META.coral }];
+const after = [{ x: 232, top: 150, c: META.sky }, { x: 262, top: 112, c: META.leaf }, { x: 294, top: squash(40), c: META.coral }];
+const W = 24;
+const people = [...before, ...after].map(p => ({ ...p, h: FLOOR - p.top, eyeY: p.top + 12 }));
+const ghostTop = 40, tallAfter = after[2];
+
+// ── 원리: 전달 곡선
+const x0 = 52, x1 = 304, y0 = 20, y1 = 176;
+const LO = -40;   // 축 범위 −40 ~ 0 dB (기준선 위 구간을 넉넉히)
+const X = (d: number) => x0 + (d - LO) / -LO * (x1 - x0);
+const Y = (d: number) => y1 - (d - LO) / -LO * (y1 - y0);
+const TH = -20, R = 4;
+const out = (d: number) => (d <= TH ? d : TH + (d - TH) / R);
+const ex = -4, exOut = out(ex);               // 입력 −4 dB → 출력 −16 dB
+const ticks = [-40, -30, -20, -10, 0];
+const curve = `M${X(LO)} ${Y(LO)} L${X(TH)} ${Y(TH)} L${X(0)} ${Y(out(0))}`;
+---
+<Explain simple={simple} title="컴프레서" question="큰 소리만 골라서 어떻게 줄일까?"
+  label="컴프레서 설명 그림: 문 높이보다 큰 사람만 문지기가 눌러 통과시키듯, 컴프레서는 Threshold를 넘은 소리만 Ratio만큼 줄인다. 4:1에서 입력 −4 dB는 출력 −16 dB가 된다."
+  map={[['문지기', '컴프레서'], ['문 높이', 'Threshold'], ['넘은 키의 ¼만 남김', 'Ratio 4:1'], ['줄어든 만큼', '게인 리덕션']]}
+  message="기준선을 넘은 만큼만 비율대로 줄여, 큰 소리와 작은 소리의 차이를 좁힌다."
+  caption="예시는 Threshold −20 dB · Ratio 4:1. 실제 컴프레서는 어택·릴리즈 시간에 맞춰 서서히 반응하고, 줄어든 전체 음량은 메이크업 게인으로 되돌립니다.">
+  <svg slot="metaphor" viewBox="0 0 320 222" role="img" aria-label="문 높이보다 큰 사람만 문지기가 눌러, 나간 뒤에는 넘었던 키의 4분의 1만 남는다">
+    <defs><marker id={`${uid}m`} viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill={META.motion} /></marker></defs>
+    <!-- 문 높이 -->
+    <line x1="8" x2="312" y1={DOOR} y2={DOOR} stroke="#b45309" stroke-width="1.5" stroke-dasharray="5 4" />
+    <text x="10" y={DOOR - 6} font-size="11" font-weight="600" fill="#b45309">문 높이</text>
+    <!-- 바닥 -->
+    <line x1="8" x2="312" y1={FLOOR} y2={FLOOR} stroke={META.outline} stroke-width="2" stroke-linecap="round" />
+    <!-- 문과 문지기 -->
+    <rect x="140" y={DOOR} width="44" height={FLOOR - DOOR} fill={META.cream} stroke={META.outline} stroke-width="2" />
+    <rect x="134" y={DOOR - 9} width="56" height="10" rx="3" fill={META.coral} stroke={META.outline} stroke-width="2" />
+    <rect x="151" y="124" width="22" height={FLOOR - 124} rx="11" fill={META.sun} stroke={META.outline} stroke-width="2" />
+    <rect x="149" y="118" width="26" height="9" rx="3" fill={META.outline} />
+    <circle cx="158" cy="136" r="1.8" fill={META.outline} /><circle cx="166" cy="136" r="1.8" fill={META.outline} />
+    <path d="M151 150 L132 140 M173 150 L194 140" stroke={META.outline} stroke-width="2.2" stroke-linecap="round" />
+    <text x="162" y="214" text-anchor="middle" font-size="11" font-weight="600" fill={META.outline}>문지기</text>
+    <!-- 소리들 (키 = 소리 크기) -->
+    {people.map(p => <rect x={p.x - W / 2} y={p.top} width={W} height={p.h} rx={W / 2} fill={p.c} stroke={META.outline} stroke-width="2" />)}
+    {people.map(p => <circle cx={p.x - 4} cy={p.eyeY} r="1.8" fill={META.outline} />)}
+    {people.map(p => <circle cx={p.x + 4} cy={p.eyeY} r="1.8" fill={META.outline} />)}
+    <!-- 원래 키(점선)와 줄어든 만큼 -->
+    <rect x={tallAfter.x - W / 2} y={ghostTop} width={W} height={tallAfter.top - ghostTop + 10} rx={W / 2} fill="none" stroke={META.motion} stroke-width="1.5" stroke-dasharray="4 3" />
+    <path d={`M${tallAfter.x - 16} ${ghostTop + 6} L${tallAfter.x - 16} ${tallAfter.top - 4}`} stroke={META.motion} stroke-width="2" marker-end={`url(#${uid}m)`} />
+    <text x={tallAfter.x - 20} y={ghostTop + 26} text-anchor="end" font-size="11" font-weight="600" fill={META.motion}>꾹</text>
+    <!-- 이동 -->
+    <path d="M112 186 L130 186" stroke={META.motion} stroke-width="2.5" stroke-linecap="round" marker-end={`url(#${uid}m)`} />
+    <path d="M196 186 L214 186" stroke={META.motion} stroke-width="2.5" stroke-linecap="round" marker-end={`url(#${uid}m)`} />
+    <text x="58" y="214" text-anchor="middle" font-size="11" font-weight="600" fill={META.outline}>들어오기 전</text>
+    <text x="262" y="214" text-anchor="middle" font-size="11" font-weight="600" fill={META.outline}>나간 뒤</text>
+  </svg>
+  <svg slot="principle" viewBox="0 0 320 222" role="img" aria-label="입력·출력 전달 곡선: −20 dB까지는 1:1, 그 위로는 4:1로 완만해진다. 입력 −4 dB는 출력 −16 dB로 12 dB 줄어든다">
+    <defs><pattern id={`${uid}h`} width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="5" stroke={TECH.change} stroke-width="2" /></pattern></defs>
+    <!-- 축 -->
+    <line x1={x0} x2={x1} y1={y1} y2={y1} stroke={TECH.axis} />
+    <line x1={x0} x2={x0} y1={y0} y2={y1} stroke={TECH.axis} />
+    {ticks.map(t => <text x={X(t)} y={y1 + 14} text-anchor="middle" font-size="11" class="num" fill={INK.sub}>{t}</text>)}
+    {ticks.map(t => <text x={x0 - 6} y={Y(t) + 4} text-anchor="end" font-size="11" class="num" fill={INK.sub}>{t}</text>)}
+    <text x={(x0 + x1) / 2} y="214" text-anchor="middle" font-size="11" fill={INK.sub}>입력 크기 (dB) →</text>
+    <text x="12" y={(y0 + y1) / 2} text-anchor="middle" font-size="11" fill={INK.sub} transform={`rotate(-90 12 ${(y0 + y1) / 2})`}>출력 크기 (dB) →</text>
+    <!-- 1:1 기준 -->
+    <line x1={X(LO)} y1={Y(LO)} x2={X(0)} y2={Y(0)} stroke={TECH.input} stroke-width="1.5" stroke-dasharray="4 4" opacity="0.6" />
+    <text x={X(-31)} y={Y(-24)} font-size="11" fill={TECH.input} text-anchor="middle">1:1 — 그대로</text>
+    <!-- Threshold -->
+    <line x1={X(TH)} x2={X(TH)} y1={y0} y2={y1} stroke={TECH.limit} stroke-width="1.5" stroke-dasharray="5 4" />
+    <text x={X(TH) - 4} y={y1 - 6} text-anchor="end" font-size="11" font-weight="600" fill={TECH.limit}>Threshold −20</text>
+    <!-- 전달 곡선 -->
+    <path d={curve} fill="none" stroke={TECH.output} stroke-width="2.5" stroke-linejoin="round" />
+    <text x={X(-11)} y={Y(-23)} text-anchor="middle" font-size="11" font-weight="600" fill={TECH.output}>4:1 구간</text>
+    <!-- 예: 입력 −4 → 출력 −16 -->
+    <rect x={X(ex) - 6} y={Y(ex)} width="12" height={Y(exOut) - Y(ex)} fill={`url(#${uid}h)`} />
+    <circle cx={X(ex)} cy={Y(ex)} r="4" fill={TECH.input} />
+    <circle cx={X(ex)} cy={Y(exOut)} r="4" fill={TECH.output} />
+    <text x={X(ex) - 10} y={Y(ex) + 4} text-anchor="end" font-size="11" class="num" fill={TECH.input}>입력 −4</text>
+    <text x={X(ex) - 10} y={Y(exOut) + 4} text-anchor="end" font-size="11" class="num" fill={TECH.output}>출력 −16</text>
+    <text x={X(ex) - 10} y={(Y(ex) + Y(exOut)) / 2 + 4} text-anchor="end" font-size="11" font-weight="600" fill={TECH.change}>12 dB 줄임</text>
+  </svg>
+</Explain>

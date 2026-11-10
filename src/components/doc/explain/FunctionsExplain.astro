@@ -1,0 +1,77 @@
+---
+// 파일럿 ① 비유형 — 화성 기능: 집 → 나들이 → 언덕 꼭대기 → 다시 집 / G7 → C의 반음 해결
+import Explain from './Explain.astro';
+import { INK, META, FN } from './tokens';
+interface Props { simple?: boolean; }
+const { simple = false } = Astro.props;
+const uid = 'fn' + Math.random().toString(36).slice(2, 7);
+
+// ── 원리: 건반 레4 ~ 도5 (흰 건반 7개)
+const KW = 40, KX = 20, KY = 78, KH = 104;
+const whites = [
+  { n: '레', role: 'D7' }, { n: '미', role: 'T' }, { n: '파', role: 'D7' }, { n: '솔', role: 'both' },
+  { n: '라', role: '' }, { n: '시', role: 'D7' }, { n: '도', role: 'T' },
+].map((k, i) => ({ ...k, x: KX + i * KW, cx: KX + i * KW + KW / 2,
+  fill: k.role === 'D7' ? FN.D : k.role === 'T' ? FN.T : k.role === 'both' ? FN.D : '#ffffff',
+  op: k.role ? 0.22 : 1, tc: k.role === 'D7' || k.role === 'both' ? FN.D : k.role === 'T' ? FN.T : INK.sub }));
+const blacks = [0, 2, 3, 4].map(i => ({ x: KX + (i + 1) * KW - 12 }));   // 레♯ 파♯ 솔♯ 라♯
+const cx = (i: number) => KX + i * KW + KW / 2;
+const arcY = KY + KH - 26;
+const arc = (a: number, b: number) => `M${cx(a)} ${arcY} Q ${(cx(a) + cx(b)) / 2} ${arcY - 22} ${cx(b) + (b > a ? -6 : 6)} ${arcY - 4}`;
+---
+<Explain simple={simple} title="화성 기능 — 긴장과 해결" question="왜 G7 다음에 C가 오면 '끝났다'고 느낄까?"
+  label="화성 기능 설명 그림: 집을 나와 나들이를 하고 언덕 꼭대기에 오른 공이 집으로 굴러 내려오듯, 도미넌트 G7의 시와 파가 반음씩 움직여 토닉 C의 도와 미에 내려앉는다."
+  map={[['집', '토닉 (I)'], ['나들이', '서브도미넌트 (IV)'], ['언덕 꼭대기', '도미넌트 (V7)'], ['굴러 내려옴', '해결 (V7 → I)']]}
+  message="도미넌트의 시·파가 반음씩 움직여 토닉의 도·미에 내려앉는 것이 해결이다."
+  caption="비유는 흐름의 느낌만 보여 줍니다. 긴장의 실제 원인은 시–파 트라이톤과 반음 이동이고, 곡의 문맥에 따라 다르게 풀리기도 합니다(거짓종지 등).">
+  <svg slot="metaphor" viewBox="0 0 320 222" role="img" aria-label="집에서 나와 나들이를 하고 언덕 꼭대기에 오른 공이 다시 집으로 굴러 내려온다">
+    <defs><marker id={`${uid}m`} viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill={META.motion} /></marker></defs>
+    <!-- 언덕 -->
+    <path d="M8 182 L62 182 C 92 182, 100 152, 130 150 C 160 148, 176 70, 214 64 C 240 60, 254 150, 280 182 L312 182 L312 198 L8 198 Z" fill="#d7eedd" stroke={META.outline} stroke-width="2" stroke-linejoin="round" />
+    <!-- 왼쪽 집 -->
+    <rect x="18" y="154" width="32" height="28" fill={META.sand} stroke={META.outline} stroke-width="2" />
+    <path d="M13 156 L34 136 L55 156 Z" fill={META.coral} stroke={META.outline} stroke-width="2" stroke-linejoin="round" />
+    <rect x="29" y="166" width="10" height="16" fill={META.cream} stroke={META.outline} stroke-width="1.5" />
+    <!-- 오른쪽 집 -->
+    <rect x="276" y="154" width="32" height="28" fill={META.sand} stroke={META.outline} stroke-width="2" />
+    <path d="M271 156 L292 136 L313 156 Z" fill={META.coral} stroke={META.outline} stroke-width="2" stroke-linejoin="round" />
+    <rect x="287" y="166" width="10" height="16" fill={META.cream} stroke={META.outline} stroke-width="1.5" />
+    <!-- 나들이 발자국 -->
+    <path d="M58 172 C 90 172, 100 142, 130 140 C 160 138, 176 64, 204 56" fill="none" stroke={META.outline} stroke-width="2" stroke-dasharray="1 7" stroke-linecap="round" opacity="0.6" />
+    <!-- 꼭대기의 공 + 긴장 표시 -->
+    <circle cx="214" cy="50" r="12" fill={META.sun} stroke={META.outline} stroke-width="2" />
+    <circle cx="210" cy="48" r="1.6" fill={META.outline} /><circle cx="218" cy="48" r="1.6" fill={META.outline} />
+    <path d="M198 34 l-5 -6 M214 30 v-8 M230 34 l5 -6" stroke={META.motion} stroke-width="2" stroke-linecap="round" />
+    <!-- 굴러 내려옴 -->
+    <path d="M228 58 C 248 70, 256 128, 272 160" fill="none" stroke={META.motion} stroke-width="2.5" stroke-linecap="round" marker-end={`url(#${uid}m)`} />
+    <!-- 이름표 -->
+    <text x="34" y="214" text-anchor="middle" font-size="11" font-weight="600" fill={META.outline}>집</text>
+    <text x="118" y="132" text-anchor="middle" font-size="11" font-weight="600" fill={META.outline}>나들이</text>
+    <text x="214" y="16" text-anchor="middle" font-size="11" font-weight="600" fill={META.outline}>언덕 꼭대기</text>
+    <text x="252" y="102" font-size="11" font-weight="600" fill={META.motion}>굴러 내려옴</text>
+    <text x="292" y="214" text-anchor="middle" font-size="11" font-weight="600" fill={META.outline}>다시 집</text>
+  </svg>
+  <svg slot="principle" viewBox="0 0 320 222" role="img" aria-label="건반 위 G7(레 파 솔 시)에서 C(도 미 솔)로: 시는 도로 반음 올라가고, 파는 미로 반음 내려간다. 시와 파는 트라이톤이다">
+    <defs><marker id={`${uid}k`} viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill={INK.ink} /></marker></defs>
+    <!-- 범례 -->
+    <rect x="20" y="8" width="11" height="11" rx="2" fill={FN.D} opacity="0.35" stroke={FN.D} />
+    <text x="36" y="18" font-size="11" fill={INK.ink}>G7 — 도미넌트</text>
+    <rect x="140" y="8" width="11" height="11" rx="2" fill={FN.T} opacity="0.35" stroke={FN.T} />
+    <text x="156" y="18" font-size="11" fill={INK.ink}>C — 토닉</text>
+    <!-- 트라이톤 괄호 (파–시) -->
+    <path d={`M${cx(2)} 64 V56 H${cx(5)} V64`} fill="none" stroke={FN.D} stroke-width="1.5" />
+    <text x={(cx(2) + cx(5)) / 2} y="50" text-anchor="middle" font-size="11" font-weight="600" fill={FN.D}>파–시 트라이톤 = 불안정</text>
+    <!-- 건반 -->
+    {whites.map(k => <rect x={k.x} y={KY} width={KW - 2} height={KH} rx="4" fill="#ffffff" stroke={INK.line} />)}
+    {whites.filter(k => k.role).map(k => <rect x={k.x} y={KY} width={KW - 2} height={KH} rx="4" fill={k.fill} opacity={k.op} />)}
+    {blacks.map(b => <rect x={b.x} y={KY} width="22" height="62" rx="3" fill={INK.ink} />)}
+    {whites.map(k => <text x={k.cx - 1} y={KY + KH - 8} text-anchor="middle" font-size="12" font-weight="600" fill={k.tc}>{k.n}</text>)}
+    <!-- 반음 이동 -->
+    <path d={arc(5, 6)} fill="none" stroke={INK.ink} stroke-width="1.75" marker-end={`url(#${uid}k)`} />
+    <path d={arc(2, 1)} fill="none" stroke={INK.ink} stroke-width="1.75" marker-end={`url(#${uid}k)`} />
+    <text x={(cx(5) + cx(6)) / 2} y={KY + KH + 16} text-anchor="middle" font-size="11" font-weight="600" fill={INK.ink}>시→도 반음↑</text>
+    <text x={(cx(1) + cx(2)) / 2} y={KY + KH + 16} text-anchor="middle" font-size="11" font-weight="600" fill={INK.ink}>파→미 반음↓</text>
+    <text x={cx(3)} y={KY + KH + 16} text-anchor="middle" font-size="11" fill={INK.sub}>솔 그대로</text>
+    <text x="160" y="214" text-anchor="middle" font-size="11" fill={INK.sub}>G7(레 파 솔 시) → C(도 미 솔)</text>
+  </svg>
+</Explain>

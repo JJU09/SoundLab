@@ -2,6 +2,7 @@
 // 설명 그림 틀 — 하나의 개념을 ① 비유 ② 실제 원리 ③ 핵심 메시지로 설명한다.
 //   비유와 원리는 배경·선·글자 모양으로 시각적으로 분리하고, 둘 사이의 대응(map)을 명시한다.
 //   simple: 초급용 — 원리 칸을 접고 비유 + 메시지만 보여 줌.
+//   layout: 'side'(기본, 칸당 320 좌표) · 'stack'(칸당 640 좌표, 가로로 긴 그래프·넓은 장면). 높이는 그림마다 자유.
 // 사용: 개념별 컴포넌트(예: CompressorExplain)가 이 틀에 slot="metaphor" · slot="principle" SVG를 넣는다.
 interface Props {
   title: string;                 // 개념 이름
@@ -11,8 +12,11 @@ interface Props {
   caption?: string;              // 정확성 보충(단순화한 부분 밝히기)
   label: string;                 // 스크린리더용 전체 설명
   simple?: boolean;
+  layout?: 'side' | 'stack';     // side: 두 칸 나란히(기본) · stack: 두 칸을 위아래 전체 폭으로(가로로 긴 그래프·장면)
 }
-const { title, question, map = [], message, caption, label, simple = false } = Astro.props;
+const { title, question, map = [], message, caption, label, simple = false, layout = 'side' } = Astro.props;
+// 핵심 문장은 한 번에 읽히는 길이로 (공백 포함 60자 이내)
+if (message.length > 60) console.warn(`[Explain] 핵심 문장이 깁니다(${message.length}자): ${title}`);
 ---
 <figure class="ex not-prose my-6" role="group" aria-label={label}>
   <div class="ex-card">
@@ -21,11 +25,12 @@ const { title, question, map = [], message, caption, label, simple = false } = A
       {question && <span class="ex-q">{question}</span>}
     </header>
 
-    <div class={`ex-panels ${simple ? 'one' : ''}`}>
+    <div class={`ex-panels ${simple || layout === 'stack' ? 'one' : ''} ${layout === 'stack' ? 'stack' : ''}`}>
       <section class="ex-panel meta" aria-label="비유">
         <span class="ex-chip meta">비유 · 이렇게 상상해 보세요</span>
         <slot name="metaphor" />
       </section>
+      {layout === 'stack' && <p class="ex-swipe">그림을 옆으로 밀어서 보세요 →</p>}
       {!simple && (
         <section class="ex-panel tech" aria-label="실제 원리">
           <span class="ex-chip tech">실제 원리</span>
@@ -62,6 +67,11 @@ const { title, question, map = [], message, caption, label, simple = false } = A
   .ex-chip.meta { color: #b45309; }
   .ex-chip.tech { color: #2563eb; font-family: ui-monospace, monospace; }
   .ex-panel svg { display: block; width: 100%; height: auto; }
+  .ex-panels.stack .ex-panel { overflow-x: auto; }
+  .ex-panels.stack .ex-panel svg { min-width: 560px; } /* 가로로 긴 그림은 좁은 화면에서 칸 안 가로 스크롤 */
+  .ex-swipe { display: none; font-size: 11px; color: #a0a0c0; text-align: right; margin: -2px 4px 4px; }
+  @media (max-width: 600px) { .ex-panels.stack + .ex-swipe, .ex-panels.stack .ex-swipe { display: block; } }
+  .ex-panels.one:not(.stack) .ex-panel { max-width: 460px; width: 100%; margin: 0 auto; } /* 초급(simple) 한 칸은 너무 커지지 않게 */
   .ex-panel svg text { font-family: 'Pretendard', sans-serif; }
   .ex-panel svg .num { font-family: ui-monospace, 'SFMono-Regular', monospace; }
   .ex-map { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 10px 2px 0; font-size: 12px; }

@@ -7,7 +7,14 @@ const { simple = false } = Astro.props;
 const uid = 'fn' + Math.random().toString(36).slice(2, 7);
 
 // ── 원리: 건반 레4 ~ 도5 (흰 건반 7개)
-const KW = 40, KX = 20, KY = 78, KH = 104;
+const KW = 40, KX = 20, KY = 172, KH = 92;
+// 성부 이동 표: [G7 음, C 음, 이동 설명, 강조]
+const ROWS = [
+  { a: '시 (B)', b: '도 (C)', t: '반음 위로 — 이끎음', y: 46, strong: true, ac: FN.D, bc: FN.T },
+  { a: '솔 (G)', b: '솔 (G)', t: '그대로 — 공통음', y: 76, strong: false, ac: '#a0a0c0', bc: '#a0a0c0' },
+  { a: '파 (F)', b: '미 (E)', t: '반음 아래로 — 7음', y: 106, strong: true, ac: FN.D, bc: FN.T },
+  { a: '레 (D)', b: '도 (C)', t: '흔히 온음 아래로', y: 136, strong: false, ac: '#a0a0c0', bc: '#a0a0c0' },
+];
 const whites = [
   { n: '레', role: 'D7' }, { n: '미', role: 'T' }, { n: '파', role: 'D7' }, { n: '솔', role: 'both' },
   { n: '라', role: '' }, { n: '시', role: 'D7' }, { n: '도', role: 'T' },
@@ -16,7 +23,7 @@ const whites = [
   op: k.role ? 0.22 : 1, tc: k.role === 'D7' || k.role === 'both' ? FN.D : k.role === 'T' ? FN.T : INK.sub }));
 const blacks = [0, 2, 3, 4].map(i => ({ x: KX + (i + 1) * KW - 12 }));   // 레♯ 파♯ 솔♯ 라♯
 const cx = (i: number) => KX + i * KW + KW / 2;
-const arcY = KY + KH - 26;
+const arcY = KY + KH - 24;
 const arc = (a: number, b: number) => `M${cx(a)} ${arcY} Q ${(cx(a) + cx(b)) / 2} ${arcY - 22} ${cx(b) + (b > a ? -6 : 6)} ${arcY - 4}`;
 ---
 <Explain simple={simple} title="화성 기능 — 긴장과 해결" question="왜 G7 다음에 C가 오면 '끝났다'고 느낄까?"
@@ -51,27 +58,32 @@ const arc = (a: number, b: number) => `M${cx(a)} ${arcY} Q ${(cx(a) + cx(b)) / 2
     <text x="252" y="102" font-size="11" font-weight="600" fill={META.motion}>굴러 내려옴</text>
     <text x="292" y="214" text-anchor="middle" font-size="11" font-weight="600" fill={META.outline}>다시 집</text>
   </svg>
-  <svg slot="principle" viewBox="0 0 320 222" role="img" aria-label="건반 위 G7(레 파 솔 시)에서 C(도 미 솔)로: 시는 도로 반음 올라가고, 파는 미로 반음 내려간다. 시와 파는 트라이톤이다">
-    <defs><marker id={`${uid}k`} viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill={INK.ink} /></marker></defs>
-    <!-- 범례 -->
-    <rect x="20" y="8" width="11" height="11" rx="2" fill={FN.D} opacity="0.35" stroke={FN.D} />
-    <text x="36" y="18" font-size="11" fill={INK.ink}>G7 — 도미넌트</text>
-    <rect x="140" y="8" width="11" height="11" rx="2" fill={FN.T} opacity="0.35" stroke={FN.T} />
-    <text x="156" y="18" font-size="11" fill={INK.ink}>C — 토닉</text>
-    <!-- 트라이톤 괄호 (파–시) -->
-    <path d={`M${cx(2)} 64 V56 H${cx(5)} V64`} fill="none" stroke={FN.D} stroke-width="1.5" />
-    <text x={(cx(2) + cx(5)) / 2} y="50" text-anchor="middle" font-size="11" font-weight="600" fill={FN.D}>파–시 트라이톤 = 불안정</text>
-    <!-- 건반 -->
+  <svg slot="principle" viewBox="0 0 320 312" role="img" aria-label="G7에서 C로: 시는 도로 반음 올라가고, 파는 미로 반음 내려가고, 솔은 그대로 남는다. 시와 파는 트라이톤이다. 건반 위에서도 같은 이동을 보여 준다">
+    <defs><marker id={`${uid}k`} viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill={INK.ink} /></marker>
+      <marker id={`${uid}g`} viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="#a0a0c0" /></marker></defs>
+    <!-- ① 성부 이동 표 -->
+    <text x="74" y="18" text-anchor="middle" font-size="12" font-weight="700" fill={FN.D}>G7 · 도미넌트</text>
+    <text x="270" y="18" text-anchor="middle" font-size="12" font-weight="700" fill={FN.T}>C · 토닉</text>
+    {ROWS.map(r => <rect x="46" y={r.y - 11} width="56" height="22" rx="11" fill={r.strong ? FN.D : '#ffffff'} fill-opacity={r.strong ? 0.16 : 1} stroke={r.ac} stroke-width={r.strong ? 1.6 : 1} />)}
+    {ROWS.map(r => <rect x="242" y={r.y - 11} width="56" height="22" rx="11" fill={r.strong ? FN.T : '#ffffff'} fill-opacity={r.strong ? 0.16 : 1} stroke={r.bc} stroke-width={r.strong ? 1.6 : 1} />)}
+    {ROWS.map(r => <text x="74" y={r.y + 4} text-anchor="middle" font-size="12" font-weight={r.strong ? 700 : 500} fill={r.strong ? INK.ink : INK.sub}>{r.a}</text>)}
+    {ROWS.map(r => <text x="270" y={r.y + 4} text-anchor="middle" font-size="12" font-weight={r.strong ? 700 : 500} fill={r.strong ? INK.ink : INK.sub}>{r.b}</text>)}
+    {ROWS.map(r => <line x1="106" x2="236" y1={r.y} y2={r.y} stroke={r.strong ? INK.ink : '#a0a0c0'} stroke-width={r.strong ? 1.75 : 1.2} stroke-dasharray={r.strong ? '' : '4 3'} marker-end={r.strong ? `url(#${uid}k)` : `url(#${uid}g)`} />)}
+    {ROWS.map(r => <text x="171" y={r.y - 5} text-anchor="middle" font-size="11" font-weight={r.strong ? 700 : 400} fill={r.strong ? INK.ink : INK.sub}>{r.t}</text>)}
+    <!-- 트라이톤 괄호 (시–파) -->
+    <path d="M40 46 H32 V106 H40" fill="none" stroke={FN.D} stroke-width="1.5" />
+    <text x="20" y="76" text-anchor="middle" font-size="11" font-weight="700" fill={FN.D} transform="rotate(-90 20 76)">트라이톤</text>
+    <!-- ② 건반에서 보면 -->
+    <text x="20" y="162" font-size="11" fill={INK.sub}>건반에서 보면</text>
     {whites.map(k => <rect x={k.x} y={KY} width={KW - 2} height={KH} rx="4" fill="#ffffff" stroke={INK.line} />)}
     {whites.filter(k => k.role).map(k => <rect x={k.x} y={KY} width={KW - 2} height={KH} rx="4" fill={k.fill} opacity={k.op} />)}
-    {blacks.map(b => <rect x={b.x} y={KY} width="22" height="62" rx="3" fill={INK.ink} />)}
+    {blacks.map(b => <rect x={b.x} y={KY} width="22" height="54" rx="3" fill={INK.ink} />)}
     {whites.map(k => <text x={k.cx - 1} y={KY + KH - 8} text-anchor="middle" font-size="12" font-weight="600" fill={k.tc}>{k.n}</text>)}
-    <!-- 반음 이동 -->
     <path d={arc(5, 6)} fill="none" stroke={INK.ink} stroke-width="1.75" marker-end={`url(#${uid}k)`} />
     <path d={arc(2, 1)} fill="none" stroke={INK.ink} stroke-width="1.75" marker-end={`url(#${uid}k)`} />
     <text x={(cx(5) + cx(6)) / 2} y={KY + KH + 16} text-anchor="middle" font-size="11" font-weight="600" fill={INK.ink}>시→도 반음↑</text>
     <text x={(cx(1) + cx(2)) / 2} y={KY + KH + 16} text-anchor="middle" font-size="11" font-weight="600" fill={INK.ink}>파→미 반음↓</text>
     <text x={cx(3)} y={KY + KH + 16} text-anchor="middle" font-size="11" fill={INK.sub}>솔 그대로</text>
-    <text x="160" y="214" text-anchor="middle" font-size="11" fill={INK.sub}>G7(레 파 솔 시) → C(도 미 솔)</text>
+    <text x="160" y="304" text-anchor="middle" font-size="11" fill={INK.sub}>빨강 = G7의 음 · 초록 = 도착하는 C의 음</text>
   </svg>
 </Explain>

@@ -13,8 +13,9 @@ interface Props {
   label: string;                 // 스크린리더용 전체 설명
   simple?: boolean;
   layout?: 'side' | 'stack';     // side: 두 칸 나란히(기본) · stack: 두 칸을 위아래 전체 폭으로(가로로 긴 그래프·장면)
+  scroll?: boolean;              // stack에서 640 좌표 SVG 하나를 쓸 때: 좁은 화면은 칸 안 가로 스크롤 + 안내
 }
-const { title, question, map = [], message, caption, label, simple = false, layout = 'side' } = Astro.props;
+const { title, question, map = [], message, caption, label, simple = false, layout = 'side', scroll = false } = Astro.props;
 // 핵심 문장은 한 번에 읽히는 길이로 (공백 포함 60자 이내)
 if (message.length > 60) console.warn(`[Explain] 핵심 문장이 깁니다(${message.length}자): ${title}`);
 ---
@@ -30,7 +31,7 @@ if (message.length > 60) console.warn(`[Explain] 핵심 문장이 깁니다(${me
         <span class="ex-chip meta">비유 · 이렇게 상상해 보세요</span>
         <slot name="metaphor" />
       </section>
-      {layout === 'stack' && <p class="ex-swipe">그림을 옆으로 밀어서 보세요 →</p>}
+      {scroll && <p class="ex-swipe">그림을 옆으로 밀어서 보세요 →</p>}
       {!simple && (
         <section class="ex-panel tech" aria-label="실제 원리">
           <span class="ex-chip tech">실제 원리</span>
@@ -68,7 +69,11 @@ if (message.length > 60) console.warn(`[Explain] 핵심 문장이 깁니다(${me
   .ex-chip.tech { color: #2563eb; font-family: ui-monospace, monospace; }
   .ex-panel svg { display: block; width: 100%; height: auto; }
   .ex-panels.stack .ex-panel { overflow-x: auto; }
-  .ex-panels.stack .ex-panel svg { min-width: 560px; } /* 가로로 긴 그림은 좁은 화면에서 칸 안 가로 스크롤 */
+  .ex-panels.stack .ex-panel > svg { min-width: 560px; } /* 가로로 긴 그림은 좁은 화면에서 칸 안 가로 스크롤 */
+  /* 두 장면·두 그래프 나란히(좁은 화면에서는 위아래) */
+  .ex-duo { display: grid; grid-template-columns: 1fr; gap: 10px; }
+  @media (min-width: 600px) { .ex-duo { grid-template-columns: 1fr 1fr; } }
+  .ex-duo > svg { display: block; width: 100%; height: auto; }
   .ex-swipe { display: none; font-size: 11px; color: #a0a0c0; text-align: right; margin: -2px 4px 4px; }
   @media (max-width: 600px) { .ex-panels.stack + .ex-swipe, .ex-panels.stack .ex-swipe { display: block; } }
   .ex-panels.one:not(.stack) .ex-panel { max-width: 460px; width: 100%; margin: 0 auto; } /* 초급(simple) 한 칸은 너무 커지지 않게 */

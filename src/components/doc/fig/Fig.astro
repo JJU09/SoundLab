@@ -4,14 +4,14 @@ interface Props { caption?: string; minW?: number; maxW?: number; label: string;
 const { caption, minW = 0, maxW = 0, label } = Astro.props;
 ---
 <figure class="sl-fig not-prose my-4" role="img" aria-label={label}>
-  <div class="rounded-xl border border-[var(--color-border)] bg-white p-3 overflow-x-auto">
+  <div class="rounded-xl border border-[var(--color-border)] bg-white p-4 overflow-x-auto">
     <div style={`${minW ? `min-width:${minW}px;` : ''}${maxW ? `max-width:${maxW}px;margin:0 auto;` : ''}`}><slot /></div>
   </div>
-  {caption && <figcaption class="text-xs text-[var(--color-ink-300)] mt-1.5 text-center">{caption}</figcaption>}
+  {caption && <figcaption class="text-[12.5px] leading-relaxed text-[var(--color-ink-500)] mt-2 text-center">{caption}</figcaption>}
 </figure>
 <style is:global>
   .sl-fig svg { display: block; width: 100%; height: auto; }
   .sl-fig svg text { font-family: 'Pretendard', sans-serif; }
   .sl-fig svg .fd { font-family: 'Space Grotesk', 'Pretendard', sans-serif; font-weight: 700; }
-  .sl-fig svg .mono { font-family: ui-monospace, 'SFMono-Regular', monospace; }
+  .sl-fig svg .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
 </style>

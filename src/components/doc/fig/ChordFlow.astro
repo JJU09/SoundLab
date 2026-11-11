@@ -1,15 +1,26 @@
 ---
 // 코드(또는 기능) 상자를 화살표로 잇는 흐름도 — 선 도면형. 테두리 색 = 화성 기능.
+// 모든 상자의 코드를 읽을 수 있으면 소리 나는 도식: 상자를 누르면 그 코드, 재생 버튼은 순서대로.
 import Fig from './Fig.astro'; import { C, FN_TXT } from './colors';
+import { CHORD_TYPES, LETTER_PC, type Letter } from '../../../lib/music';
 type Fn = 'T' | 'S' | 'D' | 'B' | 'X';
-interface Item { name: string; sub?: string; fn?: Fn; }
+interface Item { name: string; sub?: string; fn?: Fn; chord?: string; }
 interface Props { items: Item[]; links?: string[]; loop?: string; legend?: boolean; caption?: string; label?: string; boxW?: number; }
 const { items, links = [], loop, legend = false, caption, label, boxW = 84 } = Astro.props as Props;
 const GAP = Math.max(46, ...links.map(l => (l ?? '').length * 9 + 16)), BH = 56, top = 14, n = items.length;
 const W = n * boxW + (n - 1) * GAP + 16;
 const H = top + BH + (loop ? 48 : 8) + (legend ? 26 : 0);
 const xOf = (i: number) => 8 + i * (boxW + GAP);
-const boxes = items.map((it, i) => ({ ...it, x: xOf(i), cx: xOf(i) + boxW / 2, col: it.fn ? C[it.fn] : C.ink3 }));
+// 코드 이름 → MIDI (베이스 한 음 + 가운데 도 옥타브 안에 모은 화음)
+const voice = (s: string): number[] | null => {
+  const m = /^([A-G])([♭b♯#]?)(.*)$/.exec(s.trim()); if (!m) return null;
+  const t = Object.values(CHORD_TYPES).find(t => t.sym === m[3]); if (!t) return null;
+  const pc = (LETTER_PC[m[1] as Letter] + (m[2] === '♭' || m[2] === 'b' ? -1 : m[2] ? 1 : 0) + 12) % 12;
+  return [(pc <= 7 ? 48 : 36) + pc, ...t.steps.map(st => 60 + (pc + st) % 12).sort((a, b) => a - b)];
+};
+const voiced = items.map(it => voice(it.chord ?? it.name));
+const playable = voiced.every(Boolean);
+const boxes = items.map((it, i) => ({ ...it, i, x: xOf(i), cx: xOf(i) + boxW / 2, col: it.fn ? C[it.fn] : C.ink3, midi: voiced[i]?.join(',') ?? '', say: it.chord ?? it.name }));
 const arrows = boxes.slice(0, -1).map((b, i) => ({ x1: b.x + boxW + 6, x2: b.x + boxW + GAP - 8, mid: b.x + boxW + GAP / 2, label: links[i] ?? '' }));
 const used = [...new Set(items.map(i => i.fn).filter(Boolean))] as Fn[];
 const leg = used.map((f, i) => ({ x: 14 + i * 112, col: C[f], t: FN_TXT[f] }));
@@ -18,11 +29,15 @@ const mid = 'sl-arrow-' + Math.random().toString(36).slice(2, 8); // 숨은 난�
 const loopPath = loop ? `M ${boxes[n - 1].cx} ${top + BH + 5} C ${boxes[n - 1].cx} ${top + BH + 36}, ${boxes[0].cx} ${top + BH + 36}, ${boxes[0].cx} ${top + BH + 9}` : '';
 ---
 <Fig caption={caption} minW={Math.min(W, 640)} label={label ?? items.map(i => i.name).join(' → ')}>
-  <svg viewBox={`0 0 ${W} ${H}`}>
+  <svg viewBox={`0 0 ${W} ${H}`} data-chordflow={playable ? '' : undefined} data-loop={loop ? '' : undefined}>
     <defs><marker id={mid} viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 1 L9 5 L1 9" fill="none" stroke={C.ink5} stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></marker></defs>
-    {boxes.map(b => <rect x={b.x} y={top} width={boxW} height={BH} rx="6" fill="white" stroke={b.col} stroke-width="1.5" />)}
-    {boxes.map(b => <text x={b.cx} y={top + (b.sub ? 25 : 34)} text-anchor="middle" font-size="16" class="fd" fill={C.ink}>{b.name}</text>)}
-    {boxes.filter(b => b.sub).map(b => <text x={b.cx} y={top + 43} text-anchor="middle" font-size="10.5" fill={C.ink5}>{b.sub}</text>)}
+    {boxes.map(b => (
+      <g class="cf-box" style={`--c:${b.col}`} data-play={playable ? b.midi : undefined} tabindex={playable ? 0 : undefined} role={playable ? 'button' : undefined} aria-label={playable ? `${b.say} 코드 듣기` : undefined}>
+        <rect class="cf-rect" x={b.x} y={top} width={boxW} height={BH} rx="6" fill="white" stroke={b.col} stroke-width="1.5" />
+        <text x={b.cx} y={top + (b.sub ? 25 : 34)} text-anchor="middle" font-size="16" class="fd" fill={C.ink}>{b.name}</text>
+        {b.sub && <text x={b.cx} y={top + 43} text-anchor="middle" font-size="10.5" fill={C.ink5}>{b.sub}</text>}
+      </g>
+    ))}
     {arrows.map(a => <line x1={a.x1} x2={a.x2} y1={ay} y2={ay} stroke={C.ink5} stroke-width="1.5" marker-end={`url(#${mid})`} />)}
     {arrows.filter(a => a.label).map(a => <text x={a.mid} y={ay - 8} text-anchor="middle" font-size="10" fill={C.ink5}>{a.label}</text>)}
     {loop && <path d={loopPath} fill="none" stroke={C.ink5} stroke-width="1.5" marker-end={`url(#${mid})`} />}
@@ -30,4 +45,69 @@ const loopPath = loop ? `M ${boxes[n - 1].cx} ${top + BH + 5} C ${boxes[n - 1].c
     {legend && leg.map(l => <rect x={l.x - 6} y={H - 15} width="12" height="9" rx="2" fill="white" stroke={l.col} stroke-width="1.5" />)}
     {legend && leg.map(l => <text x={l.x + 12} y={H - 7} font-size="10" fill={C.ink5}>{l.t}</text>)}
   </svg>
+  {playable && (
+    <Fragment slot="controls">
+      <button type="button" class="sl-fig-play" data-cf-play aria-pressed="false">
+        <svg class="ic-play" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 1.5v9l7.5-4.5z" fill="currentColor" /></svg>
+        <svg class="ic-stop" viewBox="0 0 12 12" aria-hidden="true"><rect x="2.5" y="2.5" width="7" height="7" rx="1" fill="currentColor" /></svg>
+        <span data-cf-label>순서대로 듣기</span>
+      </button>
+      <span class="sl-fig-hint">상자를 누르면 그 코드가 울려요</span>
+    </Fragment>
+  )}
 </Fig>
+<style is:global>
+  .sl-fig .cf-box[data-play] { cursor: pointer; outline: none; }
+  .sl-fig .cf-box .cf-rect { transition: fill .12s, stroke-width .12s; }
+  .sl-fig .cf-box[data-play]:hover .cf-rect { fill: color-mix(in srgb, var(--c) 7%, white); }
+  .sl-fig .cf-box.is-on .cf-rect { fill: color-mix(in srgb, var(--c) 16%, white); stroke-width: 2.5; }
+  .sl-fig .cf-box[data-play]:focus-visible .cf-rect { stroke-width: 3; }
+</style>
+<script>
+import { figChord, figClaim } from '../../../lib/figaudio';
+
+const STEP = 1100; // 코드 하나의 길이(ms)
+
+function init(svg: SVGSVGElement) {
+  const fig = svg.closest('figure')!;
+  const boxes = [...svg.querySelectorAll<SVGGElement>('.cf-box[data-play]')];
+  const btn = fig.querySelector<HTMLButtonElement>('[data-cf-play]');
+  const lab = fig.querySelector<HTMLElement>('[data-cf-label]');
+  const loop = svg.hasAttribute('data-loop');
+  const scroller = svg.closest<HTMLElement>('.overflow-x-auto');
+  let timers: number[] = [];
+
+  const light = (i: number, ms: number) => {
+    boxes.forEach((b, k) => b.classList.toggle('is-on', k === i));
+    // 좁은 화면(가로 스크롤)에서는 울리는 상자가 보이도록 따라간다
+    if (scroller && scroller.scrollWidth > scroller.clientWidth) {
+      const r = boxes[i].getBoundingClientRect(), s = scroller.getBoundingClientRect();
+      scroller.scrollBy({ left: r.left + r.width / 2 - (s.left + s.width / 2), behavior: 'smooth' });
+    }
+    timers.push(window.setTimeout(() => boxes[i]?.classList.remove('is-on'), ms));
+  };
+  const sound = (i: number, ms: number) => { figChord(boxes[i].dataset.play!.split(',').map(Number), ms / 1000 + 0.5); light(i, ms); };
+  const stop = () => {
+    timers.forEach(clearTimeout); timers = [];
+    boxes.forEach(b => b.classList.remove('is-on'));
+    btn?.setAttribute('aria-pressed', 'false'); if (lab) lab.textContent = '순서대로 듣기';
+  };
+  const playAll = () => {
+    figClaim(stop);
+    btn?.setAttribute('aria-pressed', 'true'); if (lab) lab.textContent = '멈춤';
+    // 반복 진행은 첫 코드로 한 번 돌아와서 끝낸다 — "돌아온다"를 귀로 확인
+    const order = loop ? [...boxes.keys(), 0] : [...boxes.keys()];
+    order.forEach((i, k) => timers.push(window.setTimeout(() => sound(i, STEP - 80), k * STEP)));
+    timers.push(window.setTimeout(stop, order.length * STEP + 300));
+  };
+
+  boxes.forEach((b, i) => {
+    const one = () => { figClaim(stop); stop(); sound(i, 700); };
+    b.addEventListener('click', one);
+    b.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); one(); } });
+  });
+  btn?.addEventListener('click', () => { if (btn.getAttribute('aria-pressed') === 'true') stop(); else { stop(); playAll(); } });
+}
+
+document.querySelectorAll<SVGSVGElement>('svg[data-chordflow]').forEach(init);
+</script>

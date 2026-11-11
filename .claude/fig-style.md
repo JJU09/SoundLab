@@ -45,6 +45,18 @@
 - **축**: 바닥선 ink 1.5px, 눈금 숫자는 모노 10.
 - **주석 괄호**: violet 1.5px ㄷ자 선, 위에 이름(12/600) · 그 위에 모노 보조(10).
 
+## 소리 나는 도식
+
+도식에는 "눌러서 확인"만 넣는다. 값을 바꿔 가며 실험하는 것은 위젯의 일(슬라이더는 도식에 넣지 않음).
+
+- **표시**: 카드 아래 구분선 + 재생 버튼(`.sl-fig-play`) + 한 줄 안내(`.sl-fig-hint`). 이 줄이 있으면 누를 수 있는 도식.
+  `Fig.astro`의 `controls` 슬롯에 넣는다.
+- **눌러서 듣기**: 요소에 `data-play`(MIDI 목록), `tabindex`, `role="button"`, `aria-label`. Enter·Space로도 동작.
+- **재생 따라가기**: 울리는 요소에 `.is-on` — 자기 색을 16% 섞은 채움 + 테두리 2.5px. 다시 누르면 멈춤.
+- **오디오**: `src/lib/figaudio.ts` — 페이지당 AudioCore 하나, `figClaim`으로 한 번에 한 도식만 재생.
+- **가로 스크롤**: 재생 중에는 울리는 요소가 보이도록 스크롤이 따라간다.
+- 적용: ✅ ChordFlow (2026-11-11) · ⬜ StepGrid · SwingFig · KeyboardFig · BeatsFig
+
 ## 적용 현황
 
 - ✅ 11종 전부 적용 (2026-11-11): KeyboardFig · RangeFig · FormFig · AxisRanges · BeatsFig · ChordFlow ·

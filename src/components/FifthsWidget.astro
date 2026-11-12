@@ -1,5 +1,5 @@
 ---
-// 5도권 만들기 위젯 — C에서 5도씩 올라가며 12칸을 직접 채우고, 이웃·맞은편 음과 함께 들어 본다.
+// 5도권 만들기 위젯: C에서 5도씩 올라가며 12칸을 직접 채우고, 이웃·맞은편 음과 함께 들어 본다.
 // "5도권 읽는 법" 레슨용. 조표·조 이야기는 하지 않고 "음을 둘러놓은 판"까지만.
 interface Props { config?: Record<string, any>; } // 설정 없음 (TopicWidget 공통 시그니처)
 // 시계 방향 = 5도 위. [음이름, pc]
@@ -20,7 +20,7 @@ const pos = (i: number) => { const a = (i * 30 - 90) * Math.PI / 180; return [cx
     </div>
   </div>
   <div class="p-5 space-y-3">
-    <svg viewBox="0 0 300 300" class="w-full max-w-[300px] mx-auto block select-none" role="group" aria-label="5도권 — 12개 음을 5도 간격으로 둘러놓은 원">
+    <svg viewBox="0 0 300 300" class="w-full max-w-[300px] mx-auto block select-none" role="group" aria-label="5도권. 12개 음을 5도 간격으로 둘러놓은 원">
       <circle cx={cx} cy={cy} r={R} fill="none" stroke="#e2e2f0" />
       <line class="fw-link" x1={cx} y1={cy} x2={cx} y2={cy} stroke="#7c3aed" stroke-width="2" stroke-linecap="round" opacity="0" />
       {NOTES.map(([name], i) => { const [x, y] = pos(i); return (
@@ -40,13 +40,13 @@ const pos = (i: number) => { const a = (i * 30 - 90) * Math.PI / 180; return [cx
     <div class="rounded-xl bg-[var(--color-surface-2)] border border-[var(--color-border)] px-4 py-3 text-center" aria-live="polite">
       <div class="fw-key text-2xl font-bold text-[var(--color-ink-700)] font-display">C</div>
       <div class="fw-line text-sm text-[var(--color-violet)] font-semibold mt-0.5">여기서 시작해요</div>
-      <div class="fw-sub text-xs text-[var(--color-ink-500)] mt-1">「다음 칸」을 누르면 5도 위 음이 옆자리에 놓여요</div>
+      <div class="fw-sub text-xs text-[var(--color-ink-500)] mt-1">다음 칸을 누르면 5도 위 음이 옆 칸에 놓여요</div>
     </div>
     <div class="flex flex-wrap gap-2 justify-center">
-      <button type="button" class="fw-btn fw-nb" disabled>이웃과 함께 듣기</button>
-      <button type="button" class="fw-btn fw-op" disabled>맞은편과 함께 듣기</button>
+      <button type="button" class="fw-btn fw-nb" disabled>옆 칸과 같이 듣기</button>
+      <button type="button" class="fw-btn fw-op" disabled>맞은편과 같이 듣기</button>
     </div>
-    <p class="fw-hint text-[11px] text-center text-[var(--color-ink-300)]">12칸을 다 채우면 아래 두 버튼이 열려요. 채워진 음은 눌러서 들을 수 있어요.</p>
+    <p class="fw-hint text-[11px] text-center text-[var(--color-ink-500)]">12칸을 다 채우면 아래 버튼이 켜져요. 채운 음은 눌러서 들어 보세요.</p>
   </div>
 </div>
 
@@ -98,46 +98,46 @@ function initFifths(root: HTMLElement) {
     count.textContent = String(n);
     const full = n === 12;
     nb.disabled = op.disabled = !full;
-    hint.textContent = full ? '음을 누르고, 이웃·맞은편과 함께 들어 보세요. 이웃은 잘 어울리고 맞은편은 부딪혀요.' : '12칸을 다 채우면 아래 두 버튼이 열려요. 채워진 음은 눌러서 들을 수 있어요.';
+    hint.textContent = full ? '음을 하나 고르고 아래 버튼으로 옆 칸, 맞은편 음과 같이 들어 보세요.' : '12칸을 다 채우면 아래 버튼이 켜져요. 채운 음은 눌러서 들어 보세요.';
     key.textContent = NOTES[sel][0];
   }
   function describe() {
     const l = NOTES[(sel + 11) % 12][0], r = NOTES[(sel + 1) % 12][0], o = NOTES[(sel + 6) % 12][0];
     if (n < 12) return;
-    line.textContent = `이웃 ${l} · ${r}`; sub.textContent = `맞은편 ${o}`;
+    line.textContent = `옆 칸 ${l}, ${r}`; sub.textContent = `맞은편 ${o}`;
   }
 
   q<HTMLButtonElement>('.fw-next').addEventListener('click', () => {
     clearMarks();
     if (n === 12) {                        // 한 번 더 → 다시 C
       sel = 0; render(); tone([72]);
-      line.textContent = '한 바퀴 돌아 다시 C'; sub.textContent = '5도씩 12번 올라가면 처음 음으로 돌아와요';
+      line.textContent = '다시 C로 돌아왔어요'; sub.textContent = '5도씩 12번 올라가면 처음 음으로 돌아와요';
       return;
     }
     const prev = n - 1; n++; sel = n - 1; render();
     tone([midi(sel)]);
     line.textContent = `${NOTES[prev][0]} → ${NOTES[sel][0]} · 5도 위`;
-    sub.textContent = n === 12 ? '12칸을 다 채웠어요 — 한 번 더 누르면 어디로 갈까요?' : '건반으로는 7칸(반음 7개) 위의 음이에요';
+    sub.textContent = n === 12 ? '12칸을 다 채웠어요. 한 번 더 누르면 어디로 갈까요?' : '건반에서 반음 7개 위에 있는 음이에요';
   });
   q<HTMLButtonElement>('.fw-all').addEventListener('click', () => { clearMarks(); n = 12; render(); describe(); });
-  q<HTMLButtonElement>('.fw-reset').addEventListener('click', () => { clearMarks(); n = 1; sel = 0; render(); line.textContent = '여기서 시작해요'; sub.textContent = '「다음 칸」을 누르면 5도 위 음이 옆자리에 놓여요'; });
+  q<HTMLButtonElement>('.fw-reset').addEventListener('click', () => { clearMarks(); n = 1; sel = 0; render(); line.textContent = '여기서 시작해요'; sub.textContent = '다음 칸을 누르면 5도 위 음이 옆 칸에 놓여요'; });
 
   nodes.forEach((g, i) => {
     const pick = () => { if (i >= n) return; clearMarks(); sel = i; render(); tone([midi(i)]);
-      if (n === 12) describe(); else { line.textContent = `${i + 1}번째 칸`; sub.textContent = '채워진 음은 언제든 눌러서 들을 수 있어요'; } };
+      if (n === 12) describe(); else { line.textContent = `${i + 1}번째 칸`; sub.textContent = '채운 음은 언제든 다시 눌러 볼 수 있어요'; } };
     g.addEventListener('click', pick);
     g.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); } });
   });
   nb.addEventListener('click', () => {
     clearMarks(); const r = (sel + 1) % 12, l = (sel + 11) % 12;
     mark(r, 'pair'); tone([midi(sel), midi(sel) + 7], 1.0);
-    line.textContent = `${NOTES[sel][0]} + ${NOTES[r][0]} — 잘 어울려요`; sub.textContent = '옆 칸은 5도 사이. 가장 잘 섞이는 두 음이에요';
-    timers.push(window.setTimeout(() => { nodes[r].classList.remove('pair'); mark(l, 'pair'); tone([midi(sel), midi(sel) - 7], 1.0); line.textContent = `${NOTES[sel][0]} + ${NOTES[l][0]} — 이쪽 이웃도 잘 어울려요`; }, 1150));
+    line.textContent = `${NOTES[sel][0]} + ${NOTES[r][0]} · 잘 어울려요`; sub.textContent = '옆 칸은 5도 떨어진 음이에요. 같이 눌러도 잘 섞여요';
+    timers.push(window.setTimeout(() => { nodes[r].classList.remove('pair'); mark(l, 'pair'); tone([midi(sel), midi(sel) - 7], 1.0); line.textContent = `${NOTES[sel][0]} + ${NOTES[l][0]} · 반대쪽 옆 칸도 잘 어울려요`; }, 1150));
   });
   op.addEventListener('click', () => {
     clearMarks(); const o = (sel + 6) % 12;
     mark(o, 'far'); tone([midi(sel), midi(sel) + 6], 1.2);
-    line.textContent = `${NOTES[sel][0]} + ${NOTES[o][0]} — 부딪혀요`; sub.textContent = '맞은편은 원에서 가장 먼 음. 불안하고 긴장된 소리가 나요';
+    line.textContent = `${NOTES[sel][0]} + ${NOTES[o][0]} · 부딪혀요`; sub.textContent = '맞은편은 가장 멀리 떨어진 음이에요. 같이 누르면 불안하게 들려요';
   });
   render();
 }

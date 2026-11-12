@@ -72,50 +72,50 @@ export const FN_LABEL: Record<Fn, string> = { T: '토닉', S: '서브도미넌�
 // rn = 그 자리의 기본 코드, variants = 같은 자리의 모양([로마숫자, 이름]), mood = 분위기 한 줄
 export type MainFn = 'T' | 'S' | 'D';
 export const FN_GROUPS: { fn: MainFn; home: string; desc: string }[] = [
-  { fn: 'T', home: '집', desc: '안정' },
-  { fn: 'S', home: '나들이', desc: '떠남' },
-  { fn: 'D', home: '긴장', desc: '돌아가려는 힘' },
+  { fn: 'T', home: '집', desc: '편안하게 머무는 코드' },
+  { fn: 'S', home: '나들이', desc: '집을 떠나는 코드' },
+  { fn: 'D', home: '긴장', desc: '집으로 돌아가려는 코드' },
 ];
 export interface DegreeDef { rn: string; fn: MainFn; variants: [string, string][]; mood: string; }
 const deg = (rn: string, fn: MainFn, mood: string, ...more: [string, string][]): DegreeDef => ({ rn, fn, mood, variants: [[rn, '기본'], ...more] });
 export const DEGREES: Record<Song['mode'], DegreeDef[]> = {
   major: [
-    deg('I', 'T', '가장 안정된 집. 시작과 끝에 두면 편안해요', ['Imaj7', '7화음']),
-    deg('vi', 'T', '그늘진 집. 아련하고 서정적인 분위기', ['vi7', '7화음']),
-    deg('iii', 'T', '집과 긴장 사이. 살짝 떠 있는 느낌', ['iii7', '7화음']),
-    deg('IV', 'S', '밝게 열리며 집을 나서는 느낌', ['IVmaj7', '7화음']),
-    deg('ii', 'S', '부드럽게 떠남. V로 이어 가기 좋아요', ['ii7', '7화음']),
-    deg('V', 'D', '집으로 돌아가고 싶은 힘이 가장 강해요', ['V7', '7화음'], ['Vsus4', 'sus4']),
-    deg('vii°', 'D', '불안정한 긴장. 드물게, 스쳐 가듯 써요'),
+    deg('I', 'T', '가장 편안한 코드예요. 곡을 시작하거나 끝낼 때 자주 써요.', ['Imaj7', '7화음']),
+    deg('vi', 'T', 'I보다 어둡고 차분해요. 슬픈 노래가 이 코드로 자주 시작해요.', ['vi7', '7화음']),
+    deg('iii', 'T', '살짝 붕 뜬 느낌이에요. 다른 코드로 넘어가는 중간에 잘 어울려요.', ['iii7', '7화음']),
+    deg('IV', 'S', '밝게 열리는 느낌이에요. I에서 벗어날 때 가장 많이 써요.', ['IVmaj7', '7화음']),
+    deg('ii', 'S', 'IV와 비슷한데 조금 더 부드러워요. 뒤에 V를 놓으면 잘 이어져요.', ['ii7', '7화음']),
+    deg('V', 'D', 'I로 돌아가고 싶어지는 코드예요. 다음에 I를 놓으면 시원하게 풀려요.', ['V7', '7화음'], ['Vsus4', 'sus4']),
+    deg('vii°', 'D', '불안하게 들려요. 자주 쓰지는 않고, I로 넘어가기 직전에 잠깐 넣어요.'),
   ],
   minor: [
-    deg('i', 'T', '어두운 집. 차분하고 안정적이에요', ['i7', '7화음']),
-    deg('♭III', 'T', '밝은 집. 나란한 장조의 빛이 잠깐 들어요', ['♭IIImaj7', '7화음']),
-    deg('iv', 'S', '깊은 그늘로 떠나는 느낌', ['iv7', '7화음']),
-    deg('♭VI', 'S', '웅장하게 열림. 서사적인 느낌', ['♭VImaj7', '7화음']),
-    deg('ii°', 'S', '불안하게 떠남. 드물게 써요'),
-    deg('v', 'D', '부드러운 긴장. 은근히 집으로 돌아가요'),
-    deg('♭VII', 'D', '힘차게 밀어 올림. i로 돌아갈 때 잘 어울려요'),
+    deg('i', 'T', '어둡지만 편안한 코드예요. 단조 곡은 보통 여기서 시작해요.', ['i7', '7화음']),
+    deg('♭III', 'T', '단조 안에서 가장 밝게 들려요. 분위기를 잠깐 환하게 바꿀 때 써요.', ['♭IIImaj7', '7화음']),
+    deg('iv', 'S', '더 깊이 가라앉는 느낌이에요. i에서 벗어날 때 많이 써요.', ['iv7', '7화음']),
+    deg('♭VI', 'S', '넓고 웅장하게 들려요. 영화 음악 같은 분위기를 낼 때 좋아요.', ['♭VImaj7', '7화음']),
+    deg('ii°', 'S', '불안하게 들려요. 자주 쓰지는 않고, V 앞에 잠깐 넣어요.'),
+    deg('v', 'D', 'i로 돌아가려는 힘이 약해요. 잔잔하게 이어 가고 싶을 때 써요.'),
+    deg('♭VII', 'D', '힘 있게 밀어 올리는 느낌이에요. 뒤에 i를 놓으면 잘 어울려요.'),
   ],
 };
 // 조 밖에서 잠깐 가져오는 코드
 export const EXTRAS: Record<Song['mode'], { rn: string; note: string }[]> = {
   major: [
-    { rn: 'V7/vi', note: 'vi로 강하게 끌어당겨요' }, { rn: 'V7/V', note: 'V로 강하게 끌어당겨요' }, { rn: 'V7/ii', note: 'ii로 강하게 끌어당겨요' },
-    { rn: 'iv', note: '단조에서 빌린 그늘진 IV' }, { rn: '♭VI', note: '단조에서 빌린 웅장함' }, { rn: '♭VII', note: '단조에서 빌린 록 느낌' },
+    { rn: 'V7/vi', note: 'vi 바로 앞에 넣으면 vi가 더 또렷하게 들려요' }, { rn: 'V7/V', note: 'V 바로 앞에 넣으면 V가 더 또렷하게 들려요' }, { rn: 'V7/ii', note: 'ii 바로 앞에 넣으면 ii가 더 또렷하게 들려요' },
+    { rn: 'iv', note: 'IV를 어둡게 바꾼 코드예요' }, { rn: '♭VI', note: '단조에서 가져온 코드예요. 웅장하게 들려요' }, { rn: '♭VII', note: '단조에서 가져온 코드예요. 록에서 많이 써요' },
   ],
   minor: [
-    { rn: 'V', note: '장3화음 V — i로 확실히 돌아가요' }, { rn: 'V7', note: '더 강하게 i로 끌어당겨요' }, { rn: 'IV', note: '밝은 IV — 도리안의 색' },
+    { rn: 'V', note: 'v를 밝게 바꾼 코드예요. i로 훨씬 강하게 돌아가요' }, { rn: 'V7', note: 'V에 음을 하나 더한 코드예요. i로 가장 강하게 돌아가요' }, { rn: 'IV', note: 'iv를 밝게 바꾼 코드예요' },
   ],
 };
 // 한 번에 넣는 4마디 진행
 export const PROGS: Record<Song['mode'], { chords: string[]; note: string }[]> = {
   major: [
-    { chords: ['I', 'V', 'vi', 'IV'], note: '가장 흔한 팝' }, { chords: ['vi', 'IV', 'I', 'V'], note: '아련하게 시작' },
-    { chords: ['I', 'vi', 'IV', 'V'], note: '옛 팝' }, { chords: ['IV', 'V', 'iii', 'vi'], note: 'J-pop 왕도' }, { chords: ['ii', 'V', 'I', 'vi'], note: '재즈풍 순환' },
+    { chords: ['I', 'V', 'vi', 'IV'], note: '가장 흔한 팝' }, { chords: ['vi', 'IV', 'I', 'V'], note: '슬프게 시작' },
+    { chords: ['I', 'vi', 'IV', 'V'], note: '50년대 팝' }, { chords: ['IV', 'V', 'iii', 'vi'], note: 'J-pop에서 흔함' }, { chords: ['ii', 'V', 'I', 'vi'], note: '재즈 느낌' },
   ],
   minor: [
-    { chords: ['i', '♭VI', '♭III', '♭VII'], note: '가장 흔한 단조 팝' }, { chords: ['i', '♭VII', '♭VI', '♭VII'], note: '록 · 영화음악' },
+    { chords: ['i', '♭VI', '♭III', '♭VII'], note: '단조 팝에서 흔함' }, { chords: ['i', '♭VII', '♭VI', '♭VII'], note: '록, 영화 음악' },
     { chords: ['i', 'iv', '♭VII', '♭III'], note: '5도씩 내려가기' }, { chords: ['i', '♭VI', 'iv', 'V'], note: '강하게 돌아오기' },
   ],
 };

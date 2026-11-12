@@ -12,7 +12,7 @@ const song = { key, mode };
 const id = 'ck' + Math.random().toString(36).slice(2, 7);
 const svg = circleSvg(song, chords, { play: true, id });
 const names = chords.map(rn => chordInfo(song, rn)?.name ?? '쉼');
-const label = `${keyName(song)}의 코드` + (chords.length ? ` — 진행 ${names.join(' → ')}` : '');
+const label = `${keyName(song)}의 코드` + (chords.length ? `, 진행 ${names.join(' → ')}` : '');
 ---
 <Fig caption={caption} maxW={380} label={label}>
   <div class="ck-fig" data-len={chords.length}><Fragment set:html={svg} /></div>
@@ -24,7 +24,7 @@ const label = `${keyName(song)}의 코드` + (chords.length ? ` — 진행 ${nam
         <span>{chords.join(' – ')}</span>
       </button>
     )}
-    <span class="sl-fig-hint">코드 자리를 누르면 소리가 나요</span>
+    <span class="sl-fig-hint">칸을 누르면 코드가 울려요</span>
   </Fragment>
 </Fig>
 <style is:global>

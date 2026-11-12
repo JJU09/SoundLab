@@ -283,22 +283,22 @@ function renderPanel() {
     // 조 안의 코드 7개를 기능별로
     const degBtn = (d: (typeof DEGREES)['major'][number]) => { const c = ch(d.rn)!, on = curDeg?.rn === d.rn;
       return `<button type="button" class="deg ${on ? 'on' : ''}" data-rn="${esc(on ? curRn : d.rn)}" aria-pressed="${on}"><b>${esc(d.rn)}</b><small>${esc(c.name)}</small></button>`; };
-    const groups = `<div class="fn-groups">${FN_GROUPS.map(g => `<div class="fn-group fg-${g.fn}"><div class="fn-head"><b>${FN_LABEL[g.fn]}</b><span>${g.home} · ${g.desc}</span></div><div class="fn-btns">${DEGREES[song.mode].filter(d => d.fn === g.fn).map(degBtn).join('')}</div></div>`).join('')}</div>`;
+    const groups = `<div class="fn-groups">${FN_GROUPS.map(g => `<div class="fn-group fg-${g.fn}"><div class="fn-head"><b>${FN_LABEL[g.fn]}</b><span>${g.desc}</span></div><div class="fn-btns">${DEGREES[song.mode].filter(d => d.fn === g.fn).map(degBtn).join('')}</div></div>`).join('')}</div>`;
     // 지금 고른 코드의 기능·분위기 + 같은 자리의 모양
     const detail = `<div class="ch-detail">${curC
       ? `<div class="ch-now"><b class="font-display">${esc(curRn)}</b><span>${esc(curC.name)}</span><em class="fn-tag ft-${curC.fn}">${FN_LABEL[curC.fn]}</em></div><p>${esc(curDeg?.mood ?? curExtra?.note ?? '')}</p>`
       : `<div class="ch-now"><b class="font-display">쉼</b></div><p>이 마디는 코드를 비워 둬요.</p>`}
       <div class="flex flex-wrap items-center gap-2 mt-2">${curDeg && curDeg.variants.length > 1 ? `<span class="sk-label">모양</span><div class="sk-seg">${curDeg.variants.map(([rn, l]) => `<button type="button" data-rn="${esc(rn)}" class="${rn === curRn ? 'on' : ''}">${l} · ${esc(ch(rn)!.name)}</button>`).join('')}</div>` : ''}${curRn ? `<button type="button" class="sk-chip" data-rn="">이 마디 비우기</button>` : ''}</div></div>`;
-    const extras = `<div class="ch-extra"><button type="button" class="ch-extra-head" data-opt="extra" aria-expanded="${extraOpen}"><span><b>색다른 코드</b> — 조 밖에서 잠깐 가져오는 코드 ${EXTRAS[song.mode].length}개</span><span>${extraOpen ? '접기 ▴' : '펼치기 ▾'}</span></button>
+    const extras = `<div class="ch-extra"><button type="button" class="ch-extra-head" data-opt="extra" aria-expanded="${extraOpen}"><span><b>조 밖의 코드</b> ${EXTRAS[song.mode].length}개</span><span>${extraOpen ? '접기 ▴' : '펼치기 ▾'}</span></button>
       ${extraOpen ? `<div class="ch-extra-list">${EXTRAS[song.mode].map(x => { const c = ch(x.rn)!; return `<button type="button" class="deg wide ${x.rn === curRn ? 'on' : ''}" data-rn="${esc(x.rn)}"><b>${esc(x.rn)}</b><small>${esc(c.name)} · ${x.note}</small></button>`; }).join('')}</div>` : ''}</div>`;
     const circle = `<div class="ch-circle"><div class="sk-label mb-1">5도권에서 본 ${SECTION_LABEL[cur]} 진행</div>${circleSvg(song, sec.chords, { pickable: true })}
-      <p>바깥 고리는 장3화음, 안쪽은 단3화음. 색칠한 부채꼴이 <b>${esc(keyName(song))}</b>의 코드예요. 가까운 자리끼리는 닮아서 부드럽게 이어지고, 멀리 뛰면 색다르게 들려요. 연한 화살표는 처음으로 돌아가는 길.</p></div>`;
-    const progs = `<div class="mt-5"><div class="sk-label mb-2">진행 한 번에 넣기 — 네 마디를 채우고 고쳐 쓰세요</div><div class="flex flex-wrap gap-1.5">${PROGS[song.mode].map((p, i) => `<button type="button" class="sk-chip prog" data-prog="${i}"><b>${p.chords.map(esc).join(' – ')}</b>${p.note}</button>`).join('')}</div></div>`;
+      <p>바깥 줄은 장3화음, 안쪽 줄은 단3화음이에요. 색칠한 부분이 <b>${esc(keyName(song))}</b>에서 쓰는 코드예요. 화살표가 짧으면 가까운 코드로 간 거고, 길면 먼 코드로 뛴 거예요. 연한 화살표는 처음으로 돌아가는 길이에요.</p></div>`;
+    const progs = `<div class="mt-5"><div class="sk-label mb-2">자주 쓰는 진행으로 네 마디 채우기</div><div class="flex flex-wrap gap-1.5">${PROGS[song.mode].map((p, i) => `<button type="button" class="sk-chip prog" data-prog="${i}"><b>${p.chords.map(esc).join(' – ')}</b>${p.note}</button>`).join('')}</div></div>`;
     h = off('chords') + slots
-      + `<div class="ch-layout"><div><div class="sk-label mb-2">${bar0 + chordSlot + 1}마디에 넣을 코드 — ${esc(keyName(song))}</div>${groups}${detail}${extras}</div>${circle}</div>`
+      + `<div class="ch-layout"><div><div class="sk-label mb-2">${bar0 + chordSlot + 1}마디에 넣을 코드 · ${esc(keyName(song))}</div>${groups}${detail}${extras}</div>${circle}</div>`
       + progs
       + `<div class="flex flex-wrap items-center gap-2 mt-5"><span class="sk-label">치는 방식</span>${seg('chordStyle', [['block', '블록'], ['arp', '분산화음'], ['stab', '스탭'], ['pad', '패드']], sec.chordStyle)}</div>`
-      + tip(`<b>토닉</b>에서 시작해 <b>도미넌트</b>를 거쳐 돌아오면 안정적이에요. 같은 기능끼리는 바꿔 끼워도 흐름이 유지되고, 벌스와 코러스의 첫 코드를 다르게 하면 단락이 바뀌는 느낌이 나요. → ${L('harmony/progressions', '자주 쓰는 코드 진행')} · ${L('harmony/functions', '화성 기능')} · ${L('melody/circle-of-fifths', '조와 5도권')}`);
+      + tip(`토닉에서 시작해서 도미넌트를 거쳐 다시 토닉으로 돌아오면 안정적으로 들려요. 같은 기능의 코드끼리는 서로 바꿔 넣어도 흐름이 크게 달라지지 않아요. 벌스와 코러스의 첫 코드를 다르게 하면 단락이 바뀐 게 잘 느껴져요. → ${L('harmony/progressions', '자주 쓰는 코드 진행')} · ${L('harmony/functions', '화성 기능')} · ${L('melody/circle-of-fifths', '조와 5도권')}`);
   } else if (tab === 'bass') {
     h = off('bass') + `<div class="flex flex-wrap items-center gap-2 mb-4"><span class="sk-label">리듬</span>${seg('bass', [['whole', '온음표'], ['eighth', '8분음표'], ['kick', '킥 따라가기'], ['octave', '옥타브']], sec.bass)}</div>
       <div class="grid grid-cols-4 gap-2">${sec.chords.map((rn, i) => { const c = rn ? chordInfo(song, rn) : null; return `<div class="slot" data-barslot="${cur}-${i}"><div class="sk-label">${(cur === 'verse' ? 0 : 4) + i + 1}마디</div><div class="text-base font-bold font-display">${c ? midiName(36 + c.rootPc, song.mode === 'minor' || [1, 3, 8, 10].includes(song.key) ? 'flat' : 'sharp', false) : '—'}</div><div class="text-[11px] text-[var(--color-ink-500)]">${c ? esc(c.name) + '의 근음' : '쉼'}</div></div>`; }).join('')}</div>`

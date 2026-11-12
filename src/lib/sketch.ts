@@ -53,7 +53,7 @@ export const keyName = (song: Pick<Song, 'key' | 'mode'>) => (song.mode === 'maj
 export const keyOptions = (mode: Song['mode']) => (mode === 'major' ? MAJOR_NAMES : MINOR_NAMES).map((n, i) => ({ pc: i, name: n }));
 const keyRoot = (song: Pick<Song, 'key' | 'mode'>) => parseRoot((song.mode === 'major' ? MAJOR_NAMES : MINOR_NAMES)[song.key]);
 
-type Fn = 'T' | 'S' | 'D' | 'B' | 'X';
+export type Fn = 'T' | 'S' | 'D' | 'B' | 'X';
 interface RomanDef { deg: number; semi: number; type: string; fn: Fn; }
 const MINOR_ROMAN: Record<string, RomanDef> = {
   'i': { deg: 0, semi: 0, type: 'min', fn: 'T' }, 'ii°': { deg: 1, semi: 2, type: 'dim', fn: 'S' }, '♭III': { deg: 2, semi: 3, type: 'maj', fn: 'T' },
@@ -68,14 +68,68 @@ export const PALETTE: Record<Song['mode'], string[][]> = {
 };
 export const FN_LABEL: Record<Fn, string> = { T: '토닉', S: '서브도미넌트', D: '도미넌트', B: '빌린 화음', X: '세컨더리' };
 
-export interface ChordInfo { rn: string; name: string; fn: Fn; rootPc: number; pcs: number[]; }
+// ── 코드 고르기: 기능(토닉·서브도미넌트·도미넌트)별로 묶은 조 안의 코드 ──
+// rn = 그 자리의 기본 코드, variants = 같은 자리의 모양([로마숫자, 이름]), mood = 분위기 한 줄
+export type MainFn = 'T' | 'S' | 'D';
+export const FN_GROUPS: { fn: MainFn; home: string; desc: string }[] = [
+  { fn: 'T', home: '집', desc: '안정' },
+  { fn: 'S', home: '나들이', desc: '떠남' },
+  { fn: 'D', home: '긴장', desc: '돌아가려는 힘' },
+];
+export interface DegreeDef { rn: string; fn: MainFn; variants: [string, string][]; mood: string; }
+const deg = (rn: string, fn: MainFn, mood: string, ...more: [string, string][]): DegreeDef => ({ rn, fn, mood, variants: [[rn, '기본'], ...more] });
+export const DEGREES: Record<Song['mode'], DegreeDef[]> = {
+  major: [
+    deg('I', 'T', '가장 안정된 집. 시작과 끝에 두면 편안해요', ['Imaj7', '7화음']),
+    deg('vi', 'T', '그늘진 집. 아련하고 서정적인 분위기', ['vi7', '7화음']),
+    deg('iii', 'T', '집과 긴장 사이. 살짝 떠 있는 느낌', ['iii7', '7화음']),
+    deg('IV', 'S', '밝게 열리며 집을 나서는 느낌', ['IVmaj7', '7화음']),
+    deg('ii', 'S', '부드럽게 떠남. V로 이어 가기 좋아요', ['ii7', '7화음']),
+    deg('V', 'D', '집으로 돌아가고 싶은 힘이 가장 강해요', ['V7', '7화음'], ['Vsus4', 'sus4']),
+    deg('vii°', 'D', '불안정한 긴장. 드물게, 스쳐 가듯 써요'),
+  ],
+  minor: [
+    deg('i', 'T', '어두운 집. 차분하고 안정적이에요', ['i7', '7화음']),
+    deg('♭III', 'T', '밝은 집. 나란한 장조의 빛이 잠깐 들어요', ['♭IIImaj7', '7화음']),
+    deg('iv', 'S', '깊은 그늘로 떠나는 느낌', ['iv7', '7화음']),
+    deg('♭VI', 'S', '웅장하게 열림. 서사적인 느낌', ['♭VImaj7', '7화음']),
+    deg('ii°', 'S', '불안하게 떠남. 드물게 써요'),
+    deg('v', 'D', '부드러운 긴장. 은근히 집으로 돌아가요'),
+    deg('♭VII', 'D', '힘차게 밀어 올림. i로 돌아갈 때 잘 어울려요'),
+  ],
+};
+// 조 밖에서 잠깐 가져오는 코드
+export const EXTRAS: Record<Song['mode'], { rn: string; note: string }[]> = {
+  major: [
+    { rn: 'V7/vi', note: 'vi로 강하게 끌어당겨요' }, { rn: 'V7/V', note: 'V로 강하게 끌어당겨요' }, { rn: 'V7/ii', note: 'ii로 강하게 끌어당겨요' },
+    { rn: 'iv', note: '단조에서 빌린 그늘진 IV' }, { rn: '♭VI', note: '단조에서 빌린 웅장함' }, { rn: '♭VII', note: '단조에서 빌린 록 느낌' },
+  ],
+  minor: [
+    { rn: 'V', note: '장3화음 V — i로 확실히 돌아가요' }, { rn: 'V7', note: '더 강하게 i로 끌어당겨요' }, { rn: 'IV', note: '밝은 IV — 도리안의 색' },
+  ],
+};
+// 한 번에 넣는 4마디 진행
+export const PROGS: Record<Song['mode'], { chords: string[]; note: string }[]> = {
+  major: [
+    { chords: ['I', 'V', 'vi', 'IV'], note: '가장 흔한 팝' }, { chords: ['vi', 'IV', 'I', 'V'], note: '아련하게 시작' },
+    { chords: ['I', 'vi', 'IV', 'V'], note: '옛 팝' }, { chords: ['IV', 'V', 'iii', 'vi'], note: 'J-pop 왕도' }, { chords: ['ii', 'V', 'I', 'vi'], note: '재즈풍 순환' },
+  ],
+  minor: [
+    { chords: ['i', '♭VI', '♭III', '♭VII'], note: '가장 흔한 단조 팝' }, { chords: ['i', '♭VII', '♭VI', '♭VII'], note: '록 · 영화음악' },
+    { chords: ['i', 'iv', '♭VII', '♭III'], note: '5도씩 내려가기' }, { chords: ['i', '♭VI', 'iv', 'V'], note: '강하게 돌아오기' },
+  ],
+};
+// 로마숫자가 속한 조 안의 자리(없으면 조 밖의 코드)
+export const degreeOf = (mode: Song['mode'], rn: string) => DEGREES[mode].find(d => d.variants.some(v => v[0] === rn)) ?? null;
+
+export interface ChordInfo { rn: string; name: string; fn: Fn; rootPc: number; pcs: number[]; type: string; }
 export function chordInfo(song: Pick<Song, 'key' | 'mode'>, rn: string): ChordInfo | null {
   const def: RomanDef | undefined = song.mode === 'major' ? (ROMAN as Record<string, RomanDef>)[rn] : MINOR_ROMAN[rn];
   if (!def) return null;
   const t = CHORD_TYPES[def.type];
   const root = spellFrom(keyRoot(song), def.deg, def.semi);
   const rootPc = (song.key + def.semi) % 12;
-  return { rn, name: root.name + t.sym, fn: def.fn, rootPc, pcs: t.steps.map(s => (rootPc + s) % 12) };
+  return { rn, name: root.name + t.sym, fn: def.fn, rootPc, pcs: t.steps.map(s => (rootPc + s) % 12), type: def.type };
 }
 
 // ── 멜로디 음 ──

@@ -73,6 +73,8 @@
 
 11. ✅ 도식 보강 — 도식 없던 레슨 14개에 그림 추가. 공용 도식 컴포넌트 `src/components/doc/fig/`(BeatsFig·StepGrid·SwingFig·AxisRanges·DynamicsFig·ChordFlow·KeyboardFig·FormFig·LayerFig·RangeFig·StackFig) (2026-11-10)
 
+12. ✅ 곡 스케치 코드 탭 개편 — 로마숫자(조 안의 자리) 중심 표기, 기능별 묶음(토닉·서브도미넌트·도미넌트) + 분위기 한 줄, 7화음은 같은 자리의 '모양'으로, 조 밖의 코드는 접어 둠, 진행 한 번에 넣기, 5도권 위에 진행 화살표(재생 중 강조). 5도권 그림은 `src/lib/circle.ts`(SVG 문자열 생성 — 레슨·위젯에서 재사용) (2026-11-12)
+
 ### 다음 후보
 - 곡 스케치 2차: 디테일 다듬기(음색·밸런스·예시 곡), MIDI 내보내기, 인트로~아웃트로 전체 구조
 - 장르별 로드맵(발라드·로파이), 심화 이론

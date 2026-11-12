@@ -7,16 +7,53 @@ const L = 122, R = 546, W = 560, RH = 40, top = 26;
 const x = (t: number) => L + (t / seconds) * (R - L);
 const H = top + rows.length * RH + 4;
 const ticks = Array.from({ length: seconds + 1 }, (_, s) => ({ x: x(s), s }));
-const lanes = rows.map((r, i) => ({ ...r, y: top + i * RH + RH / 2 }));
-const dots = lanes.flatMap(r => Array.from({ length: Math.floor(seconds * r.bpm / 60 + 1e-9) + 1 }, (_, k) => ({ x: x(k * 60 / r.bpm), y: r.y, big: k % 4 === 0 })));
+const lanes = rows.map((r, i) => ({ ...r, i, y: top + i * RH + RH / 2 }));
+const dots = lanes.flatMap(r => Array.from({ length: Math.floor(seconds * r.bpm / 60 + 1e-9) + 1 }, (_, k) => ({ x: x(k * 60 / r.bpm), y: r.y, big: k % 4 === 0, lane: r.i, k })));
 ---
 <Fig caption={caption} minW={440} label={`템포별 박의 간격: ${rows.map(r => r.bpm + ' BPM').join(', ')}`}>
-  <svg viewBox={`0 0 ${W} ${H}`}>
+  <svg viewBox={`0 0 ${W} ${H}`} data-beatsfig data-seconds={seconds}>
     {ticks.map(t => <line x1={t.x} x2={t.x} y1={top - 4} y2={H - 4} stroke={C.line} />)}
     {ticks.map(t => <text x={t.x} y={top - 11} text-anchor="middle" font-size="10" fill={C.ink5} class="mono">{t.s}초</text>)}
     {lanes.map(r => <text x="2" y={r.y - 1} font-size="13" fill={C.ink} class="fd">{r.bpm} BPM</text>)}
     {lanes.map(r => <text x="2" y={r.y + 13} font-size="10.5" fill={C.ink5}>{r.label}</text>)}
     {lanes.map(r => <line x1={L} x2={R} y1={r.y} y2={r.y} stroke={C.ink3} />)}
-    {dots.map(d => <circle cx={d.x} cy={d.y} r={d.big ? 6 : 5} fill={d.big ? C.violet : 'white'} stroke={C.violet} stroke-width="1.5" />)}
+    {dots.map(d => <circle class="bt-dot" data-lane={d.lane} data-k={d.k} cx={d.x} cy={d.y} r={d.big ? 6 : 5} fill={d.big ? C.violet : 'white'} stroke={C.violet} stroke-width="1.5" />)}
   </svg>
+  <Fragment slot="controls">
+    {lanes.map(r => (
+      <button type="button" class="sl-fig-play" data-bt-play={r.i} data-bpm={r.bpm} aria-pressed="false">
+        <svg class="ic-play" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 1.5v9l7.5-4.5z" fill="currentColor" /></svg>
+        <svg class="ic-stop" viewBox="0 0 12 12" aria-hidden="true"><rect x="2.5" y="2.5" width="7" height="7" rx="1" fill="currentColor" /></svg>
+        <span>{r.bpm} BPM</span>
+      </button>
+    ))}
+    <span class="sl-fig-hint">같은 {seconds}초를 들려줘요</span>
+  </Fragment>
 </Fig>
+<style is:global>
+  .sl-fig .bt-dot { transform-box: fill-box; transform-origin: center; transition: transform .08s; }
+  .sl-fig .bt-dot.is-on { transform: scale(1.6); }
+</style>
+<script>
+import { figCore, figPlayer, LEAD } from '../../../lib/figaudio';
+import { playKey } from '../../../audio/keys';
+
+function init(svg: SVGSVGElement) {
+  const fig = svg.closest('figure')!;
+  const seconds = Number(svg.dataset.seconds);
+  const dots = [...svg.querySelectorAll<SVGCircleElement>('.bt-dot')];
+  const player = figPlayer(() => dots.forEach(d => d.classList.remove('is-on')));
+  fig.querySelectorAll<HTMLButtonElement>('[data-bt-play]').forEach(btn => btn.addEventListener('click', async () => {
+    if (player.playing(btn)) return player.stop();
+    const lane = dots.filter(d => d.dataset.lane === btn.dataset.btPlay), bpm = Number(btn.dataset.bpm);
+    const core = await figCore();
+    const t0 = core.ctx.currentTime + LEAD / 1000 + 0.02;
+    const events = lane.flatMap((d, k) => { const t = k * 60 / bpm; return [
+      { at: t * 1000, run: () => playKey(core, k % 4 === 0 ? 88 : 81, t0 + t, 0.12, k % 4 === 0 ? 0.3 : 0.2) },
+      { at: t * 1000 + LEAD, run: () => { d.classList.add('is-on'); setTimeout(() => d.classList.remove('is-on'), 150); } },
+    ]; });
+    player.start(btn, events, seconds * 1000 + LEAD + 300);
+  }));
+}
+document.querySelectorAll<SVGSVGElement>('svg[data-beatsfig]').forEach(init);
+</script>

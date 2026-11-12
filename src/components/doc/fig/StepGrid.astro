@@ -7,7 +7,7 @@ const { presets, caption } = Astro.props as Props;
 const ORDER: DrumTrack[] = ['hat', 'open', 'clap', 'snare', 'kick'];
 const CW = 24, L = 70, W = L + 16 * CW + 8;
 let y = 4;
-const heads: { y: number; name: string; meta: string }[] = [], nums: { x: number; y: number; n: number }[] = [], labs: { y: number; t: string }[] = [], cells: { x: number; y: number; fill: string; stroke: string }[] = [];
+const heads: { y: number; name: string; meta: string }[] = [], nums: { x: number; y: number; n: number }[] = [], labs: { y: number; t: string }[] = [], cells: { x: number; y: number; fill: string; stroke: string }[] = [], heads2: { i: number; y: number; h: number; data: string; name: string }[] = [];
 for (const id of presets) {
   const p = PRESETS[id]; const tracks = ORDER.filter(t => p.tracks[t] && /[xo]/.test(p.tracks[t]!));
   heads.push({ y: y + 14, name: p.name, meta: `${p.bpm} BPM${p.swing ? ` · 스윙 ${Math.round(p.swing * 100)}%` : ''}` });
@@ -17,16 +17,56 @@ for (const id of presets) {
     labs.push({ y: yy + 14, t: TRACK_LABEL[t] });
     for (let s = 0; s < 16; s++) cells.push({ x: L + s * CW + 1, y: yy, fill: pat[s] === 'x' ? C.violet : pat[s] === 'o' ? C.violetG : 'white', stroke: pat[s] === 'x' || pat[s] === 'o' ? C.violet : C.line });
   });
+  heads2.push({ i: heads2.length, y: y + 30, h: (tracks.length - 1) * (CW - 2) + CW - 2, name: p.name, data: JSON.stringify({ bpm: p.bpm, swing: p.swing ?? 0.5, tracks: Object.fromEntries(tracks.map(t => [t, p.tracks[t]])) }) });
   y += 28 + tracks.length * (CW - 2) + 14;
 }
 const H = y;
 ---
 <Fig caption={caption} minW={420} label={`드럼 패턴 격자: ${presets.map(id => PRESETS[id].name).join(', ')}`}>
-  <svg viewBox={`0 0 ${W} ${H}`}>
+  <svg viewBox={`0 0 ${W} ${H}`} data-stepgrid data-l={L} data-cw={CW}>
     {heads.map(h => <text x="4" y={h.y} font-size="13" class="fd" fill={C.ink}>{h.name}</text>)}
     {heads.map(h => <text x={W - 6} y={h.y} font-size="10" fill={C.ink5} text-anchor="end" class="mono">{h.meta}</text>)}
     {nums.map(n => <text x={n.x} y={n.y} font-size="10" fill={C.ink5} text-anchor="middle" class="mono">{n.n}</text>)}
     {labs.map(l => <text x="4" y={l.y} font-size="11" font-weight="600" fill={C.ink}>{l.t}</text>)}
     {cells.map(c => <rect x={c.x + 0.5} y={c.y + 0.5} width={CW - 5} height={CW - 7} rx="3" fill={c.fill} stroke={c.stroke} />)}
+    {heads2.map(h => <rect class="sg-head" data-p={h.i} data-pattern={h.data} x={L - 1} y={h.y} width={CW} height={h.h} rx="5" fill="rgba(45,45,74,0.07)" stroke={C.ink} stroke-width="1.5" opacity="0" />)}
   </svg>
+  <Fragment slot="controls">
+    {heads2.map(h => (
+      <button type="button" class="sl-fig-play" data-sg-play={h.i} aria-pressed="false">
+        <svg class="ic-play" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 1.5v9l7.5-4.5z" fill="currentColor" /></svg>
+        <svg class="ic-stop" viewBox="0 0 12 12" aria-hidden="true"><rect x="2.5" y="2.5" width="7" height="7" rx="1" fill="currentColor" /></svg>
+        <span>{heads2.length > 1 ? h.name : '들어 보기'}</span>
+      </button>
+    ))}
+    <span class="sl-fig-hint">두 마디를 들려줘요</span>
+  </Fragment>
 </Fig>
+<script>
+import { figCore, figPlayer, figFollow, LEAD } from '../../../lib/figaudio';
+import { hit, type DrumTrack } from '../../../audio/drums';
+
+function init(svg: SVGSVGElement) {
+  const fig = svg.closest('figure')!;
+  const L = Number(svg.dataset.l), CW = Number(svg.dataset.cw);
+  const heads = [...svg.querySelectorAll<SVGRectElement>('.sg-head')];
+  const player = figPlayer(() => heads.forEach(h => h.setAttribute('opacity', '0')));
+  fig.querySelectorAll<HTMLButtonElement>('[data-sg-play]').forEach(btn => btn.addEventListener('click', async () => {
+    if (player.playing(btn)) return player.stop();
+    const head = heads[Number(btn.dataset.sgPlay)];
+    const p = JSON.parse(head.dataset.pattern!) as { bpm: number; swing: number; tracks: Record<DrumTrack, string> };
+    const core = await figCore();
+    const beat = 60 / p.bpm, t0 = core.ctx.currentTime + LEAD / 1000 + 0.02;
+    // 스윙: 박 안의 16분 네 칸 위치 (뒤 8분 = swing × 1박)
+    const pos = [0, p.swing / 2, p.swing, p.swing + (1 - p.swing) / 2];
+    const events = [];
+    for (let k = 0; k < 32; k++) {
+      const s = k % 16, t = (Math.floor(k / 4) + pos[k % 4]) * beat;
+      events.push({ at: t * 1000, run: () => { for (const [tr, pat] of Object.entries(p.tracks)) if (pat[s] !== '.') hit(core, tr as DrumTrack, t0 + t, pat[s] === 'o' ? 0.5 : 1); } });
+      events.push({ at: t * 1000 + LEAD, run: () => { head.setAttribute('x', String(L + s * CW - 1)); head.setAttribute('opacity', '1'); if (s % 4 === 0) figFollow(head); } });
+    }
+    player.start(btn, events, 8 * beat * 1000 + LEAD + 60);
+  }));
+}
+document.querySelectorAll<SVGSVGElement>('svg[data-stepgrid]').forEach(init);
+</script>

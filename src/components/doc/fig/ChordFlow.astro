@@ -64,7 +64,7 @@ const loopPath = loop ? `M ${boxes[n - 1].cx} ${top + BH + 5} C ${boxes[n - 1].c
   .sl-fig .cf-box[data-play]:focus-visible .cf-rect { stroke-width: 3; }
 </style>
 <script>
-import { figChord, figClaim } from '../../../lib/figaudio';
+import { figChord, figClaim, figFollow } from '../../../lib/figaudio';
 
 const STEP = 1100; // 코드 하나의 길이(ms)
 
@@ -74,16 +74,11 @@ function init(svg: SVGSVGElement) {
   const btn = fig.querySelector<HTMLButtonElement>('[data-cf-play]');
   const lab = fig.querySelector<HTMLElement>('[data-cf-label]');
   const loop = svg.hasAttribute('data-loop');
-  const scroller = svg.closest<HTMLElement>('.overflow-x-auto');
   let timers: number[] = [];
 
   const light = (i: number, ms: number) => {
     boxes.forEach((b, k) => b.classList.toggle('is-on', k === i));
-    // 좁은 화면(가로 스크롤)에서는 울리는 상자가 보이도록 따라간다
-    if (scroller && scroller.scrollWidth > scroller.clientWidth) {
-      const r = boxes[i].getBoundingClientRect(), s = scroller.getBoundingClientRect();
-      scroller.scrollBy({ left: r.left + r.width / 2 - (s.left + s.width / 2), behavior: 'smooth' });
-    }
+    figFollow(boxes[i]);
     timers.push(window.setTimeout(() => boxes[i]?.classList.remove('is-on'), ms));
   };
   const sound = (i: number, ms: number) => { figChord(boxes[i].dataset.play!.split(',').map(Number), ms / 1000 + 0.5); light(i, ms); };

@@ -53,9 +53,15 @@
   `Fig.astro`의 `controls` 슬롯에 넣는다.
 - **눌러서 듣기**: 요소에 `data-play`(MIDI 목록), `tabindex`, `role="button"`, `aria-label`. Enter·Space로도 동작.
 - **재생 따라가기**: 울리는 요소에 `.is-on` — 자기 색을 16% 섞은 채움 + 테두리 2.5px. 다시 누르면 멈춤.
-- **오디오**: `src/lib/figaudio.ts` — 페이지당 AudioCore 하나, `figClaim`으로 한 번에 한 도식만 재생.
-- **가로 스크롤**: 재생 중에는 울리는 요소가 보이도록 스크롤이 따라간다.
-- 적용: ✅ ChordFlow (2026-11-11) · ⬜ StepGrid · SwingFig · KeyboardFig · BeatsFig
+- **오디오**: `src/lib/figaudio.ts` — 페이지당 AudioCore 하나(`figCore`), 한 번에 한 도식만 재생(`figClaim`),
+  재생 버튼 공용 로직(`figPlayer`: 사건 목록을 시간순 실행, 다시 누르면 멈춤).
+- **박자가 중요한 소리**: 타이머는 `LEAD`(80ms) 먼저 깨워서 오디오 시각으로 예약하고, 강조는 `LEAD` 뒤에 켠다.
+- **재생 길이**: 짧게 끝낸다(드럼 2마디, 스윙 4박, 템포 4초). 반복 재생은 위젯의 일.
+- **가로 스크롤**: 재생 중에는 울리는 요소가 보이도록 스크롤이 따라간다(`figFollow`).
+- **버튼 이름**: 재생 대상이 여럿이면 버튼도 대상마다 하나씩, 이름은 대상 이름(예: `8비트 록`, `67%`, `120 BPM`).
+- 적용 (2026-11-12): ✅ ChordFlow(상자 누르기 + 순서대로) · StepGrid(재생선) · SwingFig(줄별) · BeatsFig(BPM별) ·
+  KeyboardFig(건반 누르기 + 묶음별 차례로)
+- ⬜ 도식과 위젯의 소리 겹침 방지(위젯 쪽 수정 필요)
 
 ## 적용 현황
 

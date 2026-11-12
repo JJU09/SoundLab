@@ -5,11 +5,11 @@ interface Props { rows?: { pct: number; label: string }[]; caption?: string; }
 const { rows = [{ pct: 50, label: '스트레이트 1 : 1' }, { pct: 60, label: '가벼운 스윙' }, { pct: 67, label: '셔플 2 : 1' }], caption } = Astro.props as Props;
 const L = 132, BW = 200, W = L + 2 * BW + 12, RH = 40, top = 26, bottom = top + rows.length * RH, H = bottom + 20;
 const beats = [0, 1].map(b => ({ x: L + b * BW, half: L + b * BW + BW / 2, t2: L + b * BW + BW * 2 / 3, n: b + 1 }));
-const lanes = rows.map((r, i) => ({ ...r, y: top + i * RH + RH / 2, f: r.pct / 100 }));
-const segs = lanes.flatMap(r => beats.map(b => ({ y: r.y, x0: b.x, f: r.f })));
+const lanes = rows.map((r, i) => ({ ...r, i, y: top + i * RH + RH / 2, f: r.pct / 100 }));
+const segs = lanes.flatMap(r => beats.map((b, k) => ({ y: r.y, x0: b.x, f: r.f, lane: r.i, k })));
 ---
 <Fig caption={caption} minW={440} label="스트레이트와 스윙에서 뒤 8분음표의 위치 비교">
-  <svg viewBox={`0 0 ${W} ${H}`}>
+  <svg viewBox={`0 0 ${W} ${H}`} data-swingfig>
     {[0, 1, 2].map(b => <line x1={L + b * BW} x2={L + b * BW} y1={top - 4} y2={bottom + 4} stroke={C.ink3} />)}
     {beats.map(b => <line x1={b.half} x2={b.half} y1={top - 4} y2={bottom + 4} stroke={C.line} />)}
     {beats.map(b => <line x1={b.t2} x2={b.t2} y1={top - 4} y2={bottom + 4} stroke={C.blueL} />)}
@@ -19,7 +19,51 @@ const segs = lanes.flatMap(r => beats.map(b => ({ y: r.y, x0: b.x, f: r.f })));
     {lanes.map(r => <text x="2" y={r.y - 1} font-size="13" class="fd" fill={C.ink}>{r.pct}%</text>)}
     {lanes.map(r => <text x="2" y={r.y + 13} font-size="10.5" fill={C.ink5}>{r.label}</text>)}
     {lanes.map(r => <line x1={L} x2={L + 2 * BW} y1={r.y} y2={r.y} stroke={C.ink3} />)}
-    {segs.map(s => <circle cx={s.x0} cy={s.y} r="6.5" fill={C.violet} />)}
-    {segs.map(s => <circle cx={s.x0 + BW * s.f} cy={s.y} r="5.5" fill={C.blue} />)}
+    {segs.map(s => <circle class="sw-dot" data-lane={s.lane} data-k={s.k * 2} cx={s.x0} cy={s.y} r="6.5" fill={C.violet} stroke={C.violet} />)}
+    {segs.map(s => <circle class="sw-dot" data-lane={s.lane} data-k={s.k * 2 + 1} cx={s.x0 + BW * s.f} cy={s.y} r="5.5" fill={C.blue} stroke={C.blue} />)}
   </svg>
+  <Fragment slot="controls">
+    {lanes.map(r => (
+      <button type="button" class="sl-fig-play" data-sw-play={r.i} data-pct={r.pct} aria-pressed="false">
+        <svg class="ic-play" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 1.5v9l7.5-4.5z" fill="currentColor" /></svg>
+        <svg class="ic-stop" viewBox="0 0 12 12" aria-hidden="true"><rect x="2.5" y="2.5" width="7" height="7" rx="1" fill="currentColor" /></svg>
+        <span>{r.pct}%</span>
+      </button>
+    ))}
+    <span class="sl-fig-hint">줄마다 들어 보고 비교해요</span>
+  </Fragment>
 </Fig>
+<style is:global>
+  .sl-fig .sw-dot { stroke-width: 0; stroke-opacity: 0.3; transition: stroke-width .08s; }
+  .sl-fig .sw-dot.is-on { stroke-width: 9; }
+</style>
+<script>
+import { figCore, figPlayer, LEAD } from '../../../lib/figaudio';
+import { hit } from '../../../audio/drums';
+
+function init(svg: SVGSVGElement) {
+  const fig = svg.closest('figure')!;
+  const dots = [...svg.querySelectorAll<SVGCircleElement>('.sw-dot')];
+  const player = figPlayer(() => dots.forEach(d => d.classList.remove('is-on')));
+  fig.querySelectorAll<HTMLButtonElement>('[data-sw-play]').forEach(btn => btn.addEventListener('click', async () => {
+    if (player.playing(btn)) return player.stop();
+    const lane = btn.dataset.swPlay!, f = Number(btn.dataset.pct) / 100;
+    const core = await figCore();
+    const beat = 60 / 92, t0 = core.ctx.currentTime + LEAD / 1000 + 0.02;
+    const flash = (k: number) => { const d = dots.find(d => d.dataset.lane === lane && d.dataset.k === String(k)); if (!d) return; d.classList.add('is-on'); setTimeout(() => d.classList.remove('is-on'), 160); };
+    const events = [];
+    // 그림의 두 박을 두 번 반복하고 첫 박으로 끝낸다
+    for (let b = 0; b < 4; b++) {
+      const tb = b * beat, tk = (b + f) * beat;
+      events.push({ at: tb * 1000, run: () => { hit(core, 'kick', t0 + tb, 0.8); hit(core, 'hat', t0 + tb, 1); } });
+      events.push({ at: tb * 1000 + LEAD, run: () => flash((b % 2) * 2) });
+      events.push({ at: tk * 1000, run: () => hit(core, 'hat', t0 + tk, 0.8) });
+      events.push({ at: tk * 1000 + LEAD, run: () => flash((b % 2) * 2 + 1) });
+    }
+    events.push({ at: 4 * beat * 1000, run: () => { hit(core, 'kick', t0 + 4 * beat, 0.8); hit(core, 'hat', t0 + 4 * beat, 1); } });
+    events.push({ at: 4 * beat * 1000 + LEAD, run: () => flash(0) });
+    player.start(btn, events, 4 * beat * 1000 + LEAD + 400);
+  }));
+}
+document.querySelectorAll<SVGSVGElement>('svg[data-swingfig]').forEach(init);
+</script>

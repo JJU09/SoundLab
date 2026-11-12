@@ -12,19 +12,61 @@ const all: number[] = []; for (let m = from; m <= to; m++) all.push(m);
 const whites = all.filter(m => !isBlack(m));
 const wx = new Map<number, number>(); whites.forEach((m, i) => wx.set(m, L + i * WW));
 const info = (m: number) => { const g = groups.find(g => g.notes.includes(m)); return g ? { col: C[g.color ?? 'violet'], ring: !!g.ring, name: g.names?.[m] ?? midiName(m, 'flat', false) } : null; };
-const wk = whites.map(m => ({ x: wx.get(m)!, cx: wx.get(m)! + WW / 2, cy: top + WH - 22, h: info(m) }));
-const bk = all.filter(isBlack).map(m => ({ x: wx.get(m - 1)! + WW - BWd / 2, cx: wx.get(m - 1)! + WW, cy: top + BH - 18, h: info(m) }));
+const wk = whites.map(m => ({ m, x: wx.get(m)!, cx: wx.get(m)! + WW / 2, cy: top + WH - 22, h: info(m) }));
+const bk = all.filter(isBlack).map(m => ({ m, x: wx.get(m - 1)! + WW - BWd / 2, cx: wx.get(m - 1)! + WW, cy: top + BH - 18, h: info(m) }));
 const dots = [...wk, ...bk.map(k => ({ ...k, black: true }))].filter(k => k.h) as { cx: number; cy: number; black?: boolean; h: { col: string; ring: boolean; name: string } }[];
 const W = L * 2 + whites.length * WW, H = top + WH + 12 + groups.length * 18;
 const legend = groups.map((g, i) => ({ cx: L + 8, cy: top + WH + 20 + i * 18, col: C[g.color ?? 'violet'], ring: !!g.ring, label: g.label }));
 ---
 <Fig caption={caption} minW={300} maxW={460} label={label}>
-  <svg viewBox={`0 0 ${W} ${H}`}>
-    {wk.map(k => <rect x={k.x} y={top} width={WW} height={WH} rx="3" fill="white" stroke={C.keyLine} />)}
-    {bk.map(k => <rect x={k.x} y={top} width={BWd} height={BH} rx="2" fill={C.ink} />)}
-    {dots.map(d => <circle cx={d.cx} cy={d.cy} r={R} fill={d.h.ring ? 'white' : d.h.col} stroke={d.h.ring ? d.h.col : (d.black ? 'white' : 'none')} stroke-width="1.5" />)}
-    {dots.map(d => <text x={d.cx} y={d.cy + 3.6} text-anchor="middle" font-size={d.h.name.length > 1 ? 9 : 10.5} class="fd" fill={d.h.ring ? d.h.col : 'white'}>{d.h.name}</text>)}
+  <svg viewBox={`0 0 ${W} ${H}`} data-keyboardfig>
+    {wk.map(k => <rect class="kb-key kb-w" data-note={k.m} tabindex="0" role="button" aria-label={`${midiName(k.m, 'flat', false)} 듣기`} x={k.x} y={top} width={WW} height={WH} rx="3" fill="white" stroke={C.keyLine} />)}
+    {bk.map(k => <rect class="kb-key kb-b" data-note={k.m} tabindex="0" role="button" aria-label={`${midiName(k.m, 'flat', false)} 듣기`} x={k.x} y={top} width={BWd} height={BH} rx="2" fill={C.ink} />)}
+    {dots.map(d => <circle pointer-events="none" cx={d.cx} cy={d.cy} r={R} fill={d.h.ring ? 'white' : d.h.col} stroke={d.h.ring ? d.h.col : (d.black ? 'white' : 'none')} stroke-width="1.5" />)}
+    {dots.map(d => <text pointer-events="none" x={d.cx} y={d.cy + 3.6} text-anchor="middle" font-size={d.h.name.length > 1 ? 9 : 10.5} class="fd" fill={d.h.ring ? d.h.col : 'white'}>{d.h.name}</text>)}
     {legend.map(l => <circle cx={l.cx} cy={l.cy} r="4.5" fill={l.ring ? 'white' : l.col} stroke={l.col} stroke-width="1.5" />)}
     {legend.map(l => <text x={l.cx + 11} y={l.cy + 3.5} font-size="10" fill={C.ink}>{l.label}</text>)}
   </svg>
+  <Fragment slot="controls">
+    {groups.map(g => (
+      <button type="button" class="sl-fig-play" data-kb-play={[...g.notes].sort((a, b) => a - b).join(',')} aria-pressed="false">
+        <svg class="ic-play" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 1.5v9l7.5-4.5z" fill="currentColor" /></svg>
+        <svg class="ic-stop" viewBox="0 0 12 12" aria-hidden="true"><rect x="2.5" y="2.5" width="7" height="7" rx="1" fill="currentColor" /></svg>
+        <span>{g.label}</span>
+      </button>
+    ))}
+    <span class="sl-fig-hint">건반을 눌러도 소리가 나요</span>
+  </Fragment>
 </Fig>
+<style is:global>
+  .sl-fig .kb-key { cursor: pointer; outline: none; transition: fill .08s; }
+  .sl-fig .kb-w:hover { fill: #f8f8fc; }
+  .sl-fig .kb-w.is-on { fill: #ede6fd; }
+  .sl-fig .kb-b.is-on { fill: #7c3aed; }
+  .sl-fig .kb-key:focus-visible { stroke: #7c3aed; stroke-width: 2; }
+</style>
+<script>
+import { figCore, figPlayer, figClaim } from '../../../lib/figaudio';
+import { playKey } from '../../../audio/keys';
+
+function init(svg: SVGSVGElement) {
+  const fig = svg.closest('figure')!;
+  const keys = new Map([...svg.querySelectorAll<SVGRectElement>('.kb-key')].map(k => [Number(k.dataset.note), k]));
+  const player = figPlayer(() => keys.forEach(k => k.classList.remove('is-on')));
+  const sound = async (m: number, ms: number) => {
+    const core = await figCore(); playKey(core, m, core.ctx.currentTime + 0.01, 0.9, 0.3);
+    const k = keys.get(m); if (!k) return; k.classList.add('is-on'); setTimeout(() => k.classList.remove('is-on'), ms);
+  };
+  keys.forEach((k, m) => {
+    const one = () => { player.stop(); figClaim(null); sound(m, 260); };
+    k.addEventListener('click', one);
+    k.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); one(); } });
+  });
+  fig.querySelectorAll<HTMLButtonElement>('[data-kb-play]').forEach(btn => btn.addEventListener('click', () => {
+    if (player.playing(btn)) return player.stop();
+    const notes = btn.dataset.kbPlay!.split(',').map(Number), STEP = 330;
+    player.start(btn, notes.map((m, i) => ({ at: i * STEP, run: () => sound(m, STEP - 60) })), notes.length * STEP + 500);
+  }));
+}
+document.querySelectorAll<SVGSVGElement>('svg[data-keyboardfig]').forEach(init);
+</script>

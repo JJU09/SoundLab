@@ -15,6 +15,7 @@ quiz: diatonic
 scaffold: true
 prereqs:
   - harmony/triads
+  - harmony/circle-basics
   - melody/major-scale
 ---
 import Level from '../../../components/doc/Level.astro';
@@ -22,6 +23,7 @@ import DefList from '../../../components/doc/DefList.astro';
 import DefCard from '../../../components/doc/DefCard.astro';
 import Callout from '../../../components/doc/Callout.astro';
 import Staff from '../../../components/doc/Staff.astro';
+import CircleKeyFig from '../../../components/doc/fig/CircleKeyFig.astro';
 
 {/* ───────── 초급 ───────── */}
 <Level show="easy">
@@ -57,6 +59,16 @@ C장조는 흰 건반만 쓰죠. 도·레·미·파·솔·라·시 각각에서 
 <Staff notes="C4+E4+G4/q D4+F4+A4/q E4+G4+B4/q F4+A4+C5/q G4+B4+D5/q A4+C5+E5/q B4+D5+F5/q" play bpm={70} caption="I · ii · iii · IV · V · vi · vii° — 장 · 단 · 단 · 장 · 장 · 단 · 감" />
 
 장조의 3화음 성질은 언제나 **장 · 단 · 단 · 장 · 장 · 단 · 감** 순서입니다. 위젯에서 조를 G나 E♭으로 바꿔 보세요. 코드 이름은 모두 바뀌지만 로마 숫자와 소리의 관계는 그대로입니다. 그래서 "I–V–vi–IV"라고 말하면 어느 조에서든 같은 진행을 뜻합니다.
+
+## 5도권 위의 일곱 코드
+
+일곱 코드를 5도권 위에 놓으면 **한 부채꼴 안에 모입니다.** 바깥 고리에는 장3화음 IV · I · V가 나란히, 그 안쪽에는 단3화음 ii · vi · iii가, 가장 안쪽에는 vii°가 있습니다. 색은 코드의 기능입니다 — 초록은 토닉, 파랑은 서브도미넌트, 빨강은 도미넌트.
+
+<CircleKeyFig tonic="C" caption="C장조의 일곱 코드 — 한 조의 코드는 서로 이웃한 자리에 모여 살아요" />
+
+조를 바꾸면 부채꼴이 통째로 돌아갑니다. 모양과 배치는 그대로이고 코드 이름만 바뀝니다.
+
+<CircleKeyFig tonic="G" caption="G장조 — 부채꼴이 시계 방향으로 한 칸 돌았어요. C · G · Em · Am은 두 조에 모두 있어요" />
 
 <Callout>
 프리셋을 **7화음 7개**로 바꿔 들어 보세요. 7화음으로 쌓으면 성질은 **maj7 · m7 · m7 · maj7 · 7 · m7 · m7♭5**가 됩니다. 딸림7화음(7)은 V에서만 생기고, 이것이 V가 특별히 강한 긴장을 갖는 이유입니다.

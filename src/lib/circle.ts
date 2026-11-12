@@ -1,7 +1,7 @@
 // 5도권 그림 — 조 안의 코드(부채꼴)와 코드 진행(화살표)을 한 장에. SVG 문자열을 돌려주므로
 // Astro(set:html)와 클라이언트 스크립트(innerHTML) 양쪽에서 쓴다.
 //   바깥 고리 = 장3화음(시계 방향 = 5도 위), 안쪽 고리 = 나란한 단조, 가장 안쪽 = 감3화음
-import { chordInfo, DEGREES, type ChordInfo, type Fn, type Song } from './sketch';
+import { chordInfo, DEGREES, voice, type ChordInfo, type Fn, type Song } from './sketch';
 
 const FN_COL: Record<Fn, string> = { T: '#16a34a', S: '#2563eb', D: '#dc2626', B: '#9333ea', X: '#ea580c' };
 const INK = '#2d2d4a', INK5 = '#6b6b8e', INK3 = '#a0a0c0', LINE = '#e2e2f0', SURF = '#f0f0f8', VIOLET = '#7c3aed', VIOLET_L = '#a78bfa';
@@ -20,20 +20,22 @@ export function circlePlace(ci: Pick<ChordInfo, 'rootPc' | 'type'>) {
   return { ring, pos: majPos((ci.rootPc + [0, 3, 1][ring]) % 12), key: `${ring}-${majPos((ci.rootPc + [0, 3, 1][ring]) % 12)}` };
 }
 
-interface Node { key: string; ring: number; pos: number; rn: string; name: string; fn: Fn; bars: number[]; pick?: string; }
+interface Node { key: string; ring: number; pos: number; rn: string; name: string; fn: Fn; bars: number[]; pick?: string; midi: number[]; }
+const chordMidi = (ci: ChordInfo) => [(ci.rootPc <= 7 ? 36 : 24) + ci.rootPc + 12, ...voice(ci.pcs)];
 
-export function circleSvg(song: Pick<Song, 'key' | 'mode'>, chords: string[], opts: { pickable?: boolean; id?: string } = {}) {
+// opts.pickable: 조 안의 코드 자리에 data-rn(곡 스케치에서 눌러 고르기), opts.play: 모든 자리에 data-play(도식에서 눌러 듣기)
+export function circleSvg(song: Pick<Song, 'key' | 'mode'>, chords: string[], opts: { pickable?: boolean; play?: boolean; id?: string } = {}) {
   const id = opts.id ?? 'cq';
   const home = majPos(song.mode === 'major' ? song.key : (song.key + 3) % 12);
   const nodes = new Map<string, Node>();
   for (const d of DEGREES[song.mode]) {
     const ci = chordInfo(song, d.rn)!; const pl = circlePlace(ci);
-    nodes.set(pl.key, { ...pl, rn: d.rn, name: ci.name, fn: ci.fn, bars: [], pick: d.rn });
+    nodes.set(pl.key, { ...pl, rn: d.rn, name: ci.name, fn: ci.fn, bars: [], pick: d.rn, midi: chordMidi(ci) });
   }
   const seq: (string | null)[] = chords.map((rn, i) => {
     const ci = rn ? chordInfo(song, rn) : null; if (!ci) return null;
     const pl = circlePlace(ci);
-    if (!nodes.has(pl.key)) nodes.set(pl.key, { ...pl, rn, name: ci.name, fn: ci.fn, bars: [] });   // 조 밖의 코드는 쓰일 때만 나타남
+    if (!nodes.has(pl.key)) nodes.set(pl.key, { ...pl, rn, name: ci.name, fn: ci.fn, bars: [], midi: chordMidi(ci) });   // 조 밖의 코드는 쓰일 때만 나타남
     nodes.get(pl.key)!.bars.push(i);
     return pl.key;
   });
@@ -66,7 +68,8 @@ export function circleSvg(song: Pick<Song, 'key' | 'mode'>, chords: string[], op
   // 코드 자리
   for (const n of nodes.values()) {
     const [x, y] = pt(n.pos, RAD[n.ring]), r = NR[n.ring], col = FN_COL[n.fn];
-    const pick = opts.pickable && n.pick ? ` data-rn="${esc(n.pick)}" tabindex="0" role="button" aria-label="${esc(n.rn)} ${esc(n.name)}"` : '';
+    const pick = opts.pickable && n.pick ? ` data-rn="${esc(n.pick)}" tabindex="0" role="button" aria-label="${esc(n.rn)} ${esc(n.name)}"`
+      : opts.play ? ` data-play="${n.midi.join(',')}" tabindex="0" role="button" aria-label="${esc(n.rn)} ${esc(n.name)} 듣기"` : '';
     h += `<g class="cq-node${pick ? ' cq-pick' : ''}" data-bars="${n.bars.join(' ')}"${pick}>`
       + `<circle cx="${f(x)}" cy="${f(y)}" r="${r}" fill="white" stroke="${col}" stroke-width="1.5"/>`
       + `<text x="${f(x)}" y="${f(y + (n.ring === 2 ? -0.5 : 0))}" text-anchor="middle" font-size="${n.rn.length > 4 ? 8 : n.rn.length > 3 || n.ring === 2 ? 9.5 : 12}" font-weight="700" fill="${INK}" class="cq-rn">${esc(n.rn)}</text>`

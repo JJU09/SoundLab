@@ -1,0 +1,145 @@
+---
+// 5도권 만들기 위젯 — C에서 5도씩 올라가며 12칸을 직접 채우고, 이웃·맞은편 음과 함께 들어 본다.
+// "5도권 읽는 법" 레슨용. 조표·조 이야기는 하지 않고 "음을 둘러놓은 판"까지만.
+interface Props { config?: Record<string, any>; } // 설정 없음 (TopicWidget 공통 시그니처)
+// 시계 방향 = 5도 위. [음이름, pc]
+const NOTES: [string, number][] = [['C', 0], ['G', 7], ['D', 2], ['A', 9], ['E', 4], ['B', 11], ['F♯', 6], ['D♭', 1], ['A♭', 8], ['E♭', 3], ['B♭', 10], ['F', 5]];
+const cx = 150, cy = 150, R = 112;
+const pos = (i: number) => { const a = (i * 30 - 90) * Math.PI / 180; return [cx + R * Math.cos(a), cy + R * Math.sin(a)]; };
+---
+<div class="fifths-widget rounded-2xl border border-[var(--color-border)] bg-white overflow-hidden" data-notes={JSON.stringify(NOTES)}>
+  <div class="flex items-center justify-between px-5 py-4 border-b border-[var(--color-border)] bg-[var(--color-surface)]">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg flex items-center justify-center gradient-brand">
+        <svg class="text-white" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3v4M21 12h-4"/></svg>
+      </div>
+      <div>
+        <span class="font-bold text-base font-display">5도권 만들기</span>
+        <span class="text-sm text-[var(--color-ink-300)] ml-2">Circle of Fifths</span>
+      </div>
+    </div>
+  </div>
+  <div class="p-5 space-y-3">
+    <svg viewBox="0 0 300 300" class="w-full max-w-[300px] mx-auto block select-none" role="group" aria-label="5도권 — 12개 음을 5도 간격으로 둘러놓은 원">
+      <circle cx={cx} cy={cy} r={R} fill="none" stroke="#e2e2f0" />
+      <line class="fw-link" x1={cx} y1={cy} x2={cx} y2={cy} stroke="#7c3aed" stroke-width="2" stroke-linecap="round" opacity="0" />
+      {NOTES.map(([name], i) => { const [x, y] = pos(i); return (
+        <g class="fw-n" data-i={i} tabindex="0" role="button" aria-label={`${name} 듣기`}>
+          <circle class="fw-c" cx={x} cy={y} r="20" />
+          <text class="fw-t font-display" x={x} y={y + 5} text-anchor="middle" font-size={name.length > 1 ? 12 : 14} font-weight="700">{name}</text>
+        </g>
+      ); })}
+      <text class="fw-count font-display" x={cx} y={cy - 2} text-anchor="middle" font-size="26" font-weight="700" fill="#2d2d4a">1</text>
+      <text x={cx} y={cy + 16} text-anchor="middle" font-size="10.5" fill="#6b6b8e">/ 12칸</text>
+    </svg>
+    <div class="flex flex-wrap gap-2 justify-center">
+      <button type="button" class="fw-next gradient-brand text-white font-semibold px-4 py-2 rounded-xl text-sm font-display">다음 칸 ▶ <span class="font-normal opacity-80 text-xs">5도 위</span></button>
+      <button type="button" class="fw-btn fw-all">전부 채우기</button>
+      <button type="button" class="fw-btn fw-reset">처음부터</button>
+    </div>
+    <div class="rounded-xl bg-[var(--color-surface-2)] border border-[var(--color-border)] px-4 py-3 text-center" aria-live="polite">
+      <div class="fw-key text-2xl font-bold text-[var(--color-ink-700)] font-display">C</div>
+      <div class="fw-line text-sm text-[var(--color-violet)] font-semibold mt-0.5">여기서 시작해요</div>
+      <div class="fw-sub text-xs text-[var(--color-ink-500)] mt-1">「다음 칸」을 누르면 5도 위 음이 옆자리에 놓여요</div>
+    </div>
+    <div class="flex flex-wrap gap-2 justify-center">
+      <button type="button" class="fw-btn fw-nb" disabled>이웃과 함께 듣기</button>
+      <button type="button" class="fw-btn fw-op" disabled>맞은편과 함께 듣기</button>
+    </div>
+    <p class="fw-hint text-[11px] text-center text-[var(--color-ink-300)]">12칸을 다 채우면 아래 두 버튼이 열려요. 채워진 음은 눌러서 들을 수 있어요.</p>
+  </div>
+</div>
+
+<style is:global>
+  .fifths-widget .fw-btn { font-size: 13px; font-weight: 600; padding: 8px 12px; border-radius: 12px; border: 1px solid var(--color-border); color: var(--color-ink-700); background: white; transition: border-color .12s, color .12s, opacity .12s; }
+  .fifths-widget .fw-btn:hover:not(:disabled) { border-color: var(--color-violet); color: var(--color-violet); }
+  .fifths-widget .fw-btn:disabled { opacity: .4; cursor: default; }
+  .fifths-widget .fw-n { outline: none; }
+  .fifths-widget .fw-c { fill: white; stroke: #e2e2f0; stroke-width: 1.5; transition: fill .12s, stroke .12s; }
+  .fifths-widget .fw-t { fill: transparent; pointer-events: none; }
+  .fifths-widget .fw-n.on { cursor: pointer; }
+  .fifths-widget .fw-n.on .fw-c { stroke: #a78bfa; }
+  .fifths-widget .fw-n.on .fw-t { fill: #2d2d4a; }
+  .fifths-widget .fw-n.pair .fw-c { fill: #ede6fd; stroke: #7c3aed; }
+  .fifths-widget .fw-n.far .fw-c { fill: #fde8e8; stroke: #dc2626; }
+  .fifths-widget .fw-n.sel .fw-c { fill: #7c3aed; stroke: #7c3aed; }
+  .fifths-widget .fw-n.sel .fw-t { fill: white; }
+  .fifths-widget .fw-n.on:focus-visible .fw-c { stroke-width: 3; }
+</style>
+
+<script>
+import { AudioCore } from '../audio/core';
+import { playKey } from '../audio/keys';
+
+function initFifths(root: HTMLElement) {
+  const NOTES: [string, number][] = JSON.parse(root.dataset.notes!);
+  let core: AudioCore | null = null;
+  let n = 1, sel = 0, timers: number[] = [];
+  const nodes = [...root.querySelectorAll<SVGGElement>('.fw-n')];
+  const q = <T extends Element>(s: string) => root.querySelector(s) as T;
+  const key = q<HTMLElement>('.fw-key'), line = q<HTMLElement>('.fw-line'), sub = q<HTMLElement>('.fw-sub'), count = q<SVGTextElement>('.fw-count'), hint = q<HTMLElement>('.fw-hint');
+  const link = q<SVGLineElement>('.fw-link'), nb = q<HTMLButtonElement>('.fw-nb'), op = q<HTMLButtonElement>('.fw-op');
+  const centerText = [count, count.nextElementSibling as SVGTextElement];
+  const center = (i: number) => { const c = nodes[i].querySelector('circle')!; return [Number(c.getAttribute('cx')), Number(c.getAttribute('cy'))]; };
+  const midi = (i: number) => 60 + NOTES[i][1];
+
+  const ready = async () => { core ??= new AudioCore(); await core.resume(); return core; };
+  const tone = async (ms: number[], dur = 1.1) => { const c = await ready(); const t = c.ctx.currentTime + 0.02; ms.forEach(m => playKey(c, m, t, dur, ms.length > 1 ? 0.24 : 0.3)); };
+  const clearMarks = () => { timers.forEach(clearTimeout); timers = []; nodes.forEach(g => g.classList.remove('pair', 'far')); link.setAttribute('opacity', '0'); centerText.forEach(t => t.setAttribute('opacity', '1')); };
+  const mark = (i: number, cls: 'pair' | 'far') => {
+    const [x1, y1] = center(sel), [x2, y2] = center(i);
+    link.setAttribute('x1', String(x1)); link.setAttribute('y1', String(y1)); link.setAttribute('x2', String(x2)); link.setAttribute('y2', String(y2));
+    link.setAttribute('stroke', cls === 'far' ? '#dc2626' : '#7c3aed'); link.setAttribute('opacity', '1'); centerText.forEach(t => t.setAttribute('opacity', '0'));   // 선이 가운데 숫자를 지나므로 잠시 숨김
+    nodes[i].classList.add(cls);
+  };
+
+  function render() {
+    nodes.forEach((g, i) => { g.classList.toggle('on', i < n); g.classList.toggle('sel', i === sel); });
+    count.textContent = String(n);
+    const full = n === 12;
+    nb.disabled = op.disabled = !full;
+    hint.textContent = full ? '음을 누르고, 이웃·맞은편과 함께 들어 보세요. 이웃은 잘 어울리고 맞은편은 부딪혀요.' : '12칸을 다 채우면 아래 두 버튼이 열려요. 채워진 음은 눌러서 들을 수 있어요.';
+    key.textContent = NOTES[sel][0];
+  }
+  function describe() {
+    const l = NOTES[(sel + 11) % 12][0], r = NOTES[(sel + 1) % 12][0], o = NOTES[(sel + 6) % 12][0];
+    if (n < 12) return;
+    line.textContent = `이웃 ${l} · ${r}`; sub.textContent = `맞은편 ${o}`;
+  }
+
+  q<HTMLButtonElement>('.fw-next').addEventListener('click', () => {
+    clearMarks();
+    if (n === 12) {                        // 한 번 더 → 다시 C
+      sel = 0; render(); tone([72]);
+      line.textContent = '한 바퀴 돌아 다시 C'; sub.textContent = '5도씩 12번 올라가면 처음 음으로 돌아와요';
+      return;
+    }
+    const prev = n - 1; n++; sel = n - 1; render();
+    tone([midi(sel)]);
+    line.textContent = `${NOTES[prev][0]} → ${NOTES[sel][0]} · 5도 위`;
+    sub.textContent = n === 12 ? '12칸을 다 채웠어요 — 한 번 더 누르면 어디로 갈까요?' : '건반으로는 7칸(반음 7개) 위의 음이에요';
+  });
+  q<HTMLButtonElement>('.fw-all').addEventListener('click', () => { clearMarks(); n = 12; render(); describe(); });
+  q<HTMLButtonElement>('.fw-reset').addEventListener('click', () => { clearMarks(); n = 1; sel = 0; render(); line.textContent = '여기서 시작해요'; sub.textContent = '「다음 칸」을 누르면 5도 위 음이 옆자리에 놓여요'; });
+
+  nodes.forEach((g, i) => {
+    const pick = () => { if (i >= n) return; clearMarks(); sel = i; render(); tone([midi(i)]);
+      if (n === 12) describe(); else { line.textContent = `${i + 1}번째 칸`; sub.textContent = '채워진 음은 언제든 눌러서 들을 수 있어요'; } };
+    g.addEventListener('click', pick);
+    g.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); } });
+  });
+  nb.addEventListener('click', () => {
+    clearMarks(); const r = (sel + 1) % 12, l = (sel + 11) % 12;
+    mark(r, 'pair'); tone([midi(sel), midi(sel) + 7], 1.0);
+    line.textContent = `${NOTES[sel][0]} + ${NOTES[r][0]} — 잘 어울려요`; sub.textContent = '옆 칸은 5도 사이. 가장 잘 섞이는 두 음이에요';
+    timers.push(window.setTimeout(() => { nodes[r].classList.remove('pair'); mark(l, 'pair'); tone([midi(sel), midi(sel) - 7], 1.0); line.textContent = `${NOTES[sel][0]} + ${NOTES[l][0]} — 이쪽 이웃도 잘 어울려요`; }, 1150));
+  });
+  op.addEventListener('click', () => {
+    clearMarks(); const o = (sel + 6) % 12;
+    mark(o, 'far'); tone([midi(sel), midi(sel) + 6], 1.2);
+    line.textContent = `${NOTES[sel][0]} + ${NOTES[o][0]} — 부딪혀요`; sub.textContent = '맞은편은 원에서 가장 먼 음. 불안하고 긴장된 소리가 나요';
+  });
+  render();
+}
+document.querySelectorAll<HTMLElement>('.fifths-widget').forEach(initFifths);
+</script>

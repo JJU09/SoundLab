@@ -1,0 +1,64 @@
+---
+// 조·코드의 5도권 — 한 조의 코드 일곱 개가 모인 부채꼴과, (chords를 주면) 진행의 화살표.
+// 코드 자리를 누르면 그 코드가 울리고, 진행이 있으면 순서대로 들을 수 있다.
+import Fig from './Fig.astro';
+import { circleSvg } from '../../../lib/circle';
+import { chordInfo, keyName } from '../../../lib/sketch';
+interface Props { tonic?: string; mode?: 'major' | 'minor'; chords?: string[]; caption?: string; }
+const { tonic = 'C', mode = 'major', chords = [], caption } = Astro.props as Props;
+const PC: Record<string, number> = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+const key = (PC[tonic[0]] + (tonic.includes('♯') || tonic.includes('#') ? 1 : tonic.includes('♭') || tonic.slice(1).includes('b') ? -1 : 0) + 12) % 12;
+const song = { key, mode };
+const id = 'ck' + Math.random().toString(36).slice(2, 7);
+const svg = circleSvg(song, chords, { play: true, id });
+const names = chords.map(rn => chordInfo(song, rn)?.name ?? '쉼');
+const label = `${keyName(song)}의 코드` + (chords.length ? ` — 진행 ${names.join(' → ')}` : '');
+---
+<Fig caption={caption} maxW={380} label={label}>
+  <div class="ck-fig" data-len={chords.length}><Fragment set:html={svg} /></div>
+  <Fragment slot="controls">
+    {chords.length > 0 && (
+      <button type="button" class="sl-fig-play" data-ck-play aria-pressed="false">
+        <svg class="ic-play" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 1.5v9l7.5-4.5z" fill="currentColor" /></svg>
+        <svg class="ic-stop" viewBox="0 0 12 12" aria-hidden="true"><rect x="2.5" y="2.5" width="7" height="7" rx="1" fill="currentColor" /></svg>
+        <span>{chords.join(' – ')}</span>
+      </button>
+    )}
+    <span class="sl-fig-hint">코드 자리를 누르면 소리가 나요</span>
+  </Fragment>
+</Fig>
+<style is:global>
+  .sl-fig .cq .cq-rn { font-family: 'Space Grotesk', 'Pretendard', sans-serif; }
+  .sl-fig .cq-node[data-play] { cursor: pointer; outline: none; }
+  .sl-fig .cq-node circle { transition: fill .08s; }
+  .sl-fig .cq-node[data-play]:hover circle { fill: #f8f8fc; }
+  .sl-fig .cq-node.now circle { fill: #ede6fd; stroke-width: 2.5; }
+  .sl-fig .cq-node[data-play]:focus-visible circle { stroke-width: 3; }
+</style>
+<script>
+import { figChord, figClaim, figPlayer } from '../../../lib/figaudio';
+
+function init(wrap: HTMLElement) {
+  const fig = wrap.closest('figure')!;
+  const nodes = [...wrap.querySelectorAll<SVGGElement>('.cq-node[data-play]')];
+  const player = figPlayer(() => nodes.forEach(n => n.classList.remove('now')));
+  const sound = (n: SVGGElement, ms: number) => {
+    figChord(n.dataset.play!.split(',').map(Number), ms / 1000 + 0.5);
+    nodes.forEach(k => k.classList.toggle('now', k === n)); setTimeout(() => n.classList.remove('now'), ms);
+  };
+  nodes.forEach(n => {
+    const one = () => { player.stop(); figClaim(null); sound(n, 600); };
+    n.addEventListener('click', one);
+    n.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); one(); } });
+  });
+  const btn = fig.querySelector<HTMLButtonElement>('[data-ck-play]');
+  btn?.addEventListener('click', () => {
+    if (player.playing(btn)) return player.stop();
+    const len = Number(wrap.dataset.len), STEP = 1100;
+    // 마디 순서대로, 마지막에 첫 코드로 한 번 돌아와 끝낸다
+    const order = [...Array(len).keys(), 0].map(bar => nodes.find(n => (n.dataset.bars ?? '').split(' ').includes(String(bar)))).filter(Boolean) as SVGGElement[];
+    player.start(btn, order.map((n, k) => ({ at: k * STEP, run: () => sound(n, STEP - 80) })), order.length * STEP + 300);
+  });
+}
+document.querySelectorAll<HTMLElement>('.sl-fig .ck-fig').forEach(init);
+</script>

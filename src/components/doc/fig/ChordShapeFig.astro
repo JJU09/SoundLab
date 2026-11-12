@@ -1,0 +1,56 @@
+---
+// 코드의 모양 — 코드의 음을 5도권 위에 찍어 선으로 이은 그림을 나란히. 그림을 누르면 그 코드가 울린다.
+// 보라 = 근음의 시계 쪽(밝은 쪽) 음, 파랑 = 반시계 쪽(어두운 쪽) 음.
+import Fig from './Fig.astro';
+import { CHORD_TYPES, LETTER_PC, chordNotes, type Letter } from '../../../lib/music';
+import { chordShapeSvg } from '../../../lib/circle';
+interface Props { chords: string[]; caption?: string; }
+const { chords, caption } = Astro.props as Props;
+const items = chords.map(name => {
+  const m = /^([A-G])([♭b♯#]?)(.*)$/.exec(name.trim());
+  const t = m && Object.values(CHORD_TYPES).find(t => t.sym === m[3]);
+  if (!m || !t) throw new Error(`ChordShapeFig: 읽을 수 없는 코드 이름 "${name}"`);
+  const root = { letter: m[1] as Letter, acc: m[2] === '♭' || m[2] === 'b' ? -1 : m[2] ? 1 : 0 };
+  const rootPc = (LETTER_PC[root.letter] + root.acc + 12) % 12;
+  const degs = t.formula.split(' · ').map(d => d.replace(/\(.*\)/, '').replace('♭♭7', '°7').trim());
+  const tones = chordNotes(root, t).map((n, i) => ({ pc: (rootPc + t.steps[i]) % 12, name: n.name.replace('♭♭', '𝄫'), deg: degs[i] ?? '' }));
+  const midi = [(rootPc <= 7 ? 48 : 36) + rootPc, ...t.steps.map(st => 60 + (rootPc + st) % 12).sort((a, b) => a - b)];
+  return { name, kr: t.kr, midi: midi.join(','), svg: chordShapeSvg(rootPc, tones, `${name} ${t.kr}: ${tones.map(n => n.name).join(' · ')}`) };
+});
+---
+<Fig caption={caption} label={`5도권 위의 코드 모양: ${chords.join(', ')}`}>
+  <div class="cs-grid" style={`--n:${Math.min(items.length, 5)}`}>
+    {items.map(it => (
+      <button type="button" class="cs-item" data-play={it.midi} aria-label={`${it.name} ${it.kr} 듣기`}>
+        <span class="cs-name"><b>{it.name}</b>{it.kr}</span>
+        <Fragment set:html={it.svg} />
+      </button>
+    ))}
+  </div>
+  <Fragment slot="controls">
+    <span class="sl-fig-hint"><i class="cs-key" style="background:#7c3aed"></i>근음의 시계 쪽 음</span>
+    <span class="sl-fig-hint"><i class="cs-key" style="background:#2563eb"></i>반시계 쪽 음</span>
+    <span class="sl-fig-hint">그림을 누르면 코드가 울려요</span>
+  </Fragment>
+</Fig>
+<style is:global>
+  .sl-fig .cs-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(132px, 1fr)); gap: 6px; }
+  @media (min-width: 640px) { .sl-fig .cs-grid { grid-template-columns: repeat(var(--n), minmax(0, 1fr)); } }
+  .sl-fig .cs-item { display: block; padding: 8px 4px 2px; border-radius: 12px; border: 1px solid transparent; background: none; cursor: pointer; transition: border-color .12s; }
+  .sl-fig .cs-item:hover { border-color: var(--color-border); }
+  .sl-fig .cs-item:focus-visible { outline: 2px solid var(--color-violet); outline-offset: 2px; }
+  .sl-fig .cs-item svg { max-width: 200px; margin: 0 auto; }
+  .sl-fig .cs-name { display: flex; align-items: baseline; justify-content: center; gap: 6px; font-size: 11.5px; color: var(--color-ink-500); }
+  .sl-fig .cs-name b { font-family: 'Space Grotesk', 'Pretendard', sans-serif; font-size: 16px; color: var(--color-ink-700); }
+  .sl-fig .cs-poly { transition: fill .1s; }
+  .sl-fig .cs-item.is-on .cs-poly { fill: #ede6fd; }
+  .sl-fig .cs-key { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 5px; }
+</style>
+<script>
+import { figChord, figClaim } from '../../../lib/figaudio';
+document.querySelectorAll<HTMLButtonElement>('.sl-fig .cs-item[data-play]').forEach(btn => btn.addEventListener('click', () => {
+  figClaim(null);
+  figChord(btn.dataset.play!.split(',').map(Number));
+  btn.classList.add('is-on'); setTimeout(() => btn.classList.remove('is-on'), 600);
+}));
+</script>

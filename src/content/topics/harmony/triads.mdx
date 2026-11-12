@@ -21,6 +21,7 @@ import DefList from '../../../components/doc/DefList.astro';
 import DefCard from '../../../components/doc/DefCard.astro';
 import Callout from '../../../components/doc/Callout.astro';
 import Staff from '../../../components/doc/Staff.astro';
+import ChordShapeFig from '../../../components/doc/fig/ChordShapeFig.astro';
 
 {/* ───────── 초급 ───────── */}
 <Level show="easy">
@@ -51,6 +52,16 @@ import Staff from '../../../components/doc/Staff.astro';
   <DefCard term="감3화음 (Cdim, C°) — 단3도 + 단3도">5음이 반음 낮아 긴장되고 불안정. 다음 화음으로 풀리고 싶어 합니다.</DefCard>
   <DefCard term="증3화음 (Caug, C+) — 장3도 + 장3도">5음이 반음 높아 붕 뜬 느낌. 화음과 화음을 잇는 경과적 색채로 씁니다.</DefCard>
 </DefList>
+
+## 5도권 위의 모양
+
+세 음을 5도권 위에 찍고 선으로 이으면 코드마다 고유한 모양이 생깁니다. 장3화음은 근음에서 **시계 방향**으로 기운 삼각형이고, 단3화음은 그것을 뒤집어 **반시계 방향**으로 기운 삼각형입니다.
+
+<ChordShapeFig chords={["C","Cm","Cdim","Caug"]} caption="장3화음과 단3화음은 서로 뒤집은 모양. 감3화음은 넓게 벌어지고, 증3화음은 정삼각형" />
+
+근음을 바꿔도 모양은 그대로입니다. 원 위에서 돌아갈 뿐이에요.
+
+<ChordShapeFig chords={["F","C","G","Am"]} caption="F · C · G는 같은 삼각형이 한 칸씩 돈 것. Am은 뒤집힌 삼각형" />
 
 ## 3음을 빼면: 서스 코드
 

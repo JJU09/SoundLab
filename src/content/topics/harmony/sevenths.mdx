@@ -21,6 +21,7 @@ import DefList from '../../../components/doc/DefList.astro';
 import DefCard from '../../../components/doc/DefCard.astro';
 import Callout from '../../../components/doc/Callout.astro';
 import Staff from '../../../components/doc/Staff.astro';
+import ChordShapeFig from '../../../components/doc/fig/ChordShapeFig.astro';
 
 {/* ───────── 초급 ───────── */}
 <Level show="easy">
@@ -50,6 +51,12 @@ import Staff from '../../../components/doc/Staff.astro';
 </DefList>
 
 <Staff notes="C4+E4+G4+B4/w | C4+E4+G4+Bb4/w | C4+Eb4+G4+Bb4/w | C4+Eb4+Gb4+Bb4/w" time="4/4" play caption="Cmaj7 · C7 · Cm7 · Cm7♭5 — 3음·5음·7음 중 무엇이 바뀌는지 비교" />
+
+## 5도권 위의 모양
+
+같은 코드를 5도권 위에 그리면 성격이 눈에 보입니다. Cmaj7은 네 음이 모두 근음의 **시계 쪽**에 모여 있고, C7은 7음 하나가 **반대쪽**으로 넘어가 양쪽에 걸칩니다. Cm7은 3음까지 넘어가 왼쪽으로 기웁니다.
+
+<ChordShapeFig chords={["Cmaj7","C7","Cm7","Cm7♭5","Cdim7"]} caption="음이 반시계 쪽으로 하나씩 넘어갈수록 어두워져요. Cdim7은 정사각형 — 어느 음이 근음이어도 같은 모양" />
 
 <Callout>
 코드 이름의 "7"은 기본적으로 **단7도**를 뜻합니다. 장7도를 쓰려면 반드시 **maj7**(또는 M7, Δ7)이라고 적어야 합니다. C7과 Cmaj7은 맨 위 음 하나 차이지만 역할이 완전히 다르니, 코드표를 읽고 쓸 때 가장 많이 헷갈리는 부분입니다.

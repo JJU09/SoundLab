@@ -81,3 +81,32 @@ export function circleSvg(song: Pick<Song, 'key' | 'mode'>, chords: string[], op
   }
   return h + '</svg>';
 }
+
+// ── 음의 원: 코드 하나를 5도권 위의 모양으로 ──
+// 12음을 5도 간격으로 둘러놓고(시계 방향 = 5도 위) 코드의 음을 점으로 찍어 선으로 잇는다.
+// 근음에서 시계 쪽 음 = 보라(밝은 쪽), 반시계 쪽 음 = 파랑(어두운 쪽). 같은 종류의 코드는 늘 같은 모양.
+export interface ShapeTone { pc: number; name: string; deg: string; }
+const BLUE = '#2563eb';
+export function chordShapeSvg(rootPc: number, tones: ShapeTone[], label: string) {
+  const Sz = 200, c = Sz / 2, R = 64, DR = 12.5;
+  const at = (pos: number, r: number): [number, number] => { const a = (pos * 30 - 90) * Math.PI / 180; return [c + r * Math.cos(a), c + r * Math.sin(a)]; };
+  const rootPos = majPos(rootPc), minorish = tones.some(t => (t.pc - rootPc + 12) % 12 === 3);
+  const ts = tones.map(t => { const pos = majPos(t.pc), d = (pos - rootPos + 12) % 12;
+    return { ...t, pos, col: d === 0 ? INK : d < 6 || (d === 6 && !minorish) ? VIOLET : BLUE }; }).sort((a, b) => a.pos - b.pos);
+  let h = `<svg viewBox="0 0 ${Sz} ${Sz}" class="cs" role="img" aria-label="${esc(label)}">`;
+  h += `<circle cx="${c}" cy="${c}" r="${R}" fill="none" stroke="${LINE}"/>`;
+  h += `<polygon class="cs-poly" points="${ts.map(t => at(t.pos, R).map(f).join(',')).join(' ')}" fill="${SURF}" stroke="${INK}" stroke-width="1.5" stroke-linejoin="round"/>`;
+  const on = new Set(ts.map(t => t.pos));
+  for (let pos = 0; pos < 12; pos++) {
+    if (on.has(pos)) continue;
+    const [x, y] = at(pos, R);
+    h += `<circle cx="${f(x)}" cy="${f(y)}" r="8" fill="white"/><text x="${f(x)}" y="${f(y + 3.2)}" text-anchor="middle" font-size="9" fill="${INK3}">${MAJ[(pos * 7) % 12]}</text>`;
+  }
+  for (const t of ts) {
+    const [x, y] = at(t.pos, R), [lx, ly] = at(t.pos, R + 22);
+    h += `<circle cx="${f(x)}" cy="${f(y)}" r="${DR}" fill="${t.col}"/>`
+      + `<text x="${f(x)}" y="${f(y + 3.8)}" text-anchor="middle" font-size="${t.name.length > 1 ? 9.5 : 11}" font-weight="700" fill="white" class="fd">${esc(t.name)}</text>`
+      + `<text x="${f(lx)}" y="${f(ly + 3.2)}" text-anchor="middle" font-size="9" font-weight="700" fill="${t.col}" class="mono">${esc(t.deg)}</text>`;
+  }
+  return h + '</svg>';
+}

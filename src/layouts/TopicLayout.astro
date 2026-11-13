@@ -53,7 +53,7 @@ const accent = data.color === 'violet'
   ? 'border-[var(--color-violet-light)] text-[var(--color-violet)] bg-[var(--color-violet-glow)]'
   : 'border-[var(--color-blue-light)] text-[var(--color-blue)] bg-[var(--color-blue-glow)]';
 ---
-<Base title={`${data.title} (${data.kr})`} description={data.desc} type="article"
+<Base title={`${data.kr} (${data.title})`} description={data.desc} type="article"
   breadcrumbs={[
     { name: '홈', url: base },
     { name: hub.kr, url: `${base}learn/${data.hub}/` },
@@ -68,7 +68,7 @@ const accent = data.color === 'violet'
       <span>/</span>
       <a href={`${base}learn/${data.hub}/`} class="hover:text-[var(--color-violet)] transition">{hub.kr}</a>
       <span>/</span>
-      <span class="text-[var(--color-ink-700)]">{data.title}</span>
+      <span class="text-[var(--color-ink-700)]">{data.kr}</span>
     </nav>
 
     <div {...(data.scaffold ? { 'data-scaffold': '', 'data-level': 'normal' } : {})}>
@@ -90,13 +90,13 @@ const accent = data.color === 'violet'
       <div>
         <div class="flex items-center gap-3 mb-4">
           <span class={`text-xs font-mono px-2.5 py-1 rounded-full border ${accent}`}>
-            {hub.label.toUpperCase()} · {num}
+            {hub.kr}<span class="label-en">{hub.label}</span> · {num}
           </span>
         </div>
 
         <h1 class="text-3xl sm:text-4xl font-bold mb-2 leading-tight font-display">
-          {data.title}
-          <span class="text-[var(--color-ink-300)] font-medium text-2xl ml-2">{data.kr}</span>
+          {data.kr}
+          <span class="text-[var(--color-ink-300)] font-medium text-xl ml-2">{data.title}</span>
         </h1>
         <p class={`text-lg font-medium mb-6 ${data.color === 'violet' ? 'gradient-brand-text' : ''}`}
           style={data.color === 'blue' ? 'color:var(--color-blue)' : ''}>
@@ -173,7 +173,7 @@ const accent = data.color === 'violet'
               <svg class="w-4 h-4 transition group-hover:-translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
               <div>
                 <div class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)]">이전</div>
-                <div>{prev.title} ({prev.kr})</div>
+                <div>{prev.kr}<span class="label-en">{prev.title}</span></div>
               </div>
             </a>
           ) : <div />}
@@ -183,7 +183,7 @@ const accent = data.color === 'violet'
               class="flex items-center gap-2 text-sm font-medium text-[var(--color-ink-500)] hover:text-[var(--color-violet)] transition group text-right">
               <div>
                 <div class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)]">다음</div>
-                <div>{next.title} ({next.kr})</div>
+                <div>{next.kr}<span class="label-en">{next.title}</span></div>
               </div>
               <svg class="w-4 h-4 transition group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
             </a>

@@ -1,0 +1,273 @@
+---
+// 코드 진행 지도 — 진행을 고르면 근음이 5도권(음의 원) 위에서 움직이는 길을 그리고, 들으며 따라간다.
+import Base from '../../layouts/Base.astro';
+import { PROGS, mapSvg } from '../../lib/progmap';
+const base = import.meta.env.BASE_URL;
+const desc = '코드 진행을 5도권 위에 그려 주는 무료 도구. 캐논, 로열로드, ii–V–I 같은 진행에서 근음이 어느 방향으로 몇 칸 움직이는지 보고 들으며 익히고, 곡 스케치로 보내 곡을 시작할 수 있어요.';
+const first = PROGS[0];
+const groups = [...new Set(PROGS.map(p => p.group))];
+---
+<Base title="코드 진행 지도" description={desc} type="website"
+  breadcrumbs={[{ name: '홈', url: base }, { name: '도구', url: `${base}tools/` }, { name: '코드 진행 지도', url: Astro.url.pathname }]}>
+
+<div class="max-w-6xl mx-auto px-4 sm:px-6 py-10">
+  <nav class="flex items-center gap-2 text-xs font-mono text-[var(--color-ink-300)] mb-6">
+    <a href={base} class="hover:text-[var(--color-violet)] transition">홈</a><span>/</span>
+    <a href={`${base}tools/`} class="hover:text-[var(--color-violet)] transition">도구</a><span>/</span>
+    <span class="text-[var(--color-ink-700)]">코드 진행 지도</span>
+  </nav>
+
+  <div class="mb-6 max-w-2xl">
+    <span class="text-xs font-mono px-2.5 py-1 rounded-full border border-[var(--color-violet-light)] text-[var(--color-violet)] bg-[var(--color-violet-glow)]">도구<span class="label-en">Tools</span></span>
+    <h1 class="text-3xl font-bold mt-3 mb-2 font-display">코드 진행 지도<span class="text-base font-normal text-[var(--color-ink-300)] ml-2">Progression Map</span></h1>
+    <p class="text-[var(--color-ink-500)]">진행을 고르면 근음이 5도권 위에서 어느 쪽으로 몇 칸 움직이는지 그려져요. 재생을 누르고 길을 따라가 보세요.</p>
+  </div>
+
+  <div id="pm" class="grid grid-cols-1 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] gap-5 items-start"
+    data-init={JSON.stringify({ key: 0, mode: first.mode, chords: first.chords, id: first.id })}>
+
+    <!-- 지도 -->
+    <section class="rounded-2xl border border-[var(--color-border)] bg-white overflow-hidden lg:sticky lg:top-20">
+      <div class="flex items-center justify-between gap-2 px-4 py-3 border-b border-[var(--color-border)] bg-[var(--color-surface)]">
+        <div class="flex items-center gap-1.5">
+          <select id="pmKey" class="pm-select" aria-label="으뜸음"></select>
+          <div class="pm-seg" role="group" aria-label="장조 단조">
+            <button type="button" class="pm-mode" data-v="major" aria-pressed="true">장조</button>
+            <button type="button" class="pm-mode" data-v="minor" aria-pressed="false">단조</button>
+          </div>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <button id="pmLoop" type="button" class="pm-btn" aria-pressed="false" title="끝나면 처음부터 다시">반복</button>
+          <button id="pmPlay" type="button" class="gradient-brand text-white text-sm font-semibold px-4 py-1.5 rounded-full font-display whitespace-nowrap" aria-pressed="false">▶ 재생</button>
+        </div>
+      </div>
+      <div id="pmMap" class="p-3 sm:p-5"><Fragment set:html={mapSvg(0, first.mode, first.chords)} /></div>
+      <div class="flex flex-wrap gap-x-4 gap-y-1 px-4 pb-4 text-xs text-[var(--color-ink-500)]">
+        <span><i class="pm-dot" style="background:#7c3aed"></i>시계 방향 (근음이 5도 위로)</span>
+        <span><i class="pm-dot" style="background:#2563eb"></i>반시계 방향 (근음이 5도 아래로)</span>
+        <span><i class="pm-dot" style="background:#f0f0f8;border:1px solid #d4d4e6"></i>이 조의 일곱 음</span>
+      </div>
+    </section>
+
+    <!-- 진행 -->
+    <div class="space-y-4">
+      <section class="p-4 rounded-2xl border border-[var(--color-border)] bg-white space-y-3">
+        <h2 class="text-sm font-bold font-display text-[var(--color-ink-700)]">진행 고르기</h2>
+        {groups.map(g => (
+          <div class="flex flex-wrap items-center gap-1.5">
+            <span class="text-[11px] text-[var(--color-ink-500)] w-14 shrink-0">{g}</span>
+            {PROGS.filter(p => p.group === g).map(p => <button type="button" class="pm-chip" data-prog={p.id} aria-pressed={p.id === first.id ? 'true' : 'false'}>{p.name}</button>)}
+          </div>
+        ))}
+      </section>
+
+      <section class="p-4 rounded-2xl border border-[var(--color-border)] bg-white space-y-3">
+        <div>
+          <h2 id="pmName" class="text-lg font-bold font-display text-[var(--color-ink-700)]">{first.name}</h2>
+          <p id="pmDesc" class="text-sm text-[var(--color-ink-500)] min-h-[1.25rem]">{first.desc}</p>
+        </div>
+        <div id="pmSteps" class="pm-steps" aria-label="코드 순서"></div>
+        <p id="pmSummary" class="text-sm text-[var(--color-ink-700)] leading-relaxed"></p>
+        <ol id="pmMoves" class="space-y-1.5"></ol>
+      </section>
+
+      <section class="p-4 rounded-2xl border border-[var(--color-border)] bg-white space-y-2">
+        <div>
+          <h2 class="text-sm font-bold font-display text-[var(--color-ink-700)]">직접 만들기</h2>
+          <p class="text-xs text-[var(--color-ink-500)]">누르면 진행 끝에 붙어요. 위 코드의 ×를 누르면 빠져요. 8개까지 넣을 수 있어요.</p>
+        </div>
+        <div id="pmPal" class="flex flex-wrap gap-1"></div>
+      </section>
+
+      <section class="p-4 rounded-2xl border border-[var(--color-border)] bg-white flex flex-wrap items-center gap-2">
+        <a id="pmSketch" href={`${base}sandbox/sketch/`} class="gradient-brand text-white font-semibold px-4 py-2.5 rounded-xl text-sm font-display">이 진행으로 곡 스케치 시작</a>
+        <button id="pmShare" type="button" class="pm-btn py-2.5">링크 복사</button>
+        <p class="text-xs text-[var(--color-ink-500)] basis-full">곡 스케치에서는 앞의 네 코드가 벌스, 뒤의 네 코드가 코러스가 돼요.</p>
+      </section>
+    </div>
+  </div>
+
+  <!-- 읽는 법 -->
+  <section class="mt-12 max-w-2xl space-y-3 text-[var(--color-ink-700)] leading-relaxed">
+    <h2 class="text-xl font-bold font-display">이 지도를 읽는 법</h2>
+    <p>원에는 12개 음이 5도 간격으로 놓여 있어요. 시계 방향으로 한 칸 가면 5도 위, 반시계 방향으로 한 칸 가면 5도 아래예요.</p>
+    <p>원 바깥의 화살표는 코드가 바뀔 때 근음이 움직인 길이에요. 반시계 방향으로 한 칸 가는 움직임(G에서 C로)이 가장 자연스럽게 풀려요. ii–V–I를 고르면 이 움직임이 두 번 이어지는 게 보여요.</p>
+    <p>원 안의 색칠한 모양은 지금 울리는 코드예요. 근음보다 시계 방향에 있는 음은 보라, 반시계 방향에 있는 음은 파랑으로 칠해요. 장3화음과 단3화음은 서로 뒤집은 모양이에요.</p>
+    <div class="flex flex-wrap gap-x-4 gap-y-1 pt-2 text-sm">
+      <a href={`${base}learn/harmony/circle-basics/`} class="text-[var(--color-violet)] font-medium hover:underline">5도권 읽는 법</a>
+      <a href={`${base}learn/harmony/triads/`} class="text-[var(--color-violet)] font-medium hover:underline">3화음</a>
+      <a href={`${base}learn/harmony/progressions/`} class="text-[var(--color-violet)] font-medium hover:underline">자주 쓰는 코드 진행</a>
+      <a href={`${base}sandbox/sketch/`} class="text-[var(--color-violet)] font-medium hover:underline">곡 스케치</a>
+    </div>
+  </section>
+</div>
+</Base>
+
+<style is:global>
+  #pm .pm-svg { width: 100%; max-width: 460px; margin: 0 auto; display: block; }
+  #pm .pm-svg .pm-name { font-family: 'Space Grotesk', 'Pretendard', sans-serif; }
+  #pm .pm-svg .mono { font-family: 'JetBrains Mono', monospace; }
+  #pm .pm-svg .pm-move { transition: opacity .2s; }
+  #pm .pm-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 5px; vertical-align: -1px; }
+  #pm .pm-select { font-size: 13px; font-weight: 600; padding: 5px 8px; border-radius: 8px; border: 1px solid var(--color-border); background: white; color: var(--color-ink-700); }
+  #pm .pm-seg { display: inline-flex; gap: 2px; padding: 2px; border-radius: 10px; background: var(--color-surface-2); }
+  #pm .pm-mode { font-size: 12px; font-weight: 600; padding: 4px 9px; border-radius: 8px; color: var(--color-ink-500); }
+  #pm .pm-mode[aria-pressed="true"] { background: white; color: var(--color-violet); box-shadow: 0 1px 2px rgba(0,0,0,.06); }
+  #pm .pm-btn { font-size: 13px; font-weight: 600; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--color-border); background: white; color: var(--color-ink-500); transition: all .1s; }
+  #pm .pm-btn:hover, #pm .pm-btn[aria-pressed="true"] { border-color: var(--color-violet); color: var(--color-violet); }
+  #pm .pm-chip { font-size: 12.5px; font-weight: 600; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--color-border); background: white; color: var(--color-ink-700); font-family: 'Space Grotesk', 'Pretendard', sans-serif; transition: all .1s; }
+  #pm .pm-chip:hover { border-color: var(--color-violet); }
+  #pm .pm-chip[aria-pressed="true"] { border-color: var(--color-violet); background: var(--color-violet-glow); color: var(--color-violet); }
+  #pm .pm-steps { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+  #pm .pm-step { position: relative; min-width: 58px; padding: 6px 8px 5px; border-radius: 10px; border: 1.5px solid var(--color-border); border-top-width: 3px; background: white; text-align: center; cursor: pointer; transition: all .08s; }
+  #pm .pm-step .rn { display: block; font-size: 10.5px; font-family: 'JetBrains Mono', monospace; color: var(--color-ink-500); }
+  #pm .pm-step .nm { display: block; font-size: 15px; font-weight: 800; color: var(--color-ink-700); font-family: 'Space Grotesk', 'Pretendard', sans-serif; line-height: 1.2; }
+  #pm .pm-step.now { background: var(--color-violet-glow); transform: translateY(-2px); }
+  #pm .pm-step .x { position: absolute; top: -8px; right: -7px; width: 18px; height: 18px; border-radius: 50%; background: white; border: 1px solid var(--color-border); font-size: 11px; line-height: 15px; color: var(--color-ink-500); display: none; }
+  #pm .pm-step:hover .x, #pm .pm-step:focus-within .x { display: block; }
+  @media (hover: none) { #pm .pm-step .x { display: block; } }
+  #pm .pm-arrow { font-size: 11px; font-weight: 700; font-family: 'JetBrains Mono', monospace; padding: 0 1px; }
+  #pm .pm-move-row { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; padding: 7px 10px; border-radius: 10px; border: 1px solid transparent; font-size: 13.5px; line-height: 1.5; color: var(--color-ink-700); }
+  #pm .pm-move-row .hd { font-family: 'Space Grotesk', 'Pretendard', sans-serif; font-weight: 700; white-space: nowrap; }
+  #pm .pm-move-row.now { border-color: var(--color-violet-light); background: var(--color-violet-glow); }
+  #pm .pm-pal { font-size: 12px; font-weight: 700; padding: 4px 8px; border-radius: 8px; border: 1px solid var(--color-border); background: white; color: var(--color-ink-700); font-family: 'Space Grotesk', 'Pretendard', sans-serif; }
+  #pm .pm-pal:hover:not(:disabled) { border-color: var(--color-violet); color: var(--color-violet); }
+  #pm .pm-pal:disabled { opacity: .4; cursor: default; }
+</style>
+
+<script>
+import { AudioCore } from '../../audio/core';
+import { playKey } from '../../audio/keys';
+import { PROGS, MAX_CHORDS, palette, analyze, mapSvg, encodeState, decodeState, type Mode } from '../../lib/progmap';
+import { chordInfo, keyOptions, voice, blankSong, encodeSong, SECTIONS } from '../../lib/sketch';
+
+const FN_COL: Record<string, string> = { T: '#16a34a', S: '#2563eb', D: '#dc2626', B: '#9333ea', X: '#ea580c' };
+const STEP = 1500;
+const root = document.getElementById('pm')!;
+const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
+const map = $('pmMap'), steps = $('pmSteps'), moves = $('pmMoves'), summary = $('pmSummary');
+const keySel = $<HTMLSelectElement>('pmKey'), playBtn = $<HTMLButtonElement>('pmPlay'), loopBtn = $<HTMLButtonElement>('pmLoop');
+
+const init = JSON.parse(root.dataset.init!);
+let st: { key: number; mode: Mode; chords: string[]; id: string | null } = init;
+const fromUrl = decodeState(new URLSearchParams(location.search));
+if (fromUrl) st = { ...fromUrl, id: PROGS.find(p => p.mode === fromUrl.mode && p.chords.join() === fromUrl.chords.join())?.id ?? null };
+let now = 0, upto: number | undefined, playing = false, loop = false, timers: number[] = [];
+let core: AudioCore | null = null;
+
+const esc = (s: string) => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
+const prog = () => PROGS.find(p => p.id === st.id);
+
+function fillKeys() {
+  keySel.innerHTML = keyOptions(st.mode).map(o => `<option value="${o.pc}">${o.name} ${st.mode === 'major' ? '장조' : '단조'}</option>`).join('');
+  keySel.value = String(st.key);
+}
+
+function drawMap() { map.innerHTML = mapSvg(st.key, st.mode, st.chords, { now, upto }); }
+
+function render() {
+  const { infos, moves: mv, summary: sum } = analyze(st.key, st.mode, st.chords);
+  drawMap();
+  const p = prog();
+  $('pmName').textContent = p ? p.name : '내 진행';
+  $('pmDesc').textContent = p ? p.desc : '직접 만든 진행이에요.';
+  root.querySelectorAll<HTMLButtonElement>('[data-prog]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.prog === st.id)));
+  root.querySelectorAll<HTMLButtonElement>('.pm-mode').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === st.mode)));
+  // 코드 순서 + 사이의 움직임
+  steps.innerHTML = infos.map((c, i) => {
+    const m = mv[i], arrow = i < infos.length - 1 && m.steps !== 0
+      ? `<span class="pm-arrow" style="color:${m.steps > 0 ? '#7c3aed' : '#2563eb'}" title="${m.steps > 0 ? '시계' : '반시계'} 방향 ${Math.abs(m.steps)}칸">${m.steps > 0 ? '↻' : '↺'}${Math.abs(m.steps)}</span>`
+      : i < infos.length - 1 ? '<span class="pm-arrow" style="color:#6b6b8e">·</span>' : '';
+    return `<div class="pm-step" data-i="${i}" role="button" tabindex="0" style="border-top-color:${FN_COL[c.fn]}" aria-label="${esc(c.rn)} ${esc(c.name)} 듣기">`
+      + `<span class="rn">${esc(c.rn)}</span><span class="nm">${esc(c.name)}</span>`
+      + (st.chords.length > 2 ? `<button type="button" class="x" data-del="${i}" aria-label="${esc(c.name)} 빼기">×</button>` : '') + `</div>${arrow}`;
+  }).join('');
+  summary.textContent = sum;
+  moves.innerHTML = mv.map((m, i) => `<li class="pm-move-row" data-i="${i}"><span class="hd">${esc(m.from.name)} → ${esc(m.to.name)}${i === mv.length - 1 ? ' <span class="font-normal text-[11px] text-[var(--color-ink-500)]">처음으로</span>' : ''}</span><span>${esc(m.text)}</span></li>`).join('');
+  // 팔레트
+  $('pmPal').innerHTML = palette(st.mode).map(rn => { const c = chordInfo(st, rn)!; return `<button type="button" class="pm-pal" data-add="${esc(rn)}" title="${esc(c.name)}"${st.chords.length >= MAX_CHORDS ? ' disabled' : ''}>${esc(rn)}</button>`; }).join('');
+  // 링크
+  history.replaceState(null, '', `${location.pathname}?${encodeState(st.key, st.mode, st.chords)}`);
+  $<HTMLAnchorElement>('pmSketch').href = sketchUrl();
+  mark();
+}
+
+// 지금 코드 표시(재생 중 강조)
+function mark() {
+  steps.querySelectorAll('.pm-step').forEach(el => el.classList.toggle('now', playing && Number((el as HTMLElement).dataset.i) === now));
+  const mi = upto !== undefined && playing ? upto - 1 : -1;
+  moves.querySelectorAll('.pm-move-row').forEach(el => el.classList.toggle('now', Number((el as HTMLElement).dataset.i) === mi));
+}
+
+async function sound(i: number, dur: number) {
+  core ??= new AudioCore(); await core.resume();
+  const c = chordInfo(st, st.chords[i]); if (!c) return;
+  const t = core.ctx.currentTime + 0.02;
+  playKey(core, 36 + c.rootPc + (c.rootPc > 7 ? -12 : 0) + 12, t, dur, 0.22);
+  voice(c.pcs).forEach(m => playKey(core!, m, t, dur, 0.16));
+}
+
+function stop() {
+  timers.forEach(clearTimeout); timers = [];
+  playing = false; upto = undefined;
+  playBtn.textContent = '▶ 재생'; playBtn.setAttribute('aria-pressed', 'false');
+  drawMap(); mark();
+}
+function play() {
+  stop(); playing = true;
+  playBtn.textContent = '■ 멈춤'; playBtn.setAttribute('aria-pressed', 'true');
+  const n = st.chords.length;
+  const order = [...Array(n).keys(), 0];      // 마지막에 첫 코드로 한 번 돌아와 끝낸다
+  order.forEach((ci, k) => timers.push(window.setTimeout(() => {
+    now = ci; upto = k; sound(ci, STEP / 1000 + 0.1); drawMap(); mark();
+  }, k * STEP)));
+  timers.push(window.setTimeout(() => {
+    if (loop && playing) return play();
+    now = 0; stop();
+  }, (loop ? n : n + 1) * STEP));
+}
+
+function sketchUrl() {
+  const s = blankSong(st.mode); s.key = st.key; s.title = prog()?.name ?? '내 진행';
+  const c = st.chords, four = (from: number) => Array.from({ length: 4 }, (_, i) => c[(from + i) % c.length]);
+  s.sections[SECTIONS[0]].chords = four(0);
+  s.sections[SECTIONS[1]].chords = c.length > 4 ? four(4) : four(0);
+  return `${import.meta.env.BASE_URL}sandbox/sketch/?s=${encodeSong(s)}&tab=chords`;
+}
+
+// ── 이벤트 ──
+playBtn.addEventListener('click', () => (playing ? (stop(), now = 0, drawMap()) : play()));
+loopBtn.addEventListener('click', () => { loop = !loop; loopBtn.setAttribute('aria-pressed', String(loop)); });
+keySel.addEventListener('change', () => { st.key = Number(keySel.value); render(); });
+root.querySelectorAll<HTMLButtonElement>('.pm-mode').forEach(b => b.addEventListener('click', () => {
+  if (b.dataset.v === st.mode) return;
+  const p = PROGS.find(x => x.mode === b.dataset.v)!;
+  stop(); st = { key: p.mode === 'minor' ? 9 : 0, mode: p.mode, chords: [...p.chords], id: p.id }; now = 0; fillKeys(); render();
+}));
+root.querySelectorAll<HTMLButtonElement>('[data-prog]').forEach(b => b.addEventListener('click', () => {
+  const p = PROGS.find(x => x.id === b.dataset.prog)!;
+  const keep = p.mode === st.mode;
+  stop(); st = { key: keep ? st.key : p.mode === 'minor' ? 9 : 0, mode: p.mode, chords: [...p.chords], id: p.id }; now = 0;
+  if (!keep) fillKeys();
+  render(); play();
+}));
+steps.addEventListener('click', e => {
+  const t = e.target as HTMLElement;
+  const del = t.closest<HTMLElement>('[data-del]');
+  if (del) { stop(); st.chords.splice(Number(del.dataset.del), 1); st.id = null; now = 0; render(); return; }
+  const s = t.closest<HTMLElement>('.pm-step'); if (!s) return;
+  stop(); now = Number(s.dataset.i); sound(now, 1.2); drawMap();
+});
+steps.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && (e.target as HTMLElement).classList.contains('pm-step')) { e.preventDefault(); (e.target as HTMLElement).click(); } });
+$('pmPal').addEventListener('click', e => {
+  const b = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-add]'); if (!b || st.chords.length >= MAX_CHORDS) return;
+  stop(); st.chords.push(b.dataset.add!); st.id = null; now = st.chords.length - 1; render(); sound(now, 1.2);
+});
+$('pmShare').addEventListener('click', async () => {
+  const b = $('pmShare');
+  try { await navigator.clipboard.writeText(location.href); b.textContent = '복사했어요'; } catch { b.textContent = '주소창의 링크를 복사하세요'; }
+  setTimeout(() => (b.textContent = '링크 복사'), 1800);
+});
+
+fillKeys(); render();
+</script>

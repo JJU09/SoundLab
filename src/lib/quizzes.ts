@@ -2612,7 +2612,7 @@ export const QUIZZES: Record<string, QuizQuestion[] | LevelQuizzes> = {
         explain: 'n번째 측대역의 진폭은 변조 인덱스 β에 대한 제1종 베셀 함수 Jₙ(β)로 주어집니다. β가 커질수록 에너지가 바깥 측대역으로 퍼집니다.',
       },
       {
-        q: 'DX7 같은 디지털 신서사이저가 실제로 쓰는 것은 FM이 아니라?',
+        q: 'DX7 같은 디지털 신디사이저가 실제로 쓰는 것은 FM이 아니라?',
         options: ['진폭 변조(AM)', '위상 변조(PM)', '링 변조', '펄스 폭 변조'],
         answer: 1,
         explain: '사인 캐리어에 대해 FM과 PM은 수학적으로 등가이고, PM이 DC 드리프트가 없어 안정적입니다. DX7은 위상 변조로 구현됩니다.',

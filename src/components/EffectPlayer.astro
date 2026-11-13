@@ -88,7 +88,7 @@ const adv = (tier?: string) => (tier && tier !== 'easy' ? { 'data-adv': tier } :
     <div class="px-5 pb-2 flex flex-col gap-2">
       <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]">
         <canvas class="spectrum-canvas block w-full" style="height:130px"></canvas>
-        <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-blue)] opacity-70 pointer-events-none">Spectrum · 드래그로 Cutoff/Q 조절</span>
+        <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-blue)] opacity-70 pointer-events-none">드래그로 Cutoff/Q 조절<span class="label-en">Spectrum</span></span>
       </div>
       <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]">
         <canvas class="scope-canvas block w-full" style="height:60px"></canvas>
@@ -111,7 +111,7 @@ const adv = (tier?: string) => (tier && tier !== 'easy' ? { 'data-adv': tier } :
         <canvas class="envelope-canvas block w-full" style="height:56px"></canvas>
         <span class="absolute top-1.5 left-2.5 text-[10px] font-mono uppercase tracking-wider opacity-70"
           style={`color:${m.id === 'delay' ? 'var(--color-violet)' : 'var(--color-blue)'}`}>
-          Envelope · 시간 흐름
+          시간 흐름<span class="label-en">Envelope</span>
         </span>
       </div>
     </div>

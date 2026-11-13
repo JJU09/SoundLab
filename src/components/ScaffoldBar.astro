@@ -13,9 +13,9 @@ const LEVELS = ['easy', 'normal', 'hard'] as const;
 type Level = typeof LEVELS[number];
 
 const TEXT: Record<Level, { label: string; dot: string; down?: string; up?: string }> = {
-  easy:   { label: 'Easy · 초급', dot: '#22c55e', up: '이제 좀 이해가 돼요 (중급으로) →' },
-  normal: { label: 'Normal · 중급', dot: '#7c3aed', down: '← 내용이 너무 어려워요', up: '내용이 좀 쉬워요 →' },
-  hard:   { label: 'Hard · 고급', dot: '#ef4444', down: '← 갑자기 너무 어려워졌어요 (중급으로)' },
+  easy:   { label: '초급<span class="label-en">Easy</span>', dot: '#22c55e', up: '이제 좀 이해가 돼요 (중급으로) →' },
+  normal: { label: '중급<span class="label-en">Normal</span>', dot: '#7c3aed', down: '← 내용이 너무 어려워요', up: '내용이 좀 쉬워요 →' },
+  hard:   { label: '고급<span class="label-en">Hard</span>', dot: '#ef4444', down: '← 갑자기 너무 어려워졌어요 (중급으로)' },
 };
 
 function initBar(bar: HTMLElement) {

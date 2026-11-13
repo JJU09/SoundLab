@@ -29,7 +29,7 @@ const adv = (tier?: string) => (tier && tier !== 'easy' ? { 'data-adv': tier } :
     <!-- 스코프 (클립 후 파형) -->
     <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]">
       <canvas class="scope-cv block w-full" style="height:120px"></canvas>
-      <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)] opacity-70">Waveform · 출력 파형</span>
+      <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)] opacity-70">출력 파형<span class="label-en">Waveform</span></span>
       <span class="clip-led absolute top-2 right-2.5 text-[10px] font-mono font-bold px-2 py-0.5 rounded text-white transition-opacity opacity-0" style="background:#ef4444">CLIP</span>
     </div>
 
@@ -59,7 +59,7 @@ const adv = (tier?: string) => (tier && tier !== 'easy' ? { 'data-adv': tier } :
     <!-- 입력 게인 (easy — 핵심) -->
     <div>
       <div class="flex items-center justify-between mb-1">
-        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Input Gain · 입력 게인</span>
+        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">입력 게인<span class="label-en">Input Gain</span></span>
         <span class="gain-val text-sm font-mono text-[var(--color-ink-700)]">{c.gain > 0 ? '+' : ''}{c.gain} dB</span>
       </div>
       <input type="range" class="sl-range gain-range" min="-24" max="12" step="0.5" value={c.gain} aria-label="입력 게인" />

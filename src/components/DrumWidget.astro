@@ -59,7 +59,7 @@ const seg = 'px-2 py-1.5 rounded-lg text-xs font-semibold transition-all text-[v
     {showSwing && (
       <div>
         <div class="flex items-center justify-between mb-1">
-          <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Swing · 스윙</span>
+          <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">스윙<span class="label-en">Swing</span></span>
           <span class="swing-val text-sm font-mono text-[var(--color-ink-700)]">50% (정박)</span>
         </div>
         <input type="range" class="sl-range swing-range" min="50" max="75" step="1" value="50" aria-label="스윙" />
@@ -67,7 +67,7 @@ const seg = 'px-2 py-1.5 rounded-lg text-xs font-semibold transition-all text-[v
     )}
     <div>
       <div class="flex items-center justify-between mb-1">
-        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">BPM · 템포</span>
+        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">템포<span class="label-en">BPM</span></span>
         <span class="bpm-val text-sm font-mono text-[var(--color-ink-700)]">{first.bpm}</span>
       </div>
       <input type="range" class="sl-range bpm-range" min="50" max="180" step="1" value={first.bpm} aria-label="템포" />

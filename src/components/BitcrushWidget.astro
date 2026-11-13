@@ -29,18 +29,18 @@ const adv = (tier?: string) => (tier && tier !== 'easy' ? { 'data-adv': tier } :
     <!-- 파형 (계단) -->
     <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]">
       <canvas class="scope-cv block w-full" style="height:120px"></canvas>
-      <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)] opacity-70">Waveform · 계단 양자화</span>
+      <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)] opacity-70">계단 양자화<span class="label-en">Waveform</span></span>
     </div>
     <!-- 스펙트럼 (normal: 양자화 노이즈) -->
     <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]" {...adv('normal')}>
       <canvas class="spec-cv block w-full" style="height:80px"></canvas>
-      <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-blue)] opacity-70">Spectrum · 양자화 노이즈</span>
+      <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-blue)] opacity-70">양자화 노이즈<span class="label-en">Spectrum</span></span>
     </div>
 
     <!-- 비트 뎁스 (easy) -->
     <div>
       <div class="flex items-center justify-between mb-1">
-        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Bit Depth · 비트 수</span>
+        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">비트 수<span class="label-en">Bit Depth</span></span>
         <span class="bits-val text-sm font-mono text-[var(--color-ink-700)]">{c.bits}-bit</span>
       </div>
       <input type="range" class="sl-range bits-range" min="1" max="16" step="1" value={c.bits} aria-label="비트 뎁스" />
@@ -66,7 +66,7 @@ const adv = (tier?: string) => (tier && tier !== 'easy' ? { 'data-adv': tier } :
     </div>
     <!-- 디더 (hard) -->
     <div {...adv('hard')}>
-      <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">Dither · 디더링</div>
+      <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">디더링<span class="label-en">Dither</span></div>
       <div class="flex gap-1.5 p-1 bg-[var(--color-surface-2)] rounded-xl w-fit dither-group" role="group">
         <button class="dither-btn px-3 py-1.5 rounded-lg text-xs font-mono transition-all text-[var(--color-ink-500)]" data-on="0" aria-pressed="true">Off</button>
         <button class="dither-btn px-3 py-1.5 rounded-lg text-xs font-mono transition-all text-[var(--color-ink-500)]" data-on="1" aria-pressed="false">On</button>

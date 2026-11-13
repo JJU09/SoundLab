@@ -65,14 +65,14 @@ const seg = 'px-2 py-1.5 rounded-lg text-xs font-semibold transition-all text-[v
     </div>
     <div class="grid gap-2" style={`grid-template-columns:${voicing ? '1fr 1fr' : '1fr'}`}>
       <div>
-        <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">Key · 조</div>
+        <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">조<span class="label-en">Key</span></div>
         <div class="grid gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" style={`grid-template-columns:repeat(${keys.length},1fr)`} role="group">
           {keys.map(k => <button type="button" class={`key-btn ${seg}`} style="padding-left:0;padding-right:0" data-v={k} aria-pressed={k === key ? 'true' : 'false'}>{k}</button>)}
         </div>
       </div>
       {voicing && (
         <div>
-          <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">Voicing · 보이싱</div>
+          <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">보이싱<span class="label-en">Voicing</span></div>
           <div class="grid grid-cols-2 gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" role="group">
             <button type="button" class={`voi-btn ${seg}`} data-v="root" aria-pressed="true">기본형</button>
             <button type="button" class={`voi-btn ${seg}`} data-v="smooth" aria-pressed="false">가까운 자리</button>

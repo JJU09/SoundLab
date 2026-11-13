@@ -40,13 +40,13 @@ const adv = (tier?: string) => (tier && tier !== 'easy' ? { 'data-adv': tier } :
     <!-- 스펙트럼 (normal) -->
     <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]" {...adv('normal')}>
       <canvas class="spec-cv block w-full" style="height:80px"></canvas>
-      <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-blue)] opacity-70">Spectrum · 실제 들리는 음</span>
+      <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-blue)] opacity-70">실제 들리는 음<span class="label-en">Spectrum</span></span>
     </div>
 
     <!-- 샘플레이트 (easy — 핵심) -->
     <div>
       <div class="flex items-center justify-between mb-1">
-        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Sample Rate · 1초당 샘플 수</span>
+        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">1초당 샘플 수<span class="label-en">Sample Rate</span></span>
         <span class="sr-val text-sm font-mono text-[var(--color-ink-700)]">{c.sr}Hz</span>
       </div>
       <input type="range" class="sl-range sr-range" min="800" max="16000" step="50" value={c.sr} aria-label="샘플레이트" />
@@ -54,7 +54,7 @@ const adv = (tier?: string) => (tier && tier !== 'easy' ? { 'data-adv': tier } :
     <!-- 신호 주파수 (normal) -->
     <div {...adv('normal')}>
       <div class="flex items-center justify-between mb-1">
-        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Signal · 원본 주파수</span>
+        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">원본 주파수<span class="label-en">Signal</span></span>
         <span class="freq-val text-sm font-mono text-[var(--color-ink-700)]">{c.freq}Hz</span>
       </div>
       <input type="range" class="sl-range freq-range" min="100" max="600" step="5" value={c.freq} aria-label="원본 주파수" />

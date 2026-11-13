@@ -43,14 +43,14 @@ const seg = 'px-2 py-1.5 rounded-lg text-xs font-semibold transition-all text-[v
       {keys.filter(isBlack).map(m => <span class="ck black" data-midi={m} style={`left:${blackLeft(m)}%;width:${W * 0.6}%`}></span>)}
     </div>
     <div>
-      <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">Root · 근음</div>
+      <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">근음<span class="label-en">Root</span></div>
       <div class="grid grid-cols-6 gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" role="group">
         {ROOTS.map(r => <button type="button" class={`root-btn ${seg}`} style="padding-left:0;padding-right:0" data-v={r.name} aria-pressed={r.name === rootName ? 'true' : 'false'}>{r.name}</button>)}
       </div>
     </div>
     {types.length > 1 && (
       <div>
-        <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">Type · 코드 종류</div>
+        <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">코드 종류<span class="label-en">Type</span></div>
         <div class="grid gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" style={`grid-template-columns:repeat(${Math.min(types.length, 4)},1fr)`} role="group">
           {types.map((t, i) => <button type="button" class={`type-btn ${seg}`} data-v={t} aria-pressed={i === 0 ? 'true' : 'false'}>{CHORD_TYPES[t].kr}</button>)}
         </div>
@@ -58,7 +58,7 @@ const seg = 'px-2 py-1.5 rounded-lg text-xs font-semibold transition-all text-[v
     )}
     {inv && (
       <div>
-        <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">Inversion · 자리바꿈</div>
+        <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">자리바꿈<span class="label-en">Inversion</span></div>
         <div class="grid grid-cols-4 gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" role="group">
           {['기본형', '1전위', '2전위', '3전위'].map((t, i) => <button type="button" class={`inv-btn ${seg}`} data-v={i} aria-pressed={i === 0 ? 'true' : 'false'}>{t}</button>)}
         </div>

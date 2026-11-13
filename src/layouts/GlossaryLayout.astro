@@ -86,7 +86,7 @@ const topicHref = data.relatedTopic ? `${base}learn/${data.relatedTopic}/` : nul
         {topicHref && (
           <a href={topicHref} class="group flex items-center gap-3 p-4 rounded-xl border border-[var(--color-border)] bg-white hover:border-[var(--color-violet)] hover:shadow-lg transition-all">
             <div class="min-w-0">
-              <div class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)]">Learn · 더 깊이</div>
+              <div class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)]">더 깊이<span class="label-en">Learn</span></div>
               <div class="font-bold text-[var(--color-ink-700)] group-hover:text-[var(--color-violet)] transition text-sm font-display">{hub.kr} 허브에서 자세히 →</div>
             </div>
           </a>
@@ -94,7 +94,7 @@ const topicHref = data.relatedTopic ? `${base}learn/${data.relatedTopic}/` : nul
         {data.relatedTool && (
           <a href={`${base}${data.relatedTool.path}`} class="group flex items-center gap-3 p-4 rounded-xl border border-[var(--color-border)] bg-white hover:border-[var(--color-violet)] hover:shadow-lg transition-all">
             <div class="min-w-0">
-              <div class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)]">Tool · 도구</div>
+              <div class="text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)]">도구<span class="label-en">Tool</span></div>
               <div class="font-bold text-[var(--color-ink-700)] group-hover:text-[var(--color-violet)] transition text-sm font-display">{data.relatedTool.name} 써보기 →</div>
             </div>
           </a>

@@ -33,18 +33,18 @@ const adv = (tier?: string) => (tier && tier !== 'easy' ? { 'data-adv': tier } :
     <!-- 파형 -->
     <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]">
       <canvas class="scope-cv block w-full" style="height:104px"></canvas>
-      <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)] opacity-70">Waveform · 파형</span>
+      <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)] opacity-70">파형<span class="label-en">Waveform</span></span>
     </div>
     <!-- 스펙트럼 (측대역) -->
     <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]">
       <canvas class="spec-cv block w-full" style="height:84px"></canvas>
-      <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-blue)] opacity-70">Spectrum · 측대역(sideband)</span>
+      <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-blue)] opacity-70">측대역(sideband)<span class="label-en">Spectrum</span></span>
     </div>
 
     <!-- 변조 인덱스 (전 티어 — easy의 단일 손잡이) -->
     <div>
       <div class="flex items-center justify-between mb-1">
-        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Index · 변조 세기 (β)</span>
+        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">변조 세기 (β)<span class="label-en">Index</span></span>
         <span class="idx-val text-sm font-mono text-[var(--color-ink-700)]">{index}</span>
       </div>
       <input type="range" class="sl-range idx-range" min="0" max="12" step="0.1" value={index} aria-label="변조 인덱스" />
@@ -53,7 +53,7 @@ const adv = (tier?: string) => (tier && tier !== 'easy' ? { 'data-adv': tier } :
     <!-- C:M 비율 (normal↑) -->
     <div {...adv('normal')}>
       <div class="flex items-center justify-between mb-1">
-        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Ratio · C:M 비율</span>
+        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">C:M 비율<span class="label-en">Ratio</span></span>
         <span class="ratio-val text-sm font-mono text-[var(--color-ink-700)]">1 : {ratio}</span>
       </div>
       <input type="range" class="sl-range ratio-range" min="0.5" max="5" step="0.25" value={ratio} aria-label="C M 비율" />
@@ -63,7 +63,7 @@ const adv = (tier?: string) => (tier && tier !== 'easy' ? { 'data-adv': tier } :
     <!-- 캐리어 주파수 (normal↑) -->
     <div {...adv('normal')}>
       <div class="flex items-center justify-between mb-1">
-        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Carrier · 캐리어(음높이)</span>
+        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">캐리어(음높이)<span class="label-en">Carrier</span></span>
         <span class="fc-val text-sm font-mono text-[var(--color-ink-700)]">{fc}Hz</span>
       </div>
       <input type="range" class="sl-range fc-range" min="110" max="440" step="1" value={fc} aria-label="캐리어 주파수" />

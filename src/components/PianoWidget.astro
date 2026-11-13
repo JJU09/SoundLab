@@ -71,14 +71,14 @@ const labelOpts: [string, string][] = [['kr', '도레미'], ['en', 'CDE'], ['bot
     {mode === 'scale' && <>
       <div class="steps-row flex flex-wrap justify-center gap-1 text-[11px] font-mono min-h-[1.5em]"></div>
       <div>
-        <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">Root · 으뜸음</div>
+        <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">으뜸음<span class="label-en">Root</span></div>
         <div class="grid grid-cols-6 gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" role="group">
           {ROOTS.map(r => <button type="button" class={`root-btn ${seg}`} style="padding-left:0;padding-right:0" data-v={r.name} aria-pressed={r.name === rootName ? 'true' : 'false'}>{r.name}</button>)}
         </div>
       </div>
       {scaleIds.length > 1 && (
         <div>
-          <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">Scale · 음계</div>
+          <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">음계<span class="label-en">Scale</span></div>
           <div class="grid gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" style={`grid-template-columns:repeat(${Math.min(scaleIds.length, 3)},1fr)`} role="group">
             {scaleIds.map((id, i) => <button type="button" class={`scale-btn ${seg}`} data-v={id} aria-pressed={i === 0 ? 'true' : 'false'}>{SCALES[id].kr}</button>)}
           </div>
@@ -89,7 +89,7 @@ const labelOpts: [string, string][] = [['kr', '도레미'], ['en', 'CDE'], ['bot
 
     <!-- 표기 -->
     <div>
-      <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">Labels · 건반 위 이름</div>
+      <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">건반 위 이름<span class="label-en">Labels</span></div>
       <div class="flex gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" role="group">
         {labelOpts.map(([v, t]) => (
           <button type="button" class="lab-btn flex-1 px-2 py-1.5 rounded-lg text-xs font-semibold transition-all text-[var(--color-ink-500)] font-display"

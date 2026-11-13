@@ -45,12 +45,12 @@ const fHz = (v: number) => v >= 1000 ? (v / 1000).toFixed(1) + 'kHz' : Math.roun
     <!-- 스펙트럼 (normal) -->
     <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]" {...adv('normal')}>
       <canvas class="spec-cv block w-full" style="height:90px"></canvas>
-      <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-blue)] opacity-70">Spectrum · 배음이 깎이는 모습</span>
+      <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-blue)] opacity-70">배음이 깎이는 모습<span class="label-en">Spectrum</span></span>
     </div>
 
     <!-- 오실레이터 파형 (easy) -->
     <div>
-      <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">Oscillator · 음원 파형</div>
+      <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">음원 파형<span class="label-en">Oscillator</span></div>
       <div class="flex gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl w-fit" role="group">
         {waves.map(([v, t]) => (
           <button class="wave-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-[var(--color-ink-500)] font-display"
@@ -61,7 +61,7 @@ const fHz = (v: number) => v >= 1000 ? (v / 1000).toFixed(1) + 'kHz' : Math.roun
     <!-- Cutoff (easy) -->
     <div>
       <div class="flex items-center justify-between mb-1">
-        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Cutoff · 깎는 경계</span>
+        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">깎는 경계<span class="label-en">Cutoff</span></span>
         <span class="cut-val text-sm font-mono text-[var(--color-ink-700)]">{fHz(c.cutoff)}</span>
       </div>
       <input type="range" class="sl-range cut-range" min="0" max="1000" step="1" value={Math.round(Math.sqrt(c.cutoff/18000)*1000)} aria-label="컷오프" />
@@ -69,14 +69,14 @@ const fHz = (v: number) => v >= 1000 ? (v / 1000).toFixed(1) + 'kHz' : Math.roun
     <!-- Resonance (normal) -->
     <div {...adv('normal')}>
       <div class="flex items-center justify-between mb-1">
-        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Resonance · 공진</span>
+        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">공진<span class="label-en">Resonance</span></span>
         <span class="q-val text-sm font-mono text-[var(--color-ink-700)]">{c.q.toFixed(1)}</span>
       </div>
       <input type="range" class="sl-range q-range" min="1" max="200" step="1" value={Math.round(c.q*10)} aria-label="공진" />
     </div>
     <!-- Filter Type (hard) -->
     <div {...adv('hard')}>
-      <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">Filter Type · 필터 종류</div>
+      <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">필터 종류<span class="label-en">Filter Type</span></div>
       <div class="flex gap-1.5 p-1 bg-[var(--color-surface-2)] rounded-xl w-fit ftype-group" role="group">
         {ftypes.map(([v, t]) => (
           <button class="ftype-btn px-3 py-1.5 rounded-lg text-xs font-mono transition-all text-[var(--color-ink-500)]"

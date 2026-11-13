@@ -29,18 +29,18 @@ const adv = (tier?: string) => (tier && tier !== 'easy' ? { 'data-adv': tier } :
     <!-- 파형 -->
     <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]">
       <canvas class="scope-cv block w-full" style="height:110px"></canvas>
-      <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)] opacity-70">Waveform · 파형</span>
+      <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)] opacity-70">파형<span class="label-en">Waveform</span></span>
     </div>
     <!-- 스펙트럼 (normal↑: 음색=배음) -->
     <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]" {...adv('normal')}>
       <canvas class="spec-cv block w-full" style="height:90px"></canvas>
-      <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-blue)] opacity-70">Spectrum · 배음</span>
+      <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-blue)] opacity-70">배음<span class="label-en">Spectrum</span></span>
     </div>
 
     <!-- 음높이 -->
     <div>
       <div class="flex items-center justify-between mb-1">
-        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Frequency · 음높이</span>
+        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">음높이<span class="label-en">Frequency</span></span>
         <span class="freq-val text-sm font-mono text-[var(--color-ink-700)]">{c.freq}Hz</span>
       </div>
       <input type="range" class="sl-range freq-range" min="80" max="880" step="1" value={c.freq} aria-label="주파수" />
@@ -48,14 +48,14 @@ const adv = (tier?: string) => (tier && tier !== 'easy' ? { 'data-adv': tier } :
     <!-- 음량 -->
     <div>
       <div class="flex items-center justify-between mb-1">
-        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Amplitude · 음량</span>
+        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">음량<span class="label-en">Amplitude</span></span>
         <span class="amp-val text-sm font-mono text-[var(--color-ink-700)]">{c.amp}%</span>
       </div>
       <input type="range" class="sl-range amp-range" min="0" max="100" step="1" value={c.amp} aria-label="음량" />
     </div>
     <!-- 음색(파형) -->
     <div>
-      <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">Waveform · 음색</div>
+      <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">음색<span class="label-en">Waveform</span></div>
       <div class="flex gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" role="group">
         {waves.map(([v, t]) => (
           <button class="wave-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-[var(--color-ink-500)] font-display"

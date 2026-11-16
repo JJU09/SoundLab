@@ -7,6 +7,7 @@
 //   title       : 헤더 제목 (기본 "건반")
 //   mode        : 'free'(기본) | 'interval'(두 건반 사이 음정) | 'scale'(으뜸음·음계를 골라 강조·재생)
 //   scales      : scale 모드에서 고를 음계 id 목록 (lib/music.ts SCALES), root: 처음 으뜸음 이름 (예 'C')
+//   mode 'keysig': 조를 고르면 그 조의 일곱 음을 건반에 칠하고 조표를 오선으로 보여 준다. key: 처음 조 (예 'G')
 import { parseNote, range, isBlack, midiName, solfegeName, SCALES, ROOTS } from '../lib/music';
 interface Props { config?: Record<string, any>; }
 const { config = {} } = Astro.props;
@@ -25,9 +26,15 @@ const W = 100 / whites.length; // 흰 건반 폭(%)
 // 검은 건반 위치: 왼쪽 흰 건반의 오른쪽 끝에 중심
 const blackLeft = (m: number) => (whites.indexOf(m - 1) + 1) * W - W * 0.3;
 const labelOpts: [string, string][] = [['kr', '도레미'], ['en', 'CDE'], ['both', '둘 다'], ['none', '숨김']];
+// keysig 모드: 조표 개수 순서. 위 줄 = 조표 없음과 ♯ 조, 아래 줄 = ♭ 조
+const KEYSIG_ROWS: [string, number][][] = [
+  [['C', 0], ['G', 1], ['D', 2], ['A', 3], ['E', 4], ['B', 5], ['F♯', 6]],
+  [['F', -1], ['B♭', -2], ['E♭', -3], ['A♭', -4], ['D♭', -5], ['G♭', -6]],
+];
+const keyName: string = config.key ?? 'G';
 ---
 <div class="piano-widget rounded-2xl border border-[var(--color-border)] bg-white overflow-hidden outline-none"
-  tabindex="0" data-labels={labels} data-lo={lo} data-mode={mode} data-root={rootName} data-scale={scaleIds[0]} aria-label="건반 위젯. 키보드 A부터 K까지로도 연주할 수 있어요">
+  tabindex="0" data-labels={labels} data-lo={lo} data-mode={mode} data-root={rootName} data-scale={scaleIds[0]} data-key={keyName} aria-label="건반 위젯. 키보드 A부터 K까지로도 연주할 수 있어요">
 
   <div class="flex items-center justify-between px-5 py-4 border-b border-[var(--color-border)] bg-[var(--color-surface)]">
     <div class="flex items-center gap-3">
@@ -42,6 +49,15 @@ const labelOpts: [string, string][] = [['kr', '도레미'], ['en', 'CDE'], ['bot
   </div>
 
   <div class="p-5 space-y-4">
+    {mode === 'keysig' && (
+      <div class="ks-head flex items-center gap-3 rounded-xl border border-[var(--color-border)] px-3 py-2">
+        <div class="ks-staff shrink-0"></div>
+        <div class="min-w-0">
+          <div class="ks-name text-lg font-bold text-[var(--color-ink-700)] font-display leading-tight"></div>
+          <div class="ks-acc text-xs text-[var(--color-ink-500)] mt-0.5"></div>
+        </div>
+      </div>
+    )}
     <!-- 지금 누른 음 -->
     <div class="rounded-xl bg-[var(--color-surface-2)] border border-[var(--color-border)] px-4 py-3 text-center" aria-live="polite">
       <div class="now-kr text-3xl font-bold text-[var(--color-ink-700)] leading-tight font-display">건반을 눌러 보세요</div>
@@ -56,11 +72,12 @@ const labelOpts: [string, string][] = [['kr', '도레미'], ['en', 'CDE'], ['bot
           {m === 60 && <span class="mid-c" title="가운데 도 (C4)"></span>}
           <span class="lab lab-kr">{solfegeName(m)}</span>
           <span class="lab lab-en">{midiName(m, 'sharp', m % 12 === 0)}</span>
+          {mode === 'keysig' && <span class="ks-lab"></span>}
         </button>
       ))}
       {keys.filter(isBlack).map(m => (
         <button type="button" class:list={['key black', highlight.includes(m) && 'hl']} data-midi={m}
-          style={`left:${blackLeft(m)}%;width:${W * 0.6}%`} aria-label={`${solfegeName(m)} ${midiName(m)}`}></button>
+          style={`left:${blackLeft(m)}%;width:${W * 0.6}%`} aria-label={`${solfegeName(m)} ${midiName(m)}`}>{mode === 'keysig' && <span class="ks-lab"></span>}</button>
       ))}
     </div>
     <div class="flex items-center justify-between text-[10px] font-mono text-[var(--color-ink-300)]">
@@ -87,8 +104,27 @@ const labelOpts: [string, string][] = [['kr', '도레미'], ['en', 'CDE'], ['bot
       <button type="button" class="scale-play w-full text-sm font-semibold py-2 rounded-xl gradient-brand text-white hover:opacity-90 transition">▶ 음계 들어보기</button>
     </>}
 
+    {mode === 'keysig' && <>
+      <div>
+        <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">조<span class="label-en">Key</span></div>
+        <div class="space-y-1 p-1 bg-[var(--color-surface-2)] rounded-xl" role="group" aria-label="조 고르기">
+          {KEYSIG_ROWS.map(row => (
+            <div class="grid grid-cols-7 gap-1">
+              {row.map(([k, n]) => (
+                <button type="button" class={`ks-btn ${seg}`} style="padding-left:0;padding-right:0" data-v={k} data-n={n} aria-pressed={k === keyName ? 'true' : 'false'}>
+                  <span class="block font-display text-[13px] leading-tight">{k}</span>
+                  <span class="block text-[10px] font-normal leading-tight">{n === 0 ? '없음' : `${n > 0 ? '♯' : '♭'}${Math.abs(n)}`}</span>
+                </button>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+      <button type="button" class="scale-play w-full text-sm font-semibold py-2 rounded-xl gradient-brand text-white hover:opacity-90 transition">▶ 이 조의 음계 들어보기</button>
+    </>}
+
     <!-- 표기 -->
-    <div>
+    <div class:list={[mode === 'keysig' && 'hidden']}>
       <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">건반 위 이름<span class="label-en">Labels</span></div>
       <div class="flex gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" role="group">
         {labelOpts.map(([v, t]) => (
@@ -114,13 +150,41 @@ const labelOpts: [string, string][] = [['kr', '도레미'], ['en', 'CDE'], ['bot
   .kb .mid-c { position: absolute; top: 42%; left: 50%; margin-left: -3px; width: 6px; height: 6px; border-radius: 50%; background: var(--color-violet); pointer-events: none; }
   .piano-widget[data-labels="kr"] .lab-en, .piano-widget[data-labels="en"] .lab-kr,
   .piano-widget[data-labels="none"] .lab { display: none; }
+  .piano-widget[data-mode="keysig"] .lab { display: none; }
+  .kb .ks-lab { display: none; pointer-events: none; text-align: center; line-height: 1.15; }
+  .kb .key.hl .ks-lab { display: block; }
+  .kb .white .ks-lab { font-size: 11px; font-weight: 700; color: var(--color-ink-700); font-family: 'Space Grotesk', 'Pretendard', sans-serif; }
+  .kb .black .ks-lab { position: absolute; left: 0; right: 0; bottom: 5px; font-size: 9.5px; font-weight: 700; color: #fff; font-family: 'Space Grotesk', 'Pretendard', sans-serif; }
+  .kb .ks-lab :global(small) { display: block; font-size: 9.5px; font-weight: 500; color: var(--color-ink-500); font-family: 'Pretendard', sans-serif; }
+  .kb .black .ks-lab :global(small) { color: #e9e3ff; }
+  .kb .white.hl.acc { background: #ddd6fe; box-shadow: inset 0 -3px 0 var(--color-violet); }
+  .kb .black.hl.acc { background: #7c3aed; }
+  .ks-btn[aria-pressed="true"] { background: white; color: var(--color-violet); box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  .ks-staff :global(.mus) { font-family: 'SL Music', 'Noto Music', serif; }
   .piano-widget:focus-visible { box-shadow: 0 0 0 2px var(--color-violet-light); }
 </style>
 
 <script>
 import { AudioCore } from '../audio/core';
 import { playKey } from '../audio/keys';
-import { midiName, solfegeName, isBlack, intervalName, SCALES, ROOTS, spellScale, LETTER_PC } from '../lib/music';
+import { midiName, solfegeName, isBlack, intervalName, SCALES, ROOTS, spellScale, LETTER_PC, type Letter } from '../lib/music';
+
+// ── keysig 모드 도우미 ──
+const KR_LETTER: Record<string, string> = { C: '다', D: '라', E: '마', F: '바', G: '사', A: '가', B: '나' };
+const MOVABLE = ['도', '레', '미', '파', '솔', '라', '시'];
+const keyRootOf = (name: string) => ({ letter: name[0] as Letter, acc: name.includes('♯') ? 1 : name.includes('♭') ? -1 : 0 });
+const keyKr = (name: string) => { const r = keyRootOf(name); return (r.acc > 0 ? '올림' : r.acc < 0 ? '내림' : '') + KR_LETTER[r.letter] + '장조'; };
+// 높은음자리표 조표 위치(온음계 번호, E4 = 30) — Staff.astro와 같은 값
+const SHARP_POS = [38, 35, 39, 36, 33, 37, 34], FLAT_POS = [34, 37, 33, 36, 32, 35, 31];
+function keySigSvg(n: number) {
+  const S = 8, TOP = 18, BOTTOM = TOP + 4 * S, yOf = (d: number) => BOTTOM - (d - 30) * S / 2;
+  const pos = n > 0 ? SHARP_POS.slice(0, n) : FLAT_POS.slice(0, -n), w = Math.max(64, 40 + pos.length * 8 + 10), h = BOTTOM + 16;
+  let out = `<svg viewBox="0 0 ${w} ${h}" width="${w * 1.15}" height="${h * 1.15}" role="img" aria-label="조표 ${n === 0 ? '없음' : `${n > 0 ? '샵' : '플랫'} ${Math.abs(n)}개`}">`;
+  for (let i = 0; i < 5; i++) out += `<line x1="2" x2="${w - 2}" y1="${TOP + i * S}" y2="${TOP + i * S}" stroke="#3a3a48" stroke-width="0.9"/>`;
+  out += `<text x="4" y="${TOP + 3 * S}" class="mus" font-size="${S * 4}" fill="#1d1d26">\u{1D11E}</text>`;
+  pos.forEach((d, i) => { out += `<text x="${36 + i * 8}" y="${yOf(d) + (n > 0 ? 3 : 2)}" class="mus" font-size="${S * 1.7}" fill="#7c3aed">${n > 0 ? '♯' : '♭'}</text>`; });
+  return out + '</svg>';
+}
 
 // PC 키보드 → 반음 오프셋 (C부터 한 옥타브 + 도)
 const KEYMAP: Record<string, number> = { a: 0, w: 1, s: 2, e: 3, d: 4, f: 5, t: 6, g: 7, y: 8, h: 9, u: 10, j: 11, k: 12 };
@@ -161,8 +225,48 @@ function initPiano(root: HTMLElement) {
       return;
     }
     const pc = ((m % 12) + 12) % 12;
+    if (mode === 'keysig' && !spelled[pc]) { nowKr.textContent = solfegeName(m); nowEn.textContent = '이 조의 일곱 음에는 없는 음이에요'; return; }
+    if (mode === 'keysig') { const [nm, rest] = spelled[pc].split(' · '); nowKr.textContent = nm; nowEn.textContent = rest; return; }
     nowKr.textContent = spelled[pc] ? spelled[pc] : solfegeName(m);
     nowEn.textContent = isBlack(m) ? `${midiName(m, 'sharp')} = ${midiName(m, 'flat')}` : midiName(m);
+  }
+
+  // ── keysig 모드: 조를 고르면 일곱 음과 조표 ──
+  if (mode === 'keysig') {
+    let keyN = root.dataset.key || 'G', notes: number[] = [];
+    const head = { staff: root.querySelector('.ks-staff') as HTMLElement, name: root.querySelector('.ks-name') as HTMLElement, acc: root.querySelector('.ks-acc') as HTMLElement };
+    function apply() {
+      const btn = root.querySelector<HTMLElement>(`.ks-btn[data-v="${keyN}"]`)!, n = Number(btn.dataset.n);
+      const r = keyRootOf(keyN), sp = spellScale(r, SCALES.major);
+      spelled = {};
+      const deg: Record<number, number> = {}, acc: Record<number, boolean> = {};
+      sp.forEach((x, i) => { spelled[x.pc] = `${x.kr} (${x.name}) · 이 조의 ${MOVABLE[i]}`; deg[x.pc] = i; acc[x.pc] = x.acc !== 0; });
+      root.querySelectorAll<HTMLElement>('.key').forEach(k => {
+        const pc = Number(k.dataset.midi) % 12, inKey = pc in deg;
+        k.classList.toggle('hl', inKey); k.classList.toggle('acc', inKey && acc[pc]);
+        const lab = k.querySelector('.ks-lab');
+        if (lab) lab.innerHTML = inKey ? `${sp[deg[pc]].name}<small>${MOVABLE[deg[pc]]}</small>` : '';
+      });
+      const rootPc = (LETTER_PC[r.letter] + r.acc + 12) % 12, start = lo + ((rootPc - (lo % 12) + 12) % 12);
+      notes = [...SCALES.major.steps.map(st => start + st), start + 12];
+      const accs = sp.filter(x => x.acc !== 0);
+      head.staff.innerHTML = keySigSvg(n);
+      head.name.innerHTML = `${keyKr(keyN)}<span class="label-en">${keyN} major</span>`;
+      const list = (n > 0 ? 'FCGDAEB' : 'BEADGCF').slice(0, Math.abs(n)).split('').map(l => accs.find(x => x.letter === l)!.kr).join(', ');
+      const tonic = `${sp[0].kr}(${sp[0].name})${/[솔♯♭]$/.test(sp[0].kr) ? '이' : '가'}`;
+      head.acc.textContent = (n === 0 ? '조표가 없어서 흰 건반만 써요.' : `조표 ${n > 0 ? '♯' : '♭'} ${Math.abs(n)}개: ${list}.`) + ` 으뜸음 ${tonic} 이 조의 도예요.`;
+      nowKr.textContent = '건반을 눌러 보세요'; nowEn.innerHTML = '&nbsp;';
+    }
+    root.querySelectorAll<HTMLButtonElement>('.ks-btn').forEach(b => b.addEventListener('click', () => {
+      root.querySelectorAll('.ks-btn').forEach(x => x.setAttribute('aria-pressed', 'false'));
+      b.setAttribute('aria-pressed', 'true'); keyN = b.dataset.v!; apply();
+    }));
+    root.querySelector('.scale-play')!.addEventListener('click', async () => {
+      core ??= new AudioCore(); await core.resume();
+      const t0 = core.ctx.currentTime + 0.05;
+      notes.forEach((m, i) => { playKey(core!, m, t0 + i * 0.32, 0.5); setTimeout(() => { keyEl(m)?.classList.add('on'); setTimeout(() => keyEl(m)?.classList.remove('on'), 260); }, 50 + i * 320); });
+    });
+    apply();
   }
 
   // ── scale 모드 ──

@@ -10,9 +10,9 @@ widget: piano
 widgetConfig:
   from: C4
   to: B5
-  labels: both
-  highlight: [G4, A4, B4, C5, D5, E5, F#5]
-  title: 사장조의 일곱 음
+  mode: keysig
+  key: G
+  title: 조표와 건반
 quiz: keysig
 scaffold: true
 prereqs:
@@ -40,7 +40,9 @@ import Staff from '../../../components/doc/Staff.astro';
 ## 직접 해보기
 
 <Callout>
-오른쪽 건반에서 **파**를 누르고, 바로 오른쪽 검은 건반을 눌러 보세요. 그게 <b>파♯</b>이에요. 이번엔 **시**를 누르고 바로 왼쪽 검은 건반 — <b>시♭</b>이에요. 보라색으로 칠해진 건반들은 다음 단계에서 배울 "사장조"의 일곱 음이에요.
+오른쪽 건반에서 파를 누르고, 바로 오른쪽 검은 건반을 눌러 보세요. 그게 <b>파♯</b>이에요. 이번엔 시를 누르고 바로 왼쪽 검은 건반을 눌러 보세요. 시♭이에요.
+
+아래 **조** 버튼을 바꾸면 그 조에서 쓰는 일곱 음이 건반에 칠해져요. 진하게 칠한 건반이 ♯이나 ♭이 붙는 음이에요.
 </Callout>
 </Level>
 
@@ -58,6 +60,10 @@ import Staff from '../../../components/doc/Staff.astro';
   <DefCard term="조표 (Key signature)">음자리표 뒤에 모아 적는 ♯·♭. 곡이 끝날 때까지, 모든 옥타브의 그 음에 적용됩니다.</DefCard>
   <DefCard term="임시표 (Accidental)">음표 바로 앞에 붙이는 ♯·♭·♮. 그 마디가 끝날 때까지, 같은 높이의 음에만 적용됩니다.</DefCard>
 </DefList>
+
+<Callout>
+위젯에서 조를 G, D, A로 차례로 바꿔 보세요. 조표의 ♯이 하나씩 늘 때마다 건반에서도 진하게 칠한 음이 하나씩 늘어나요. F, B♭, E♭으로 바꾸면 ♭이 같은 방식으로 늘어나요.
+</Callout>
 
 ## 임시표는 마디줄에서 풀린다
 

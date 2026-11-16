@@ -8,11 +8,11 @@ tagline: 틀리기 어려운 다섯 음
 desc: 장음계에서 부딪히는 두 음을 빼면 다섯 음짜리 펜타토닉이 됩니다. 반음이 없어 어떤 순서로 쳐도 잘 어울려 동요·민요부터 록 기타 솔로까지 쓰입니다. 장조·단조 펜타토닉과 블루 노트를 더한 블루스 음계를 익힙니다.
 widget: piano
 widgetConfig:
-  mode: scale
-  scales: [majpent, minpent, blues]
+  mode: walk
+  walk: { by: scale }
+  scales: [major, majpent, minpent, blues]
   root: C
   title: 펜타토닉 비교
-  labels: en
 quiz: pentatonic
 scaffold: true
 prereqs:
@@ -34,7 +34,7 @@ import Staff from '../../../components/doc/Staff.astro';
 ## 직접 해보기
 
 <Callout>
-피아노의 **검은 건반 다섯 개만** 아무렇게나 눌러 보세요. 신기하게도 다 어울려요. 검은 건반은 그 자체로 펜타토닉이거든요. 오른쪽 위젯에서 **장조 펜타토닉**을 들어 보고, 칠해진 건반만 마음대로 눌러 나만의 멜로디를 만들어 보세요.
+피아노의 **검은 건반 다섯 개만** 아무렇게나 눌러 보세요. 신기하게도 다 어울려요. 검은 건반은 그 자체로 펜타토닉이거든요. 오른쪽 위젯에서 → 화살표로 C Major(장음계)에서 **C Major Pentatonic**으로 넘겨 보세요. 4음과 7음이 빠지는 게 보여요. 칠해진 건반만 마음대로 눌러 나만의 멜로디를 만들어 보세요.
 </Callout>
 </Level>
 
@@ -53,7 +53,7 @@ import Staff from '../../../components/doc/Staff.astro';
 C 장조 펜타토닉(C D E G A)과 A 단조 펜타토닉(A C D E G)은 **같은 다섯 음**입니다. 나란한 장조·단조처럼, 어느 음을 중심으로 느끼게 하느냐에 따라 밝게도 어둡게도 들립니다.
 
 <Callout>
-위젯에서 **블루스 음계**를 고르고, F♯(또는 G♭) 건반을 지나가듯 짧게 눌렀다가 G로 바로 넘어가 보세요. 그 반음 하나가 블루스의 "울음"입니다. 오래 머물면 어색하고, 스쳐 지나가면 맛이 납니다.
+위젯에서 → 화살표를 끝까지 눌러 **C Blues**로 넘기고, F♯(또는 G♭) 건반을 지나가듯 짧게 눌렀다가 G로 바로 넘어가 보세요. 그 반음 하나가 블루스의 "울음"입니다. 오래 머물면 어색하고, 스쳐 지나가면 맛이 납니다.
 </Callout>
 </Level>
 

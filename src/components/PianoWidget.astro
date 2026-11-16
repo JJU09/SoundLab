@@ -15,10 +15,12 @@
 import { parseNote, range, isBlack, midiName, solfegeName, SCALES, ROOTS } from '../lib/music';
 interface Props { config?: Record<string, any>; }
 const { config = {} } = Astro.props;
-// 새 모양(keysig·walk)은 한 옥타브만: 건반이 넓어야 음이름과 숫자가 들어간다
-const oneOct = ['keysig', 'walk'].includes(config.mode);
-const lo = parseNote(config.from ?? 'C4')?.midi ?? 60;
-const hi = parseNote(config.to ?? (oneOct ? 'B4' : 'B5'))?.midi ?? 83;
+// 새 모양(keysig·walk)은 근음부터 한 옥타브 위 근음까지만 보여 준다(앞뒤 흰 건반 하나씩 여유).
+// 건반은 C3~B5를 그려 두고, 흰 건반 10개 너비의 창이 근음 쪽으로 미끄러진다.
+const slide = ['keysig', 'walk'].includes(config.mode);
+const VIEW = 10;
+const lo = slide ? 48 : parseNote(config.from ?? 'C4')?.midi ?? 60;
+const hi = slide ? 83 : parseNote(config.to ?? 'B5')?.midi ?? 83;
 const labels: string = config.labels ?? 'both';
 const highlight: number[] = (config.highlight ?? []).map((s: string) => parseNote(s)?.midi).filter((m: any) => m != null);
 const title: string = config.title ?? '건반';
@@ -109,11 +111,11 @@ const NOTE_CIRCLE = ['C', 'G', 'D', 'A', 'E', 'B', 'F♯/G♭', 'D♭', 'A♭', 
                 ); })}
               </svg>
             )}
-            <div class="wk-name text-xl font-bold text-[var(--color-ink-700)] font-display leading-tight text-center" aria-live="polite"></div>
+            <div class="wk-name text-lg sm:text-xl font-bold whitespace-nowrap text-[var(--color-ink-700)] font-display leading-tight text-center" aria-live="polite"></div>
           </div>
           <button type="button" class="ks-arrow" data-d="1" aria-label="다음">→</button>
         </div>
-        {walk.gaps && <div class="steps-row flex flex-wrap justify-center gap-1 text-[11px] font-mono"></div>}
+        {walk.gaps && <div class="steps-row flex flex-nowrap justify-center gap-0.5 text-[11px] font-mono"></div>}
       </div>
     )}
     <!-- 지금 누른 음 -->
@@ -123,7 +125,8 @@ const NOTE_CIRCLE = ['C', 'G', 'D', 'A', 'E', 'B', 'F♯/G♭', 'D♭', 'A♭', 
     </div>
 
     <!-- 건반 -->
-    <div class="kb relative select-none touch-none" style="height:150px">
+    <div class:list={['kb relative select-none touch-none', slide && 'overflow-hidden']} style="height:150px">
+      <div class:list={[slide && 'kb-track still']} style={slide ? `width:${(whites.length / VIEW) * 100}%` : 'display:contents'}>
       {whites.map((m, i) => (
         <button type="button" class:list={['key white', highlight.includes(m) && 'hl']} data-midi={m}
           style={`left:${i * W}%;width:${W}%`} aria-label={`${solfegeName(m)} ${midiName(m)}`}>
@@ -137,6 +140,7 @@ const NOTE_CIRCLE = ['C', 'G', 'D', 'A', 'E', 'B', 'F♯/G♭', 'D♭', 'A♭', 
         <button type="button" class:list={['key black', highlight.includes(m) && 'hl']} data-midi={m}
           style={`left:${blackLeft(m)}%;width:${W * 0.6}%`} aria-label={`${solfegeName(m)} ${midiName(m)}`}>{clean && <span class="ks-lab"></span>}</button>
       ))}
+      </div>
     </div>
     <div class="flex items-center justify-between text-[10px] font-mono text-[var(--color-ink-300)]">
       <span><span class="inline-block w-1.5 h-1.5 rounded-full bg-[var(--color-violet)] align-middle mr-1"></span>가운데 도 (C4)</span>
@@ -194,13 +198,15 @@ const NOTE_CIRCLE = ['C', 'G', 'D', 'A', 'E', 'B', 'F♯/G♭', 'D♭', 'A♭', 
   .piano-widget[data-labels="kr"] .lab-en, .piano-widget[data-labels="en"] .lab-kr,
   .piano-widget[data-labels="none"] .lab { display: none; }
   .piano-widget:is([data-mode="keysig"], [data-mode="walk"]) .lab { display: none; }
+  .kb .kb-track { position: absolute; top: 0; bottom: 0; left: 0; transition: transform .45s ease; }
+  .kb .kb-track.still { transition: none; }
   .piano-widget:is([data-mode="keysig"], [data-mode="walk"]) .kb .white.hl { background: #ede6fd; }
   .piano-widget:is([data-mode="keysig"], [data-mode="walk"]) .kb .black.hl { background: #7c3aed; }
   .kb .white .ks-lab.chg { color: var(--color-violet); }
   .kb .white .ks-lab.chg :global(small) { color: var(--color-violet); font-weight: 700; }
-  .kb .black .ks-lab.chg { left: 3px; right: 3px; background: #fff; color: var(--color-violet); border-radius: 4px; padding: 1px 0; }
+  .kb .black .ks-lab.chg { left: 2px; right: 2px; font-size: 10.5px; background: #fff; color: var(--color-violet); border-radius: 4px; padding: 1px 0; }
   .kb .black .ks-lab.chg :global(small) { color: var(--color-violet); font-weight: 700; }
-  .wk-head :global(.wk-half) { align-self: center; font-size: 10px; font-weight: 700; color: var(--color-violet); padding: 0 3px; border-bottom: 1.5px solid var(--color-violet); line-height: 1.3; }
+  .wk-head :global(.wk-half) { align-self: center; font-size: 10px; font-weight: 700; color: var(--color-violet); padding: 0 2px; white-space: nowrap; border-bottom: 1.5px solid var(--color-violet); line-height: 1.3; }
   .wk-circle .wk-band { transform-origin: 70px 70px; transform: rotate(var(--rot, 0deg)); transition: transform .45s ease; }
   .wk-circle .wk-cl { fill: #a0a0c0; font-weight: 600; font-family: 'Space Grotesk', 'Pretendard', sans-serif; transition: fill .2s; }
   .wk-circle .wk-cl.in { fill: #2d2d4a; }
@@ -231,6 +237,25 @@ const NOTE_CIRCLE = ['C', 'G', 'D', 'A', 'E', 'B', 'F♯/G♭', 'D♭', 'A♭', 
 import { AudioCore } from '../audio/core';
 import { playKey } from '../audio/keys';
 import { midiName, solfegeName, isBlack, intervalName, SCALES, ROOTS, spellScale, LETTER_PC, type Letter } from '../lib/music';
+
+// ── 근음부터 한 옥타브: 창 이동과 칠하기 (keysig·walk 공용) ──
+// info: pc → 건반 글자. 근음 midi부터 한 옥타브 위 근음까지만 칠한다.
+function paintRange(root: HTMLElement, rootMidi: number, info: Record<number, { html: string; chg?: boolean }>) {
+  const track = root.querySelector<HTMLElement>('.kb-track');
+  root.querySelectorAll<HTMLElement>('.key').forEach(k => {
+    const m = Number(k.dataset.midi), it = m >= rootMidi && m <= rootMidi + 12 ? info[m % 12] : undefined;
+    k.classList.toggle('hl', !!it);
+    const lab = k.querySelector('.ks-lab');
+    if (lab) { lab.innerHTML = it ? it.html : ''; lab.classList.toggle('chg', !!it?.chg); }
+  });
+  if (!track) return;
+  const whites = [...track.querySelectorAll<HTMLElement>('.key.white')];
+  const firstWhite = whites.findIndex(k => Number(k.dataset.midi) >= rootMidi - (isBlack(rootMidi) ? 1 : 0));
+  const start = Math.max(0, firstWhite - (isBlack(rootMidi) ? 0 : 1));
+  track.style.transform = `translateX(${-(start / whites.length) * 100}%)`;
+  if (track.classList.contains('still')) requestAnimationFrame(() => requestAnimationFrame(() => track.classList.remove('still')));
+}
+const rootMidiOf = (pc: number) => 60 + pc;
 
 // ── keysig 모드 도우미 ──
 const KR_LETTER: Record<string, string> = { C: '다', D: '라', E: '마', F: '바', G: '사', A: '가', B: '나' };
@@ -304,15 +329,10 @@ function initPiano(root: HTMLElement) {
     function apply() {
       const keyN = KEYSIG_ORDER[idx], n = idx - MID;
       const r = keyRootOf(keyN), sp = spellScale(r, SCALES.major);
-      const deg: Record<number, number> = {};
-      sp.forEach((x, i) => (deg[x.pc] = i));
-      root.querySelectorAll<HTMLElement>('.key').forEach(k => {
-        const pc = Number(k.dataset.midi) % 12, inKey = pc in deg;
-        k.classList.toggle('hl', inKey);
-        const lab = k.querySelector('.ks-lab');
-        if (lab) lab.innerHTML = inKey ? `${sp[deg[pc]].name}<small>${deg[pc] + 1}</small>` : '';
-      });
-      const rootPc = (LETTER_PC[r.letter] + r.acc + 12) % 12, start = lo + ((rootPc - (lo % 12) + 12) % 12);
+      const rootPc = (LETTER_PC[r.letter] + r.acc + 12) % 12, start = rootMidiOf(rootPc);
+      const info: Record<number, { html: string }> = {};
+      sp.forEach((x, i) => (info[x.pc] = { html: `${x.name}<small>${i + 1}</small>` }));
+      paintRange(root, start, info);
       notes = [...SCALES.major.steps.map(st => start + st), start + 12];
       const accs = sp.filter(x => x.acc !== 0);
       const list = (n > 0 ? 'FCGDAEB' : 'BEADGCF').slice(0, Math.abs(n)).split('').map(l => accs.find(x => x.letter === l)!.name).join(' ');
@@ -333,7 +353,7 @@ function initPiano(root: HTMLElement) {
     root.querySelector('.scale-play')!.addEventListener('click', async () => {
       core ??= new AudioCore(); await core.resume();
       const t0 = core.ctx.currentTime + 0.05;
-      const vis = (m: number) => keyEl(m) ?? keyEl(m - 12);
+      const vis = (m: number) => keyEl(m);
       notes.forEach((m, i) => { playKey(core!, m, t0 + i * 0.32, 0.5); setTimeout(() => { vis(m)?.classList.add('on'); setTimeout(() => vis(m)?.classList.remove('on'), 260); }, 50 + i * 320); });
     });
     apply();
@@ -360,20 +380,15 @@ function initPiano(root: HTMLElement) {
         const d = sc.deg[i], diff = sc.steps[i] - MAJ[d];
         info[x.pc] = { name: x.name, num: (diff < 0 ? '♭'.repeat(-diff) : '♯'.repeat(Math.max(0, diff))) + (d + 1), chg: !!before && !before.has(x.pc) };
       });
-      root.querySelectorAll<HTMLElement>('.key').forEach(k => {
-        const pc = Number(k.dataset.midi) % 12, it = info[pc];
-        k.classList.toggle('hl', !!it);
-        const lab = k.querySelector('.ks-lab');
-        if (lab) { lab.innerHTML = it ? `${it.name}<small>${it.num}</small>` : ''; lab.classList.toggle('chg', !!it?.chg); }
-      });
-      const r = keyRootOf(st.root), rootPc = (LETTER_PC[r.letter] + r.acc + 12) % 12, start = lo + ((rootPc - (lo % 12) + 12) % 12);
+      const r = keyRootOf(st.root), rootPc = (LETTER_PC[r.letter] + r.acc + 12) % 12, start = rootMidiOf(rootPc);
+      paintRange(root, start, Object.fromEntries(Object.entries(info).map(([pc, it]) => [pc, { html: `${it.name}<small>${it.num}</small>`, chg: it.chg }])));
       notes = [...sc.steps.map(x => start + x), start + 12];
-      nameEl.innerHTML = `${st.root} ${sc.en}<span class="label-en">${sc.kr}</span>`;
+      nameEl.innerHTML = `${st.root} ${sc.en}<span class="block text-xs font-medium text-[var(--color-ink-500)] mt-0.5">${sc.kr}</span>`;
       if (stepsRow) {
         const gaps = notes.slice(1).map((n, i) => n - notes[i]);
-        const chip = (t: string) => `<span class="px-1.5 py-0.5 rounded bg-[var(--color-violet-glow)] text-[var(--color-violet)] font-bold">${t}</span>`;
+        const chip = (t: string) => `<span class="px-1 py-0.5 rounded bg-[var(--color-violet-glow)] text-[var(--color-violet)] font-bold whitespace-nowrap">${t}</span>`;
         // 반음인 곳에만 표시. 나머지 사이는 비워 둔다
-        stepsRow.innerHTML = sp.map((x, i) => chip(x.name) + (gaps[i] === 1 ? '<span class="wk-half">반음</span>' : gaps[i] === 3 ? '<span class="wk-half">반음 3개</span>' : '<span class="w-1.5"></span>')).join('') + chip(sp[0].name);
+        stepsRow.innerHTML = sp.map((x, i) => chip(x.name) + (gaps[i] === 1 ? '<span class="wk-half">반음</span>' : gaps[i] === 3 ? '<span class="wk-half">반음 3개</span>' : '<span class="w-1"></span>')).join('') + chip(sp[0].name);
       }
       if (circle) {
         // 7칸 창: 리디안이면 으뜸음에서 시계 방향 0~6칸, 한 단계 어두워질 때마다 반시계로 한 칸
@@ -398,8 +413,7 @@ function initPiano(root: HTMLElement) {
     root.querySelector('.scale-play')!.addEventListener('click', async () => {
       core ??= new AudioCore(); await core.resume();
       const t0 = core.ctx.currentTime + 0.05;
-      // 한 옥타브 건반이라 위 옥타브 음은 같은 이름 건반에 불을 켠다
-      const vis = (m: number) => keyEl(m) ?? keyEl(m - 12);
+      const vis = (m: number) => keyEl(m);
       notes.forEach((m, i) => { playKey(core!, m, t0 + i * 0.32, 0.5); setTimeout(() => { vis(m)?.classList.add('on'); setTimeout(() => vis(m)?.classList.remove('on'), 260); }, 50 + i * 320); });
     });
     apply();

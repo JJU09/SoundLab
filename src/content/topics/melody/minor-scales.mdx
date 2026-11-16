@@ -8,11 +8,11 @@ tagline: 같은 음에서 시작하는 어두운 계단
 desc: 단음계는 3음이 반음 낮아 어둡고 서정적으로 들립니다. 자연 단음계, 7음을 올린 화성 단음계, 6·7음을 올린 가락 단음계가 왜 세 가지나 있는지, 장조와 나란한 단조의 관계까지 익힙니다.
 widget: piano
 widgetConfig:
-  mode: scale
+  mode: walk
+  walk: { by: scale, gaps: true }
   scales: [natural, harmonic, melodic, major]
   root: A
   title: 단음계 비교
-  labels: en
 quiz: minor-scales
 scaffold: true
 prereqs:
@@ -35,7 +35,7 @@ import Staff from '../../../components/doc/Staff.astro';
 ## 직접 해보기
 
 <Callout>
-오른쪽 위젯은 으뜸음이 <b>A(라)</b>로 맞춰져 있어요. **자연 단음계**를 들은 다음 **장음계**로 바꿔 들어 보세요. 같은 라에서 시작해도 장음계는 밝고, 단음계는 어두워요. 많은 발라드와 록이 단음계로 쓰여요.
+오른쪽 위젯은 으뜸음이 <b>A(라)</b>로 맞춰져 있어요. 처음 보이는 **A Natural Minor**(자연 단음계)를 들은 다음, → 화살표를 끝까지 눌러 **A Major**(장음계)로 넘겨 들어 보세요. 같은 라에서 시작해도 장음계는 밝고, 단음계는 어두워요. 한 칸 넘길 때마다 음이 하나씩만 바뀌고, 바뀐 음은 보라색 숫자로 보여요. 많은 발라드와 록이 단음계로 쓰여요.
 </Callout>
 </Level>
 
@@ -55,7 +55,7 @@ import Staff from '../../../components/doc/Staff.astro';
 - **같은으뜸음조** — 으뜸음이 같은 장조와 단조. 다장조와 다단조(♭ 3개). 같은 시작음에서 3·6·7음만 바뀝니다.
 
 <Callout>
-위젯에서 으뜸음을 **C**로 바꾸고 **장음계 ↔ 자연 단음계**를 번갈아 보세요. E·A·B가 E♭·A♭·B♭로 바뀌는 것이 보입니다. 코러스에서 갑자기 분위기가 어두워지는 곡은 이처럼 같은으뜸음 단조의 음을 빌려 오는 경우가 많습니다(→ 화성 허브의 모달 인터체인지).
+위젯에서 **A Natural Minor**와 **A Major**를 번갈아 보세요. 3·6·7음 세 개가 반음씩 다릅니다(C·F·G와 C♯·F♯·G♯). 코러스에서 갑자기 분위기가 어두워지는 곡은 이처럼 같은으뜸음 단조의 음을 빌려 오는 경우가 많습니다(→ 화성 허브의 모달 인터체인지).
 </Callout>
 </Level>
 

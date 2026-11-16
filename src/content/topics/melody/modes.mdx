@@ -8,11 +8,11 @@ tagline: 같은 일곱 음, 다른 중심
 desc: 장음계의 일곱 음을 그대로 두고 시작음만 바꾸면 일곱 가지 모드가 생깁니다. 도리안의 세련된 단조, 믹솔리디안의 록 장조, 리디안의 몽환적인 밝음처럼 모드마다 다른 색을 만드는 "특징음"을 같은 으뜸음에서 비교하며 익힙니다.
 widget: piano
 widgetConfig:
-  mode: scale
-  scales: [ionian, dorian, phrygian, lydian, mixolydian, aeolian, locrian]
+  mode: walk
+  walk: { by: scale, start: 1, home: 1, circle: true }
+  scales: [lydian, ionian, mixolydian, dorian, aeolian, phrygian, locrian]
   root: C
   title: 모드 비교
-  labels: en
 quiz: modes
 scaffold: true
 prereqs:
@@ -36,7 +36,7 @@ import Staff from '../../../components/doc/Staff.astro';
 ## 직접 해보기
 
 <Callout>
-오른쪽 위젯은 모두 <b>C(도)</b>에서 시작하게 맞춰 두었어요. **이오니안**(= 장음계)을 들은 다음 **리디안**, **믹솔리디안**으로 바꿔 들어 보세요. 대부분 같은데 딱 한 음만 달라서 느낌이 바뀌어요. 어떤 음이 바뀌었는지 칠해진 건반을 비교해 보세요.
+오른쪽 위젯은 모두 <b>C(도)</b>에서 시작하게 맞춰 두었어요. 처음에는 **Ionian**(이오니안, 장음계)이에요. ← 화살표를 누르면 Lydian, → 화살표를 누르면 Mixolydian으로 넘어가요. 한 칸 넘길 때마다 딱 한 음만 바뀌고, 바뀐 음은 보라색 숫자로 보여요. →를 계속 누르면 음이 하나씩 내려가며 점점 어두워져요.
 </Callout>
 </Level>
 

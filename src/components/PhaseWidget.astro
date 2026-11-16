@@ -45,13 +45,13 @@ const adv = (tier?: string) => (tier && tier !== 'easy' ? { 'data-adv': tier } :
     <!-- 실제 출력 스코프 -->
     <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]">
       <canvas class="scope-cv block w-full" style="height:70px"></canvas>
-      <span class="absolute top-1.5 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Output · 실제 합성음</span>
+      <span class="absolute top-1.5 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)]">실제 합성음<span class="label-en">Output</span></span>
     </div>
 
     <!-- 위상 슬라이더 (easy) -->
     <div>
       <div class="flex items-center justify-between mb-1">
-        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Phase · 위상차</span>
+        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">위상차<span class="label-en">Phase</span></span>
         <span class="phase-val text-sm font-mono text-[var(--color-ink-700)]">{c.phase}°</span>
       </div>
       <input type="range" class="sl-range phase-range" min="0" max="360" step="1" value={c.phase} aria-label="위상차" />

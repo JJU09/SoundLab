@@ -10,7 +10,8 @@
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",
-    "astro": "astro"
+    "astro": "astro",
+    "copy:lint": "node scripts/copy-lint.mjs"
   },
   "dependencies": {
     "@astrojs/mdx": "^6.0.3",

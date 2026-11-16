@@ -28,14 +28,14 @@ const adv = (tier?: string) => (tier && tier !== 'easy' ? { 'data-adv': tier } :
     <!-- 스펙트럼 (빗 노치) -->
     <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]">
       <canvas class="spec-cv block w-full" style="height:140px"></canvas>
-      <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-blue)] opacity-70">Spectrum · 빗(comb) 노치</span>
+      <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-blue)] opacity-70">빗(comb) 노치<span class="label-en">Spectrum</span></span>
     </div>
     <p class="text-[11px] text-[var(--color-ink-300)] -mt-1">노이즈를 흘려보내면 지연 간격마다 주파수가 깎여 빗살 무늬가 생깁니다.</p>
 
     <!-- 지연 시간 (easy) -->
     <div>
       <div class="flex items-center justify-between mb-1">
-        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Delay · 지연</span>
+        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">지연<span class="label-en">Delay</span></span>
         <span class="delay-val text-sm font-mono text-[var(--color-ink-700)]">{c.delay}ms</span>
       </div>
       <input type="range" class="sl-range delay-range" min="0.3" max="20" step="0.1" value={c.delay} aria-label="지연 시간" />
@@ -44,7 +44,7 @@ const adv = (tier?: string) => (tier && tier !== 'easy' ? { 'data-adv': tier } :
     <!-- 깊이 (normal) -->
     <div {...adv('normal')}>
       <div class="flex items-center justify-between mb-1">
-        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Depth · 복사본 양</span>
+        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">복사본 양<span class="label-en">Depth</span></span>
         <span class="mix-val text-sm font-mono text-[var(--color-ink-700)]">{c.mix}%</span>
       </div>
       <input type="range" class="sl-range mix-range" min="0" max="100" step="1" value={c.mix} aria-label="복사본 양" />
@@ -52,7 +52,7 @@ const adv = (tier?: string) => (tier && tier !== 'easy' ? { 'data-adv': tier } :
     <!-- 피드백 (hard) -->
     <div {...adv('hard')}>
       <div class="flex items-center justify-between mb-1">
-        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Feedback · 공진</span>
+        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">공진<span class="label-en">Feedback</span></span>
         <span class="fb-val text-sm font-mono text-[var(--color-ink-700)]">{c.feedback}%</span>
       </div>
       <input type="range" class="sl-range fb-range" min="0" max="90" step="1" value={c.feedback} aria-label="피드백" />

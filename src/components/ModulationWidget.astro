@@ -34,12 +34,12 @@ const adv = (tier?: string) => (tier && tier !== 'easy' ? { 'data-adv': tier } :
     <!-- 라이브 스코프 -->
     <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]">
       <canvas class="scope-cv block w-full" style="height:120px"></canvas>
-      <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)] opacity-70">Output · 변조된 소리</span>
+      <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)] opacity-70">변조된 소리<span class="label-en">Output</span></span>
     </div>
 
     <!-- 변조 목적지 (전 티어 — 이 토픽의 핵심) -->
     <div>
-      <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">Destination · LFO를 어디에 연결?</div>
+      <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">LFO를 어디에 연결?<span class="label-en">Destination</span></div>
       <div class="flex gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" role="group">
         {targets.map(([v, t]) => (
           <button class="tgt-btn flex-1 px-2 py-1.5 rounded-lg text-xs font-semibold transition-all text-[var(--color-ink-500)] font-display"
@@ -51,7 +51,7 @@ const adv = (tier?: string) => (tier && tier !== 'easy' ? { 'data-adv': tier } :
     <!-- Rate -->
     <div>
       <div class="flex items-center justify-between mb-1">
-        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Rate · 흔드는 속도</span>
+        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">흔드는 속도<span class="label-en">Rate</span></span>
         <span class="rate-val text-sm font-mono text-[var(--color-ink-700)]">{rate}Hz</span>
       </div>
       <input type="range" class="sl-range rate-range" min="0.2" max="20" step="0.1" value={rate} aria-label="LFO 속도" />
@@ -59,7 +59,7 @@ const adv = (tier?: string) => (tier && tier !== 'easy' ? { 'data-adv': tier } :
     <!-- Depth -->
     <div>
       <div class="flex items-center justify-between mb-1">
-        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Depth · 흔드는 깊이</span>
+        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">흔드는 깊이<span class="label-en">Depth</span></span>
         <span class="depth-val text-sm font-mono text-[var(--color-ink-700)]">{depth}%</span>
       </div>
       <input type="range" class="sl-range depth-range" min="0" max="100" step="1" value={depth} aria-label="LFO 깊이" />
@@ -67,7 +67,7 @@ const adv = (tier?: string) => (tier && tier !== 'easy' ? { 'data-adv': tier } :
 
     <!-- LFO 파형 (normal↑) -->
     <div {...adv('normal')}>
-      <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">LFO Shape · 변조 파형</div>
+      <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">변조 파형<span class="label-en">LFO Shape</span></div>
       <div class="flex gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" role="group">
         {shapes.map(([v, t]) => (
           <button class="shape-btn flex-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-[var(--color-ink-500)] font-display"

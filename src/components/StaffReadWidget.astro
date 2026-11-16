@@ -39,7 +39,7 @@ const clefOpts: [string, string][] = [['treble', '높은음자리표'], ['bass',
     <button type="button" class="next-btn w-full text-sm font-semibold py-2 rounded-xl border border-[var(--color-border)] text-[var(--color-ink-500)] hover:border-[var(--color-violet)] hover:text-[var(--color-violet)] transition">다음 문제 →</button>
 
     <div>
-      <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">Clef · 음자리표</div>
+      <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">음자리표<span class="label-en">Clef</span></div>
       <div class="flex gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" role="group">
         {clefOpts.map(([v, t]) => (
           <button type="button" class="clef-btn flex-1 px-2 py-1.5 rounded-lg text-xs font-semibold transition-all text-[var(--color-ink-500)] font-display"

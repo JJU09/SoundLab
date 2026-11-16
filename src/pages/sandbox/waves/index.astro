@@ -39,11 +39,11 @@ const related = [
       <!-- 비주얼라이저 -->
       <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]">
         <canvas class="scope-cv block w-full" style="height:110px"></canvas>
-        <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)] opacity-70">Waveform · 합성된 파형</span>
+        <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)] opacity-70">합성된 파형<span class="label-en">Waveform</span></span>
       </div>
       <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]">
         <canvas class="spec-cv block w-full" style="height:80px"></canvas>
-        <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-blue)] opacity-70">Spectrum · 주파수 성분</span>
+        <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-blue)] opacity-70">주파수 성분<span class="label-en">Spectrum</span></span>
       </div>
 
       <!-- ── 모드: 배음 합성 ── -->
@@ -54,7 +54,7 @@ const related = [
           ))}
         </div>
         <div>
-          <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">Harmonics · 배음 진폭</div>
+          <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">배음 진폭<span class="label-en">Harmonics</span></div>
           <div class="space-y-1.5">
             {Array.from({ length: N }, (_, i) => (
               <div class="flex items-center gap-2" data-partial={i}>
@@ -68,7 +68,7 @@ const related = [
         </div>
         <div>
           <div class="flex items-center justify-between mb-1">
-            <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Fundamental · 기음</span>
+            <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">기음<span class="label-en">Fundamental</span></span>
             <span class="hf0-val text-sm font-mono text-[var(--color-ink-700)]">{f0}Hz</span>
           </div>
           <input type="range" class="sl-range hf0-range w-full" min="80" max="330" step="1" value={f0} aria-label="기음 주파수" />
@@ -80,14 +80,14 @@ const related = [
         <div class="beat-readout p-3 rounded-xl border text-sm font-mono"></div>
         <div>
           <div class="flex items-center justify-between mb-1">
-            <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Detune · 두 음의 차이</span>
+            <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">두 음의 차이<span class="label-en">Detune</span></span>
             <span class="bdet-val text-sm font-mono text-[var(--color-ink-700)]">4Hz</span>
           </div>
           <input type="range" class="sl-range bdet-range w-full" min="0" max="20" step="0.5" value="4" aria-label="디튠" />
         </div>
         <div>
           <div class="flex items-center justify-between mb-1">
-            <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Frequency · 기준 주파수</span>
+            <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">기준 주파수<span class="label-en">Frequency</span></span>
             <span class="bf-val text-sm font-mono text-[var(--color-ink-700)]">220Hz</span>
           </div>
           <input type="range" class="sl-range bf-range w-full" min="110" max="660" step="1" value="220" aria-label="기준 주파수" />
@@ -105,14 +105,14 @@ const related = [
         </div>
         <div>
           <div class="flex items-center justify-between mb-1">
-            <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Phase · 위상차</span>
+            <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">위상차<span class="label-en">Phase</span></span>
             <span class="ph-val text-sm font-mono text-[var(--color-ink-700)]">0°</span>
           </div>
           <input type="range" class="sl-range ph-range w-full" min="0" max="360" step="1" value="0" aria-label="위상차" />
         </div>
         <div>
           <div class="flex items-center justify-between mb-1">
-            <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Frequency · 주파수</span>
+            <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">주파수<span class="label-en">Frequency</span></span>
             <span class="pf-val text-sm font-mono text-[var(--color-ink-700)]">220Hz</span>
           </div>
           <input type="range" class="sl-range pf-range w-full" min="110" max="440" step="1" value="220" aria-label="주파수" />

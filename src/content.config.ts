@@ -50,7 +50,7 @@ export const SANDBOX_OF: Partial<Record<Hub, { path: string; name: string }>> = 
 };
 
 // 위젯 타입 — MDX가 어떤 인터랙티브 컴포넌트를 띄울지 결정
-export const WIDGETS = ['effect', 'synth', 'subtractive', 'additive', 'fm', 'modulation', 'phase', 'beats', 'tone', 'comb', 'bitcrush', 'samplerate', 'aliasing', 'level', 'mixer', 'piano', 'staffread', 'rhythm', 'drums', 'circle', 'melody', 'chord', 'progression', 'arrange', 'none'] as const;
+export const WIDGETS = ['effect', 'synth', 'subtractive', 'additive', 'fm', 'modulation', 'phase', 'beats', 'tone', 'comb', 'bitcrush', 'samplerate', 'aliasing', 'level', 'mixer', 'piano', 'staffread', 'rhythm', 'drums', 'circle', 'fifths', 'melody', 'chord', 'progression', 'arrange', 'none'] as const;
 
 const topics = defineCollection({
   loader: glob({ pattern: '**/*.mdx', base: './src/content/topics' }),

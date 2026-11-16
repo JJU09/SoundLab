@@ -57,7 +57,7 @@ export const PATHS: LearningPath[] = [
         id: 'chords',
         title: '코드',
         goal: '한 조 안에서 쓸 수 있는 코드를 고르고 4코드 진행을 만듭니다.',
-        lessons: ['harmony/triads', 'harmony/diatonic-chords', 'harmony/progressions'],
+        lessons: ['harmony/circle-basics', 'harmony/triads', 'harmony/diatonic-chords', 'harmony/progressions'],
         deeper: ['harmony/functions', 'harmony/sevenths', 'harmony/voice-leading'],
         output: '4코드 진행 하나',
         sketch: { tab: 'chords', label: '스케치에서 코드 고르기' },

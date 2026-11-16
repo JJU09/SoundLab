@@ -1,20 +1,21 @@
 ---
-// 셈여림 계단 pp → ff + 크레셴도·데크레셴도 쐐기
+// 셈여림 계단 pp → ff + 크레셴도·데크레셴도 쐐기 — 선 도면형
 import Fig from './Fig.astro'; import { C } from './colors';
 interface Props { caption?: string; }
 const { caption } = Astro.props as Props;
 const marks = [['pp', '아주 여리게'], ['p', '여리게'], ['mp', '조금 여리게'], ['mf', '조금 세게'], ['f', '세게'], ['ff', '아주 세게']];
-const W = 560, BW = 62, G = 14, L = 10, base = 134;
-const bars = marks.map(([m, t], i) => ({ m, t, i })).map(({ m, t, i }) => ({ m, t, h: 18 + i * 17, x: L + i * (BW + G), cx: L + i * (BW + G) + BW / 2, op: 0.25 + i * 0.13 }));
+const W = 560, BW = 62, G = 26, L = 20, base = 132;
+const bars = marks.map(([m, t], i) => ({ m, t, h: 16 + i * 17, x: L + i * (BW + G), cx: L + i * (BW + G) + BW / 2 }));
 ---
-<Fig caption={caption} minW={430} label="셈여림 여섯 단계와 크레셴도·데크레셴도 기호">
-  <svg viewBox={`0 0 ${W} 222`}>
-    {bars.map(b => <rect x={b.x} y={base - b.h} width={BW} height={b.h} rx="6" fill={C.violet} opacity={b.op} />)}
-    {bars.map(b => <text x={b.cx} y={base - b.h - 8} text-anchor="middle" font-size="19" font-style="italic" class="fd" letter-spacing="1" style="font-variant-ligatures:none;font-feature-settings:'liga' 0" fill={C.ink}>{b.m}</text>)}
-    {bars.map(b => <text x={b.cx} y={base + 16} text-anchor="middle" font-size="11" fill={C.ink5}>{b.t}</text>)}
-    <path d="M 40 186 L 230 170 M 40 186 L 230 202" stroke={C.violet} stroke-width="2.2" fill="none" stroke-linecap="round" />
-    <text x="135" y="216" text-anchor="middle" font-size="11" fill={C.ink5}>cresc. — 점점 세게</text>
-    <path d="M 320 170 L 510 186 L 320 202" stroke={C.blue} stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round" />
-    <text x="415" y="216" text-anchor="middle" font-size="11" fill={C.ink5}>decresc. · dim. — 점점 여리게</text>
+<Fig caption={caption} minW={440} label="셈여림 여섯 단계와 크레셴도·데크레셴도 기호">
+  <svg viewBox={`0 0 ${W} 216`}>
+    {bars.map(b => <rect x={b.x} y={base - b.h} width={BW} height={b.h} rx="4" fill="white" stroke={C.ink3} stroke-width="1.5" />)}
+    <line x1="8" x2={W - 8} y1={base} y2={base} stroke={C.ink} stroke-width="1.5" />
+    {bars.map(b => <text x={b.cx} y={base - b.h - 8} text-anchor="middle" font-size="18" font-style="italic" class="fd" letter-spacing="1" style="font-variant-ligatures:none;font-feature-settings:'liga' 0" fill={C.ink}>{b.m}</text>)}
+    {bars.map(b => <text x={b.cx} y={base + 16} text-anchor="middle" font-size="10.5" fill={C.ink5}>{b.t}</text>)}
+    <path d="M 230 172 L 50 184 L 230 196" stroke={C.ink} stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+    <text x="140" y="212" text-anchor="middle" font-size="10.5" fill={C.ink5}>cresc. — 점점 세게</text>
+    <path d="M 330 172 L 510 184 L 330 196" stroke={C.ink} stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+    <text x="420" y="212" text-anchor="middle" font-size="10.5" fill={C.ink5}>decresc. · dim. — 점점 여리게</text>
   </svg>
 </Fig>

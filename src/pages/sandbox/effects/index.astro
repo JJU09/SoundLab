@@ -37,7 +37,7 @@ const presetRow2 = starterPresets.slice(3);
     <!-- 좌: 이펙터 팔레트(창고) -->
     <div class="lg:sticky lg:top-20 self-start">
       <div class="p-3 rounded-2xl border border-[var(--color-border)] bg-white">
-        <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-3 px-1">Palette · 창고</div>
+        <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-3 px-1">창고<span class="label-en">Palette</span></div>
         <div class="flex lg:flex-col gap-2 flex-wrap">
           {MODULES.map(m => (
             <button class="palette-chip group flex items-center gap-2 px-3 py-2.5 rounded-xl border border-[var(--color-border)] bg-white hover:border-[var(--color-violet)] hover:bg-[var(--color-violet-glow)] transition cursor-grab active:cursor-grabbing text-left"
@@ -60,7 +60,7 @@ const presetRow2 = starterPresets.slice(3);
       <div class="p-4 rounded-2xl border border-[var(--color-border)] bg-white mb-4">
         <div class="flex items-center justify-between flex-wrap gap-4">
           <div>
-            <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-2">Source · 음원</div>
+            <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-2">음원<span class="label-en">Source</span></div>
             <div class="flex gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" role="group">
               {[['tone','지속음'],['pluck','플럭'],['noise','노이즈']].map(([v,t]) => (
                 <button class="src-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-[var(--color-ink-500)] font-display"
@@ -158,7 +158,7 @@ const presetRow2 = starterPresets.slice(3);
     <!-- 우: 비주얼라이저 -->
     <div class="lg:sticky lg:top-20 self-start space-y-4">
       <div class="p-4 rounded-2xl border border-[var(--color-border)] bg-white">
-        <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-3">Visualizer · 출력 신호</div>
+        <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-3">출력 신호<span class="label-en">Visualizer</span></div>
         <div class="flex items-center gap-2 mb-4">
           <span class="text-[10px] font-mono text-[var(--color-ink-300)]">OUT</span>
           <div class="flex-1 h-2 rounded-full bg-[var(--color-surface-2)] border border-[var(--color-border)] overflow-hidden">

@@ -21,6 +21,7 @@ import StaffReadWidget from './StaffReadWidget.astro';
 import RhythmWidget from './RhythmWidget.astro';
 import DrumWidget from './DrumWidget.astro';
 import CircleWidget from './CircleWidget.astro';
+import FifthsWidget from './FifthsWidget.astro';
 import MelodyWidget from './MelodyWidget.astro';
 import ChordWidget from './ChordWidget.astro';
 import ProgressionWidget from './ProgressionWidget.astro';
@@ -56,6 +57,7 @@ const effectModule = widget === 'effect' && moduleId ? MODULE_MAP[moduleId] : nu
 {widget === 'rhythm' && <RhythmWidget config={config} />}
 {widget === 'drums' && <DrumWidget config={config} />}
 {widget === 'circle' && <CircleWidget config={config} />}
+{widget === 'fifths' && <FifthsWidget config={config} />}
 {widget === 'melody' && <MelodyWidget config={config} />}
 {widget === 'chord' && <ChordWidget config={config} />}
 {widget === 'progression' && <ProgressionWidget config={config} />}

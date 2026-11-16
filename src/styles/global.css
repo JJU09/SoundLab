@@ -192,3 +192,10 @@
     cursor: grab;
   }
 }
+
+/* 라벨의 영어 이름: 한국어 뒤에 작게 (문구 규칙 6) */
+.label-en {
+  margin-left: 0.5em;
+  font-size: 0.85em;
+  opacity: 0.6;
+}

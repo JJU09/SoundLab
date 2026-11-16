@@ -66,7 +66,7 @@ const seg = 'px-2 py-1.5 rounded-lg text-xs font-semibold transition-all text-[v
       <div class="beats flex justify-center gap-2 py-3"></div>
       <div class="meter-desc text-center text-sm text-[var(--color-ink-500)] min-h-[1.5em]"></div>
       <div>
-        <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">Time Signature · 박자표</div>
+        <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">박자표<span class="label-en">Time Signature</span></div>
         <div class="flex gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" role="group">
           {METERS.map(m => <button type="button" class={`meter-btn flex-1 ${seg} font-display`} data-v={m} aria-pressed={m === meter ? 'true' : 'false'} >{m}</button>)}
         </div>
@@ -79,13 +79,13 @@ const seg = 'px-2 py-1.5 rounded-lg text-xs font-semibold transition-all text-[v
         <div class="expr-sub text-xs text-[var(--color-ink-500)] mt-1">보통 빠르게 · 조금 세게 — ♩ = 110</div>
       </div>
       <div>
-        <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">Tempo · 빠르기말</div>
+        <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">빠르기말<span class="label-en">Tempo</span></div>
         <div class="grid grid-cols-3 gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" role="group">
           {TEMPI.map(([t, k, bpm]) => <button type="button" class={`tempo-btn ${seg}`} data-v={t} data-kr={k} data-bpm={bpm} aria-pressed={t === 'Moderato' ? 'true' : 'false'}>{t}</button>)}
         </div>
       </div>
       <div>
-        <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">Dynamics · 셈여림</div>
+        <div class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">셈여림<span class="label-en">Dynamics</span></div>
         <div class="grid grid-cols-6 gap-1 p-1 bg-[var(--color-surface-2)] rounded-xl" role="group">
           {DYN.map(([d, k, g]) => <button type="button" class={`dyn-btn ${seg} italic font-serif`} data-v={d} data-kr={k} data-g={g} aria-pressed={d === 'mf' ? 'true' : 'false'}>{d}</button>)}
         </div>
@@ -106,7 +106,7 @@ const seg = 'px-2 py-1.5 rounded-lg text-xs font-semibold transition-all text-[v
     {mode !== 'values' && (
       <div>
         <div class="flex items-center justify-between mb-1">
-          <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">BPM · 템포</span>
+          <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">템포<span class="label-en">BPM</span></span>
           <span class="bpm-val text-sm font-mono text-[var(--color-ink-700)]">{mode === 'expression' ? 110 : mode === 'subdiv' ? 80 : 90}</span>
         </div>
         <input type="range" class="sl-range bpm-range" min="40" max="200" step="1" value={mode === 'expression' ? 110 : mode === 'subdiv' ? 80 : 90} aria-label="템포" />

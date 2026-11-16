@@ -29,20 +29,20 @@ const adv = (tier?: string) => (tier && tier !== 'easy' ? { 'data-adv': tier } :
     <!-- 포락선 다이어그램 -->
     <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]">
       <canvas class="env-cv block w-full" style="height:140px"></canvas>
-      <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)] opacity-70">Envelope · 음량의 맥동</span>
+      <span class="absolute top-2 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-violet)] opacity-70">음량의 맥동<span class="label-en">Envelope</span></span>
     </div>
     <!-- 맥놀이 판정 -->
     <div class="beat-readout p-3 rounded-xl border text-sm font-mono"></div>
     <!-- 실제 출력 스코프 -->
     <div class="relative rounded-xl overflow-hidden bg-[var(--color-surface-2)] border border-[var(--color-border)]">
       <canvas class="scope-cv block w-full" style="height:70px"></canvas>
-      <span class="absolute top-1.5 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Output · 실제 합성음</span>
+      <span class="absolute top-1.5 left-2.5 text-[10px] font-mono uppercase tracking-wider text-[var(--color-ink-300)]">실제 합성음<span class="label-en">Output</span></span>
     </div>
 
     <!-- 디튠 (easy — 핵심) -->
     <div>
       <div class="flex items-center justify-between mb-1">
-        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Detune · 두 음의 주파수 차</span>
+        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">두 음의 주파수 차<span class="label-en">Detune</span></span>
         <span class="det-val text-sm font-mono text-[var(--color-ink-700)]">{c.detune}Hz</span>
       </div>
       <input type="range" class="sl-range det-range" min="0" max="20" step="0.5" value={c.detune} aria-label="디튠" />
@@ -50,7 +50,7 @@ const adv = (tier?: string) => (tier && tier !== 'easy' ? { 'data-adv': tier } :
     <!-- 기준 주파수 (normal) -->
     <div {...adv('normal')}>
       <div class="flex items-center justify-between mb-1">
-        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">Frequency · 기준 음</span>
+        <span class="text-xs font-mono uppercase tracking-wider text-[var(--color-ink-300)]">기준 음<span class="label-en">Frequency</span></span>
         <span class="freq-val text-sm font-mono text-[var(--color-ink-700)]">{c.freq}Hz</span>
       </div>
       <input type="range" class="sl-range freq-range" min="110" max="660" step="1" value={c.freq} aria-label="기준 주파수" />
